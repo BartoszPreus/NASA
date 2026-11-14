@@ -1,10 +1,10 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 20:00, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 19:50, by the conductor session (Claude Code, Fable) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
-## 0. START HERE (state at 20:00, Sat 14 Nov)
+## 0. START HERE (state at 19:50, Sat 14 Nov)
 
 **Done since 19:00 and pushed.**
 - **Data layout v2 (J16).** Everything lives in `data/reference`, `data/moon`, `data/earth/cells`, `data/earth/tiles`, `data/sites`, `data/validation`, `data/sample`; `data/out/` is gone. Every script takes its paths from `pipeline/paths.py`. The catalogue is generated: `python -m pipeline.catalog` writes `data/README.md` (open this first), `data/catalog.csv` (every file and the command that makes it) and `data/sources.csv` (every external source, all 11 challenge links, with status).
@@ -18,9 +18,11 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 **In flight** (workers of the conductor session; on a context reset their reports are lost, their files are not):
 - **J18, algorithm fix.** Default target becomes `base_regions` (the seven named Artemis-candidate regions pooled; they are much steeper than the polar average) with `--target` selectable; measure what that does to the sand seas and to the known analogs; a terrain-based sand-sea flag if the existing columns allow one; a ranking key that does not reward sheer size (capped area or best 15 x 15 km window); `validation/enrichment.py` rewritten with a KD-tree so it runs on 1.3 million bare cells. Files: `pipeline/moon_reference.py`, `score.py`, `sites.py`, `validation/enrichment.py`, `data/moon/reference.json`, `data/sites/*`, `docs/sources/j18.md`. Verify: `python -m pytest tests -q`; `python -m pipeline.score --target polar_160km` must still print the old regression table; read the before/after tables in `docs/sources/j18.md`; look at the top 20 of the new `ranking.csv` on a map before believing it.
 - **J17, NASA data at the core of the Earth side.** `--dem nasadem|copdem` (NASADEM GeoTIFFs without login from OpenTopography's public bucket or Planetary Computer; exists only between 56 S and 60 N) and `--landcover modis|worldcover` (MODIS IGBP land cover through NASA GIBS); a cloud rescan of the non-polar tiles into `data/earth/cells_nasadem/`; comparison in `validation/nasadem_vs_copdem.py` -> `data/validation/nasadem_vs_copdem.json`. Files: `pipeline/io_earth.py`, `landcover.py`, `cells.py`, `earth_scan.py`, `cloud/earth-scan-nasa.yml`. Verify: default behaviour unchanged (tests green; one cached tile gives identical cells), then decide whether NASADEM becomes the primary DEM below 60 deg latitude.
-- **J14, ICESat-2 laser profiles.** Resumed with the standard ATL06 product through SlideRule (baselines 60 / 220 / 560 m). Outputs: `data/validation/icesat2.json`, `docs/figures/icesat2_vs_grid_vs_moon.png`. `validation/icesat2_profiles.py` is modified and uncommitted.
+- **J14 is closed as BLOCKED** (the SlideRule client fails on Windows for 20 km boxes; no laser data was obtained; the script `validation/icesat2_profiles.py` is committed). Its replacement is **J21**: the same script on the cloud runner with 5 km boxes.
 
-**After J18 and J17 are committed.**
+**Exact specifications of everything that is left: `docs/TASKS.md`, section 5** (J17, J18, J19 final configuration and ranking, J20 validation on the full scan, J21 ICESat-2 in the cloud, J22 novelty check, J7 web app, J11 README and pitch, J23 freeze). Each spec has inputs, outputs and acceptance checks, so any capable model can take one. Order and timeline: section 6 there. The same jobs are on the Axis board.
+
+**After J18 and J17 are committed (this is job J19).**
 1. `python -m pipeline.run sites validate-enrichment context catalog`, then commit `data/sites/`, `data/earth/tiles/tile_summary.csv`, `data/validation/enrichment.json`, the catalogue.
 2. Novelty pass (as J9) on the new top unflagged sites; update `docs/VALIDATION.md` section 0 and `docs/HANDOFF.md` section 9 with the full-scan numbers.
 3. J7 web app: Wiktor confirmed the prototype in `app/` is his and may be taken over. Commit `app/`, point `app/build_data.py` at `data/sites/`, `data/moon/`, `data/validation/`, then the J7 scope in `docs/TASKS.md` (site card with the Diviner / POWER temperature gap, instrument quicklooks, Worldview image).
@@ -37,7 +39,9 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 | J1 pipeline, J2 lunar regions, J3 Earth scan (2,101 tiles), J5 NASA-product check, J6 effectiveness (on 78 tiles), J8 known analogs, J10 lidar, J12 NASA POWER + Worldview, J13 Diviner + LOLA from PDS, J15 LRO instruments, J16 layout and catalogue | **done and pushed** |
 | J4 scoring and sites | works; being changed by J18 (target, ranking key, sand-sea flag) |
 | J9 novelty check | done for the 78-tile ranking; to be repeated on the new ranking; a person opens the evidence |
-| J14 ICESat-2, J17 NASA Earth core, J18 algorithm fix | workers running (section 0) |
+| J17 NASA Earth core, J18 algorithm fix | workers running (section 0) |
+| J14 ICESat-2 | blocked; replaced by J21 |
+| J19 final configuration, J20 validation, J21 ICESat-2 in the cloud, J22 novelty, J23 freeze | to do; exact specs in `docs/TASKS.md` section 5 |
 | J7 app, J11 pitch | not started (section 0) |
 
 ## 2. How the conductor works here
@@ -49,7 +53,7 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 - After each job: a 1-3 line note in the Axis notepad, then `complete_job` with a factual outcome.
 - Never touch or commit `app/` (another session's work in progress) or `scratch/`.
 
-Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476a-ab63-6e35e9880c19` · J3 `8271bacb-1472-449c-8812-3e83510e790f` · J4 `ab37f145-9a47-44b1-8544-fc6652e419d4` · J5 `58f1d556-928a-440d-b9d0-fe1f25b12de1` · J6 `c3e1a105-04cb-426e-a35a-ee1031c0ea57` · J7 `bca8f49c-4912-4163-9762-62428249a3bc` · J8 `e9f21535-c175-4638-bd8a-0783b1870d8a` · J9 `61e58427-311a-4461-be16-092d23e094ce` · J10 `29168446-e704-4751-8087-e8d39229e313` · J11 `27b2e0f1-8d97-4c15-9698-aa59b50e4654`.
+Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476a-ab63-6e35e9880c19` · J3 `8271bacb-1472-449c-8812-3e83510e790f` · J4 `ab37f145-9a47-44b1-8544-fc6652e419d4` · J5 `58f1d556-928a-440d-b9d0-fe1f25b12de1` · J6 `c3e1a105-04cb-426e-a35a-ee1031c0ea57` · J7 `bca8f49c-4912-4163-9762-62428249a3bc` · J8 `e9f21535-c175-4638-bd8a-0783b1870d8a` · J9 `61e58427-311a-4461-be16-092d23e094ce` · J10 `29168446-e704-4751-8087-e8d39229e313` · J11 `27b2e0f1-8d97-4c15-9698-aa59b50e4654`. · J12 `269abe59-3684-4dd5-8ab7-886ce2c2fb75` · J13 `dabb8952-3491-43f6-a2c1-f43ab614a0b4` · J15 `30ea5b03-b103-46d1-8af0-63940a7d8d38` · J16 `ee990d37-784a-42e1-93b1-349c754a966c` · J17 `cac38a05-52dd-47a2-944b-9770c0108cc7` · J18 `a75e4fb3-586b-4200-a6be-00a6a80fb5ca` · J19 `79d900f3-f210-4e70-9ed6-f50fec43dc7f` · J20 `8010a28b-b7b9-4c22-97a5-87ffa7c8f21c` · J21 `cdcb1f34-e49f-49fe-a97c-eeb9675385a9` · J22 `b29c8286-096a-4e11-b07d-0e770ae41c1f` · J23 `ac92e644-e9b5-4361-945b-6c856adaad29`. J17 and J18 are claimed by the conductor id; J9 is still open under it (human check pending); J7, J11, J19-J23 are unclaimed.
 
 ## 3. Verification checklist before committing a worker's output
 
