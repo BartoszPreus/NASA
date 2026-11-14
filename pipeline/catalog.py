@@ -132,9 +132,21 @@ SOURCES = [
     S("icesat2_atl03", "NASA", "ICESat-2 ATL03 v7 geolocated photons (SlideRule atl03x)", 1,
       "https://nsidc.org/data/atl03 ; doi:10.5067/ATLAS/ATL03.007", "as ATL06", "no (via SlideRule)",
       "looked at, not used", "none: the on-demand fit did not deliver on the public SlideRule cluster", ""),
-    S("nasadem", "NASA", "NASADEM merged DEM 1 arc second (NASADEM_HGT v001; collection name UNVERIFIED)", 1,
-      "https://search.earthdata.nasa.gov/", "NASA open data", "yes (Earthdata)", "needs login, not downloaded",
-      "planned: recompute the Earth features on a NASA DEM", "data/raw/cowork/nasadem/"),
+    S("nasadem", "NASA", "NASADEM Merged DEM Global 1 arc second V001 (NASADEM_HGT, NASA JPL), 56 S - 60 N", 1,
+      "https://opentopography.s3.sdsc.edu/raster?list-type=2&prefix=NASADEM/NASADEM_be/ ; "
+      "https://portal.opentopography.org/datasetMetadata?otCollectionID=OT.032021.4326.2 ; "
+      "doi:10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001 (LP DAAC page not opened)",
+      "UNVERIFIED: OpenTopography's page says 'Not Provided'; LP DAAC's citation request not read yet "
+      "(docs/sources/j17.md)", "no (OpenTopography public mirror; LP DAAC itself needs Earthdata login)",
+      "being added", "pipeline/io_earth.py (dem='nasadem'), cloud/earth-scan-nasa.yml, "
+      "validation/nasadem_vs_copdem.py (job J17, comparison at scale not finished)", "data/raw/nasadem/"),
+    S("modis_igbp", "NASA", "MODIS MCD12Q1 v061 land cover type 1 (IGBP), yearly, about 500 m, as the NASA GIBS "
+      "layer MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual", 2,
+      "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi ; "
+      "https://gibs.earthdata.nasa.gov/colormaps/v1.3/MODIS_IGBP_Land_Cover_Type.xml",
+      "GIBS acknowledgement as for worldview_gibs; MCD12Q1 citation UNVERIFIED (LP DAAC page not opened, "
+      "docs/sources/j17.md)", "no", "being added", "pipeline/landcover.py (landcover='modis'), "
+      "cloud/earth-scan-nasa.yml (job J17)", "data/raw/modis_igbp/"),
     S("modis_lst", "NASA", "MODIS land surface temperature MOD11A2 v061 via AppEEARS point sample", 1,
       "https://appeears.earthdatacloud.nasa.gov/", "NASA open data", "yes (Earthdata)",
       "needs login, not downloaded", "planned: measured Earth surface temperature next to Diviner",
@@ -250,6 +262,11 @@ FILE_MAP = [
      "Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover)"),
     ("data/earth/cells/scan_p*.parquet", "python -m pipeline.checkpoint (local scan, superseded)",
      "copernicus_dem, esa_worldcover", "Earth cells of one block of the local scan"),
+    ("data/earth/cells_nasadem/*.parquet", "python -m pipeline.earth_scan --dem nasadem --landcover modis "
+     "--keep-all-cells on the cloud runner (cloud/earth-scan-nasa.yml), then python -m pipeline.cloud ingest-nasa "
+     "(job J17)", "nasadem, modis_igbp, data/earth/tiles/tiles_scanned.csv",
+     "Earth cells of one shard of the NASA-input rescan (all valid land cells, 56 S - 60 N); never mixed into "
+     "the ranking"),
     ("data/earth/tiles/tiles_scanned.csv", "python -m pipeline.tiles --select, then --update-status",
      "copernicus_dem, esa_worldcover, data/reference/known_analogs.csv, data/reference/pilot_tiles.csv",
      "scan plan in priority order with the status of every tile"),
@@ -266,6 +283,12 @@ FILE_MAP = [
     ("data/sites/scored_compact.parquet", "python -m pipeline.sites", "data/earth/cells/*.parquet, "
      "data/moon/reference.json", "scored cells with p_all >= 0.05 or candidate (full table: data/raw/"
      "earth_scored_full.parquet)"),
+    ("data/sites/target_comparison.csv", "python -m pipeline.sites --compare-targets (job J18)",
+     "data/earth/cells/*.parquet, data/moon/reference.json",
+     "per lunar target: candidate cells, sites and the tile ranks of reference and sand-sea tiles"),
+    ("data/sites/target_comparison_top_tiles.csv", "python -m pipeline.sites --compare-targets (job J18)",
+     "data/earth/cells/*.parquet, data/moon/reference.json",
+     "top 25 tiles per lunar target with region and median slope of the candidate cells"),
     ("data/sites/novelty_check.csv", "hand-curated by job J9 (agent literature and map search, no script)",
      "osm, wikipedia, analog_literature, data/sites/ranking.csv", "literature verdict for the top new sites"),
     ("data/sites/nasa_context.csv", "python -m pipeline.nasa_context --top 150 --images 60", "nasa_power, "
@@ -285,6 +308,9 @@ FILE_MAP = [
     ("data/validation/enrichment.json", "python validation/enrichment.py (after python -m pipeline.sites)",
      "data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv",
      "enrichment of lunar-like terrain around known analog sites"),
+    ("data/validation/nasadem_vs_copdem.json", "python validation/nasadem_vs_copdem.py (job J17)",
+     "data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json",
+     "NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile"),
     ("data/validation/pds_lola.json", "python validation/pds_products.py --part lola",
      "pds_lola_gdr, pgda90_lola_20m", "PDS LOLA gridded DEM against the PGDA DEM"),
     ("data/validation/crater_profiles.json", "python lidar/crater_profiles.py --part all",
@@ -306,6 +332,7 @@ FOLDERS = [
     ("moon/", "lunar targets: reference statistics, cells, footprints, hillshades"),
     ("moon/instruments/", "one JSON (and small images) per LRO instrument, per lunar region"),
     ("earth/cells/", "Earth cell tables with the terrain features (pilot, known-analog tiles, scan shards)"),
+    ("earth/cells_nasadem/", "the same cells recomputed from NASA inputs (NASADEM + MODIS land cover), for comparison"),
     ("earth/tiles/", "scan plan and status, per-tile summary"),
     ("sites/", "the product: candidate sites, ranking, compact scores, novelty, NASA context, images"),
     ("validation/", "every validation result as JSON"),

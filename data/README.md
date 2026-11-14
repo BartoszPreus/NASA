@@ -13,6 +13,7 @@ data/
   moon/               lunar targets: reference statistics, cells, footprints, hillshades
   moon/instruments/   one JSON (and small images) per LRO instrument, per lunar region
   earth/cells/        Earth cell tables with the terrain features (pilot, known-analog tiles, scan shards)
+  earth/cells_nasadem/ the same cells recomputed from NASA inputs (NASADEM + MODIS land cover), for comparison
   earth/tiles/        scan plan and status, per-tile summary
   sites/              the product: candidate sites, ranking, compact scores, novelty, NASA context, images
   validation/         every validation result as JSON
@@ -32,7 +33,7 @@ data/
 | `earth/tiles/tile_summary.csv` | per tile: valid, bare, terrain-pass and candidate cells, sites, weighted area, 2060 rows, 114.6 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `earth/tiles/tiles_scanned.csv` | scan plan in priority order with the status of every tile, 2101 rows, 134.1 kB | `python -m pipeline.tiles --select, then --update-status` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv, data/reference/pilot_tiles.csv |
 | `moon/cells.parquet` | lunar cells of all regions with the terrain features, 8464 rows, 619.7 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m |
-| `moon/reference.json` | lunar reference populations per region: mean, covariance, sorted distances, medians, 343.3 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
+| `moon/reference.json` | lunar reference populations per region: mean, covariance, sorted distances, medians, 387.4 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/regions.geojson` | region footprints in lunar latitude / east longitude, 8 rows, 33.9 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/hillshade/*.png` | grey hillshade of one lunar region window | `python -m pipeline.moon_reference` | pgda90_lola_20m |
 | `moon/instruments/diviner_pcp_regions.json` | Diviner polar temperatures per lunar region, 10.7 kB | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp, data/moon/reference.json |
@@ -54,6 +55,8 @@ data/
 | `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 151.2 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
 | `sites/scored_compact.parquet` | scored cells with p_all >= 0.05 or candidate (full table: data/raw/earth_scored_full.parquet), 250269 rows, 18.0 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `sites/sites.geojson` | candidate sites: outline and properties (contract in docs/TASKS.md section 3), 4593 rows, 14.6 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet |
+| `sites/target_comparison.csv` | per lunar target: candidate cells, sites and the tile ranks of reference and sand-sea tiles, 9 rows, 752 B | `python -m pipeline.sites --compare-targets (job J18)` | data/earth/cells/*.parquet, data/moon/reference.json |
+| `sites/target_comparison_top_tiles.csv` | top 25 tiles per lunar target with region and median slope of the candidate cells, 225 rows, 12.1 kB | `python -m pipeline.sites --compare-targets (job J18)` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `sites/images/*.jpg` | MODIS or VIIRS true-colour image around one site (NASA imagery, unmodified) | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `sites/images/index.csv` | bbox, date, layer and cloud share of every site image, 60 rows, 10.2 kB | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `validation/crater_profiles.json` | crater measurements: Earth lidar, 30 m DEM and the lunar DEM, 11.9 kB | `python lidar/crater_profiles.py --part all` | usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt |
@@ -87,7 +90,8 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 - `nasa_power`: NASA POWER climatology API v2 (MERRA-2): skin temperature, precipitation, wind. *used*. https://power.larc.nasa.gov/api/temporal/climatology/point
 - `icesat2_atl06` (link 1): ICESat-2 ATL06 v7 land ice height, subset through SlideRule (NSIDC DAAC). *being added*. https://nsidc.org/data/atl06
 - `icesat2_atl03` (link 1): ICESat-2 ATL03 v7 geolocated photons (SlideRule atl03x). *looked at, not used*. https://nsidc.org/data/atl03
-- `nasadem` (link 1): NASADEM merged DEM 1 arc second (NASADEM_HGT v001; collection name UNVERIFIED). *needs login, not downloaded*. https://search.earthdata.nasa.gov/
+- `nasadem` (link 1): NASADEM Merged DEM Global 1 arc second V001 (NASADEM_HGT, NASA JPL), 56 S - 60 N. *being added*. https://opentopography.s3.sdsc.edu/raster?list-type=2&prefix=NASADEM/NASADEM_be/
+- `modis_igbp` (link 2): MODIS MCD12Q1 v061 land cover type 1 (IGBP), yearly, about 500 m, as the NASA GIBS layer MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual. *being added*. https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi
 - `modis_lst` (link 1): MODIS land surface temperature MOD11A2 v061 via AppEEARS point sample. *needs login, not downloaded*. https://appeears.earthdatacloud.nasa.gov/
 - `nasa_moon_factsheet`: NSSDC Moon fact sheet (Earth obliquity, lunar spin-axis tilt). *used*. https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
 
@@ -163,8 +167,10 @@ Git-ignored. One folder per source; every script recreates what it needs, so the
 - `raw/j4_check/`: intermediate checks of job J4
 - `raw/lidar/`: USGS 3DEP and GUGiK windows
 - `raw/lro/`: other LRO instrument products (job J15)
+- `raw/modis_igbp/`
 - `raw/moon/`: LOLA DEM windows (NASA PGDA)
 - `raw/nasa_context/`: NASA POWER and Worldview responses
+- `raw/nasadem/`
 - `raw/naturalearth/`: country outlines
 - `raw/pds/`: PDS Geosciences files (LOLA GDR, Diviner PRP columns)
 - `raw/run_logs/`
