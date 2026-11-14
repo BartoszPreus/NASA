@@ -40,7 +40,8 @@ Sources:
 - Libraries: sliderule (BSD-3), geopandas (BSD-3), numpy, pandas, matplotlib.
 
 Run from the repo root:  .venv/Scripts/python.exe validation/icesat2_profiles.py
-(`--fetch SITE_ID LAT LON` fetches one site into the cache; used internally.)
+(`--fetch SITE_ID LAT LON` fetches one site into the cache, used internally;
+ `--analyse-only` skips fetching and uses the cached sites.)
 Written with SI assistance (Claude Code)
 """
 import json
@@ -288,7 +289,10 @@ def main():
     else:
         moon_g, moon_source = FALLBACK_MOON_GRID, "fallback copy in validation/icesat2_profiles.py"
     moon_p = moon_pgda()
-    failures = fetch_all(sites_in)
+    if "--analyse-only" in sys.argv:        # use the cache only; uncached sites are reported as missing
+        failures = {s: "not fetched (no cache)" for s in sites_in if not os.path.exists(stem(s) + ".parquet")}
+    else:
+        failures = fetch_all(sites_in)
     sites = {}
     for sid, r in sites_in.items():
         if sid in failures:
