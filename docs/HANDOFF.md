@@ -9,16 +9,16 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 | Job | State | What exists | Next action |
 |---|---|---|---|
 | J1 pipeline package | **done, pushed** (`2ca3719`) | `pipeline/`, `tests/` (9 green), fixtures in `data/out/sample/` | none |
-| J8 known analogs | **done, pushed** (`fa0ef98`) | `data/known_analogs.csv` (63 rows; 16 from opened primary sources, 47 secondary) | optional: upgrade secondary rows |
-| J5 reproduce NASA product | **done, pushed**; rerun by the conductor gave identical numbers | `validation/t1_reproduce.py`, `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png` | use the numbers in section 6; optional second window near 84-85 S |
-| J10 lidar close-up | worker running since 17:57 | on disk, unverified: `lidar/crater_profiles.py`, `data/out/crater_profiles.json`, `docs/figures/crater_profile_overlay.png` | verify, commit, `complete_job` |
-| J3 Earth scan | worker running since 18:04 | nothing yet | verify pilot parquet, commit; **night scan needs Wiktor's go** |
-| J4 scoring and sites | worker running since 18:04 | nothing yet | verify regression table, commit; rerun when J2 and the night scan land |
-| J2 lunar regions | worker running since 18:04 | nothing yet | verify, commit, `complete_job` |
-| J6 effectiveness | not started (needs J4) | | start after J4 is committed and completed in Axis |
-| J9 novelty check | not started (needs J4 and J8) | | start after J4; needs a human spot-check of the top 5 |
-| J7 web app | **open for a teammate** | uncommitted prototype in `app/` from another session | its author commits it first |
-| J11 pitch and submission | **open for a teammate** (human-led) | | start now |
+| J8 known analogs | **done, pushed** (`fa0ef98`) | `data/known_analogs.csv` (63 rows; 16 from opened primary sources, 47 secondary) | J9 is appending `type = region` rows (Hawaii, Iceland, Atacama) |
+| J5 reproduce NASA product | **done, pushed** (`df7fcc8`); rerun by the conductor gave identical numbers | `validation/t1_reproduce.py`, `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png` | optional second window near 84-85 S |
+| J10 lidar close-up | **done, pushed** (`05ae5b7`); rerun gave identical numbers | `lidar/`, `data/out/crater_profiles.json`, two figures in `docs/figures/` | a human confirms on an LROC image that the lunar crater (87.68 S, 306.40 E) is fresh |
+| J3 Earth scan | milestone 1 **done, pushed** (`6ad8e44`): pilot table. Worker still running since 18:04 on the tile selection | `data/out/earth_cells_pilot.parquet` (76,574 cells, 37 tiles), `pilot_tiles.csv`; on disk, uncommitted: `pipeline/earth_scan.py`, `pipeline/tiles.py`, `docs/sources/j3.md` | verify and commit the code and `tiles_scanned.csv`; **night scan needs Wiktor's go** |
+| J4 scoring and sites | v0 **done, pushed** (`ca8c37b`), completed in Axis | `pipeline/score.py`, `pipeline/sites.py`, `data/out/earth_scored.parquet`, `sites.geojson`, `ranking.csv` (81 sites) | rerun `python -m pipeline.sites` after J2 regions, after J9's region rows, after the night scan |
+| J2 lunar regions | worker running since 18:04 | on disk, uncommitted: `pipeline/moon_reference.py`, `data/out/moon_*` (the reference JSON is already used by J4) | verify, commit, `complete_job` |
+| J6 effectiveness | worker running since 18:16 | nothing yet | verify, commit, `complete_job` |
+| J9 novelty check | worker running since 18:16 | nothing yet | verify, rerun J4, commit; **a human must open the evidence for the top 5** |
+| J7 web app | **open for a teammate** | uncommitted prototype in `app/` from another session; real data to show is now in `data/out/sites.geojson` | its author commits it first |
+| J11 pitch and submission | **open for a teammate** (human-led) | figures ready: `docs/figures/t1_reproduce_nasa.png`, `crater_profile_overlay.png`, `morasko_1m_vs_30m.png` | start now |
 
 If the context was cleared while workers were running, their final reports are gone. Their results are the files listed above: judge a job by its files and the checklist in section 3, not by a report.
 
@@ -79,6 +79,8 @@ Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476
 - Lunar polar window (160 x 160 km, 6,889 cells): median slope 5.11 deg at 240 m, 4.96 deg at 570 m; closed depressions 1.8% of cell area on average; only 13% of pixels at or below 5 deg and 39% at or below 8 deg (median per cell).
 - Adding closed depressions to slope and roughness removes false hits (Tassili n'Ajjer 15% -> 1%, Hoggar 12% -> 0%) and keeps volcanic and polar terrain (Mauna Kea 24%, Devon Island 20%, Lanzarote 18%, Ellesmere 14%).
 - Gradient coherence adds nothing; Hurst exponent and temperature cannot be scored.
+- **First ranking (J4, 37 pilot tiles, 81 sites).** Ranking key: similarity-weighted area = sum of `p_all` over the site's cells x cell area (a plain median put 4-cell patches on top). Top: Mauna Loa, Hawaii (615 km2; Hawaii is a known analog region, not flagged until the region rows land), Harrat Khaybar lava field, Saudi Arabia (94 km2), Kilauea (known), Kunlun, China, Gobi-Altai, Mongolia, Askja (known), Haughton (known), Lut desert, Iran, Ellesmere Island, Canada. Novelty of the non-flagged ones is being checked in J9; until then call them candidates, not discoveries.
+- **Lidar close-up (J10).** Meteor Crater on 1 m lidar: rim-crest diameter 1222 m, depth 163 m, d/D 0.134, steepest profile wall 41 deg. The 30 m model keeps the size and depth (1258 m, 162 m) and loses the steep walls (37 deg; per-pixel P95 42 against 48 deg). Lunar crater from the LOLA 20 m DEM: 1140 m, d/D 0.175, wall 28 deg. Morasko on 1 m lidar: largest crater 101 m across, at least 5.6 m deep, not resolved at 30 m.
 - **Validation T1 (J5), 40 x 40 km window at the pole, 640,000 pixels:** our implementation of NASA's plane-fit slope at a 200 m baseline matches NASA's map `LDRM_80S_50MPP_ADJ_SLP_200M.TIF` with a median absolute difference of 0.042 deg on the native 20 m DEM and 0.064 deg on a 30 m DEM (r = 0.9999). Roughness comes out at 0.84 of NASA's (r = 0.95), because NASA takes residuals from individual laser spots and we only have the gridded DEM.
 - **What T1 does and does not cover:** it validates our reading of the data and a plane-fit estimator written for the test. The features used for scoring (`s240`, `s570`: two-point slopes) are a different quantity; the plane-fit slope is 1.56 times the two-point slope at about 200 m in this window. For the two-point slopes the check is the comparison with NASA's along-track product (PGDA 70): ratio 1.01-1.03 along the north-south direction and 0.91 with both directions pooled, as the pipeline does. The PGDA 70 reference is coarse at the pole (15 latitude rows in the window), so treat that ratio as indicative.
 - Sample-grid registration matters: shifting the 50 m sample grid by 25 m raises the slope difference from 0.042 to 0.304 deg.
