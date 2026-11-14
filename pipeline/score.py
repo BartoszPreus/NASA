@@ -213,14 +213,29 @@ def default_cells_path():
     return pilot if os.path.exists(pilot) else os.path.join("data", "out", "sample", "earth_cells_sample.parquet")
 
 
+def load_cells(spec=None):
+    """Load Earth cells. spec: None = every data/out/earth_cells_*.parquet (pilot, known-analog tiles, scan shards),
+    falling back to the sample fixture; otherwise a parquet path, a glob, or a comma list of both.
+    Tables are concatenated and de-duplicated on (tile, row, col). Returns (DataFrame, description)."""
+    import glob
+    if spec is None:
+        paths = sorted(glob.glob(os.path.join("data", "out", "earth_cells_*.parquet"))) or [default_cells_path()]
+    else:
+        paths = []
+        for part in str(spec).split(","):
+            paths += sorted(glob.glob(part)) or [part]
+    df = pd.concat([pd.read_parquet(q) for q in paths], ignore_index=True)
+    df = df.drop_duplicates(["tile", "row", "col"], keep="first").reset_index(drop=True)
+    return df, "%d file(s): %s" % (len(paths), ", ".join(os.path.basename(q) for q in paths))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Score Earth cells against the lunar reference; print the regression.")
     ap.add_argument("--cells", default=None, help="Earth cell parquet (default: pilot if present, else sample)")
     ap.add_argument("--raw-dir", default=os.path.join("data", "raw"))
     ap.add_argument("--out", default=None, help="write the scored table here (sites.py writes the final one)")
     a = ap.parse_args(argv)
-    path = a.cells or default_cells_path()
-    df = pd.read_parquet(path)
+    df, path = load_cells(a.cells)
     scored, regions = score_all_regions(df, a.raw_dir)
     ref = load_reference(regions[0], a.raw_dir)
     print("cells: %s  rows %d  valid %d  regions %s  reference: %s (n=%s)" % (

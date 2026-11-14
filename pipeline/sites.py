@@ -36,7 +36,7 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
-from .score import (DEFAULT_REGION, default_cells_path, regression_table, score_all_regions)
+from .score import (DEFAULT_REGION, load_cells, regression_table, score_all_regions)
 
 MIN_CELLS = 4
 EARTH_R_KM = 6371.0088
@@ -185,7 +185,15 @@ def find_sites(scored, regions, min_cells=MIN_CELLS):
     return sites, site_of_row
 
 
-def add_context(sites, known, countries):
+NOVELTY_CSV = os.path.join("data", "out", "novelty_check.csv")
+
+
+def load_novelty(path=NOVELTY_CSV):
+    """Literature verdicts of job J9 (site coordinates, place name, verdict), or None."""
+    return pd.read_csv(path) if os.path.exists(path) else None
+
+
+def add_context(sites, known, countries, novelty=None):
     for s in sites:
         if known is not None and len(known):
             d = haversine_km(s["lat"], s["lon"], known["lat"].to_numpy(float), known["lon"].to_numpy(float))
@@ -196,14 +204,19 @@ def add_context(sites, known, countries):
         else:
             s["nearest_known"] = s["nearest_known_km"] = s["is_known"] = None
         s["country"] = countries(s["lat"], s["lon"])
-        s["novelty"] = "unchecked"
+        s["novelty"], s["place"] = "unchecked", None
+        if novelty is not None and len(novelty):  # match by position: site ids change between runs
+            dn = haversine_km(s["lat"], s["lon"], novelty["lat"].to_numpy(float), novelty["lon"].to_numpy(float))
+            j = int(np.argmin(dn))
+            if dn[j] <= 3.0:
+                s["novelty"], s["place"] = str(novelty["verdict"].iloc[j]), str(novelty["place"].iloc[j])
         s["breaks"] = breaks_for(s["_veg"], s["_ice_mean"], s["lat"], s["elev_med"])
     return sites
 
 
 PROPS = ["site_id", "lat", "lon", "area_km2", "weighted_area_km2", "n_cells", "score", "score_amp", "score_dep",
          "best_region", "tile",
-         "country"] + MEDIAN_COLS + ["nearest_known", "nearest_known_km", "is_known", "novelty", "breaks",
+         "country"] + MEDIAN_COLS + ["nearest_known", "nearest_known_km", "is_known", "novelty", "place", "breaks",
                                      "region_scores"]
 
 
@@ -252,8 +265,7 @@ def main(argv=None):
     ap.add_argument("--known", default=KNOWN_CSV)
     ap.add_argument("--min-cells", type=int, default=MIN_CELLS)
     a = ap.parse_args(argv)
-    path = a.cells or default_cells_path()
-    df = pd.read_parquet(path)
+    df, path = load_cells(a.cells)
     scored, regions = score_all_regions(df, a.raw_dir)
     print("cells: %s  rows %d  valid %d  regions %s" % (path, len(df), int(df["valid"].sum()), regions))
     print(regression_table(scored).to_string(index=False))
@@ -266,7 +278,7 @@ def main(argv=None):
     known = load_known(a.known)
     print("known analogs: %s" % ("%d entries (operational excluded)" % len(known) if known is not None
                                  else "file missing, novelty fields null"))
-    add_context(sites, known, CountryLookup())
+    add_context(sites, known, CountryLookup(), load_novelty())
     scored = scored.reset_index(drop=True)
     scored["site_id"] = site_of_row
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",
