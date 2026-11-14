@@ -1,6 +1,7 @@
 # TASKS — Moon-analog build (team Zodiak, NASA Space Apps 2026)
 
 State: Sat 14 Nov 2026, 17:45 Europe/Warsaw. **Hard deadline: Sun 15 Nov, 13:30** (portal submission + slides at the info desk). Feature freeze: Sun 09:30.
+**Live status of every job, and how to pick up after a context reset: `docs/HANDOFF.md`.**
 Every job below is also posted in Axis (project `nasa-space-app`) with the same number. This file is the full spec; the Axis card is the short version.
 
 **How to start an agent on a job** (paste into Claude Code):

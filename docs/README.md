@@ -1,6 +1,8 @@
 # docs/: research i zasady NASA Space Apps 2026 (drużyna Zodiak, Poznań)
 Materiały przygotowane 14.11.2026 z oficjalnych stron spaceappschallenge.org i researchu. Kod projektu jest poza tym folderem.
 
+**➡️ Aktualny stan prac i instrukcja przejęcia po wyczyszczeniu kontekstu: `HANDOFF.md`** (po angielsku, dla agentów).
+
 **➡️ Podział pracy dla agentów i ludzi: `TASKS.md`** (11 zadań z kontraktem danych; te same zadania są w Axisie jako J1-J11).
 
 **➡️ Pełny raport w PDF: `RAPORT-ANALOGI-KSIEZYCA-ZODIAK.pdf`** (walidacja pomysłu, ranking 19 kryteriów, test skuteczności wyszukiwania; sob 14.11 ok. 17:15).
