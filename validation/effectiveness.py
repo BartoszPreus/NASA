@@ -79,7 +79,9 @@ def merge_json(key, value):
 def load_cells():
     """Pilot cells (features, land cover, valid) joined with the J4 scores."""
     cells = pd.read_parquet(os.path.join(OUT, "earth_cells_pilot.parquet"))
-    sc = pd.read_parquet(os.path.join(OUT, "earth_scored.parquet"))
+    # the committed data/out/earth_scored.parquet only holds cells with p_all >= 0.05; the full table is local
+    _full = os.path.join("data", "raw", "earth_scored_full.parquet")
+    sc = pd.read_parquet(_full if os.path.exists(_full) else os.path.join(OUT, "earth_scored.parquet"))
     keep = ["tile", "row", "col", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id"]
     return cells.merge(sc[keep], on=["tile", "row", "col"], how="left", validate="1:1")
 

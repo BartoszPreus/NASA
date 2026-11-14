@@ -36,7 +36,8 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
-from .score import (DEFAULT_REGION, load_cells, regression_table, score_all_regions)
+from .score import (BARE_MIN, DEFAULT_REGION, ICE_MAX, WATER_MAX, load_cells, regression_table,
+                    score_all_regions)
 
 MIN_CELLS = 4
 EARTH_R_KM = 6371.0088
@@ -284,7 +285,27 @@ def main(argv=None):
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",
             "bare", "veg", "ice"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]
     os.makedirs(a.out_dir, exist_ok=True)
-    scored[keep].to_parquet(os.path.join(a.out_dir, "earth_scored.parquet"), index=False)
+    # Full scored table stays local (it grows to hundreds of MB with the big scan and can be rebuilt from the
+    # committed earth_cells_*.parquet in minutes). The committed file holds the cells worth looking at.
+    os.makedirs(a.raw_dir, exist_ok=True)
+    scored[keep].to_parquet(os.path.join(a.raw_dir, "earth_scored_full.parquet"), index=False)
+    compact = scored[scored["candidate"] | (scored["p_all"] >= 0.05)]
+    compact[keep].to_parquet(os.path.join(a.out_dir, "earth_scored.parquet"), index=False)
+    # Per-tile summary: the unit that stays stable when the grid is shifted or resized (docs/VALIDATION.md).
+    ok = scored["valid"]
+    barem = ok & (scored["bare"] >= BARE_MIN) & (scored["ice"] < ICE_MAX) & (scored["water"] < WATER_MAX)
+    g = pd.DataFrame({"tile": scored["tile"], "valid": ok, "bare_ok": barem, "candidate": scored["candidate"],
+                      "terrain_pass": ok & (scored["p_all"] >= 0.10), "lat": scored["lat"], "lon": scored["lon"],
+                      "p_bare": scored["p_all"].where(barem)})
+    ts = g.groupby("tile").agg(lat=("lat", "mean"), lon=("lon", "mean"), n_valid=("valid", "sum"),
+                               n_bare=("bare_ok", "sum"), n_terrain_pass=("terrain_pass", "sum"),
+                               n_candidate=("candidate", "sum"), median_p_bare=("p_bare", "median")).reset_index()
+    ts["candidate_share_of_bare"] = (ts["n_candidate"] / ts["n_bare"].where(ts["n_bare"] > 0)).round(4)
+    ts["n_sites"] = ts["tile"].map(pd.Series([s["tile"] for s in sites]).value_counts()).fillna(0).astype(int)
+    wa = pd.Series([s["weighted_area_km2"] for s in sites], index=[s["tile"] for s in sites], dtype=float)
+    ts["weighted_area_km2"] = ts["tile"].map(wa.groupby(level=0).sum()).fillna(0.0).round(2)
+    ts.round({"lat": 3, "lon": 3, "median_p_bare": 4}).sort_values("weighted_area_km2", ascending=False).to_csv(
+        os.path.join(a.out_dir, "tile_summary.csv"), index=False)
     write_geojson(sites, os.path.join(a.out_dir, "sites.geojson"))
     ranked = write_ranking(sites, os.path.join(a.out_dir, "ranking.csv"))
     print("sites %d (>= %d cells), in ranking.csv %d" % (len(sites), a.min_cells, len(ranked)))

@@ -39,7 +39,11 @@ def circle_share(lat, lon, radius, blat, blon, like):
 
 
 def main():
-    sc = pd.read_parquet(os.path.join("data", "out", "earth_scored.parquet"))
+    full = os.path.join("data", "raw", "earth_scored_full.parquet")  # written by `python -m pipeline.sites`
+    if not os.path.exists(full):
+        raise SystemExit("run `python -m pipeline.sites` first: it writes data/raw/earth_scored_full.parquet "
+                         "(the committed data/out/earth_scored.parquet only holds cells with p_all >= 0.05)")
+    sc = pd.read_parquet(full)
     known = pd.read_csv(os.path.join("data", "known_analogs.csv"))
     known = known[known["type"] != "operational"].reset_index(drop=True)
     bare = sc[(sc["bare"] >= 0.8) & (sc["ice"] < 0.05)]
