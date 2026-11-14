@@ -1,3 +1,6 @@
 stage,command,started,seconds,exit_code,git_commit,log
 sites,python.exe -m pipeline.sites,2026-11-14 19:21:44,61.6,0,4fd4672,data/raw/run_logs/sites_20261114_192144.log
 catalog,python.exe -m pipeline.catalog,2026-11-14 19:57:04,1.4,0,6289690,data/raw/run_logs/catalog_20261114_195704.log
+sites,python.exe -m pipeline.sites,2026-11-14 20:11:36,88.1,0,8544ba9,data/raw/run_logs/sites_20261114_201136.log
+validate-enrichment,python.exe validation/enrichment.py,2026-11-14 20:13:04,2.7,0,8544ba9,data/raw/run_logs/validate-enrichment_20261114_201304.log
+catalog,python.exe -m pipeline.catalog,2026-11-14 20:13:07,1.0,0,8544ba9,data/raw/run_logs/catalog_20261114_201307.log

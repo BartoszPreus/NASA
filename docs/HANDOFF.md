@@ -14,6 +14,10 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 - **Commit rule (Wiktor, 14 Nov): no `Claude-Session:` line or any session link in a commit, no keys, tokens or private e-mail addresses in the repo.** History was rewritten at about 19:45 to remove them, so every hash before `def42fd` changed: a clone made earlier should be replaced by a fresh clone (copy uncommitted files over).
 - Axis at 20:10: J21 is claimed by `codex-nasa-space-app`; J7, J11, J19, J20, J22, J23 are unclaimed.
 
+**UPDATE 20:15:** J18's full-scan run and acceptance checks are now complete; the new `base_regions` ranking replaces the pre-J18 files above. The chosen key is `best_window_km2`; the dune flag moves the four named sand-sea tiles beyond the top 50 and also flags Devon Island N75W090. Counts, key comparison, rank changes and enrichment results are in `docs/sources/j18.md`. The full test suite passes (21 tests), and `python -m pipeline.run sites validate-enrichment catalog` exited 0 for all three stages. This update supersedes the earlier J18 remaining-work notes.
+- Current Axis state: J18 complete; J17 todo and unassigned; J21 in progress under `codex-nasa-space-app`; J19 still depends on J17. The J17 and J21 cloud runs require access to Wiktor's private `witczakw/moon-scan-runner` repository.
+- The J18 top ranking is Arctic-heavy, and this machine's country/place lookup is empty for those rows. Treat the rows as candidates pending the map review in J19/J22; do not describe them as discoveries.
+
 **Done since 19:00 and pushed.**
 - **Data layout v2 (J16).** Everything lives in `data/reference`, `data/moon`, `data/earth/cells`, `data/earth/tiles`, `data/sites`, `data/validation`, `data/sample`; `data/out/` is gone. Every script takes its paths from `pipeline/paths.py`. The catalogue is generated: `python -m pipeline.catalog` writes `data/README.md` (open this first), `data/catalog.csv` (every file and the command that makes it) and `data/sources.csv` (every external source, all 11 challenge links, with status).
 - **Full Earth scan (J3).** 2,101 tiles: `data/earth/cells/pilot.parquet`, `known.parquet`, `scan_s00of20.parquet` ... `scan_s19of20.parquet` (1.76 million cells, 97 MB, all in the repo). Ran on GitHub Actions (run 43623650020 in `witczakw/moon-scan-runner`), 2,023 of 2,023 tiles done, no errors. Nobody has to scan again.
@@ -28,7 +32,7 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 - **J17, NASA data at the core of the Earth side.** `--dem nasadem|copdem` (NASADEM GeoTIFFs without login from OpenTopography's public bucket or Planetary Computer; exists only between 56 S and 60 N) and `--landcover modis|worldcover` (MODIS IGBP land cover through NASA GIBS); a cloud rescan of the non-polar tiles into `data/earth/cells_nasadem/`; comparison in `validation/nasadem_vs_copdem.py` -> `data/validation/nasadem_vs_copdem.json`. Files: `pipeline/io_earth.py`, `landcover.py`, `cells.py`, `earth_scan.py`, `cloud/earth-scan-nasa.yml`. Verify: default behaviour unchanged (tests green; one cached tile gives identical cells), then decide whether NASADEM becomes the primary DEM below 60 deg latitude.
 - **J14 is closed as BLOCKED** (the SlideRule client fails on Windows for 20 km boxes; no laser data was obtained; the script `validation/icesat2_profiles.py` is committed). Its replacement is **J21**: the same script on the cloud runner with 5 km boxes.
 
-**Exact specifications of everything that is left: `docs/TASKS.md`, section 5** (J17, J18, J19 final configuration and ranking, J20 validation on the full scan, J21 ICESat-2 in the cloud, J22 novelty check, J7 web app, J11 README and pitch, J23 freeze). Each spec has inputs, outputs and acceptance checks, so any capable model can take one. Order and timeline: section 6 there. The same jobs are on the Axis board.
+**Exact specifications of everything that is left: `docs/TASKS.md`, section 5** (J17, J19 final configuration and ranking, J20 validation on the full scan, J21 ICESat-2 in the cloud, J22 novelty check, J7 web app, J11 README and pitch, J23 freeze). Each spec has inputs, outputs and acceptance checks, so any capable model can take one. Order and timeline: section 6 there. The same jobs are on the Axis board.
 
 **After J18 and J17 are committed (this is job J19).**
 1. `python -m pipeline.run sites validate-enrichment context catalog`, then commit `data/sites/`, `data/earth/tiles/tile_summary.csv`, `data/validation/enrichment.json`, the catalogue.
@@ -45,9 +49,10 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 | Job | State |
 |---|---|
 | J1 pipeline, J2 lunar regions, J3 Earth scan (2,101 tiles), J5 NASA-product check, J6 effectiveness (on 78 tiles), J8 known analogs, J10 lidar, J12 NASA POWER + Worldview, J13 Diviner + LOLA from PDS, J15 LRO instruments, J16 layout and catalogue | **done and pushed** |
-| J4 scoring and sites | works; being changed by J18 (target, ranking key, sand-sea flag) |
+| J4 scoring and sites | final full-scan results from J18; default target `base_regions`, key `best_window_km2` |
 | J9 novelty check | done for the 78-tile ranking; to be repeated on the new ranking; a person opens the evidence |
-| J17 NASA Earth core, J18 algorithm fix | workers running (section 0) |
+| J17 NASA Earth core | partly implemented; cloud artifacts still need to be ingested and compared (section 0) |
+| J18 algorithm fix | **done**; full-scan results and caveats in `docs/sources/j18.md` |
 | J14 ICESat-2 | blocked; replaced by J21 |
 | J19 final configuration, J20 validation, J21 ICESat-2 in the cloud, J22 novelty, J23 freeze | to do; exact specs in `docs/TASKS.md` section 5 |
 | J7 app, J11 pitch | not started (section 0) |

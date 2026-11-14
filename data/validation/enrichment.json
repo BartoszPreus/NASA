@@ -1,63 +1,66 @@
 {
- "n_scanned_tiles": 78,
- "n_bare_cells": 68667,
- "base_rate": 0.039757088557822534,
+ "target": "base_regions",
+ "lunar_like_column": "p_all",
+ "scored_target": "base_regions",
+ "n_scanned_tiles": 2060,
+ "n_bare_cells": 1305454,
+ "base_rate": 0.050043892775999764,
  "min_cells_in_radius": 20,
  "n_known_rows_read": 66,
- "n_sites_tested": 31,
- "sites_with_enrichment_above_1": 21,
- "median_enrichment": 1.7966248037676609,
- "median_enrichment_point_sites_only": 1.7373547071485218,
- "n_point_sites": 23,
+ "n_sites_tested": 35,
+ "sites_with_enrichment_above_1": 15,
+ "median_enrichment": 0.9052076234966342,
+ "median_enrichment_point_sites_only": 0.8863187144176218,
+ "n_point_sites": 25,
  "random": {
   "n_repeats": 500,
-  "median_enrichment_median": 0.32665905523048383,
+  "median_enrichment_median": 0.3507262922460823,
   "median_enrichment_p05_p95": [
-   0.13966070589971688,
-   0.6699640599126891
+   0.13462738023153567,
+   0.7371596415587448
   ],
-  "above_1_median": 9.0,
+  "above_1_median": 11.0,
   "above_1_p05_p95": [
-   5.0,
-   14.0
+   7.0,
+   15.0
   ],
-  "share_of_random_runs_with_median_at_least_ours": 0.0
+  "share_of_random_runs_with_median_at_least_ours": 0.02
  },
  "by_type_median": {
-  "cave": 2.2866133866133866,
-  "desert": 1.7373547071485218,
-  "impact": 2.5152747252747254,
-  "polar": 4.046446799938702,
-  "region": 2.032874688739687,
-  "volcanic": 1.5720467032967034
+  "cave": 0.9082935585767363,
+  "desert": 1.0234293617766044,
+  "impact": 0.8215010629794037,
+  "polar": 0.9052076234966342,
+  "region": 1.063465062353902,
+  "volcanic": 0.6595941318235823
  },
  "sites": [
-  {
-   "name": "Kilauea Volcano (BASALT caldera region)",
-   "type": "volcanic",
-   "analog_for": "both",
-   "radius_km": 25.0,
-   "bare_cells": 108,
-   "share_lunar_like": 0.5278,
-   "enrichment": 13.2751
-  },
   {
    "name": "Island of Hawaii (whole island; region named in the challenge)",
    "type": "region",
    "analog_for": "both",
    "radius_km": 100.0,
    "bare_cells": 504,
-   "share_lunar_like": 0.4643,
-   "enrichment": 11.6781
+   "share_lunar_like": 0.3512,
+   "enrichment": 7.0176
   },
   {
-   "name": "Devon Island (Haughton-Mars Project region)",
-   "type": "polar",
+   "name": "Kilauea Volcano (BASALT caldera region)",
+   "type": "volcanic",
    "analog_for": "both",
-   "radius_km": 100.0,
-   "bare_cells": 988,
-   "share_lunar_like": 0.2662,
-   "enrichment": 6.6955
+   "radius_km": 25.0,
+   "bare_cells": 108,
+   "share_lunar_like": 0.3333,
+   "enrichment": 6.6608
+  },
+  {
+   "name": "Atacama Desert hyper-arid core",
+   "type": "desert",
+   "analog_for": "both",
+   "radius_km": 150.0,
+   "bare_cells": 15206,
+   "share_lunar_like": 0.1282,
+   "enrichment": 2.5612
   },
   {
    "name": "Mauna Kea (PISCES ISRU field tests)",
@@ -65,80 +68,35 @@
    "analog_for": "moon",
    "radius_km": 25.0,
    "bare_cells": 93,
-   "share_lunar_like": 0.2151,
-   "enrichment": 5.4092
+   "share_lunar_like": 0.1183,
+   "enrichment": 2.3635
   },
   {
-   "name": "Yungay hyper-arid core (Atacama)",
-   "type": "desert",
-   "analog_for": "mars",
-   "radius_km": 25.0,
-   "bare_cells": 185,
-   "share_lunar_like": 0.2054,
-   "enrichment": 5.1665
-  },
-  {
-   "name": "Haughton impact structure (Haughton-Mars Project)",
-   "type": "impact",
+   "name": "Devon Island (Haughton-Mars Project region)",
+   "type": "polar",
    "analog_for": "both",
-   "radius_km": 25.0,
-   "bare_cells": 300,
-   "share_lunar_like": 0.2,
-   "enrichment": 5.0305
-  },
-  {
-   "name": "Atacama Desert hyper-arid core",
-   "type": "desert",
-   "analog_for": "both",
-   "radius_km": 150.0,
-   "bare_cells": 2848,
-   "share_lunar_like": 0.1826,
-   "enrichment": 4.5925
+   "radius_km": 100.0,
+   "bare_cells": 4124,
+   "share_lunar_like": 0.1152,
+   "enrichment": 2.3016
   },
   {
    "name": "Atacama Desert region 4 of 5 (Taltal - Chanaral)",
    "type": "region",
    "analog_for": "both",
    "radius_km": 130.0,
-   "bare_cells": 1250,
-   "share_lunar_like": 0.1584,
-   "enrichment": 3.9842
+   "bare_cells": 10074,
+   "share_lunar_like": 0.1147,
+   "enrichment": 2.291
   },
   {
-   "name": "Askja (Apollo training)",
-   "type": "volcanic",
-   "analog_for": "both",
-   "radius_km": 25.0,
-   "bare_cells": 357,
-   "share_lunar_like": 0.098,
-   "enrichment": 2.466
-  },
-  {
-   "name": "CHILL-ICE lava tube (Iceland)",
-   "type": "cave",
-   "analog_for": "both",
-   "radius_km": 10.0,
-   "bare_cells": 22,
-   "share_lunar_like": 0.0909,
-   "enrichment": 2.2866
-  },
-  {
-   "name": "Atacama Desert region 3 of 5 (Antofagasta incl. Salar de Atacama and El Tatio)",
-   "type": "region",
-   "analog_for": "both",
-   "radius_km": 150.0,
-   "bare_cells": 3335,
-   "share_lunar_like": 0.0885,
-   "enrichment": 2.2249
-  },
-  {
-   "name": "Holuhraun lava field",
-   "type": "volcanic",
+   "name": "Yungay hyper-arid core (Atacama)",
+   "type": "desert",
    "analog_for": "mars",
    "radius_km": 25.0,
-   "bare_cells": 240,
-   "share_lunar_like": 0.0875,
-   "enrichment": 2.2009
+   "bare_cells": 490,
+   "share_lunar_like": 0.1082,
+   "enrichment": 2.1614
   },
   {
    "name": "Mars Hill (Death Valley)",
@@ -147,25 +105,106 @@
    "radius_km": 10.0,
    "bare_cells": 80,
    "share_lunar_like": 0.0875,
-   "enrichment": 2.2009
+   "enrichment": 1.7485
   },
   {
-   "name": "Iceland (whole island; region named in the challenge)",
+   "name": "Haughton impact structure (Haughton-Mars Project)",
+   "type": "impact",
+   "analog_for": "both",
+   "radius_km": 25.0,
+   "bare_cells": 450,
+   "share_lunar_like": 0.0822,
+   "enrichment": 1.643
+  },
+  {
+   "name": "Bockfjorden - Sverrefjellet volcano Svalbard (AMASE)",
+   "type": "volcanic",
+   "analog_for": "mars",
+   "radius_km": 25.0,
+   "bare_cells": 42,
+   "share_lunar_like": 0.0714,
+   "enrichment": 1.4273
+  },
+  {
+   "name": "Atacama Desert region 3 of 5 (Antofagasta incl. Salar de Atacama and El Tatio)",
    "type": "region",
    "analog_for": "both",
-   "radius_km": 290.0,
-   "bare_cells": 2379,
-   "share_lunar_like": 0.0862,
-   "enrichment": 2.1674
+   "radius_km": 150.0,
+   "bare_cells": 11315,
+   "share_lunar_like": 0.0708,
+   "enrichment": 1.4146
+  },
+  {
+   "name": "Svalbard archipelago (whole; AMASE field areas)",
+   "type": "region",
+   "analog_for": "both",
+   "radius_km": 300.0,
+   "bare_cells": 1347,
+   "share_lunar_like": 0.0624,
+   "enrichment": 1.2461
   },
   {
    "name": "Atacama Desert region 2 of 5 (Tarapaca - Loa)",
    "type": "region",
    "analog_for": "both",
    "radius_km": 110.0,
-   "bare_cells": 159,
-   "share_lunar_like": 0.0755,
-   "enrichment": 1.8983
+   "bare_cells": 6809,
+   "share_lunar_like": 0.0535,
+   "enrichment": 1.0682
+  },
+  {
+   "name": "Iceland (whole island; region named in the challenge)",
+   "type": "region",
+   "analog_for": "both",
+   "radius_km": 290.0,
+   "bare_cells": 6172,
+   "share_lunar_like": 0.053,
+   "enrichment": 1.0587
+  },
+  {
+   "name": "Death Valley",
+   "type": "desert",
+   "analog_for": "mars",
+   "radius_km": 50.0,
+   "bare_cells": 1562,
+   "share_lunar_like": 0.0512,
+   "enrichment": 1.0234
+  },
+  {
+   "name": "Askja (Apollo training)",
+   "type": "volcanic",
+   "analog_for": "both",
+   "radius_km": 25.0,
+   "bare_cells": 425,
+   "share_lunar_like": 0.0494,
+   "enrichment": 0.9874
+  },
+  {
+   "name": "CHILL-ICE lava tube (Iceland)",
+   "type": "cave",
+   "analog_for": "both",
+   "radius_km": 10.0,
+   "bare_cells": 22,
+   "share_lunar_like": 0.0455,
+   "enrichment": 0.9083
+  },
+  {
+   "name": "Svalbard (AMASE region)",
+   "type": "polar",
+   "analog_for": "both",
+   "radius_km": 150.0,
+   "bare_cells": 883,
+   "share_lunar_like": 0.0453,
+   "enrichment": 0.9052
+  },
+  {
+   "name": "Holuhraun lava field",
+   "type": "volcanic",
+   "analog_for": "mars",
+   "radius_km": 25.0,
+   "bare_cells": 248,
+   "share_lunar_like": 0.0444,
+   "enrichment": 0.8863
   },
   {
    "name": "Timanfaya Lanzarote (ESA PANGAEA)",
@@ -173,62 +212,17 @@
    "analog_for": "both",
    "radius_km": 10.0,
    "bare_cells": 28,
-   "share_lunar_like": 0.0714,
-   "enrichment": 1.7966
+   "share_lunar_like": 0.0357,
+   "enrichment": 0.7137
   },
   {
-   "name": "Death Valley",
-   "type": "desert",
-   "analog_for": "mars",
-   "radius_km": 50.0,
-   "bare_cells": 970,
-   "share_lunar_like": 0.0691,
-   "enrichment": 1.7374
-  },
-  {
-   "name": "Svalbard archipelago (whole; AMASE field areas)",
+   "name": "Atacama Desert region 1 of 5 (Arica - Tarapaca coast and pampa)",
    "type": "region",
    "analog_for": "both",
-   "radius_km": 300.0,
-   "bare_cells": 194,
-   "share_lunar_like": 0.067,
-   "enrichment": 1.6855
-  },
-  {
-   "name": "Black Point Lava Flow (Desert RATS)",
-   "type": "volcanic",
-   "analog_for": "moon",
-   "radius_km": 10.0,
-   "bare_cells": 48,
-   "share_lunar_like": 0.0625,
-   "enrichment": 1.572
-  },
-  {
-   "name": "Svalbard (AMASE region)",
-   "type": "polar",
-   "analog_for": "both",
-   "radius_km": 150.0,
-   "bare_cells": 162,
-   "share_lunar_like": 0.0556,
-   "enrichment": 1.3974
-  },
-  {
-   "name": "Qaidam Basin",
-   "type": "desert",
-   "analog_for": "mars",
-   "radius_km": 150.0,
-   "bare_cells": 2392,
-   "share_lunar_like": 0.0439,
-   "enrichment": 1.1041
-  },
-  {
-   "name": "Lut Desert central (Dasht-e Lut; yardang and aeolian Mars analogue)",
-   "type": "region",
-   "analog_for": "mars",
-   "radius_km": 150.0,
-   "bare_cells": 2688,
-   "share_lunar_like": 0.032,
-   "enrichment": 0.8047
+   "radius_km": 110.0,
+   "bare_cells": 5212,
+   "share_lunar_like": 0.0336,
+   "enrichment": 0.6709
   },
   {
    "name": "Stillwater igneous complex (anorthosite)",
@@ -237,16 +231,43 @@
    "radius_km": 25.0,
    "bare_cells": 33,
    "share_lunar_like": 0.0303,
-   "enrichment": 0.7622
+   "enrichment": 0.6055
+  },
+  {
+   "name": "Atacama Desert region 5 of 5 (Copiapo - Vallenar)",
+   "type": "region",
+   "analog_for": "both",
+   "radius_km": 120.0,
+   "bare_cells": 6105,
+   "share_lunar_like": 0.0269,
+   "enrichment": 0.5368
   },
   {
    "name": "Dalangtan (DLT) area Qaidam Basin",
    "type": "desert",
    "analog_for": "mars",
    "radius_km": 50.0,
-   "bare_cells": 1535,
-   "share_lunar_like": 0.03,
-   "enrichment": 0.7538
+   "bare_cells": 1686,
+   "share_lunar_like": 0.0208,
+   "enrichment": 0.4148
+  },
+  {
+   "name": "Qaidam Basin",
+   "type": "desert",
+   "analog_for": "mars",
+   "radius_km": 150.0,
+   "bare_cells": 5413,
+   "share_lunar_like": 0.0161,
+   "enrichment": 0.3212
+  },
+  {
+   "name": "Lut Desert central (Dasht-e Lut; yardang and aeolian Mars analogue)",
+   "type": "region",
+   "analog_for": "mars",
+   "radius_km": 150.0,
+   "bare_cells": 7093,
+   "share_lunar_like": 0.0148,
+   "enrichment": 0.2958
   },
   {
    "name": "Danakil Depression (Dallol - Erta Ale range; Europlanet field analogue)",
@@ -254,17 +275,26 @@
    "analog_for": "mars",
    "radius_km": 60.0,
    "bare_cells": 2697,
-   "share_lunar_like": 0.0226,
-   "enrichment": 0.5689
+   "share_lunar_like": 0.0093,
+   "enrichment": 0.1852
   },
   {
    "name": "Laki 1783-1784 lava flow field",
    "type": "volcanic",
    "analog_for": "mars",
    "radius_km": 25.0,
-   "bare_cells": 133,
-   "share_lunar_like": 0.015,
-   "enrichment": 0.3782
+   "bare_cells": 136,
+   "share_lunar_like": 0.0074,
+   "enrichment": 0.1469
+  },
+  {
+   "name": "Talemzane impact structure",
+   "type": "impact",
+   "analog_for": "moon",
+   "radius_km": 10.0,
+   "bare_cells": 50,
+   "share_lunar_like": 0.0,
+   "enrichment": 0.0
   },
   {
    "name": "Potrillo volcanic field",
@@ -272,8 +302,8 @@
    "analog_for": "moon",
    "radius_km": 25.0,
    "bare_cells": 77,
-   "share_lunar_like": 0.013,
-   "enrichment": 0.3267
+   "share_lunar_like": 0.0,
+   "enrichment": 0.0
   },
   {
    "name": "Craters of the Moon (BASALT and Apollo training)",
@@ -285,11 +315,20 @@
    "enrichment": 0.0
   },
   {
-   "name": "Talemzane impact structure",
-   "type": "impact",
+   "name": "Dallol hydrothermal field (Danakil)",
+   "type": "volcanic",
+   "analog_for": "mars",
+   "radius_km": 10.0,
+   "bare_cells": 81,
+   "share_lunar_like": 0.0,
+   "enrichment": 0.0
+  },
+  {
+   "name": "Black Point Lava Flow (Desert RATS)",
+   "type": "volcanic",
    "analog_for": "moon",
    "radius_km": 10.0,
-   "bare_cells": 50,
+   "bare_cells": 48,
    "share_lunar_like": 0.0,
    "enrichment": 0.0
   },
@@ -303,11 +342,11 @@
    "enrichment": 0.0
   },
   {
-   "name": "Dallol hydrothermal field (Danakil)",
-   "type": "volcanic",
+   "name": "Kangerlussuaq field site (Greenland)",
+   "type": "polar",
    "analog_for": "mars",
-   "radius_km": 10.0,
-   "bare_cells": 81,
+   "radius_km": 25.0,
+   "bare_cells": 21,
    "share_lunar_like": 0.0,
    "enrichment": 0.0
   }

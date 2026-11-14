@@ -117,7 +117,7 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | J15 | every LRO instrument per lunar region (`data/moon/instruments/`) | done |
 | J16 | data layout v2 and generated catalogue | done |
 | J17 | NASA data at the core of the Earth side (NASADEM, MODIS land cover) | **partly done, stopped at 19:55, free to take.** Code, tests and the cloud rescan are done; the comparison at scale, the recommendation and the licence checks are left. Continue from `docs/sources/j17.md` and the "State" paragraph in section 5 |
-| J18 | algorithm fix: target, ranking key, sand seas, fast enrichment | **partly done, stopped at 19:55, free to take.** Code is written and tested; the full run of the new `pipeline.sites`, the choice of ranking key and the enrichment against the new target are left. Continue from `docs/sources/j18.md` and the "State" paragraph in section 5 |
+| J18 | algorithm fix: target, ranking key, sand seas, fast enrichment | **done**; full-scan outputs, key comparison, flag impact and enrichment are recorded in `docs/sources/j18.md` |
 | J19-J23, J7, J11 | see section 5 | **to do** |
 
 ## 5. Remaining jobs: exact specifications
@@ -128,15 +128,8 @@ Start line for any agent: `Read CLAUDE.md, docs/HANDOFF.md (sections 0 and 9) an
 
 Python: `.venv\Scripts\python.exe` from the repo root (Windows). All locations: `pipeline/paths.py`. Catalogue of files and sources: `data/README.md`. The venue network gives about 0.3 MB/s: anything that downloads more than about 30 MB runs on the cloud runner (`cloud/README.md`, `python -m pipeline.cloud ...`).
 
-### J18 — Algorithm fix: target regions, ranking key, sand seas, fast enrichment  (partly done, stopped at 19:55; critical; about 45 min left)
-**State at 19:55 (commit `6289690`; full notes in `docs/sources/j18.md`).**
-- Done and verified by the conductor (21 tests pass, every CLI starts): steps 1, 2, 3 and 6 below; the code of steps 4 and 5.
-- One deviation from the text below, accepted: the pooled target is stored at `pooled_regions.base_regions` in `data/moon/reference.json`, not inside `regions`, because `pipeline/lunar_products.py` and `validation/pds_products.py` need exactly one window per entry of `regions`. Checked: `n_valid` 1,575, median s240 6.998; `regions.polar_160km.medians.s240` is still 5.108. Read the third Accept line with that path.
-- Finding of step 3: changing the target does NOT demote the sand seas (the Rub' al Khali tiles hold ranks 1-3 under every target; table in `data/sites/target_comparison.csv`).
-- Step 4, coded but not yet run end to end: a cell is flagged when `relief / r200` is below the 5th percentile of the target's lunar cells (81.84 for `base_regions`). In a scratch analysis this flags 98.5% of the sand-sea candidate cells and 5% of the lunar cells, at a cost: 62.8% of the candidate cells of Devon Island tile N75W090 and 38.9% of Harrat Khaybar.
-- Step 5, coded but not compared on numbers: `--rank-key best_window | capped_area | weighted_area`; `best_window` is the default on design grounds only.
-- **Left to do:** (a) `python -m pipeline.sites` (2-3 min) and look at the top 20; (b) compare the three ranking keys on the result and state which one is kept and why, including what the flag does to the ranks of the reference tiles; (c) `python validation/enrichment.py` against `base_regions`, and once with `--target polar_160km --out <scratch file> --figure none`; (d) `python -m pipeline.run moon sites validate-enrichment catalog`, then pytest; (e) the remaining Accept lines.
-- The committed `data/sites/*` and `data/earth/tiles/tile_summary.csv` are the full-scan run of the method BEFORE J18 (target `polar_160km`, key `weighted_area_km2`, sand seas on top). Step (a) replaces them.
+### J18 — Algorithm fix: target regions, ranking key, sand seas, fast enrichment (done)
+**Completed 14 Nov 2026.** The full-scan runs, key comparison, dune-flag trade-offs, both-target enrichment and verification are recorded in `docs/sources/j18.md`. The accepted pooled reference remains under `pooled_regions.base_regions` so that each entry of `regions` retains its single-window schema; `regions.polar_160km.medians.s240` remains 5.108. The default ranking key is `best_window_km2`, and flagged sites sort after unflagged sites. The flag removes the four named sand-sea tiles from the top 50, with the documented Devon Island N75W090 false-flag cost.
 
 **Why.** On the full scan the top of the ranking is sand seas (tiles N15E013 in Niger; N18E048, N17E046, N18E047 in the Rub' al Khali). Their cells (slope about 2 deg at 240 m, bare ground, hollows between dunes that count as closed depressions) fall inside the broad 90% envelope of the reference `polar_160km`, and the ranking key `weighted_area_km2` rewards size.
 
