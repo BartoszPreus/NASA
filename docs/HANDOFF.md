@@ -10,7 +10,7 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 |---|---|---|---|
 | J1 pipeline package | **done, pushed** (`2ca3719`) | `pipeline/`, `tests/` (9 green), fixtures in `data/out/sample/` | none |
 | J8 known analogs | **done, pushed** (`fa0ef98`) | `data/known_analogs.csv` (63 rows; 16 from opened primary sources, 47 secondary) | optional: upgrade secondary rows |
-| J5 reproduce NASA product | worker running since 17:57 | on disk, unverified: `validation/t1_reproduce.py`, `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png`, `docs/sources/j5.md` | verify (section 3), commit, `complete_job` |
+| J5 reproduce NASA product | **done, pushed**; rerun by the conductor gave identical numbers | `validation/t1_reproduce.py`, `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png` | use the numbers in section 6; optional second window near 84-85 S |
 | J10 lidar close-up | worker running since 17:57 | on disk, unverified: `lidar/crater_profiles.py`, `data/out/crater_profiles.json`, `docs/figures/crater_profile_overlay.png` | verify, commit, `complete_job` |
 | J3 Earth scan | worker running since 18:04 | nothing yet | verify pilot parquet, commit; **night scan needs Wiktor's go** |
 | J4 scoring and sites | worker running since 18:04 | nothing yet | verify regression table, commit; rerun when J2 and the night scan land |
@@ -79,6 +79,9 @@ Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476
 - Lunar polar window (160 x 160 km, 6,889 cells): median slope 5.11 deg at 240 m, 4.96 deg at 570 m; closed depressions 1.8% of cell area on average; only 13% of pixels at or below 5 deg and 39% at or below 8 deg (median per cell).
 - Adding closed depressions to slope and roughness removes false hits (Tassili n'Ajjer 15% -> 1%, Hoggar 12% -> 0%) and keeps volcanic and polar terrain (Mauna Kea 24%, Devon Island 20%, Lanzarote 18%, Ellesmere 14%).
 - Gradient coherence adds nothing; Hurst exponent and temperature cannot be scored.
+- **Validation T1 (J5), 40 x 40 km window at the pole, 640,000 pixels:** our implementation of NASA's plane-fit slope at a 200 m baseline matches NASA's map `LDRM_80S_50MPP_ADJ_SLP_200M.TIF` with a median absolute difference of 0.042 deg on the native 20 m DEM and 0.064 deg on a 30 m DEM (r = 0.9999). Roughness comes out at 0.84 of NASA's (r = 0.95), because NASA takes residuals from individual laser spots and we only have the gridded DEM.
+- **What T1 does and does not cover:** it validates our reading of the data and a plane-fit estimator written for the test. The features used for scoring (`s240`, `s570`: two-point slopes) are a different quantity; the plane-fit slope is 1.56 times the two-point slope at about 200 m in this window. For the two-point slopes the check is the comparison with NASA's along-track product (PGDA 70): ratio 1.01-1.03 along the north-south direction and 0.91 with both directions pooled, as the pipeline does. The PGDA 70 reference is coarse at the pole (15 latitude rows in the window), so treat that ratio as indicative.
+- Sample-grid registration matters: shifting the 50 m sample grid by 25 m raises the slope difference from 0.042 to 0.304 deg.
 
 ## 7. Open items that need a person
 
