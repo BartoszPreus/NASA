@@ -1,11 +1,11 @@
 # Earth scan status (written by pipeline/checkpoint.py)
 
-Updated: 2026-11-14 18:40. Scan state: **running**.
+Updated: 2026-11-14 18:41. Scan state: **running**.
 
 - Tiles in the plan: 2101 (78 of them were already in the pilot and known-analog tables).
-- Scan tiles finished: **4 of 2023**; problems: 0.
+- Scan tiles finished: **5 of 2023**; problems: 0.
 - Cells in the committed part files: 0 in 0 parts (`data/out/earth_cells_scan_p*.parquet`, manifest `scan_parts.json`).
-- Ranking last rebuilt: 2026-11-14 18:40 (`ranking.csv`, `sites.geojson`, `tile_summary.csv`).
+- Ranking last rebuilt: not yet in this run (`ranking.csv`, `sites.geojson`, `tile_summary.csv`).
 
 ## Tiles by scan priority
 
@@ -13,7 +13,7 @@ Updated: 2026-11-14 18:40. Scan state: **running**.
 state  done  planned
 prio                
 0        78        0
-1         4      554
+1         5      553
 2         0      826
 3         0      639
 ```
@@ -26,7 +26,7 @@ region
 Americas              22      135
 Antarctica             3        0
 Arctic                14     1465
-Central Asia/Tibet     9      243
+Central Asia/Tibet    10      242
 Sahara/Arabia         19      156
 other                 12        9
 southern Africa        3       11
