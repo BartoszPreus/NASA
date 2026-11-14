@@ -1,0 +1,2 @@
+stage,command,started,seconds,exit_code,git_commit,log
+sites,python.exe -m pipeline.sites,2026-11-14 19:21:44,61.6,0,4fd4672,data/raw/run_logs/sites_20261114_192144.log

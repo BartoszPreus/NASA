@@ -24,21 +24,25 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
+| `run_log.csv` | ?, 1 rows, 171 B | `UNKNOWN` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
+| `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
 | `earth/tiles/SCAN_STATUS.md` | human-readable status of the Earth scan (local loop; paths inside predate layout v2), 1.7 kB | `python -m pipeline.checkpoint` | data/earth/tiles/tiles_scanned.csv |
-| `earth/tiles/tile_summary.csv` | per tile: valid, bare, terrain-pass and candidate cells, sites, weighted area, 78 rows, 4.3 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
-| `earth/tiles/tiles_scanned.csv` | scan plan in priority order with the status of every tile, 2101 rows, 126.8 kB | `python -m pipeline.tiles --select, then --update-status` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv, data/reference/pilot_tiles.csv |
+| `earth/tiles/tile_summary.csv` | per tile: valid, bare, terrain-pass and candidate cells, sites, weighted area, 2060 rows, 114.6 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
+| `earth/tiles/tiles_scanned.csv` | scan plan in priority order with the status of every tile, 2101 rows, 134.1 kB | `python -m pipeline.tiles --select, then --update-status` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv, data/reference/pilot_tiles.csv |
 | `moon/cells.parquet` | lunar cells of all regions with the terrain features, 8464 rows, 619.7 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m |
 | `moon/reference.json` | lunar reference populations per region: mean, covariance, sorted distances, medians, 343.3 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/regions.geojson` | region footprints in lunar latitude / east longitude, 8 rows, 33.9 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/hillshade/*.png` | grey hillshade of one lunar region window | `python -m pipeline.moon_reference` | pgda90_lola_20m |
-| `moon/instruments/diviner_pcp_regions.json` | Diviner polar temperatures per lunar region, 5.5 kB | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp, data/moon/reference.json |
+| `moon/instruments/diviner_pcp_regions.json` | Diviner polar temperatures per lunar region, 10.7 kB | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp, data/moon/reference.json |
 | `moon/instruments/diviner_regions.json` | Diviner temperatures and ice-stability depths per lunar region, 12.4 kB | `python validation/pds_products.py --part diviner` | diviner_prp, data/moon/reference.json, data/sites/nasa_context_summary.json |
 | `moon/instruments/lamp*` | LAMP Lyman-alpha albedo per lunar region | `python -m pipeline.lunar_products --extract lamp (job J15)` | lamp, data/moon/reference.json |
 | `moon/instruments/lend*` | LEND neutron counts per lunar region | `python -m pipeline.lunar_products --extract lend (job J15)` | lend, data/moon/reference.json |
-| `moon/instruments/lola_regions.json` | permanent shadow, sun and Earth visibility per lunar region, 18.8 kB | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination, data/moon/reference.json |
-| `moon/instruments/registry.json` | registry of the LRO instrument products, their URLs and citations, 21.9 kB | `python -m pipeline.lunar_products --list (job J15)` | pgda90_lola_20m, pgda69_illumination, diviner_pcp, minirf, lend, lamp, lroc |
+| `moon/instruments/lola_regions.json` | permanent shadow, sun and Earth visibility per lunar region, 18.2 kB | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination, data/moon/reference.json |
+| `moon/instruments/lroc*` | LROC images per lunar region | `python -m pipeline.lunar_products --extract lroc (job J15)` | lroc, data/moon/reference.json |
+| `moon/instruments/minirf*` | Mini-RF radar values per lunar region | `python -m pipeline.lunar_products --extract minirf (job J15)` | minirf, data/moon/reference.json |
+| `moon/instruments/registry.json` | registry of the LRO instrument products, their URLs and citations, 21.6 kB | `python -m pipeline.lunar_products --list (job J15)` | pgda90_lola_20m, pgda69_illumination, diviner_pcp, minirf, lend, lamp, lroc |
 | `moon/instruments/diviner/*` | map of one Diviner layer for one lunar region | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp |
 | `moon/instruments/lola/*` | map of one LOLA-derived layer for one lunar region | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination |
 | `reference/known_analogs.csv` | known Moon and Mars analog sites: name, lat, lon, radius_km, type, source_url, verified, 75 rows, 9.7 kB | `hand-curated by jobs J8 and J9 (agent web research, no script)` | analog_literature, wikipedia, osm |
@@ -47,9 +51,9 @@ data/
 | `sites/nasa_context.csv` | NASA POWER skin temperature, precipitation and wind per site, 145 rows, 40.9 kB | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power, data/sites/ranking.csv |
 | `sites/nasa_context_summary.json` | range of annual mean skin temperature over the sites, 730 B | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power |
 | `sites/novelty_check.csv` | literature verdict for the top new sites, 12 rows, 12.4 kB | `hand-curated by job J9 (agent literature and map search, no script)` | osm, wikipedia, analog_literature, data/sites/ranking.csv |
-| `sites/ranking.csv` | top sites by similarity-weighted area, 145 rows, 105.8 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
-| `sites/scored_compact.parquet` | scored cells with p_all >= 0.05 or candidate (full table: data/raw/earth_scored_full.parquet), 14538 rows, 1.0 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
-| `sites/sites.geojson` | candidate sites: outline and properties (contract in docs/TASKS.md section 3), 145 rows, 407.2 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet |
+| `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 151.2 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
+| `sites/scored_compact.parquet` | scored cells with p_all >= 0.05 or candidate (full table: data/raw/earth_scored_full.parquet), 250269 rows, 18.0 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
+| `sites/sites.geojson` | candidate sites: outline and properties (contract in docs/TASKS.md section 3), 4593 rows, 14.6 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet |
 | `sites/images/*.jpg` | MODIS or VIIRS true-colour image around one site (NASA imagery, unmodified) | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `sites/images/index.csv` | bbox, date, layer and cloud share of every site image, 60 rows, 10.2 kB | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `validation/crater_profiles.json` | crater measurements: Earth lidar, 30 m DEM and the lunar DEM, 11.9 kB | `python lidar/crater_profiles.py --part all` | usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt |
@@ -57,6 +61,8 @@ data/
 | `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 8.0 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
 | `validation/pds_lola.json` | PDS LOLA gridded DEM against the PGDA DEM, 5.9 kB | `python validation/pds_products.py --part lola` | pds_lola_gdr, pgda90_lola_20m |
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
+
+Files without a known producer (add them to `FILE_MAP` in `pipeline/catalog.py`): `data/run_log.csv`
 
 ## External sources by agency
 
@@ -149,8 +155,8 @@ Tests: `python -m pytest tests -q`.
 Git-ignored. One folder per source; every script recreates what it needs, so the folder is safe to delete (rebuilding needs the network, about 0.3 MB/s at the venue). Folders present now:
 
 - `raw/cells/`: per-tile Earth feature tables and scan logs
+- `raw/cloud/`: artifacts from the cloud runner
 - `raw/cloud_check/`: test artifacts of the cloud runner
-- `raw/cloud_scan/`: artifacts of the cloud Earth scan
 - `raw/copdem30/`: Copernicus GLO-30 tiles
 - `raw/icesat2/`: ICESat-2 subsets (job J14)
 - `raw/j16_before/`: copies taken before the layout-v2 migration (regression check)
@@ -161,6 +167,7 @@ Git-ignored. One folder per source; every script recreates what it needs, so the
 - `raw/nasa_context/`: NASA POWER and Worldview responses
 - `raw/naturalearth/`: country outlines
 - `raw/pds/`: PDS Geosciences files (LOLA GDR, Diviner PRP columns)
+- `raw/run_logs/`
 - `raw/tiles_cache/`: tile list, WorldCover fractions and coarse slopes of the tile selection
 - `raw/validation/`: slow intermediate tables of the effectiveness tests
 
