@@ -1,130 +1,39 @@
-# Validation: does the Moon-analog search find what it should?
+# Validation of the full Moon analog scan
 
-All numbers below come from `validation/effectiveness.py` (job J6) and `validation/t1_reproduce.py` (job J5); raw
-results in `data/validation/effectiveness.json` and `data/validation/t1_reproduce_nasa.json`. Scope: the 37 hand-picked pilot tiles
-(76,574 valid ~2 km cells), lunar reference `polar_160km`, J4 scoring (`p_all >= 0.10` and bare >= 0.8, ice < 0.05,
-water < 0.05 = candidate cell; >= 4 connected candidate cells = site; 81 sites ranked by `weighted_area_km2`).
-Written with SI assistance (Claude Code).
+The final ranking uses the pooled lunar target `base_regions`, the Copernicus elevation policy `copdem`, and the `best_window_km2` ranking key. The committed scan contains **1,758,778 valid cells across 2,060 tiles**. The scan plan contains 2,101 tiles.
 
-## Headline numbers
+| Check | Result |
+|---|---|
+| NASA LOLA slope map (T1) | Median absolute plane-fit slope error **0.042°** from the native DEM and **0.064°** from the resampled DEM. The scoring pipeline uses two-point slopes. |
+| PDS versus PGDA LOLA grids | Median elevation offset **+0.191 m**, RMS difference **1.709 m**. Both grids come from LOLA. |
+| NASADEM + MODIS versus Copernicus + WorldCover | On **618** common tiles, per-tile candidate shares gave Spearman **0.637**, with **21 of the top 50** shared. Slope at the shorter baseline gave Pearson **0.999**, while closed-depression share gave **0.758**. |
+| Enrichment around known analog sites | **15 of 35** above the scan-wide rate. Median **0.91×** versus **0.35×** for matched random circles. The typical known site's circle still falls below the scan-wide rate. |
+| Tile recovery | **AUC 0.407** (bootstrap 90% CI **0.289–0.521**); median known tile percentile **35.7** relative to background. Compared **20** known tiles with a score against **1,497** background tiles with at least **100** bare cells. |
+| Negative controls | With land cover, **zero candidate cells and sites** in all four controls. Terrain alone passed **33 cells and 2 sites** in Tatry/Podhale and **3 cells and 0 sites** in the Alps; the other controls stayed at zero. |
+| ICESat-2 laser profiles | Across **8** sites, laser slopes at **240 m** were **0.43–1.16×** the grid slopes, median **0.87×**. Transects and gridded sites cover different footprints. |
 
-| Test | Result | Comparison |
-|---|---|---|
-| **Enrichment (78 tiles): lunar-like share of bare cells around known analog sites, relative to the base rate** | **21 of 31 sites above the base rate; median 1.80 x** | random circles: 9 of 31 (5-14), median 0.33 x (0.14-0.67) |
-| Hidden-known: known analog sites with a bare cell in the top 5% of all 50,233 scanned bare cells | **10 of 17** | random points in the same tiles: median 9, 5-95% range 7-12 (200 runs) |
-| Hidden-known: ... in the top 10% | **11 of 17** | random: median 10, range 8-13 |
-| Hidden-known: a site in the top 20 of the ranking within the radius | **3 of 17** | random: median 2, range 1-4 |
-| Hidden-known without the land-cover mask (top 5% of all valid cells) | 16 of 17 | random: median 15, range 13-16 |
-| Negative controls (Wielkopolska, Tatry, Alps, Sahara erg): candidate cells / sites | **0 cells, 0 sites** in all four | all 37 tiles: 2.11% candidate cells, 81 sites |
-| Ablation: slope and roughness only (6 features) vs all 8 | 9.4% vs 3.6% of valid cells pass `p >= 0.10` | reproduces the prototype table to 0.3 pp (mean), max 1.2 pp |
-| Stability: top-10 / top-30 overlap, grid shifted 32 px | **6 of 10 / 19 of 30** (66 sites instead of 81) | site centroids within 5 km |
-| Stability: cells of 48 px / 96 px | 4 of 10 / 17 of 30 (48 px, 285 sites); 4 of 10 / 6 of 30 (96 px, only 7 sites) | lunar reference recomputed at the same cell size |
-| J5: our plane-fit slope vs NASA LOLA slope (b = 200 m), median absolute difference | 0.042 deg (20 m DEM), 0.064 deg (30 m DEM) | roughness: ours / NASA median = 0.84 (20 m), 0.83 (30 m) |
+With slopes and roughness alone, **9.83%** of valid cells passed the terrain threshold. Adding the depression features reduced this to **4.88%**. Spearman correlations of per-tile candidate shares between the pooled target and the individual regions span **0.724–0.960**.
 
-Figures: `docs/figures/eff_hidden_known.png`, `docs/figures/eff_stability.png`.
+[Controls with and without land cover](figures/eff_j20_controls.png) · [Tile recovery ROC](figures/eff_j20_recovery.png) · [Enrichment against random circles](figures/eff_enrichment.png)
 
-## 0. Enrichment test (added by the conductor after J6; 78 tiles)
+## What does not hold up
 
-Script `validation/enrichment.py`, results `data/validation/enrichment.json`, figure `docs/figures/eff_enrichment.png`.
-Scope: the 37 pilot tiles plus the 41 tiles that contain known analog sites (68,667 bare cells). Sections 1-4 below
-were computed earlier on the 37 pilot tiles only.
-
-The hidden-known test in section 1 asks whether the *best* cell near a known site is in the top few percent. With
-tens to thousands of cells per circle the best cell is almost always that good, for known sites and for random
-points alike, so that statistic cannot separate them. This test uses a share instead: among the bare cells inside a
-known site's radius, how many are lunar-like (`p_all >= 0.10`), relative to the base rate over all scanned bare
-cells (4.0%).
-
-| | Known analog sites | Random circles of the same radii (500 repeats) |
-|---|---|---|
-| Sites tested (at least 20 bare cells in the radius) | 31 | 31 per repeat |
-| Sites with more lunar-like terrain than the base rate | **21 of 31** | median 9 (5-95%: 5-14) |
-| Median enrichment | **1.80 x** | 0.33 x (5-95%: 0.14-0.67); none of the 500 repeats reached 1.80 |
-
-Random circles have a median below 1 because lunar-like cells are clustered: most circles hold few of them.
-Strongest enrichment: Kilauea 13.3 x, Island of Hawaii 11.7 x, Devon Island 6.7 x, Mauna Kea 5.4 x, Yungay (Atacama)
-5.2 x, Haughton 5.0 x, Askja 2.5 x. No enrichment: Makgadikgadi salt pans, the Dallol hydrothermal field, Craters of
-the Moon, the Talemzane crater (all 0), the Potrillo and Laki lava fields (0.3-0.4 x), the Danakil depression and the
-Lut desert (0.6-0.8 x). That pattern is expected for an index built on lunar polar terrain shape: salt flats,
-hydrothermal fields and wind-eroded deserts are analogs for other reasons, and flat young lava does not have polar
-relief.
-Limits: the tiles are not a random sample of the Earth; circles of several rows overlap (Kilauea, Mauna Ulu and the
-Hawaii row); sites under vegetation or without land-cover data cannot be tested; most coordinates in the known list
-come from secondary sources.
-
-## 1. Hidden-known test
-17 non-operational rows of `data/reference/known_analogs.csv` (63 rows read, 54 non-operational) lie inside the 37 tiles.
-For each, the best `p_all` among bare cells within its `radius_km`, and the share of all scanned bare cells that
-score at least as high. **The known sites do not score better than random points in the same tiles**: 10 of 17
-reach the top 5%, against a random median of 9 (a random run does at least as well in 99 of the 200 runs). The reason
-is visible in the data: the radii (10-150 km) cover a large part of a 1-degree tile, and the tiles themselves were
-chosen because they contain analogs, so a random point in the same tile finds the same good terrain. Six of the 17
-sites have **no bare cell at all** within the radius (Meteor Crater, SP Crater, Sunset Crater and Cinder Lake in
-Arizona; the La Corona lava tube on Lanzarote; the McMurdo Dry Valleys, where WorldCover has no data): the
-land-cover mask removes them before the terrain score is looked at. Where a site has bare ground, its best cell is
-high (Askja top 0.03%, Kilauea 0.06%, Death Valley 0.06%, Haughton 0.24%). Ranked sites near a known analog:
-Kilauea rank 3, Askja 6, Haughton 7, Death Valley 21.
-This is a sanity check (the tool does not miss the terrain of known analogs where it has bare ground), **not** an
-unbiased detection rate.
-
-## 2. Negative controls
-| Tile | valid cells | `p_all >= 0.10` (terrain only) | bare mask only | candidate (both) | sites |
-|---|---|---|---|---|---|
-| Wielkopolska N52E016 | 1,903 | 0.8% | 0.0% | 0% | 0 |
-| Tatry N49E020 | 2,010 | 2.8% | 0.0% | 0% | 0 |
-| Alps N45E006 | 2,177 | 0.1% | 1.2% | 0% | 0 |
-| Sahara erg N27E001 | 2,744 | 0.0% | 99.7% | 0% | 0 |
-| All 37 tiles | 76,574 | 3.6% | 65.6% | 2.11% | 81 |
-
-The terrain score alone rejects the flat sand sea (0.0%) and nearly all of the lowland and the high Alps; it lets
-2.8% of the Tatra cells through, and the land-cover mask removes them. Over all tiles the mask removes 42% of the
-cells that pass the terrain score.
-
-## 3. Stability
-Features recomputed for all 37 tiles on three other grids, scored, grouped into sites and ranked exactly as J4
-(`pipeline.score.score_cells`, `pipeline.sites.find_sites`, key `weighted_area_km2`). Overlap = share of the J4
-top-n sites with a variant top-n site within 5 km; rho = Spearman correlation of the per-tile candidate share.
-
-| Variant | sites | top-10 overlap | top-30 overlap | rho (tiles) |
-|---|---|---|---|---|
-| same grid, lunar reference with all own distances instead of the 500-value sample | 77 | 10/10 | 30/30 | 1.00 |
-| grid shifted 32 px (half a cell) | 66 | 6/10 | 19/30 | 0.97 |
-| cells of 48 px (~1.5 km), lunar reference at 48 px | 285 | 4/10 | 17/30 | 0.97 |
-| cells of 96 px (~3 km), lunar reference at 96 px | 7 | 4/10 | 6/30 | 0.88 |
-| without `s240` / `s570` | 81 / 60 | 7/10 / 8/10 | 21/30 / 25/30 | 0.98 / 0.98 |
-| without `r200` / `r400` / `r800` / `r1600` | 96 / 83 / 77 / 76 | 7 / 6 / 8 / 8 of 10 | 21 / 21 / 21 / 21 of 30 | 0.99 / 0.99 / 0.99 / 0.98 |
-| without `dep_frac` | 233 | **2/10** | **11/30** | 0.90 |
-| without `dep_depth` | 82 | 8/10 | 26/30 | 0.99 |
-
-**Which tiles are good is stable (rho 0.88-0.99); which ~2 km patch tops the list is not.** A half-cell shift keeps
-6 of the top 10. The cell size changes the result a lot: at 96 px almost no group of 4 connected candidate cells
-survives (7 sites), at 48 px there are 3.5 times as many sites. The ranking depends most on `dep_frac`: without it
-the candidate area grows (233 sites) and only 2 of the top 10 remain. Each single slope or roughness feature can
-be dropped with 6-8 of the top 10 kept, because they are strongly correlated. Land cover of the re-gridded cells
-comes from WorldCover sampled once per 8 x 8 Earth pixels; on the 64 px grid it gives the same bare class as J4 in
-99.999% of the cells. Run time 294 s (237 s for the features, 8 processes).
-
-## 4. Ablation
-Share of valid cells with `p >= 0.10`, per tile, for the six slope and roughness features alone against all eight
-(adding the two closed-depression features): the result **confirms** `analysis/discovery_test_results.txt`. Our
-6-feature shares match its `amp_all` column within 0.3 pp on average (max 0.9 pp, Spearman 0.997 over 37 tiles);
-our 8-feature `p_all` matches `dep_all` within 0.3 pp (max 1.2 pp, Spearman 0.992). Adding the depression features
-lowers the share in every one of the 37 tiles (median -3.6 pp; Devon Island 48% -> 20%, Tassili 15% -> 0.9%):
-Earth terrain with lunar-like slopes and roughness mostly lacks the closed crater depressions.
+- **Exact site ranks move with the grid.** In the older 78-tile study, the grid check used the **37 pilot tiles** and the old polar target. Shifting by half a cell retained **6 of the top 10**. Both alternate cell sizes retained **4 of the top 10**. These grid variants were carried forward from J6.
+- **Elevation input changes which cells qualify.** The comparison found **33,911** Copernicus/WorldCover candidates and **2,996** NASADEM/MODIS candidates, with **2,237** in common. Depressions and the land-cover mask both affect the result.
+- **Sand seas can score highly.** The ranking pushes sites with the dune-field flag down. That flag can also affect real analogs, including parts of Devon Island. Missing land cover or vegetation can exclude known sites. WorldCover does not provide a mask north of **82.75° N** or in Antarctica.
 
 ## Limits
-- **Hand-picked pilot tiles.** The 37 tiles were chosen to contain known analogs and four controls; nothing here is
-  a detection rate on unseen ground, and the random-point test shows that within these tiles the known sites are not
-  distinguishable from random points.
-- **Known-analog list** (`data/reference/known_analogs.csv`) comes mostly from secondary sources; radii are approximate and
-  several entries describe a region rather than a point.
-- **Land-cover dependence.** Candidates require WorldCover "bare / sparse vegetation" >= 80%. Sparse shrubland on
-  lava and cinder fields (Arizona) and areas without WorldCover (Antarctica) can never become candidates.
-- **Zero-inflated depression feature under a Gaussian distance.** `dep_frac` is zero in most cells; the Mahalanobis
-  distance assumes an ellipsoidal population, so `p_all` is an approximation, and the depression group is the one
-  that removes most cells (section 4).
-- **30 m surface model.** Copernicus GLO-30 is a surface model (vegetation and buildings included), resolves nothing
-  below about 100 m, and is compared against a lunar DEM averaged to 30 m.
-- **J5 caveat.** J5 checked a plane-fit slope estimator written for that test against NASA's LOLA product; the
-  scoring uses two-point slopes (`s240`, `s570`), which J5 did not validate directly. J5 roughness is about 16%
-  below NASA's because NASA uses individual LOLA shots, which are not available to us.
+
+The metric compares terrain shape. A high score gives no evidence of matching regolith, temperatures, or conditions for a lunar base. The ROC uses catalogued point analogs and the scanned background, which can contain unrecorded analogs. Nearby tiles can share landforms, so the interval describes the tile bootstrap and does not account for spatial dependence.
+
+## Result files and keys
+
+Files below are under [`data/validation/`](../data/validation/). Data and license references are in [the source catalog](../data/sources.csv) and [the validation source notes](sources/j6.md). Written with SI assistance (OpenAI Codex).
+
+| Check | JSON file and keys |
+|---|---|
+| Scope and ablation | `effectiveness.json` · `configuration`, `scan`, `ablation.share6`, `ablation.share8` |
+| T1 / PDS | `t1_reproduce_nasa.json` · `step3_native20m.slope_deg.median_abs_diff`, `step4_dem30m.exact_area_average.slope_deg.median_abs_diff`; `pds_lola.json` · `difference_pds_minus_pgda.{median_m,rms_m}` |
+| DEM comparison | `nasadem_vs_copdem.json` · `ranking_nasa_vs_esa.{n_tiles,spearman_tile_share,top50_overlap}`, `features.{s240,dep_frac}.pearson`, `candidates.{esa,nasa}`, `candidate_cells_shared_esa_nasa` |
+| Enrichment / laser | `enrichment.json` · `n_sites_tested`, `sites_with_enrichment_above_1`, `median_enrichment`, `random.median_enrichment_median`; `icesat2.json` · `sites.*.ratios.laser240_over_grid240` (range and median) |
+| Controls, recovery and stability | `effectiveness.json` · `controls`, `recovery`, `stability.named_regions_spearman`, `stability.legacy_grid`, `scan.land_cover_limit` |
