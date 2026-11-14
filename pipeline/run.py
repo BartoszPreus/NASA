@@ -42,6 +42,9 @@ STAGES = [
      [], [paths.NOVELTY]),
     ("context", "local", "NASA POWER climate and NASA Worldview image for the ranked sites.",
      [[PY, "-m", "pipeline.nasa_context", "--top", "150", "--images", "60"]], [paths.SITE_CONTEXT, paths.SITE_IMAGES]),
+    ("partner-context", "local", "Measured surface temperature (JAXA GCOM-C, NASA MODIS), soil moisture (JAXA AMSR2) and "
+     "permafrost (ESA Open Science Catalog) for the ranked sites.",
+     [[PY, "-m", "pipeline.partner_context"]], [paths.PARTNER_CONTEXT, paths.PARTNER_CONTEXT_SUMMARY]),
     ("validate-nasa-product", "local", "Our estimator against NASA's lunar slope and roughness maps (T1).",
      [[PY, "validation/t1_reproduce.py"]], [paths.VALIDATION_T1]),
     ("validate-pds", "local", "The LOLA grid from the PDS archive against the DEM we use.",

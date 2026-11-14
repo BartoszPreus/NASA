@@ -61,6 +61,8 @@ NOVELTY = os.path.join(SITES, "novelty_check.csv")
 SITE_CONTEXT = os.path.join(SITES, "nasa_context.csv")
 SITE_CONTEXT_SUMMARY = os.path.join(SITES, "nasa_context_summary.json")
 SITE_IMAGES = os.path.join(SITES, "images")
+PARTNER_CONTEXT = os.path.join(SITES, "partner_context.csv")                    # job J24
+PARTNER_CONTEXT_SUMMARY = os.path.join(SITES, "partner_context_summary.json")
 
 # --- validation results
 VALIDATION_T1 = os.path.join(VALIDATION, "t1_reproduce_nasa.json")
@@ -89,6 +91,7 @@ RAW_MOON = os.path.join(RAW, "moon")                # LOLA DEM windows from NASA
 RAW_PDS = os.path.join(RAW, "pds")                  # files from the PDS Geosciences archive (LOLA, Diviner, ...)
 RAW_LRO = os.path.join(RAW, "lro")                  # other LRO instrument products (LROC, Mini-RF, LEND, LAMP)
 RAW_NASA_CONTEXT = os.path.join(RAW, "nasa_context")  # NASA POWER and Worldview responses
+RAW_PARTNER_CONTEXT = os.path.join(RAW, "partner_context")  # JAXA Earth API and ESA permafrost samples (J24)
 RAW_ICESAT2 = os.path.join(RAW, "icesat2")
 RAW_LIDAR = os.path.join(RAW, "lidar")              # USGS 3DEP, GUGiK
 RAW_NATURALEARTH = os.path.join(RAW, "naturalearth")

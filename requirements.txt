@@ -9,5 +9,6 @@ matplotlib
 pillow
 reportlab
 requests
+numcodecs
 pytest
 shapely
