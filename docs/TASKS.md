@@ -118,7 +118,8 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | J16 | data layout v2 and generated catalogue | done |
 | J17 | NASA data at the core of the Earth side (NASADEM, MODIS land cover) | **partly done, stopped at 19:55, free to take.** Code, tests and the cloud rescan are done; the comparison at scale, the recommendation and the licence checks are left. Continue from `docs/sources/j17.md` and the "State" paragraph in section 5 |
 | J18 | algorithm fix: target, ranking key, sand seas, fast enrichment | **done**; full-scan outputs, key comparison, flag impact and enrichment are recorded in `docs/sources/j18.md` |
-| J19-J23, J7, J11 | see section 5 | **to do** |
+| J19-J20, J22-J23, J7, J11 | see section 5 | **to do** |
+| J21 | ICESat-2 profiles in the cloud | **done**; 8/8 sites passed the 60 m sample threshold; results in `data/validation/icesat2.json` |
 
 ## 5. Remaining jobs: exact specifications
 
@@ -203,10 +204,10 @@ Python: `.venv\Scripts\python.exe` from the repo root (Windows). All locations: 
 
 **Accept.** `python validation/effectiveness.py all` exits 0 in under 15 minutes. Every number in `docs/VALIDATION.md` is found in a file under `data/validation/` (list the file and key next to each number in a table at the end of the document). The stage `validate-effectiveness` of `pipeline/run.py` runs.
 
-### J21 — ICESat-2 laser profiles, run in the cloud  (medium; independent; about 75 min; replaces J14)
+### J21 ? ICESat-2 laser profiles, run in the cloud (done; replaces J14)
 **Why.** ICESat-2 (NASA, distributed through NASA Earthdata) is the Earth instrument that measures like LOLA: along laser tracks. It checks our grid slopes with an independent NASA measurement and reaches the 57-60 m baseline that the 30 m grid cannot.
 
-**State.** `validation/icesat2_profiles.py` is written for the SlideRule endpoint `atl06x` (ATL06 release 007: 40 m segments every 20 m; strong beams; `atl06_quality_summary == 0`; point-to-point slopes at 60, 220, 240 and 560 m with a tolerance of 5 m; flag `--analyse-only`). On this Windows machine the client failed for 20 x 20 km boxes with `Failed to open C:\Users\...\Temp\tmp...` followed by `AttributeError: 'NoneType' object has no attribute 'drop'`; one request with a box of about 11 x 10 km worked (243 s, 9,259 segments). No site data is cached. The lunar side is computed: PGDA product 70 south of 85 S, weighted by cos(latitude), gives 4.80 / 4.60 / 4.40 deg at 57 / 225 / 560 m (ratio 560/57 = 0.917).
+**State.** GitHub Actions run `43631874981` completed successfully on the cloud runner. All 8 fixed sites passed acceptance (60 m sample counts: 683, 3,946, 9,177, 4,130, 3,707, 7,278, 3,684, 1,415). JSON, figure, source note and catalogue are in the repo. Measurements are in `docs/sources/j14.md` and `data/validation/icesat2.json`.
 
 **Do.**
 1. In the script: box half-size 5 km; add `"output": {"path": <cache file>, "format": "parquet", "open_on_complete": True}` to the request so the server writes the file and its errors become visible; keep the eight sites, matched by `site_id` in `data/sites/ranking.csv` with a nearest-site fallback within 5 km.

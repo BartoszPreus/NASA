@@ -128,7 +128,7 @@ SOURCES = [
     S("icesat2_atl06", "NASA", "ICESat-2 ATL06 v7 land ice height, subset through SlideRule (NSIDC DAAC)", 1,
       "https://nsidc.org/data/atl06 ; doi:10.5067/ATLAS/ATL06.007",
       "NASA data, no restrictions; cite the data set DOI and acknowledge NASA NSIDC DAAC", "no (via SlideRule)",
-      "being added", "validation/icesat2_profiles.py (job J14)", "data/raw/icesat2/"),
+      "used", "validation/icesat2_profiles.py (job J21)", "data/raw/icesat2/"),
     S("icesat2_atl03", "NASA", "ICESat-2 ATL03 v7 geolocated photons (SlideRule atl03x)", 1,
       "https://nsidc.org/data/atl03 ; doi:10.5067/ATLAS/ATL03.007", "as ATL06", "no (via SlideRule)",
       "looked at, not used", "none: the on-demand fit did not deliver on the public SlideRule cluster", ""),
@@ -197,7 +197,7 @@ SOURCES = [
       "looked at, not used", "mentioned in the malapert_massif notes only", ""),
     S("sliderule", "SlideRule (Univ. of Washington)", "SlideRule Earth public cluster and Python client", "",
       "https://slideruleearth.io/", "BSD-3-Clause; cite Shean et al. (2023), JOSS 8(81), 4982, "
-      "doi:10.21105/joss.04982", "no", "being added", "validation/icesat2_profiles.py (job J14)",
+      "doi:10.21105/joss.04982", "no", "used", "validation/icesat2_profiles.py (job J21)",
       "data/raw/icesat2/"),
 ]
 
@@ -316,7 +316,7 @@ FILE_MAP = [
     ("data/validation/crater_profiles.json", "python lidar/crater_profiles.py --part all",
      "usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt", "crater measurements: Earth lidar, "
      "30 m DEM and the lunar DEM"),
-    ("data/validation/icesat2.json", "python validation/icesat2_profiles.py (job J14)",
+    ("data/validation/icesat2.json", "python validation/icesat2_profiles.py (job J21)",
      "icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json",
      "ICESat-2 along-track slopes against grid slopes and the Moon"),
     ("data/sample/*.parquet", "python -m pipeline.fixtures --raw-dir data/raw", "copernicus_dem, esa_worldcover, "

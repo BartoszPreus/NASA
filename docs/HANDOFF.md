@@ -15,7 +15,7 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 - Axis at 20:10: J21 is claimed by `codex-nasa-space-app`; J7, J11, J19, J20, J22, J23 are unclaimed.
 
 **UPDATE 20:15:** J18's full-scan run and acceptance checks are now complete; the new `base_regions` ranking replaces the pre-J18 files above. The chosen key is `best_window_km2`; the dune flag moves the four named sand-sea tiles beyond the top 50 and also flags Devon Island N75W090. Counts, key comparison, rank changes and enrichment results are in `docs/sources/j18.md`. The full test suite passes (21 tests), and `python -m pipeline.run sites validate-enrichment catalog` exited 0 for all three stages. This update supersedes the earlier J18 remaining-work notes.
-- Current Axis state: J18 complete; J17 todo and unassigned; J21 in progress under `codex-nasa-space-app`; J19 still depends on J17. The J17 and J21 cloud runs require access to Wiktor's private `witczakw/moon-scan-runner` repository.
+- Current Axis state: J18 and J21 complete; J17 is in progress under `nasa-windows-worker`; J19 still depends on J17. J21 run `43631874981` succeeded, all 8 sites passed, and its outputs are integrated.
 - The J18 top ranking is Arctic-heavy, and this machine's country/place lookup is empty for those rows. Treat the rows as candidates pending the map review in J19/J22; do not describe them as discoveries.
 
 **Done since 19:00 and pushed.**
@@ -32,7 +32,7 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 - **J17, NASA data at the core of the Earth side.** `--dem nasadem|copdem` (NASADEM GeoTIFFs without login from OpenTopography's public bucket or Planetary Computer; exists only between 56 S and 60 N) and `--landcover modis|worldcover` (MODIS IGBP land cover through NASA GIBS); a cloud rescan of the non-polar tiles into `data/earth/cells_nasadem/`; comparison in `validation/nasadem_vs_copdem.py` -> `data/validation/nasadem_vs_copdem.json`. Files: `pipeline/io_earth.py`, `landcover.py`, `cells.py`, `earth_scan.py`, `cloud/earth-scan-nasa.yml`. Verify: default behaviour unchanged (tests green; one cached tile gives identical cells), then decide whether NASADEM becomes the primary DEM below 60 deg latitude.
 - **J14 is closed as BLOCKED** (the SlideRule client fails on Windows for 20 km boxes; no laser data was obtained; the script `validation/icesat2_profiles.py` is committed). Its replacement is **J21**: the same script on the cloud runner with 5 km boxes.
 
-**Exact specifications of everything that is left: `docs/TASKS.md`, section 5** (J17, J19 final configuration and ranking, J20 validation on the full scan, J21 ICESat-2 in the cloud, J22 novelty check, J7 web app, J11 README and pitch, J23 freeze). Each spec has inputs, outputs and acceptance checks, so any capable model can take one. Order and timeline: section 6 there. The same jobs are on the Axis board.
+**Exact specifications of everything that is left: `docs/TASKS.md`, section 5** (J17, J19 final configuration and ranking, J20 validation on the full scan, J22 novelty check, J7 web app, J11 README and pitch, J23 freeze). Each spec has inputs, outputs and acceptance checks, so any capable model can take one. Order and timeline: section 6 there. The same jobs are on the Axis board.
 
 **After J18 and J17 are committed (this is job J19).**
 1. `python -m pipeline.run sites validate-enrichment context catalog`, then commit `data/sites/`, `data/earth/tiles/tile_summary.csv`, `data/validation/enrichment.json`, the catalogue.
@@ -54,7 +54,8 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 | J17 NASA Earth core | partly implemented; cloud artifacts still need to be ingested and compared (section 0) |
 | J18 algorithm fix | **done**; full-scan results and caveats in `docs/sources/j18.md` |
 | J14 ICESat-2 | blocked; replaced by J21 |
-| J19 final configuration, J20 validation, J21 ICESat-2 in the cloud, J22 novelty, J23 freeze | to do; exact specs in `docs/TASKS.md` section 5 |
+| J19 final configuration, J20 validation, J22 novelty, J23 freeze | to do; exact specs in `docs/TASKS.md` section 5 |
+| J21 ICESat-2 | **done**; run 43631874981, 8/8 sites passed; results in `docs/sources/j14.md` |
 | J7 app, J11 pitch | not started (section 0) |
 
 ## 2. How the conductor works here
