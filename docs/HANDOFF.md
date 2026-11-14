@@ -6,6 +6,14 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
 ## 0. START HERE (state at 19:50, Sat 14 Nov)
 
+**UPDATE 20:10: J17 and J18 were stopped on Wiktor's order. Their progress is committed and pushed (`52b429d` J17, `6289690` J18, `cf6dcab` outputs and catalogue). This block supersedes the "In flight" list and the "NOT committed" sentence below.**
+- **Both jobs are released in Axis and free to take.** What is done, what is left and the next commands: `docs/sources/j17.md`, `docs/sources/j18.md`, and the "State" paragraph of J18 in `docs/TASKS.md` section 5. Tests: 21 passed; every changed CLI starts.
+- **J18 left:** a full run of the new `python -m pipeline.sites`, the choice of ranking key on numbers, enrichment against `base_regions`. Finding so far: changing the lunar target does not demote the sand seas; the rule `relief / r200` below the lunar 5th percentile does (98.5% of sand-sea candidate cells against 5% of lunar cells) but also flags Devon Island tile N75W090 (62.8%).
+- **J17 left:** cloud run **43628647578** (`witczakw/moon-scan-runner`) FINISHED, 10 of 10 shards green, 76 MB of artifacts `cells-nasa-0..9`, kept 30 days. A download to `data/raw/cloud/43628647578/` (git-ignored) was started at 20:00 and may be incomplete. Nothing of it is ingested or in the repo yet. Run: `python -m pipeline.cloud download 43628647578`, `python -m pipeline.cloud ingest-nasa 43628647578`, `python validation/nasadem_vs_copdem.py`; then the recommendation and the licence checks.
+- **`data/sites/*` and `data/earth/tiles/tile_summary.csv` in the repo are now the full-scan run of the method BEFORE J18** (target `polar_160km`, key `weighted_area_km2`, 4,593 sites, sand seas on ranks 1-4). Not a result to present; the J18 run replaces them.
+- **Commit rule (Wiktor, 14 Nov): no `Claude-Session:` line or any session link in a commit, no keys, tokens or private e-mail addresses in the repo.** History was rewritten at about 19:45 to remove them, so every hash before `def42fd` changed: a clone made earlier should be replaced by a fresh clone (copy uncommitted files over).
+- Axis at 20:10: J21 is claimed by `codex-nasa-space-app`; J7, J11, J19, J20, J22, J23 are unclaimed.
+
 **Done since 19:00 and pushed.**
 - **Data layout v2 (J16).** Everything lives in `data/reference`, `data/moon`, `data/earth/cells`, `data/earth/tiles`, `data/sites`, `data/validation`, `data/sample`; `data/out/` is gone. Every script takes its paths from `pipeline/paths.py`. The catalogue is generated: `python -m pipeline.catalog` writes `data/README.md` (open this first), `data/catalog.csv` (every file and the command that makes it) and `data/sources.csv` (every external source, all 11 challenge links, with status).
 - **Full Earth scan (J3).** 2,101 tiles: `data/earth/cells/pilot.parquet`, `known.parquet`, `scan_s00of20.parquet` ... `scan_s19of20.parquet` (1.76 million cells, 97 MB, all in the repo). Ran on GitHub Actions (run 43623650020 in `witczakw/moon-scan-runner`), 2,023 of 2,023 tiles done, no errors. Nobody has to scan again.
@@ -49,7 +57,7 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 - Jobs J2, J3, J4, J5, J10 are claimed in Axis (project `nasa-space-app`) by agent id **`claude-code-fable-conductor`**. Use the same id for `complete_job`, or the call is refused.
 - Workers are `opus-worker` sub-agents. They were told: write only the job's files, no git commands that change state, no Axis calls. The conductor verifies, commits and reports.
 - Commit protocol (several agents share one working tree): `git fetch`; `git add <explicit paths of one job>`; commit; `git push origin main`. Never `git add -A`. Use `git pull --rebase` only when the remote is ahead and no worker is writing files.
-- Commit message trailer used so far: `Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>` plus the session line.
+- Commit message trailer: only `Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>`. Never a session line or link (see the update in section 0).
 - After each job: a 1-3 line note in the Axis notepad, then `complete_job` with a factual outcome.
 - Never touch or commit `app/` (another session's work in progress) or `scratch/`.
 
