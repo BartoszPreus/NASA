@@ -2,6 +2,8 @@
 .venv/
 scratch/
 analysis/data/
+data/raw/
 research_notes/
 reports/
 __pycache__/
+.pytest_cache/
