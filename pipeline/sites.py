@@ -37,10 +37,18 @@ import pandas as pd
 from scipy import ndimage
 
 from . import paths
-from .score import (BARE_MIN, DEFAULT_REGION, ICE_MAX, WATER_MAX, load_cells, regression_table,
-                    score_all_regions)
+from .score import (BARE_MIN, DEFAULT_REGION, DEFAULT_TARGET, ICE_MAX, NAMED_REGIONS, P_MIN, WATER_MAX,
+                    load_cells, p_col, regression_table, score_all_regions)
 
 MIN_CELLS = 4
+BASE_REGION_KM = 15.0          # NASA Artemis candidate regions are about 15 x 15 km
+CAP_KM2 = BASE_REGION_KM ** 2  # cap of weighted_area_capped_km2
+RANK_KEYS = {  # --rank-key -> site property it sorts on (descending), then score
+    "best_window": "best_window_km2",
+    "capped_area": "weighted_area_capped_km2",
+    "weighted_area": "weighted_area_km2",
+}
+DEFAULT_RANK_KEY = "best_window"
 EARTH_R_KM = 6371.0088
 DEFAULT_RADIUS_KM = 50.0
 KNOWN_CSV = paths.KNOWN_ANALOGS
@@ -138,8 +146,35 @@ def cell_polygon(lats, lons, dlat, dlon):
 
 
 # ---------------------------------------------------------------------------------------------- sites
-def find_sites(scored, regions, min_cells=MIN_CELLS):
-    """Return (sites list of dicts, per-row site_id array)."""
+def best_window(P, side):
+    """Max over all side x side windows (fully inside the grid when it is large enough) of the sum of P,
+    and the (row, col) of the window centre."""
+    from scipy.ndimage import uniform_filter
+    R, C = P.shape
+    if R < side or C < side:
+        return float(P.sum()), (R // 2, C // 2)
+    S = uniform_filter(P.astype(np.float64), size=side, mode="constant") * side * side
+    h0 = side // 2  # uniform_filter centres an even window at index i covering i-side/2 .. i+side/2-1
+    S = S[h0:R - (side - 1 - h0), h0:C - (side - 1 - h0)]
+    i = int(np.argmax(S))
+    r, c = divmod(i, S.shape[1])
+    return float(S[r, c]), (r + h0, c + h0)
+
+
+def window_side(cell_m):
+    return max(1, int(round(BASE_REGION_KM * 1000.0 / float(cell_m))))
+
+
+def site_name_region(reg_scores):
+    named = {r: v for r, v in reg_scores.items() if r in NAMED_REGIONS}
+    pool = named or reg_scores
+    return max(pool, key=pool.get)
+
+
+def find_sites(scored, regions, min_cells=MIN_CELLS, target=None, geometry=True, rank_key=DEFAULT_RANK_KEY):
+    """Return (sites list of dicts, per-row site_id array). `target`: region whose p is in p_all (regions[0])."""
+    target = target or regions[0]
+    key = RANK_KEYS[rank_key]
     site_of_row = np.full(len(scored), None, dtype=object)
     sites = []
     scored = scored.reset_index(drop=True)
@@ -156,30 +191,49 @@ def find_sites(scored, regions, min_cells=MIN_CELLS):
         dlat = _spacing(t["lat"]) or float(t["cell_m"].iloc[0]) / 111320.0
         dlon = _spacing(t["lon"]) or dlat / max(math.cos(math.radians(float(t["lat"].mean()))), 1e-6)
         comp = lab[cand["row"].to_numpy(int), cand["col"].to_numpy(int)]
+        cell_km2 = float(t["cell_m"].iloc[0]) ** 2 / 1e6
+        side = window_side(t["cell_m"].iloc[0])
         tile_sites = []
         for k in range(1, n + 1):
             c = cand[comp == k]
             if len(c) < min_cells:
                 continue
-            reg_scores = {r: float(np.median(c["p_all" if r == DEFAULT_REGION else "p_all_" + r]))
-                          for r in regions if (r == DEFAULT_REGION or "p_all_" + r in c)}
+            reg_scores = {r: float(np.median(c[p_col(r, target)])) for r in regions if p_col(r, target) in c}
+            P = np.zeros((R, C))
+            P[c["row"].to_numpy(int), c["col"].to_numpy(int)] = c["p_all"].to_numpy(float)
+            bw, (wr, wc) = best_window(P, side)
+            wa = float(c["p_all"].sum()) * cell_km2
             s = {"tile": tile, "lat": float(c["lat"].mean()), "lon": float(c["lon"].mean()),
                  "n_cells": int(len(c)),
-                 "area_km2": round(float(len(c)) * float(c["cell_m"].iloc[0]) ** 2 / 1e6, 2),
+                 "area_km2": round(float(len(c)) * cell_km2, 2),
                  "score": float(np.median(c["p_all"])), "score_amp": float(np.median(c["p_amp"])),
-                 # similarity-weighted area: every cell counts with its p_all, so a large coherent site
-                 # outranks a 4-cell patch that happens to sit near the centre of the lunar distribution
-                 "weighted_area_km2": round(float(c["p_all"].sum()) * float(c["cell_m"].iloc[0]) ** 2 / 1e6, 2),
+                 # similarity-weighted area: every cell counts with its p_all (the ranking key before J18)
+                 "weighted_area_km2": round(wa, 2),
+                 # J18 keys: the same, capped at one 15 x 15 km base region; and the similarity-weighted area of
+                 # the best 15 x 15 km window (side x side cells) inside the site
+                 "weighted_area_capped_km2": round(min(wa, CAP_KM2), 2),
+                 "best_window_km2": round(bw * cell_km2, 2),
+                 "window_lat": None, "window_lon": None,
                  "score_dep": float(np.median(c["p_dep"])),
-                 "best_region": max(reg_scores, key=reg_scores.get),
+                 "best_region": site_name_region(reg_scores),
                  "region_scores": {r: round(v, 4) for r, v in reg_scores.items()}}
+            at = t[(t["row"] == wr) & (t["col"] == wc)]
+            if len(at):
+                s["window_lat"], s["window_lon"] = float(at["lat"].iloc[0]), float(at["lon"].iloc[0])
+            if "artefact_flag" in c:
+                share = float(c["artefact_flag"].mean())
+                s["artefact_share"] = round(share, 4)
+                s["artefact_flag"] = bool(share >= ARTEFACT_SITE_SHARE)
+                s["artefact_reason"] = (ARTEFACT_REASON + " (%.0f%% of the cells)" % (100 * share)
+                                        if s["artefact_flag"] else "")
             for m in MEDIAN_COLS:
                 s[m] = float(np.nanmedian(c[m]))
             s["_veg"], s["_ice_mean"] = float(np.nanmedian(c["veg"])), float(np.nanmean(c["ice"]))
             s["_index"] = c.index.to_numpy()
-            s["geometry"] = cell_polygon(c["lat"].to_numpy(float), c["lon"].to_numpy(float), dlat, dlon)
+            if geometry:
+                s["geometry"] = cell_polygon(c["lat"].to_numpy(float), c["lon"].to_numpy(float), dlat, dlon)
             tile_sites.append(s)
-        tile_sites.sort(key=lambda s: (-s["weighted_area_km2"], -s["score"]))
+        tile_sites.sort(key=lambda s: (-s[key], -s["score"]))
         for i, s in enumerate(tile_sites, 1):
             s["site_id"] = "%s-%02d" % (tile, i)
             site_of_row[s["_index"]] = s["site_id"]
@@ -216,8 +270,9 @@ def add_context(sites, known, countries, novelty=None):
     return sites
 
 
-PROPS = ["site_id", "lat", "lon", "area_km2", "weighted_area_km2", "n_cells", "score", "score_amp", "score_dep",
-         "best_region", "tile",
+PROPS = ["site_id", "lat", "lon", "area_km2", "weighted_area_km2", "weighted_area_capped_km2", "best_window_km2",
+         "window_lat", "window_lon", "n_cells", "score", "score_amp", "score_dep", "target", "rank_key",
+         "artefact_flag", "artefact_share", "artefact_reason", "best_region", "tile",
          "country"] + MEDIAN_COLS + ["nearest_known", "nearest_known_km", "is_known", "novelty", "place", "breaks",
                                      "region_scores"]
 
@@ -235,9 +290,18 @@ def write_geojson(sites, path):
         json.dump(fc, f, separators=(",", ":"))
 
 
-def write_ranking(sites, path, top=200):
-    ranked = sorted(sites, key=lambda s: (-s["weighted_area_km2"], -s["score"]))[:top]
-    cols = ["rank", "site_id", "country", "lat", "lon", "weighted_area_km2", "score", "score_amp", "score_dep",
+def rank_sites(sites, rank_key=DEFAULT_RANK_KEY, flagged="last"):
+    """Sites sorted by the ranking key (descending), then score. flagged: "last" = sites with artefact_flag go
+    after all unflagged ones (kept, not deleted), "keep" = the flag is ignored."""
+    key = RANK_KEYS[rank_key]
+    demote = (lambda s: bool(s.get("artefact_flag"))) if flagged == "last" else (lambda s: False)
+    return sorted(sites, key=lambda s: (demote(s), -s[key], -s["score"]))
+
+
+def write_ranking(sites, path, top=200, rank_key=DEFAULT_RANK_KEY, flagged="last"):
+    ranked = rank_sites(sites, rank_key, flagged)[:top]
+    cols = ["rank", "site_id", "country", "lat", "lon", "rank_key", "best_window_km2", "weighted_area_capped_km2",
+            "weighted_area_km2", "target", "score", "score_amp", "score_dep", "artefact_flag", "artefact_reason",
             "area_km2", "n_cells",
             "best_region", "tile", "is_known", "nearest_known", "nearest_known_km", "novelty", "elev_m",
             "slope_240m_deg", "slope_570m_deg", "rough_200m_m", "rough_1600m_m", "depression_share", "bare_share",
@@ -247,8 +311,10 @@ def write_ranking(sites, path, top=200):
         w.writerow(cols)
         for i, s in enumerate(ranked, 1):
             w.writerow([i, s["site_id"], s["country"] or "", "%.4f" % s["lat"], "%.4f" % s["lon"],
-                        s["weighted_area_km2"], "%.3f" % s["score"], "%.3f" % s["score_amp"],
-                        "%.3f" % s["score_dep"], s["area_km2"],
+                        RANK_KEYS[rank_key], s["best_window_km2"], s["weighted_area_capped_km2"],
+                        s["weighted_area_km2"], s["target"], "%.3f" % s["score"], "%.3f" % s["score_amp"],
+                        "%.3f" % s["score_dep"], bool(s.get("artefact_flag")), s.get("artefact_reason", ""),
+                        s["area_km2"],
                         s["n_cells"], s["best_region"], s["tile"], "" if s["is_known"] is None else s["is_known"],
                         s["nearest_known"] or "", "" if s["nearest_known_km"] is None else s["nearest_known_km"],
                         s["novelty"], "%.0f" % s["elev_med"], "%.2f" % s["s240"], "%.2f" % s["s570"],
@@ -257,6 +323,104 @@ def write_ranking(sites, path, top=200):
                         "https://www.openstreetmap.org/?mlat=%.4f&mlon=%.4f#map=12/%.4f/%.4f"
                         % (s["lat"], s["lon"], s["lat"], s["lon"]), "; ".join(s["breaks"])])
     return ranked
+
+
+# ---------------------------------------------------------------------------------------------- artefacts
+# Dune-field flag (job J18, docs/sources/j18.md). In sand seas the elevation range of a 2 km cell (relief = P95 - P5)
+# is only a few dozen times the 200 m roughness: relief stops growing beyond the dune scale. Lunar terrain (and the
+# volcanic and impact analogs) keeps adding relief at the cell scale. The threshold is not tuned on Earth: it is the
+# 5th percentile of relief / r200 over the valid lunar cells of the scoring target, so 5% of the target's own lunar
+# cells would be flagged. Neither relief nor r200 / relief is one of the scored features' combinations.
+ARTEFACT_SITE_SHARE = 0.5   # a site is flagged when at least half of its cells are
+ARTEFACT_QUANTILE = 0.05
+ARTEFACT_REASON = ("dune-field signature: cell relief / 200 m roughness below the 5th percentile of the "
+                   "target's lunar cells")
+
+
+def lunar_cells_for(target, moon_cells=paths.MOON_CELLS, moon_json=paths.MOON_REFERENCE):
+    """Valid lunar cells of a target region (pooled targets: the cells of their member regions)."""
+    m = pd.read_parquet(moon_cells)
+    members = [target]
+    if os.path.exists(moon_json):
+        with open(moon_json, encoding="utf-8") as f:
+            pooled = json.load(f).get("pooled_regions", {})
+        if target in pooled:
+            members = pooled[target]["member_regions"]
+    return m[m["region"].isin(members) & m["valid"]]
+
+
+def artefact_threshold(target):
+    lm = lunar_cells_for(target)
+    if not len(lm):
+        return None
+    return float(np.quantile(lm["relief"] / np.maximum(lm["r200"], 1e-3), ARTEFACT_QUANTILE))
+
+
+def artefact_flags(df, threshold):
+    """Per-cell dune-field flag: relief / r200 below `threshold` (None = no flag). Returns a bool array."""
+    if threshold is None:
+        return np.zeros(len(df), dtype=bool)
+    ratio = df["relief"].to_numpy(float) / np.maximum(df["r200"].to_numpy(float), 1e-3)
+    return np.isfinite(ratio) & (ratio < threshold)
+
+
+# ---------------------------------------------------------------------------------------------- targets
+REFERENCE_TILES = [("Mauna Loa", "N19W156"), ("Atacama core", "S25W070"), ("Devon Island", "N75W088"),
+                   ("Devon Island", "N75W090"), ("Askja", "N65W017"), ("Harrat Khaybar", "N25E039"),
+                   ("sand sea Niger", "N15E013"), ("sand sea Rub al Khali", "N18E048"),
+                   ("sand sea Rub al Khali", "N17E046"), ("sand sea Rub al Khali", "N18E047")]
+
+
+def bare_mask(scored):
+    return (scored["valid"] & (scored["bare"] >= BARE_MIN) & (scored["ice"] < ICE_MAX)
+            & (scored["water"] < WATER_MAX)).to_numpy()
+
+
+def tile_table(scored, sites):
+    """Per tile: weighted area (sum over sites), candidate cells, median s240 of the candidate cells."""
+    from .tiles import region
+    c = scored[scored["candidate"]]
+    t = c.groupby("tile").agg(n_candidate=("candidate", "size"), s240_cand_med=("s240", "median"))
+    wa = pd.Series([s["weighted_area_km2"] for s in sites], index=[s["tile"] for s in sites], dtype=float)
+    t["weighted_area_km2"] = wa.groupby(level=0).sum().reindex(t.index).fillna(0.0)
+    t["n_sites"] = pd.Series([s["tile"] for s in sites]).value_counts().reindex(t.index).fillna(0).astype(int)
+    t = t.sort_values(["weighted_area_km2", "n_candidate"], ascending=False)
+    t["rank"] = np.arange(1, len(t) + 1)
+    t["region"] = [region(x) for x in t.index]
+    return t
+
+
+def compare_targets(scored, regions, targets, out_dir, top=25):
+    """Candidate cells, sites, top tiles and the ranks of REFERENCE_TILES for each target (job J18, step 2).
+    Uses the p_all_<region> columns of one scoring pass; sites are found without geometry."""
+    bare = bare_mask(scored)
+    summary, tops = [], []
+    base_target = regions[0]
+    for tg in targets:
+        v = scored.copy(deep=False)
+        v["p_all"] = scored[p_col(tg, base_target)]
+        v["candidate"] = bare & (v["p_all"].to_numpy() >= P_MIN)
+        sites, _ = find_sites(v, regions, geometry=False, target=tg, rank_key="weighted_area")
+        tt = tile_table(v, sites)
+        row = {"target": tg, "candidate_cells": int(v["candidate"].sum()), "sites": len(sites),
+               "candidate_cells_dune_flag": int((v["candidate"] & v["artefact_flag"].to_numpy()).sum()),
+               "tiles_with_sites": int((tt["n_sites"] > 0).sum())}
+        for name, tile in REFERENCE_TILES:
+            ok = tile in tt.index and tt.loc[tile, "n_sites"] > 0
+            row["rank_" + tile] = int(tt.loc[tile, "rank"]) if ok else None
+        summary.append(row)
+        for tile, r in tt.head(top).iterrows():
+            tops.append({"target": tg, "rank": int(r["rank"]), "tile": tile, "region": r["region"],
+                         "weighted_area_km2": round(float(r["weighted_area_km2"]), 1),
+                         "n_candidate": int(r["n_candidate"]), "n_sites": int(r["n_sites"]),
+                         "s240_cand_med": round(float(r["s240_cand_med"]), 2)})
+        print("%-22s candidate cells %8d  sites %5d  reference ranks %s" % (
+            tg, row["candidate_cells"], row["sites"],
+            " ".join("%s:%s" % (t, row["rank_" + t]) for _, t in REFERENCE_TILES)), flush=True)
+    os.makedirs(out_dir, exist_ok=True)
+    pd.DataFrame(summary).to_csv(os.path.join(out_dir, "target_comparison.csv"), index=False)
+    pd.DataFrame(tops).to_csv(os.path.join(out_dir, "target_comparison_top_tiles.csv"), index=False)
+    return pd.DataFrame(summary), pd.DataFrame(tops)
 
 
 def main(argv=None):
@@ -268,58 +432,105 @@ def main(argv=None):
                          "goes to data/earth/tiles/ unless --out-dir is given")
     ap.add_argument("--known", default=KNOWN_CSV)
     ap.add_argument("--min-cells", type=int, default=MIN_CELLS)
+    ap.add_argument("--target", default=DEFAULT_TARGET,
+                    help="lunar region the candidates are scored against (default %s; %s = behaviour before J18)"
+                         % (DEFAULT_TARGET, DEFAULT_REGION))
+    ap.add_argument("--rank-key", default=DEFAULT_RANK_KEY, choices=sorted(RANK_KEYS),
+                    help="best_window = similarity-weighted area of the best 15 x 15 km window of the site "
+                         "(default); capped_area = weighted area capped at 225 km2; weighted_area = before J18")
+    ap.add_argument("--flagged", default="last", choices=["last", "keep"],
+                    help="sites with artefact_flag: ranked after all unflagged sites (default) or ignored")
+    ap.add_argument("--compare-targets", nargs="*", default=None,
+                    help="only tabulate candidates / sites / reference-tile ranks for these targets (all regions "
+                         "when empty) into <out-dir>/target_comparison*.csv; no other output is written")
     a = ap.parse_args(argv)
     df, path = load_cells(a.cells)
-    scored, regions = score_all_regions(df, a.raw_dir)
-    print("cells: %s  rows %d  valid %d  regions %s" % (path, len(df), int(df["valid"].sum()), regions))
+    scored, regions = score_all_regions(df, a.raw_dir, target=a.target)
+    print("cells: %s  rows %d  valid %d  target %s  regions %s  rank key %s" % (
+        path, len(df), int(df["valid"].sum()), a.target, regions, RANK_KEYS[a.rank_key]))
+    scored = scored.reset_index(drop=True)
+    thr = artefact_threshold(a.target)
+    flags = artefact_flags(scored, thr)
+    scored["artefact_flag"] = flags
+    print("artefact flag: relief / r200 < %s (P%02d of the lunar %s cells); site flagged when >= %.0f%% of its cells "
+          "are" % ("%.2f" % thr if thr is not None else "n/a", 100 * ARTEFACT_QUANTILE, a.target,
+                   100 * ARTEFACT_SITE_SHARE))
+    if a.compare_targets is not None:
+        compare_targets(scored, regions, a.compare_targets or regions, a.out_dir)
+        return
+    print("regression table (always against %s):" % DEFAULT_REGION)
     print(regression_table(scored).to_string(index=False))
     nolc = int(((scored["lc_source"] == "none") & scored["valid"]).sum())
     nolc_p = int(((scored["lc_source"] == "none") & scored["valid"] & (scored["p_all"] >= 0.10)).sum())
-    print("candidate cells %d; valid cells without land cover %d (of which p_all >= 0.10: %d), never candidates"
-          % (int(scored["candidate"].sum()), nolc, nolc_p))
+    print("candidate cells %d (of which artefact-flagged %d); valid cells without land cover %d (of which p_all >= "
+          "0.10: %d), never candidates" % (int(scored["candidate"].sum()), int((scored["candidate"] & flags).sum()),
+                                          nolc, nolc_p))
 
-    sites, site_of_row = find_sites(scored.reset_index(drop=True), regions, a.min_cells)
+    sites, site_of_row = find_sites(scored, regions, a.min_cells, target=a.target, rank_key=a.rank_key)
+    for s in sites:
+        s["target"], s["rank_key"] = a.target, RANK_KEYS[a.rank_key]
+        s.setdefault("artefact_flag", False)
+        s.setdefault("artefact_share", 0.0)
+        s.setdefault("artefact_reason", "")
     known = load_known(a.known)
     print("known analogs: %s" % ("%d entries (operational excluded)" % len(known) if known is not None
                                  else "file missing, novelty fields null"))
     add_context(sites, known, CountryLookup(), load_novelty())
-    scored = scored.reset_index(drop=True)
     scored["site_id"] = site_of_row
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",
-            "bare", "veg", "ice"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]
+            "bare", "veg", "ice", "artefact_flag"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]
     os.makedirs(a.out_dir, exist_ok=True)
     # Full scored table stays local (it grows to hundreds of MB with the big scan and can be rebuilt from the
     # committed earth_cells_*.parquet in minutes). The committed file holds the cells worth looking at.
+    # The target is stored in the parquet metadata (validation/enrichment.py reports it).
     os.makedirs(a.raw_dir, exist_ok=True)
-    scored[keep].to_parquet(os.path.join(a.raw_dir, os.path.basename(paths.SCORED_FULL)), index=False)
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    tbl = pa.Table.from_pandas(scored[keep], preserve_index=False)
+    md = dict(tbl.schema.metadata or {})
+    md[b"j18_target"] = a.target.encode()
+    tbl = tbl.replace_schema_metadata(md)
+    pq.write_table(tbl, os.path.join(a.raw_dir, os.path.basename(paths.SCORED_FULL)))
     compact = scored[scored["candidate"] | (scored["p_all"] >= 0.05)]
     compact[keep].to_parquet(os.path.join(a.out_dir, os.path.basename(paths.SCORED_COMPACT)), index=False)
     # Per-tile summary: the unit that stays stable when the grid is shifted or resized (docs/VALIDATION.md).
     ok = scored["valid"]
-    barem = ok & (scored["bare"] >= BARE_MIN) & (scored["ice"] < ICE_MAX) & (scored["water"] < WATER_MAX)
+    barem = pd.Series(bare_mask(scored), index=scored.index)
     g = pd.DataFrame({"tile": scored["tile"], "valid": ok, "bare_ok": barem, "candidate": scored["candidate"],
                       "terrain_pass": ok & (scored["p_all"] >= 0.10), "lat": scored["lat"], "lon": scored["lon"],
-                      "p_bare": scored["p_all"].where(barem)})
+                      "p_bare": scored["p_all"].where(barem),
+                      "flagged": scored["candidate"] & scored["artefact_flag"]})
     ts = g.groupby("tile").agg(lat=("lat", "mean"), lon=("lon", "mean"), n_valid=("valid", "sum"),
                                n_bare=("bare_ok", "sum"), n_terrain_pass=("terrain_pass", "sum"),
-                               n_candidate=("candidate", "sum"), median_p_bare=("p_bare", "median")).reset_index()
+                               n_candidate=("candidate", "sum"), n_candidate_flagged=("flagged", "sum"),
+                               median_p_bare=("p_bare", "median")).reset_index()
     ts["candidate_share_of_bare"] = (ts["n_candidate"] / ts["n_bare"].where(ts["n_bare"] > 0)).round(4)
     ts["n_sites"] = ts["tile"].map(pd.Series([s["tile"] for s in sites]).value_counts()).fillna(0).astype(int)
     wa = pd.Series([s["weighted_area_km2"] for s in sites], index=[s["tile"] for s in sites], dtype=float)
     ts["weighted_area_km2"] = ts["tile"].map(wa.groupby(level=0).sum()).fillna(0.0).round(2)
+    bw = pd.Series([s["best_window_km2"] for s in sites], index=[s["tile"] for s in sites], dtype=float)
+    ts["best_window_km2_max"] = ts["tile"].map(bw.groupby(level=0).max()).fillna(0.0).round(2)
+    ts["target"] = a.target
     tile_summary = (paths.TILE_SUMMARY if os.path.abspath(a.out_dir) == os.path.abspath(paths.SITES)
                     else os.path.join(a.out_dir, os.path.basename(paths.TILE_SUMMARY)))
     os.makedirs(os.path.dirname(tile_summary), exist_ok=True)
-    ts.round({"lat": 3, "lon": 3, "median_p_bare": 4}).sort_values("weighted_area_km2", ascending=False).to_csv(
-        tile_summary, index=False)
+    ts.round({"lat": 3, "lon": 3, "median_p_bare": 4}).sort_values(
+        [TILE_SORT[a.rank_key], "weighted_area_km2"], ascending=False).to_csv(tile_summary, index=False)
     write_geojson(sites, os.path.join(a.out_dir, os.path.basename(paths.SITES_GEOJSON)))
-    ranked = write_ranking(sites, os.path.join(a.out_dir, os.path.basename(paths.RANKING)))
-    print("sites %d (>= %d cells), in ranking.csv %d" % (len(sites), a.min_cells, len(ranked)))
-    show = pd.DataFrame([{k: s[k] for k in ("site_id", "country", "lat", "lon", "weighted_area_km2", "score",
-                                            "area_km2", "is_known",
+    ranked = write_ranking(sites, os.path.join(a.out_dir, os.path.basename(paths.RANKING)), rank_key=a.rank_key,
+                           flagged=a.flagged)
+    print("sites %d (>= %d cells; artefact-flagged %d), in ranking.csv %d, ranked by %s (target %s)"
+          % (len(sites), a.min_cells, sum(bool(s["artefact_flag"]) for s in sites), len(ranked),
+             RANK_KEYS[a.rank_key], a.target))
+    show = pd.DataFrame([{k: s[k] for k in ("site_id", "country", "best_window_km2", "weighted_area_km2", "score",
+                                            "area_km2", "artefact_flag", "is_known",
                                             "nearest_known", "nearest_known_km")} for s in ranked[:20]])
-    with pd.option_context("display.width", 200, "display.max_colwidth", 40):
+    with pd.option_context("display.width", 220, "display.max_colwidth", 36):
         print(show.round(3).to_string(index=False))
+
+
+TILE_SORT = {"best_window": "best_window_km2_max", "capped_area": "weighted_area_km2",
+             "weighted_area": "weighted_area_km2"}
 
 
 if __name__ == "__main__":

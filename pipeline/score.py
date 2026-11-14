@@ -16,6 +16,11 @@ data/raw/j4_reference_<region>.json.
 The depression features are zero-inflated, so the Gaussian distance is an approximation; the tested score
 (p_all) stays the default.
 
+Target (job J18): `--target <region>` picks the reference that p_all / candidate are computed against; default
+base_regions (the seven named candidate regions pooled, pooled_regions in reference.json). `--target polar_160km`
+reproduces the behaviour before J18. Every other region is kept as p_all_<region>; the regression table stays
+tied to polar_160km.
+
 Data: LOLA south-pole DEM LDEM_80S_20MPP_ADJ (NASA PGDA, https://pgda.gsfc.nasa.gov/products/90), Copernicus
 GLO-30 DEM (https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model), ESA WorldCover 2021
 (https://esa-worldcover.org). Libraries: numpy, pandas, scipy. Written with SI assistance (Claude Code).
@@ -31,7 +36,10 @@ import pandas as pd
 from . import paths
 from .features import AMP, DEP, SCORED, feature_matrix, mahalanobis, p_from_d2, reference_stats, transform
 
-DEFAULT_REGION = "polar_160km"
+DEFAULT_REGION = "polar_160km"      # regression reference (pilot tiles against analysis/discovery_test_results.txt)
+DEFAULT_TARGET = "base_regions"     # scoring target since job J18: the named candidate regions pooled
+NAMED_REGIONS = ["connecting_ridge", "peak_near_shackleton", "nobile_rim_2", "malapert_massif", "mons_mouton",
+                 "de_gerlache", "haworth"]
 REGION_WINDOWS = {"polar_160km": (-80000, -80000, 80000, 80000)}   # polar stereographic metres
 GROUPS = {"all": SCORED, "amp": AMP, "dep": DEP}
 P_MIN = 0.10
@@ -68,9 +76,13 @@ def build_reference(region=DEFAULT_REGION, raw_dir=paths.RAW):
 
 
 def _regions_from_json(js):
-    """moon_reference.json -> dict name -> entry. Tolerates {name: {...}}, {"regions": [...]} and [...]."""
+    """moon_reference.json -> dict name -> entry. Tolerates {name: {...}}, {"regions": [...]} and [...].
+    Entries under the top-level key `pooled_regions` (job J18) are added after the single regions."""
+    pooled = js.get("pooled_regions", {}) if isinstance(js, dict) else {}
     if isinstance(js, dict) and "regions" in js:
         js = js["regions"]
+    if isinstance(js, dict) and pooled:
+        js = dict(js, **pooled)
     if isinstance(js, list):
         return {e.get("name", e.get("id", str(i))): e for i, e in enumerate(js)}
     return {k: v for k, v in js.items() if isinstance(v, dict)}
@@ -143,13 +155,22 @@ def load_reference(region=DEFAULT_REGION, raw_dir=paths.RAW, moon_json=MOON_REF_
     return ref
 
 
-def available_regions(moon_json=MOON_REF_JSON):
-    """Regions to score: the default first, then every other region in moon_reference.json."""
-    regions = [DEFAULT_REGION]
+def available_regions(moon_json=MOON_REF_JSON, target=DEFAULT_TARGET):
+    """Regions to score: the target first, then polar_160km, then every other region in moon_reference.json."""
+    known = []
     if os.path.exists(moon_json):
         with open(moon_json, encoding="utf-8") as f:
-            regions += [r for r in _regions_from_json(json.load(f)) if r != DEFAULT_REGION]
-    return regions
+            known = list(_regions_from_json(json.load(f)))
+    if target != DEFAULT_REGION and target not in known:
+        raise SystemExit("target region %r is not in %s (regions: %s); run python -m pipeline.moon_reference"
+                         % (target, moon_json, ", ".join(known) or "none"))
+    regions = [target] + ([DEFAULT_REGION] if target != DEFAULT_REGION else [])
+    return regions + [r for r in known if r not in regions]
+
+
+def p_col(region, target):
+    """Column holding p_all of `region` when `target` is the scoring target."""
+    return "p_all" if region == target else "p_all_" + region
 
 
 def _p(d2, g):
@@ -183,9 +204,10 @@ def candidate_mask(df):
             (df["water"] < WATER_MAX) & df["valid"]).to_numpy()
 
 
-def score_all_regions(df, raw_dir=paths.RAW, regions=None):
-    """Default region into d2_all/p_all/p_amp/p_dep/candidate; other regions into p_all_<region> etc."""
-    regions = regions or available_regions()
+def score_all_regions(df, raw_dir=paths.RAW, regions=None, target=DEFAULT_TARGET):
+    """Target region into d2_all/p_all/p_amp/p_dep/candidate; other regions into p_all_<region> etc.
+    Returns (scored, regions) with regions[0] == target."""
+    regions = regions or available_regions(target=target)
     out = score_cells(df, load_reference(regions[0], raw_dir))
     for r in regions[1:]:
         try:
@@ -198,12 +220,14 @@ def score_all_regions(df, raw_dir=paths.RAW, regions=None):
     return out, regions
 
 
-def regression_table(scored):
-    """Share [%] of valid cells with p_all >= 0.10 per pilot tile (no land-cover condition) against dep_all."""
+def regression_table(scored, col=None):
+    """Share [%] of valid cells with p >= 0.10 of polar_160km per pilot tile (no land-cover condition) against
+    dep_all. Always tied to polar_160km: p_all when it is the target, else p_all_polar_160km."""
+    col = col or ("p_all_" + DEFAULT_REGION if "p_all_" + DEFAULT_REGION in scored else "p_all")
     rows = []
     for name, tile, exp in REGRESSION:
         t = scored[(scored["tile"] == tile) & scored["valid"]]
-        ours = 100.0 * float((t["p_all"] >= P_MIN).mean()) if len(t) else np.nan
+        ours = 100.0 * float((t[col] >= P_MIN).mean()) if len(t) else np.nan
         rows.append({"site": name, "tile": tile, "n_valid": len(t), "ours_pct": round(ours, 1),
                      "expected_pct": exp, "diff_pp": round(ours - exp, 1) if len(t) else np.nan})
     return pd.DataFrame(rows)
@@ -235,12 +259,16 @@ def main(argv=None):
     ap.add_argument("--cells", default=None, help="Earth cell parquet (default: pilot if present, else sample)")
     ap.add_argument("--raw-dir", default=paths.RAW)
     ap.add_argument("--out", default=None, help="write the scored table here (sites.py writes the final one)")
+    ap.add_argument("--target", default=DEFAULT_TARGET,
+                    help="lunar region the candidates are scored against (default %s; %s = behaviour before J18)"
+                         % (DEFAULT_TARGET, DEFAULT_REGION))
     a = ap.parse_args(argv)
     df, path = load_cells(a.cells)
-    scored, regions = score_all_regions(df, a.raw_dir)
+    scored, regions = score_all_regions(df, a.raw_dir, target=a.target)
     ref = load_reference(regions[0], a.raw_dir)
-    print("cells: %s  rows %d  valid %d  regions %s  reference: %s (n=%s)" % (
-        path, len(df), int(df["valid"].sum()), regions, ref.get("source"), ref["all"].get("n_cells")))
+    print("cells: %s  rows %d  valid %d  target %s  regions %s  reference: %s (n=%s)" % (
+        path, len(df), int(df["valid"].sum()), a.target, regions, ref.get("source"), ref["all"].get("n_cells")))
+    print("regression table (always against %s):" % DEFAULT_REGION)
     print(regression_table(scored).to_string(index=False))
     nolc = int(((scored["lc_source"] == "none") & scored["valid"]).sum())
     print("candidate cells %d; valid cells without land cover (never candidates in v1): %d"

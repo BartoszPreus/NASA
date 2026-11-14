@@ -3,7 +3,8 @@
 Writes, under --out-dir (default data/moon/):
   cells.parquet             all cells of all regions (contract columns, pipeline.cells.MOON_COLUMNS)
   reference.json            per region: mean / covariance / sorted own distances of the transformed features,
-                            the same for the AMP and DEP groups, medians / P10 / P90 in natural units, sources
+                            the same for the AMP and DEP groups, medians / P10 / P90 in natural units, sources;
+                            under `pooled_regions`: base_regions = the seven named regions pooled (job J18)
   regions.geojson           region footprints in LUNAR latitude / east longitude
   hillshade/<id>.png        plain grey hillshade of each window (sun from the upper left, 512 px)
 
@@ -68,6 +69,15 @@ REGIONS = [
      "-87.45 / -5.17 E (D = 51.42 km), and older lists give -87.4 / 5 W; the primary gazetteer value is used. "),
 ]
 
+# Pooled target of job J18: the named candidate regions together. The challenge asks for analogs of candidate
+# Moon-base locations; polar_160km is a broad mix of crater floors and massifs, flatter than every named region
+# except Mons Mouton, and its 90% envelope admits Earth sand seas.
+POOLED_ID = "base_regions"
+POOLED_NAME = "Named candidate regions, pooled (7 x 30 km windows)"
+POOL_MEMBERS = [r[0] for r in REGIONS]
+POOLED_NOTE = ("Cells of the seven named regions taken together; own mean and covariance. Default scoring target "
+               "of pipeline.score / pipeline.sites since job J18 (docs/sources/j18.md).")
+
 
 def log(*a):
     print(*a, flush=True)
@@ -110,7 +120,7 @@ def region_reference(rid, name, lat, lon, window, df, polar=None, coord_source="
     V = df[df["valid"]]
     n_valid = int(len(V))
     use_polar = polar is not None and n_valid < MIN_OWN_COV
-    out = {"name": name, "lat": lat, "lon": lon, "window_m": [float(v) for v in window],
+    out = {"name": name, "lat": lat, "lon": lon, "window_m": None if window is None else [float(v) for v in window],
            "n_cells": int(len(df)), "n_valid": n_valid}
     for suffix, names in (("", SCORED), ("_amp", AMP), ("_dep", DEP)):
         fb = polar["cov" + suffix] if use_polar else None
@@ -137,13 +147,73 @@ def region_reference(rid, name, lat, lon, window, df, polar=None, coord_source="
     return out
 
 
-def write_reference(path, regions):
+def pooled_reference(cells, regions, members=POOL_MEMBERS, rid=POOLED_ID):
+    """Pooled reference of the named candidate regions (job J18): their cells taken together, own mean and
+    covariance, same fields as a single region. `cells`: lunar cell table with a `region` column; `regions`: the
+    single-region entries (for the member windows and centres)."""
+    members = [m for m in members if m in regions and (cells["region"] == m).any()]
+    df = cells[cells["region"].isin(members)]
+    ref = region_reference(rid, POOLED_NAME, None, None, None, df, None, "pooled from the member regions below",
+                           "derived", POOLED_NOTE)
+    ref["pooled"] = True
+    ref["member_regions"] = members
+    ref["member_windows_m"] = {m: regions[m]["window_m"] for m in members}
+    ref["member_centres"] = {m: [regions[m]["lat"], regions[m]["lon"]] for m in members}
+    return ref
+
+
+def write_reference(path, regions, pooled=None, preserve_from=None):
+    """Write reference.json. Pooled references go under the top-level key `pooled_regions` (not `regions`): every
+    entry of `regions` has one rectangular window_m, which pipeline.lunar_products and validation/pds_products.py
+    rely on. `preserve_from`: an earlier reference.json whose `effres` entries (network-only) are carried over."""
     doc = {"feature_names": SCORED, "amp_names": AMP, "dep_names": DEP,
            "transform": "log for s* and r*, sqrt for dep_frac, log1p for dep_depth",
            "note": "Coordinates are LUNAR (latitude, east longitude 0-360); window_m is south polar stereographic "
                    "metres on a 1,737,400 m sphere (IAU 30135), as in pipeline.io_moon.moon_xy.",
            "regions": regions}
+    old = preserve_from
+    if isinstance(old, str):
+        if os.path.exists(old):
+            with open(old, encoding="utf-8") as f:
+                old = json.load(f)
+        else:
+            old = None
+    if old:
+        for rid, r in regions.items():
+            o = old.get("regions", {}).get(rid, {})
+            if "effres" in o and "effres" not in r and o.get("window_m") == r.get("window_m"):
+                r["effres"] = o["effres"]
+        if "effres_note" in old:
+            doc["effres_note"] = old["effres_note"]
+        if pooled is None and "pooled_regions" in old:
+            pooled = old["pooled_regions"]
+    if pooled:
+        doc["pooled_regions"] = pooled
+        doc["pooled_note"] = ("pooled_regions: reference populations made of the cells of several named regions "
+                              "together (no single window); pipeline.score reads them like regions.")
     _atomic_write_text(path, json.dumps(doc, indent=1))
+
+
+def add_pooled(out_dir):
+    """Add / refresh the pooled reference from the existing cells.parquet and reference.json (offline, seconds)."""
+    ref_path = os.path.join(out_dir, os.path.basename(paths.MOON_REFERENCE))
+    cells_path = os.path.join(out_dir, os.path.basename(paths.MOON_CELLS))
+    with open(ref_path, encoding="utf-8") as f:
+        doc = json.load(f)
+    cells = pd.read_parquet(cells_path)
+    p = pooled_reference(cells, doc["regions"])
+    doc.setdefault("pooled_regions", {})[POOLED_ID] = p
+    doc["pooled_note"] = ("pooled_regions: reference populations made of the cells of several named regions "
+                          "together (no single window); pipeline.score reads them like regions.")
+    _atomic_write_text(ref_path, json.dumps(doc, indent=1))
+    _log_pooled(p)
+
+
+def _log_pooled(p):
+    m = p["medians"]
+    log("%s: members %s  n_valid %d  medians s240 %.3f s570 %.3f r200 %.3f r1600 %.2f dep_frac %.4f  P10-P90 s240 "
+        "%.2f-%.2f" % (POOLED_ID, ",".join(p["member_regions"]), p["n_valid"], m["s240"], m["s570"], m["r200"],
+                       m["r1600"], m["dep_frac"], p["p10"]["s240"], p["p90"]["s240"]))
 
 
 def footprint(window, n_edge=24):
@@ -240,13 +310,23 @@ def main(argv=None):
     ap.add_argument("--only", nargs="*", help="named region ids to build (default: all)")
     ap.add_argument("--effres-only", action="store_true",
                     help="only add the effective-resolution share to an existing moon_reference.json")
+    ap.add_argument("--pooled-only", action="store_true",
+                    help="only add the pooled reference '%s' from the existing cells.parquet (offline, seconds)"
+                         % POOLED_ID)
     a = ap.parse_args(argv)
     if a.effres_only:
         add_effres(a.out_dir)
         return 0
+    if a.pooled_only:
+        add_pooled(a.out_dir)
+        return 0
     hill_dir = os.path.join(a.out_dir, os.path.basename(paths.MOON_HILLSHADE))
     os.makedirs(hill_dir, exist_ok=True)
     ref_path = os.path.join(a.out_dir, os.path.basename(paths.MOON_REFERENCE))
+    old_doc = None  # network-only fields (effres) of the previous run are carried over
+    if os.path.exists(ref_path):
+        with open(ref_path, encoding="utf-8") as f:
+            old_doc = json.load(f)
 
     tasks = [("polar_160km", "South pole, 160 x 160 km (default)", -90.0, 0.0, (-80000.0, -80000.0, 80000.0, 80000.0),
               "window centred on the pole (pipeline default; analysis/discovery_test.py)", "opened primary",
@@ -278,15 +358,21 @@ def main(argv=None):
             m = ref["medians"]
             log("  polar_160km check: s240 %.3f (5.108)  s570 %.3f (4.956)  r200 %.3f (1.091)  mean dep_frac %.4f "
                 "(0.0184)" % (m["s240"], m["s570"], m["r200"], ref["mean_dep_frac"]))
-            write_reference(ref_path, regions)
+            write_reference(ref_path, regions, preserve_from=old_doc)
             log("  wrote %s (polar_160km only)" % ref_path)
         z = load_moon_window(*window, res_m=30.0, raw_dir=a.raw_dir)
         hillshade_png(z, 30.0, os.path.join(hill_dir, rid + ".png"))
         log("  n_cells %d  n_valid %d  cov %s  %.0f s" % (ref["n_cells"], ref["n_valid"], ref["covariance_source"],
                                                        time.time() - t0))
 
-    write_reference(ref_path, regions)
     cells = pd.concat(frames, ignore_index=True)
+    pooled = None
+    if all(m in regions for m in POOL_MEMBERS):
+        pooled = {POOLED_ID: pooled_reference(cells, regions)}
+    else:
+        log("pooled %s not built: member region(s) missing: %s" % (POOLED_ID,
+                                                                  [m for m in POOL_MEMBERS if m not in regions]))
+    write_reference(ref_path, regions, pooled=pooled, preserve_from=old_doc)
     cells_path = os.path.join(a.out_dir, os.path.basename(paths.MOON_CELLS))
     tmp = cells_path + ".tmp"
     cells.to_parquet(tmp, index=False)
@@ -306,6 +392,8 @@ def main(argv=None):
             + " ".join("%8.4f" % r["medians"][c] for c in cols) + "  %-6s %s" % (r["covariance_source"], r["coord_status"]))
     for rid, why in skipped.items():
         log("skipped %s: %s" % (rid, why))
+    if pooled:
+        _log_pooled(pooled[POOLED_ID])
     return 0
 
 
