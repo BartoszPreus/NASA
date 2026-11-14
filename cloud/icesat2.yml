@@ -1,0 +1,27 @@
+name: icesat2
+on:
+  workflow_dispatch:
+jobs:
+  profiles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install analysis dependencies
+        run: pip install sliderule==5.8.1 pandas pyarrow numpy scipy matplotlib
+      - name: Run ICESat-2 profiles
+        run: python validation/icesat2_profiles.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: icesat2-results
+          path: |
+            data/validation/icesat2.json
+            docs/figures/icesat2_vs_grid_vs_moon.png
+            data/raw/icesat2/
+          if-no-files-found: warn
+          retention-days: 30

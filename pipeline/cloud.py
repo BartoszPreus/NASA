@@ -74,10 +74,13 @@ def sync():
     wf = paths.ensure(os.path.join(RUNNER_DIR, ".github", "workflows"))
     for f in glob.glob(os.path.join(CLOUD_DIR, "*.yml")):
         shutil.copy2(f, wf)
+    validation = paths.ensure(os.path.join(RUNNER_DIR, "validation"))
+    for f in glob.glob(os.path.join(paths.ROOT, "validation", "*.py")):
+        shutil.copy2(f, validation)
     for f in glob.glob(os.path.join(CLOUD_DIR, "requirements-*.txt")) + [os.path.join(paths.ROOT, "LICENSE")]:
         shutil.copy2(f, RUNNER_DIR)
     # small inputs that cloud stages read
-    for src in (paths.MOON_REFERENCE,):
+    for src in (paths.MOON_REFERENCE, paths.RANKING):
         if os.path.exists(src):
             d = paths.ensure(os.path.join(RUNNER_DIR, os.path.dirname(paths.rel(src))))
             shutil.copy2(src, d)

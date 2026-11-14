@@ -77,7 +77,7 @@ FALLBACK_SITES = {
     "N37E094-01": (37.7057, 94.7604, 1.42, 1.20, "China"),
 }
 FALLBACK_MOON_GRID = {"s240": 5.108247756958008, "s570": 4.95572566986084}
-HALF_KM = 10.0                          # box half-size around the site centre
+HALF_KM = 5.0                           # 10 x 10 km box; smaller AOIs avoid SlideRule client failures
 T0, T1 = "2023-01-01T00:00:00Z", "2023-12-31T23:59:59Z"
 BASELINES = (60, 220, 240, 560)         # metres; multiples of the 20 m ATL06 posting
 TOL = 5.0                               # accepted |separation - baseline|, metres
@@ -103,8 +103,14 @@ def fetch(site, lat, lon):
     import sliderule
     os.makedirs(CACHE, exist_ok=True)
     sliderule.init("slideruleearth.io", verbose=False, rethrow=True)
+    output_path = os.path.abspath(stem(site) + ".parquet")
+    if len(output_path) >= 128:
+        raise ValueError("SlideRule output.path must be shorter than 128 characters")
+    parms = dict(PARMS, poly=box(lat, lon, HALF_KM), output={
+        "path": output_path, "format": "parquet", "open_on_complete": True,
+    })
     t = time.time()
-    gdf = sliderule.run("atl06x", dict(PARMS, poly=box(lat, lon, HALF_KM)))
+    gdf = sliderule.run("atl06x", parms)
     secs = time.time() - t
     df = pd.DataFrame(gdf.drop(columns="geometry", errors="ignore")).reset_index()
     if "geometry" in gdf and len(gdf):
@@ -112,34 +118,39 @@ def fetch(site, lat, lon):
     df.to_parquet(stem(site) + ".parquet")
     with open(stem(site) + ".json", "w") as f:
         json.dump({"request_seconds": round(secs, 1), "rows": len(df), "lat": lat, "lon": lon,
-                   "parms": dict(PARMS, poly=box(lat, lon, HALF_KM))}, f)
+                   "parms": parms}, f)
     return len(df), secs
 
 
 def fetch_all(sites, parallel=2):
-    """Fetch uncached sites with `parallel` subprocesses at a time; returns errors per site."""
+    """Fetch uncached sites with up to two attempts per site; return final errors."""
     todo = [s for s in sites if not os.path.exists(stem(s) + ".parquet")]
     errors = {}
     os.makedirs(os.path.join(CACHE, "logs"), exist_ok=True)
-    while todo:
-        batch, todo = todo[:parallel], todo[parallel:]
-        procs = []
-        for s in batch:
-            log = open(os.path.join(CACHE, "logs", f"atl06x_{s}.log"), "w")
-            p = subprocess.Popen([sys.executable, "-u", os.path.abspath(__file__), "--fetch", s,
-                                  str(sites[s]["lat"]), str(sites[s]["lon"])],
-                                 stdout=log, stderr=subprocess.STDOUT, cwd=ROOT)
-            procs.append((s, p, log))
-        for s, p, log in procs:
-            try:
-                p.wait(timeout=900)
-            except subprocess.TimeoutExpired:
-                p.kill()
-            log.close()
-            if not os.path.exists(stem(s) + ".parquet"):
-                with open(log.name) as f:
-                    errors[s] = f.read()[-600:]
-            print(s, "cached" if s not in errors else "FAILED", flush=True)
+    for attempt in (1, 2):
+        pending = [s for s in todo if not os.path.exists(stem(s) + ".parquet")]
+        for start in range(0, len(pending), parallel):
+            procs = []
+            for s in pending[start:start + parallel]:
+                log_path = os.path.join(CACHE, "logs", f"atl06x_{s}_attempt{attempt}.log")
+                log = open(log_path, "w")
+                p = subprocess.Popen([sys.executable, "-u", os.path.abspath(__file__), "--fetch", s,
+                                      str(sites[s]["lat"]), str(sites[s]["lon"])],
+                                     stdout=log, stderr=subprocess.STDOUT, cwd=ROOT)
+                procs.append((s, p, log))
+            for s, p, log in procs:
+                try:
+                    p.wait(timeout=900)
+                except subprocess.TimeoutExpired:
+                    p.kill()
+                    p.wait()
+                log.close()
+                if not os.path.exists(stem(s) + ".parquet"):
+                    with open(log.name, encoding="utf-8", errors="replace") as f:
+                        errors[s] = f.read()[-600:]
+                else:
+                    errors.pop(s, None)
+                print(s, "cached" if s not in errors else f"FAILED attempt {attempt}", flush=True)
     return errors
 
 
@@ -203,6 +214,17 @@ def moon_pgda():
         res[f"b{b}"] = {"median_deg": weighted_median(v, w[valid]), "cells": int(valid.sum()),
                         "cells_nodata": int((~valid).sum())}
     return res
+
+
+def moon_pgda_summary():
+    """Use cached PGDA grids when present, otherwise the measured values from HANDOFF."""
+    files = [os.path.join(PGDA, f"MAS_{b}M_16.IMG") for b in (57, 225, 560)]
+    if all(os.path.isfile(path) for path in files):
+        return moon_pgda(), "PGDA 70 MAS_{57,225,560}M_16.IMG, south of 85 S, cos-lat weighted"
+    values = {57: 4.80, 225: 4.60, 560: 4.40}
+    return ({f"b{b}": {"median_deg": value, "cells": None, "cells_nodata": None}
+             for b, value in values.items()},
+            "docs/HANDOFF.md section 6 measured PGDA 70 medians; constants used because raw IMG grids are unavailable")
 
 
 def load_sites():
@@ -288,7 +310,7 @@ def main():
         moon_g, moon_source = {"s240": mg["s240"], "s570": mg["s570"]}, paths.rel(paths.MOON_REFERENCE)
     else:
         moon_g, moon_source = FALLBACK_MOON_GRID, "fallback copy in validation/icesat2_profiles.py"
-    moon_p = moon_pgda()
+    moon_p, moon_pgda_source = moon_pgda_summary()
     if "--analyse-only" in sys.argv:        # use the cache only; uncached sites are reported as missing
         failures = {s: "not fetched (no cache)" for s in sites_in if not os.path.exists(stem(s) + ".parquet")}
     else:
@@ -301,6 +323,11 @@ def main():
         with open(stem(sid) + ".json") as f:
             attrs = json.load(f)
         las = track_slopes(df)
+        missing_baselines = [b for b in (60, 220, 240, 560)
+                             if las[f"b{b}"]["median_deg"] is None]
+        if missing_baselines:
+            failures[sid] = "no valid ATL06 slope pairs at baselines " + ", ".join(map(str, missing_baselines))
+            continue
         grid = {"slope_240m_deg": r["slope_240m_deg"], "slope_570m_deg": r["slope_570m_deg"]}
         m = lambda b: las[f"b{b}"]["median_deg"]
         ratios = {"laser220_over_grid240": m(220) / grid["slope_240m_deg"],
@@ -328,11 +355,12 @@ def main():
                                    "result metadata ('Invalid \\escape').")
     moon_ratio = moon_p["b560"]["median_deg"] / moon_p["b57"]["median_deg"]
     out = {
-        "job": "J14", "written_with": "SI assistance (Claude Code)",
+        "job": "J21",
         "inputs": {"sites_and_grid_slopes": site_source, "moon_grid_medians": moon_source,
-                   "pgda70": "scratch/data/pgda70/MAS_{57,225,560}M_16.IMG"},
+                   "pgda70": moon_pgda_source},
         "request": {"endpoint": "atl06x (SlideRule Earth public cluster, slideruleearth.io)",
-                    "parms": PARMS, "aoi": f"square box, half-size {HALF_KM} km, centred on site lat/lon",
+                    "parms": {**PARMS, "output": {"format": "parquet", "open_on_complete": True}},
+                    "aoi": f"square box, half-size {HALF_KM} km, centred on site lat/lon",
                     "filters_client_side": {"spots": STRONG_SPOTS, "atl06_quality_summary": 0,
                                             "running_median_guard_m": OUTLIER_M}},
         "method": {"baselines_m": BASELINES, "pair_tolerance_m": TOL,
@@ -364,7 +392,9 @@ def main():
     os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
     with open(OUT_JSON, "w") as f:
         json.dump(out, f, indent=1, default=str)
-    if sites:
+    if sites and all(s["laser"]["b60"]["samples"] > 0 and
+                     s["laser"]["b220"]["samples"] > 0 and
+                     s["laser"]["b560"]["samples"] > 0 for s in sites.values()):
         figure(sites, moon_p, moon_g)
     print("moon pgda", {k: round(v["median_deg"], 3) for k, v in moon_p.items()}, "560/57", round(moon_ratio, 3),
           "grid", {k: round(v, 2) for k, v in moon_g.items()})
