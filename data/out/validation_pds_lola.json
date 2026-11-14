@@ -1,0 +1,248 @@
+{
+ "window_m": [
+  -80000,
+  -80000,
+  80000,
+  80000
+ ],
+ "pds_product": {
+  "name": "LOLA polar gridded DEM LDEM_80S_80M.IMG (LRO-L-LOLA-4-GDR-V1.0, product version V2.0)",
+  "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_80s_80m.img",
+  "label_url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_80s_80m.lbl",
+  "created": "2017-06-15",
+  "data_span": "2009-07-13T17:33:17 to 2017-02-02T22:18:35",
+  "built_from": "LOLA Laser 1 and 2 data through mission phase LRO_ES_54; RDRs consistent with the GRAIL 900C gravity field; ~0.004 % of points flagged as erroneous; gridded with GMT mapproject/blockmedian/surface (label DESCRIPTION). Shot/orbit count not stated in label.",
+  "grid": "7600 x 7600, 80 m/pixel, int16 DN x 0.5 m above 1,737,400 m sphere, pixel-registered, line/sample projection offset 3799.5",
+  "rows_cols_used": [
+   2800,
+   4799
+  ]
+ },
+ "pgda_product": {
+  "name": "PGDA product 90, LDEM_80S_20MPP_ADJ.TIF, averaged to 30 m (pipeline.io_moon cache) and here to the 80 m PDS cells",
+  "url": "https://pgda.gsfc.nasa.gov/products/90",
+  "citation": "Barker, M. K. et al. (2023), PSJ 4, 183, doi:10.3847/PSJ/acf3e1",
+  "built_from": "LOLA team's 2023 reprocessing of LOLA altimetry with improved orbits/adjustment (per PGDA product page and Barker et al. 2023; counts not re-checked in this job: UNVERIFIED)"
+ },
+ "registration_trials": [
+  {
+   "shift_x_px": -1.0,
+   "shift_y_px": -1.0,
+   "robust_sd_m": 14.652,
+   "rms_m": 17.702,
+   "median_m": 1.015
+  },
+  {
+   "shift_x_px": -0.5,
+   "shift_y_px": -1.0,
+   "robust_sd_m": 11.927,
+   "rms_m": 14.043,
+   "median_m": 0.639
+  },
+  {
+   "shift_x_px": 0.0,
+   "shift_y_px": -1.0,
+   "robust_sd_m": 10.53,
+   "rms_m": 12.452,
+   "median_m": 0.402
+  },
+  {
+   "shift_x_px": 0.5,
+   "shift_y_px": -1.0,
+   "robust_sd_m": 11.471,
+   "rms_m": 13.709,
+   "median_m": 0.145
+  },
+  {
+   "shift_x_px": 1.0,
+   "shift_y_px": -1.0,
+   "robust_sd_m": 14.269,
+   "rms_m": 17.198,
+   "median_m": -0.062
+  },
+  {
+   "shift_x_px": -1.0,
+   "shift_y_px": -0.5,
+   "robust_sd_m": 11.454,
+   "rms_m": 14.015,
+   "median_m": 1.033
+  },
+  {
+   "shift_x_px": -0.5,
+   "shift_y_px": -0.5,
+   "robust_sd_m": 7.428,
+   "rms_m": 9.026,
+   "median_m": 0.619
+  },
+  {
+   "shift_x_px": 0.0,
+   "shift_y_px": -0.5,
+   "robust_sd_m": 5.276,
+   "rms_m": 6.403,
+   "median_m": 0.303
+  },
+  {
+   "shift_x_px": 0.5,
+   "shift_y_px": -0.5,
+   "robust_sd_m": 7.173,
+   "rms_m": 8.737,
+   "median_m": 0.064
+  },
+  {
+   "shift_x_px": 1.0,
+   "shift_y_px": -0.5,
+   "robust_sd_m": 11.239,
+   "rms_m": 13.678,
+   "median_m": -0.188
+  },
+  {
+   "shift_x_px": -1.0,
+   "shift_y_px": 0.0,
+   "robust_sd_m": 10.2,
+   "rms_m": 12.44,
+   "median_m": 0.895
+  },
+  {
+   "shift_x_px": -0.5,
+   "shift_y_px": 0.0,
+   "robust_sd_m": 5.119,
+   "rms_m": 6.441,
+   "median_m": 0.53
+  },
+  {
+   "shift_x_px": 0.0,
+   "shift_y_px": 0.0,
+   "robust_sd_m": 1.148,
+   "rms_m": 1.709,
+   "median_m": 0.191
+  },
+  {
+   "shift_x_px": 0.5,
+   "shift_y_px": 0.0,
+   "robust_sd_m": 5.02,
+   "rms_m": 6.358,
+   "median_m": -0.116
+  },
+  {
+   "shift_x_px": 1.0,
+   "shift_y_px": 0.0,
+   "robust_sd_m": 10.136,
+   "rms_m": 12.392,
+   "median_m": -0.464
+  },
+  {
+   "shift_x_px": -1.0,
+   "shift_y_px": 0.5,
+   "robust_sd_m": 11.324,
+   "rms_m": 13.73,
+   "median_m": 0.601
+  },
+  {
+   "shift_x_px": -0.5,
+   "shift_y_px": 0.5,
+   "robust_sd_m": 7.281,
+   "rms_m": 8.812,
+   "median_m": 0.351
+  },
+  {
+   "shift_x_px": 0.0,
+   "shift_y_px": 0.5,
+   "robust_sd_m": 5.278,
+   "rms_m": 6.427,
+   "median_m": 0.149
+  },
+  {
+   "shift_x_px": 0.5,
+   "shift_y_px": 0.5,
+   "robust_sd_m": 7.368,
+   "rms_m": 8.983,
+   "median_m": -0.164
+  },
+  {
+   "shift_x_px": 1.0,
+   "shift_y_px": 0.5,
+   "robust_sd_m": 11.416,
+   "rms_m": 13.984,
+   "median_m": -0.582
+  },
+  {
+   "shift_x_px": -1.0,
+   "shift_y_px": 1.0,
+   "robust_sd_m": 14.325,
+   "rms_m": 17.226,
+   "median_m": 0.496
+  },
+  {
+   "shift_x_px": -0.5,
+   "shift_y_px": 1.0,
+   "robust_sd_m": 11.564,
+   "rms_m": 13.739,
+   "median_m": 0.289
+  },
+  {
+   "shift_x_px": 0.0,
+   "shift_y_px": 1.0,
+   "robust_sd_m": 10.491,
+   "rms_m": 12.443,
+   "median_m": 0.07
+  },
+  {
+   "shift_x_px": 0.5,
+   "shift_y_px": 1.0,
+   "robust_sd_m": 11.832,
+   "rms_m": 13.995,
+   "median_m": -0.151
+  },
+  {
+   "shift_x_px": 1.0,
+   "shift_y_px": 1.0,
+   "robust_sd_m": 14.611,
+   "rms_m": 17.662,
+   "median_m": -0.549
+  }
+ ],
+ "best_shift_px": {
+  "x": 0.0,
+  "y": 0.0
+ },
+ "difference_pds_minus_pgda": {
+  "n": 4000000,
+  "mean_m": 0.17,
+  "median_m": 0.191,
+  "robust_sd_m": 1.148,
+  "rms_m": 1.709,
+  "std_m": 1.7
+ },
+ "difference_pds_minus_pgda_unshifted": {
+  "n": 4000000,
+  "mean_m": 0.17,
+  "median_m": 0.191,
+  "robust_sd_m": 1.148,
+  "rms_m": 1.709,
+  "std_m": 1.7
+ },
+ "correlation": 0.999999,
+ "slopes": {
+  "240_m": {
+   "median_slope_pds_deg": 8.881,
+   "median_slope_pgda_deg": 8.88,
+   "relative_difference_pct": -0.02,
+   "median_slope_pgda_unshifted_deg": 8.88,
+   "p90_slope_pds_deg": 18.724,
+   "p90_slope_pgda_deg": 18.69,
+   "slope_corr": 0.9982,
+   "median_abs_slope_difference_deg": 0.192
+  },
+  "560_m": {
+   "median_slope_pds_deg": 8.564,
+   "median_slope_pgda_deg": 8.564,
+   "relative_difference_pct": -0.0,
+   "median_slope_pgda_unshifted_deg": 8.564,
+   "p90_slope_pds_deg": 18.423,
+   "p90_slope_pgda_deg": 18.416,
+   "slope_corr": 0.9995,
+   "median_abs_slope_difference_deg": 0.108
+  }
+ },
+ "slope_method": "two-point slope atan(hypot(dz_x, dz_y)/L) with L = 3 and 7 pixels of 80 m, same code on both grids; median over all valid pixels"
+}

@@ -1,0 +1,413 @@
+{
+ "product": "LRO Diviner Polar Resource Product, south (LRO-L-DLRE-5-PRP-V2.0, DLRE_PRP_SOUTH.TAB, product version 2, created 2018-02-21)",
+ "url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_prp/dlre_prp_south.tab",
+ "label_url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_prp/dlre_prp_south.lbl",
+ "format_url": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/label/dlre_prp.fmt",
+ "citation": "Paige et al., LRO DLRE LEVEL 5 PRP V2.0, NASA Planetary Data System, LRO-L-DLRE-5-PRP-V2.0, 2018 (citation requested in catalog/prpds.cat). Method: Paige, D. A. et al. (2010) Diviner Lunar Radiometer observations of cold traps in the Moon's south polar region, Science 330, 479-482, doi:10.1126/science.1187726.",
+ "data_read_as": "HTTP Range subset (481 mesh columns)",
+ "units": {
+  "temp_avg_K": "K, annual average temperature at 2 cm below the surface (label)",
+  "temp_max_K": "K, annual maximum surface temperature (label)",
+  "ice_depth": "m, depth at which water ice sublimates at 1 kg m-2 per billion years; 0 = stable at the surface; -999 = deeper than 2.8738 m (label)"
+ },
+ "shares": "area-weighted by triangle area computed from the vertex coordinates",
+ "coverage": "Mesh covers a square centred on the pole reaching 80 deg S at the edge midpoints (prpds.cat: 'covers a square region centred on the pole to 80 degrees latitude'); the corners reach about 75.9 deg S (first record, tri_clat -75.905). Every region window here lies inside it (largest |x|,|y| about 168 km vs about 300 km half-width).",
+ "centre_latitude_range_loaded_deg": [
+  -89.992,
+  -83.35
+ ],
+ "region_selection": "triangle centre (tri_clon, tri_clat) projected with pipeline.io_moon.moon_xy and tested against window_m of data/out/moon_reference.json",
+ "caveats": [
+  "Model product: thermal model fits to the first year of Diviner mapping (prpds.cat), not raw measurements; temp_avg is at 2 cm depth, temp_max at the surface.",
+  "The mesh comes from a Kaguya laser-altimeter DEM (Araki et al. 2009, prpds.cat), about 0.5 km triangles, so features below ~1 km (small craters, ridge crests) are smoothed.",
+  "Ice-stability depths are capped: anything deeper than 2.8738 m is coded -999.",
+  "ice_depth also holds the value -1, which neither the label (dlre_prp.fmt) nor the SIS (document/Diviner_RDR_SIS.pdf, section 7.1) describes. In the loaded records -1 occurs only where the annual maximum surface temperature is <= 101.3 K, colder than every depth-0 triangle (101.3-129.9 K), so it plausibly marks surface cold traps too; meaning UNVERIFIED. Shares are given both without and with code -1; 'defined' depths exclude it.",
+  "The SIS (section 7.1) names the missing constant -32768 while the label and the file use -999."
+ ],
+ "regions": {
+  "polar_160km": {
+   "name": "South pole, 160 x 160 km (default)",
+   "window_m": [
+    -80000.0,
+    -80000.0,
+    80000.0,
+    80000.0
+   ],
+   "n_records": 199712,
+   "mesh_area_km2": 26098.6,
+   "window_area_km2": 25600.0,
+   "covered_share": 1.019,
+   "temp_avg_K": {
+    "median": 82.66,
+    "p10": 45.26,
+    "p90": 133.66,
+    "min": 26.11,
+    "max": 186.69
+   },
+   "temp_max_K": {
+    "median": 224.13,
+    "p10": 75.12,
+    "p90": 277.13,
+    "min": 26.77,
+    "max": 347.8
+   },
+   "share_area_ice_stable_at_surface": 0.0115,
+   "share_area_ice_stable_within_1m": 0.6253,
+   "share_area_ice_stable_within_2.87m": 0.6322,
+   "share_area_no_stable_ice_code_-999": 0.2006,
+   "share_area_other_negative_code": 0.1672,
+   "share_area_ice_surface_incl_code_-1": 0.1788,
+   "share_area_ice_within_1m_incl_code_-1": 0.7925,
+   "temp_max_K_range_where_code_-1": [
+    26.77,
+    101.3
+   ],
+   "temp_max_K_range_where_depth_0": [
+    101.3,
+    128.85
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.04,
+   "share_area_temp_avg_below_110K": 0.7393,
+   "share_area_temp_max_below_110K": 0.1755
+  },
+  "connecting_ridge": {
+   "name": "Connecting Ridge (proposed site)",
+   "window_m": [
+    -22049.0,
+    -27236.0,
+    7951.0,
+    2764.0
+   ],
+   "n_records": 7080,
+   "mesh_area_km2": 951.8,
+   "window_area_km2": 900.0,
+   "covered_share": 1.058,
+   "temp_avg_K": {
+    "median": 116.12,
+    "p10": 55.76,
+    "p90": 147.38,
+    "min": 39.19,
+    "max": 186.48
+   },
+   "temp_max_K": {
+    "median": 250.68,
+    "p10": 94.95,
+    "p90": 295.17,
+    "min": 63.8,
+    "max": 347.8
+   },
+   "share_area_ice_stable_at_surface": 0.019,
+   "share_area_ice_stable_within_1m": 0.3721,
+   "share_area_ice_stable_within_2.87m": 0.3871,
+   "share_area_no_stable_ice_code_-999": 0.4784,
+   "share_area_other_negative_code": 0.1344,
+   "share_area_ice_surface_incl_code_-1": 0.1535,
+   "share_area_ice_within_1m_incl_code_-1": 0.5065,
+   "temp_max_K_range_where_code_-1": [
+    63.8,
+    101.25
+   ],
+   "temp_max_K_range_where_depth_0": [
+    101.33,
+    113.91
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.22,
+   "share_area_temp_avg_below_110K": 0.4246,
+   "share_area_temp_max_below_110K": 0.1516
+  },
+  "peak_near_shackleton": {
+   "name": "Peak Near Shackleton (proposed site)",
+   "window_m": [
+    9032.0,
+    -32636.0,
+    39032.0,
+    -2636.0
+   ],
+   "n_records": 7021,
+   "mesh_area_km2": 927.8,
+   "window_area_km2": 900.0,
+   "covered_share": 1.031,
+   "temp_avg_K": {
+    "median": 112.51,
+    "p10": 58.26,
+    "p90": 145.33,
+    "min": 35.05,
+    "max": 175.95
+   },
+   "temp_max_K": {
+    "median": 238.62,
+    "p10": 101.29,
+    "p90": 275.38,
+    "min": 51.35,
+    "max": 322.3
+   },
+   "share_area_ice_stable_at_surface": 0.0305,
+   "share_area_ice_stable_within_1m": 0.4632,
+   "share_area_ice_stable_within_2.87m": 0.4799,
+   "share_area_no_stable_ice_code_-999": 0.4143,
+   "share_area_other_negative_code": 0.1058,
+   "share_area_ice_surface_incl_code_-1": 0.1364,
+   "share_area_ice_within_1m_incl_code_-1": 0.569,
+   "temp_max_K_range_where_code_-1": [
+    51.35,
+    101.29
+   ],
+   "temp_max_K_range_where_depth_0": [
+    101.31,
+    122.89
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.17,
+   "share_area_temp_avg_below_110K": 0.4738,
+   "share_area_temp_max_below_110K": 0.1348
+  },
+  "nobile_rim_2": {
+   "name": "Nobile Rim 2 (top-ranked point)",
+   "window_m": [
+    138465.0,
+    71121.0,
+    168465.0,
+    101121.0
+   ],
+   "n_records": 7021,
+   "mesh_area_km2": 923.4,
+   "window_area_km2": 900.0,
+   "covered_share": 1.026,
+   "temp_avg_K": {
+    "median": 109.28,
+    "p10": 51.26,
+    "p90": 151.92,
+    "min": 33.85,
+    "max": 187.67
+   },
+   "temp_max_K": {
+    "median": 237.84,
+    "p10": 72.99,
+    "p90": 292.52,
+    "min": 39.51,
+    "max": 338.11
+   },
+   "share_area_ice_stable_at_surface": 0.0448,
+   "share_area_ice_stable_within_1m": 0.3646,
+   "share_area_ice_stable_within_2.87m": 0.3666,
+   "share_area_no_stable_ice_code_-999": 0.4074,
+   "share_area_other_negative_code": 0.226,
+   "share_area_ice_surface_incl_code_-1": 0.2708,
+   "share_area_ice_within_1m_incl_code_-1": 0.5906,
+   "temp_max_K_range_where_code_-1": [
+    39.51,
+    101.29
+   ],
+   "temp_max_K_range_where_depth_0": [
+    101.3,
+    121.57
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.01,
+   "share_area_temp_avg_below_110K": 0.5104,
+   "share_area_temp_max_below_110K": 0.2621
+  },
+  "malapert_massif": {
+   "name": "Mons Malapert (Malapert Massif)",
+   "window_m": [
+    -18554.0,
+    106898.0,
+    11446.0,
+    136898.0
+   ],
+   "n_records": 6962,
+   "mesh_area_km2": 935.1,
+   "window_area_km2": 900.0,
+   "covered_share": 1.039,
+   "temp_avg_K": {
+    "median": 141.47,
+    "p10": 88.74,
+    "p90": 182.36,
+    "min": 46.89,
+    "max": 201.38
+   },
+   "temp_max_K": {
+    "median": 274.47,
+    "p10": 218.38,
+    "p90": 313.6,
+    "min": 85.02,
+    "max": 342.08
+   },
+   "share_area_ice_stable_at_surface": 0.0001,
+   "share_area_ice_stable_within_1m": 0.3071,
+   "share_area_ice_stable_within_2.87m": 0.3115,
+   "share_area_no_stable_ice_code_-999": 0.6882,
+   "share_area_other_negative_code": 0.0003,
+   "share_area_ice_surface_incl_code_-1": 0.0004,
+   "share_area_ice_within_1m_incl_code_-1": 0.3073,
+   "temp_max_K_range_where_code_-1": [
+    85.02,
+    94.69
+   ],
+   "temp_max_K_range_where_depth_0": [
+    104.97,
+    104.97
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.14,
+   "share_area_temp_avg_below_110K": 0.277,
+   "share_area_temp_max_below_110K": 0.0004
+  },
+  "mons_mouton": {
+   "name": "Mons Mouton",
+   "window_m": [
+    69398.0,
+    125462.0,
+    99398.0,
+    155462.0
+   ],
+   "n_records": 7021,
+   "mesh_area_km2": 909.8,
+   "window_area_km2": 900.0,
+   "covered_share": 1.011,
+   "temp_avg_K": {
+    "median": 131.97,
+    "p10": 93.52,
+    "p90": 155.93,
+    "min": 40.12,
+    "max": 184.93
+   },
+   "temp_max_K": {
+    "median": 238.33,
+    "p10": 198.95,
+    "p90": 271.04,
+    "min": 51.14,
+    "max": 322.05
+   },
+   "share_area_ice_stable_at_surface": 0.004,
+   "share_area_ice_stable_within_1m": 0.2676,
+   "share_area_ice_stable_within_2.87m": 0.2716,
+   "share_area_no_stable_ice_code_-999": 0.7235,
+   "share_area_other_negative_code": 0.0049,
+   "share_area_ice_surface_incl_code_-1": 0.0089,
+   "share_area_ice_within_1m_incl_code_-1": 0.2725,
+   "temp_max_K_range_where_code_-1": [
+    51.14,
+    96.93
+   ],
+   "temp_max_K_range_where_depth_0": [
+    101.8,
+    122.18
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.17,
+   "share_area_temp_avg_below_110K": 0.19,
+   "share_area_temp_max_below_110K": 0.0083
+  },
+  "de_gerlache": {
+   "name": "de Gerlache crater",
+   "window_m": [
+    -61075.0,
+    -13665.0,
+    -31075.0,
+    16335.0
+   ],
+   "n_records": 7021,
+   "mesh_area_km2": 930.7,
+   "window_area_km2": 900.0,
+   "covered_share": 1.034,
+   "temp_avg_K": {
+    "median": 75.88,
+    "p10": 49.53,
+    "p90": 144.23,
+    "min": 30.4,
+    "max": 186.69
+   },
+   "temp_max_K": {
+    "median": 237.11,
+    "p10": 68.35,
+    "p90": 287.08,
+    "min": 35.24,
+    "max": 320.23
+   },
+   "share_area_ice_stable_at_surface": 0.011,
+   "share_area_ice_stable_within_1m": 0.4295,
+   "share_area_ice_stable_within_2.87m": 0.4353,
+   "share_area_no_stable_ice_code_-999": 0.2655,
+   "share_area_other_negative_code": 0.2991,
+   "share_area_ice_surface_incl_code_-1": 0.3102,
+   "share_area_ice_within_1m_incl_code_-1": 0.7287,
+   "temp_max_K_range_where_code_-1": [
+    35.24,
+    101.25
+   ],
+   "temp_max_K_range_where_depth_0": [
+    101.31,
+    123.4
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.03,
+   "share_area_temp_avg_below_110K": 0.6954,
+   "share_area_temp_max_below_110K": 0.3053
+  },
+  "haworth": {
+   "name": "Haworth crater",
+   "window_m": [
+    -21559.0,
+    78796.0,
+    8441.0,
+    108796.0
+   ],
+   "n_records": 7021,
+   "mesh_area_km2": 924.0,
+   "window_area_km2": 900.0,
+   "covered_share": 1.027,
+   "temp_avg_K": {
+    "median": 50.75,
+    "p10": 37.85,
+    "p90": 94.11,
+    "min": 32.72,
+    "max": 122.9
+   },
+   "temp_max_K": {
+    "median": 212.37,
+    "p10": 56.6,
+    "p90": 267.34,
+    "min": 44.96,
+    "max": 305.46
+   },
+   "share_area_ice_stable_at_surface": 0.0043,
+   "share_area_ice_stable_within_1m": 0.6018,
+   "share_area_ice_stable_within_2.87m": 0.6028,
+   "share_area_no_stable_ice_code_-999": 0.0033,
+   "share_area_other_negative_code": 0.3939,
+   "share_area_ice_surface_incl_code_-1": 0.3982,
+   "share_area_ice_within_1m_incl_code_-1": 0.9957,
+   "temp_max_K_range_where_code_-1": [
+    44.96,
+    100.75
+   ],
+   "temp_max_K_range_where_depth_0": [
+    102.43,
+    125.63
+   ],
+   "other_negative_codes_seen": [
+    -1.0
+   ],
+   "median_ice_depth_m_where_defined": 0.01,
+   "share_area_temp_avg_below_110K": 0.9816,
+   "share_area_temp_max_below_110K": 0.3956
+  }
+ }
+}
