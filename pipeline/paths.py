@@ -26,6 +26,8 @@ REFERENCE = os.path.join(DATA, "reference")
 MOON = os.path.join(DATA, "moon")
 EARTH_CELLS = os.path.join(DATA, "earth", "cells")
 EARTH_TILES = os.path.join(DATA, "earth", "tiles")
+EARTH_CELLS_NASADEM = os.path.join(DATA, "earth", "cells_nasadem")   # J17: NASADEM + MODIS IGBP cells (56 S - 60 N);
+                                                                     # kept apart so the ranking never mixes DEMs
 SITES = os.path.join(DATA, "sites")
 VALIDATION = os.path.join(DATA, "validation")
 SAMPLE = os.path.join(DATA, "sample")
@@ -67,6 +69,7 @@ VALIDATION_ENRICHMENT = os.path.join(VALIDATION, "enrichment.json")
 VALIDATION_PDS_LOLA = os.path.join(VALIDATION, "pds_lola.json")
 VALIDATION_ICESAT2 = os.path.join(VALIDATION, "icesat2.json")
 CRATER_PROFILES = os.path.join(VALIDATION, "crater_profiles.json")
+VALIDATION_NASADEM = os.path.join(VALIDATION, "nasadem_vs_copdem.json")
 
 # --- small fixtures (pipeline.fixtures)
 SAMPLE_EARTH_CELLS = os.path.join(SAMPLE, "earth_cells_sample.parquet")
@@ -80,6 +83,8 @@ SOURCES = os.path.join(DATA, "sources.csv")
 # --- raw downloads and caches (git-ignored), one folder per source
 RAW_COPDEM = os.path.join(RAW, "copdem30")          # Copernicus DEM GLO-30 tiles
 RAW_CELLS = os.path.join(RAW, "cells")              # per-tile feature tables and scan logs
+RAW_NASADEM = os.path.join(RAW, "nasadem")          # NASADEM_HGT tiles (OpenTopography mirror)
+RAW_MODIS_IGBP = os.path.join(RAW, "modis_igbp")    # decoded MODIS IGBP class grids from NASA GIBS
 RAW_MOON = os.path.join(RAW, "moon")                # LOLA DEM windows from NASA PGDA
 RAW_PDS = os.path.join(RAW, "pds")                  # files from the PDS Geosciences archive (LOLA, Diviner, ...)
 RAW_LRO = os.path.join(RAW, "lro")                  # other LRO instrument products (LROC, Mini-RF, LEND, LAMP)

@@ -14,6 +14,8 @@ Needs the GitHub CLI (`gh`) logged in with the `repo` and `workflow` scopes.
     python -m pipeline.cloud download <run_id>    # artifacts -> data/raw/cloud/<run_id>/
     python -m pipeline.cloud ingest-scan <run_id> # scan shards -> data/earth/cells/scan_sNNofMM.parquet + logs
     python -m pipeline.cloud run-scan             # all of the above for the Earth scan
+    python -m pipeline.cloud dispatch earth-scan-nasa   # J17: NASADEM + MODIS rescan of the tiles in tiles_nasa.txt
+    python -m pipeline.cloud ingest-nasa <run_id> # its shards -> data/earth/cells_nasadem/nasadem_sNNofMM.parquet
 Written with SI assistance (Claude Code).
 """
 import argparse
@@ -52,6 +54,13 @@ def remaining_tiles():
     return [t for t in plan if t not in have]
 
 
+def nasa_tiles():
+    """Tiles of the scan plan inside NASADEM's coverage (56 S - 60 N), in plan order (job J17)."""
+    from .io_earth import in_nasadem
+    plan = pd.read_csv(paths.TILES_PLAN, dtype=str, keep_default_na=False)["tile"].tolist()
+    return [t for t in plan if in_nasadem(t)]
+
+
 def sync():
     """Bring the runner repository in line with pipeline/ and cloud/ of this repository and push it."""
     if not os.path.isdir(os.path.join(RUNNER_DIR, ".git")):
@@ -76,11 +85,15 @@ def sync():
     with open(os.path.join(RUNNER_DIR, "tiles.txt"), "w", encoding="utf-8") as f:
         f.write("# Copernicus GLO-30 tiles still to scan, in priority order (data/earth/tiles/tiles_scanned.csv)\n")
         f.write("\n".join(tiles) + "\n")
+    nasa = nasa_tiles() if os.path.exists(paths.TILES_PLAN) else []
+    with open(os.path.join(RUNNER_DIR, "tiles_nasa.txt"), "w", encoding="utf-8") as f:
+        f.write("# Planned tiles inside NASADEM coverage (56 S - 60 N), for earth-scan-nasa.yml (job J17)\n")
+        f.write("\n".join(nasa) + "\n")
     sh("git", "add", "-A", cwd=RUNNER_DIR)
     if sh("git", "diff", "--cached", "--quiet", cwd=RUNNER_DIR)[0] != 0:
         sh("git", "commit", "-q", "-m", "Sync pipeline and workflows from the team repository", cwd=RUNNER_DIR, check=True)
         sh("git", "push", "-q", cwd=RUNNER_DIR, check=True)
-    print("runner %s in sync; tiles left to scan: %d" % (RUNNER_REPO, len(tiles)))
+    print("runner %s in sync; tiles left to scan: %d; NASADEM tiles: %d" % (RUNNER_REPO, len(tiles), len(nasa)))
     return len(tiles)
 
 
@@ -147,6 +160,8 @@ def ingest_scan(run_id):
     paths.ensure(paths.EARTH_CELLS, paths.RAW_CELLS)
     rows, n_files, big = 0, 0, []
     for p in sorted(glob.glob(os.path.join(src, "cells-*", "*.parquet"))):
+        if os.path.basename(os.path.dirname(p)).startswith("cells-nasa-"):
+            continue   # NASADEM shards go to data/earth/cells_nasadem/ (ingest_nasa), never into the ranking
         m = re.search(r"s(\d+)of(\d+)\.parquet$", os.path.basename(p))
         out = os.path.join(paths.EARTH_CELLS, "scan_s%sof%s.parquet" % (m.group(1), m.group(2)) if m else os.path.basename(p))
         shutil.copy2(p, out)
@@ -154,7 +169,8 @@ def ingest_scan(run_id):
         rows += len(pd.read_parquet(out, columns=["tile"]))
         if os.path.getsize(out) > 50e6:
             big.append(paths.rel(out))
-    logs = [pd.read_csv(p, dtype=str, keep_default_na=False) for p in glob.glob(os.path.join(src, "cells-*", "log_*.csv"))]
+    logs = [pd.read_csv(p, dtype=str, keep_default_na=False) for p in glob.glob(os.path.join(src, "cells-*", "log_*.csv"))
+            if not os.path.basename(os.path.dirname(p)).startswith("cells-nasa-")]
     if logs:
         log = pd.concat(logs, ignore_index=True)
         log.to_csv(os.path.join(paths.RAW_CELLS, "log_cloud_%s.csv" % run_id), index=False)
@@ -168,9 +184,32 @@ def ingest_scan(run_id):
     return n_files, rows
 
 
+def ingest_nasa(run_id):
+    """Put the NASADEM + MODIS shards of a run into data/earth/cells_nasadem/ and its logs into data/raw/cells/."""
+    src = os.path.join(paths.RAW_CLOUD, str(run_id))
+    paths.ensure(paths.EARTH_CELLS_NASADEM, paths.RAW_CELLS)
+    rows, n_files = 0, 0
+    for p in sorted(glob.glob(os.path.join(src, "cells-nasa-*", "*.parquet"))):
+        m = re.search(r"s(\d+)of(\d+)\.parquet$", os.path.basename(p))
+        out = os.path.join(paths.EARTH_CELLS_NASADEM,
+                           "nasadem_s%sof%s.parquet" % (m.group(1), m.group(2)) if m else os.path.basename(p))
+        shutil.copy2(p, out)
+        n_files += 1
+        rows += len(pd.read_parquet(out, columns=["tile"]))
+    logs = [pd.read_csv(p, dtype=str, keep_default_na=False)
+            for p in glob.glob(os.path.join(src, "cells-nasa-*", "log_*.csv"))]
+    if logs:
+        log = pd.concat(logs, ignore_index=True)
+        log.to_csv(os.path.join(paths.RAW_CELLS, "log_cloud_nasa_%s.csv" % run_id), index=False)
+        print("tiles in the cloud logs: %d, by status %s" % (len(log), log["status"].value_counts().to_dict()))
+    print("NASADEM shards ingested: %d files, %d cells -> %s" % (n_files, rows, paths.rel(paths.EARTH_CELLS_NASADEM)))
+    return n_files, rows
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Cloud execution of heavy stages (GitHub Actions runner repository).")
-    ap.add_argument("action", choices=["sync", "dispatch", "wait", "download", "ingest-scan", "run-scan", "tiles-left"])
+    ap.add_argument("action", choices=["sync", "dispatch", "wait", "download", "ingest-scan", "ingest-nasa", "run-scan",
+                                       "tiles-left"])
     ap.add_argument("arg", nargs="?", help="workflow name for dispatch, run id for wait/download/ingest-scan")
     a = ap.parse_args(argv)
     if a.action == "tiles-left":
@@ -185,6 +224,8 @@ def main(argv=None):
         download(a.arg)
     elif a.action == "ingest-scan":
         ingest_scan(a.arg)
+    elif a.action == "ingest-nasa":
+        ingest_nasa(a.arg)
     elif a.action == "run-scan":
         if sync() == 0:
             print("nothing left to scan")

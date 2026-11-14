@@ -3,10 +3,13 @@
 Resumable, shardable and crash-tolerant:
   python -m pipeline.earth_scan --tiles <file or comma list> --raw-dir data/raw --out <parquet>
          [--shard i/N] [--workers K] [--keep-tiles] [--keep-all-cells]
+         [--dem copdem|nasadem] [--landcover worldcover|modis] [--modis-year YYYY]
 
 Per tile: pipeline.cells.earth_cells_for_tile (download, features, ESA WorldCover land cover), cache in
 <raw_dir>/cells/<tile>.parquet (tiles already cached are skipped; tiles that do not exist get a
 <tile>.missing marker), one log line with status and seconds. A failing tile is logged and the run goes on.
+With --dem nasadem and/or --landcover modis (job J17) the cache is <raw_dir>/cells/<tile>__<dem>_<landcover>.parquet
+so the sources never overwrite each other (the default Copernicus + WorldCover cache keeps its old name).
 A GeoTIFF that this run downloaded is deleted after processing unless --keep-tiles; tiles that were already
 on disk are never deleted. At the end the cached tables of the shard are merged into --out, keeping
 `valid` cells with water < 0.5 (missing water = no land-cover data, kept) and, unless --keep-all-cells,
@@ -64,33 +67,44 @@ def shard_tiles(tiles, shard):
     return [t for k, t in enumerate(tiles) if k % n == i], (i, n)
 
 
-def cache_path(raw_dir, tile, ext=".parquet"):
-    return os.path.join(raw_dir, CELLS_SUBDIR, tile + ext)
+def source_suffix(dem="copdem", landcover="worldcover"):
+    """'' for the default sources, else '__<dem>_<landcover>' (keeps per-tile caches of sources apart)."""
+    return "" if (dem, landcover) == ("copdem", "worldcover") else "__%s_%s" % (dem, landcover)
+
+
+def cache_path(raw_dir, tile, ext=".parquet", dem="copdem", landcover="worldcover"):
+    return os.path.join(raw_dir, CELLS_SUBDIR, tile + source_suffix(dem, landcover) + ext)
 
 
 def process_tile(args):
     """Worker: one tile -> cached parquet. Never raises; returns a log dict."""
-    tile, raw_dir, keep_tiles = args
+    tile, raw_dir, keep_tiles = args[:3]
+    dem, landcover, modis_year = (list(args[3:6]) + [None, None, None])[:3]
+    dem, landcover = dem or "copdem", landcover or "worldcover"
+    cp = lambda ext=".parquet": cache_path(raw_dir, tile, ext, dem, landcover)
     t0 = time.time()
     rec = {"tile": tile, "status": "", "n_cells": 0, "n_valid": 0, "seconds": 0.0, "error": ""}
     try:
         from .cells import earth_cells_for_tile
         from .io_earth import tile_path
-        if os.path.exists(cache_path(raw_dir, tile)):
-            n = pd.read_parquet(cache_path(raw_dir, tile), columns=["valid"])
+        if os.path.exists(cp()):
+            n = pd.read_parquet(cp(), columns=["valid"])
             rec.update(status="cached", n_cells=len(n), n_valid=int(n["valid"].sum()))
             return rec
-        if os.path.exists(cache_path(raw_dir, tile, ".missing")):
+        if os.path.exists(cp(".missing")):
             rec["status"] = "missing"
             return rec
-        tif = tile_path(tile, raw_dir)
+        tif = tile_path(tile, raw_dir, dem)
         had_tif = os.path.exists(tif)
-        df = earth_cells_for_tile(tile, raw_dir)
+        kw = {} if (dem, landcover) == ("copdem", "worldcover") else {"dem": dem, "landcover": landcover}
+        if modis_year:
+            kw["modis_year"] = modis_year
+        df = earth_cells_for_tile(tile, raw_dir, **kw)
         if df is None:
-            open(cache_path(raw_dir, tile, ".missing"), "w").close()
+            open(cp(".missing"), "w").close()
             rec["status"] = "missing"
         else:
-            out = cache_path(raw_dir, tile)
+            out = cp()
             df.to_parquet(out + ".part", index=False)
             os.replace(out + ".part", out)
             rec.update(status="done", n_cells=len(df), n_valid=int(df["valid"].sum()),
@@ -106,11 +120,11 @@ def process_tile(args):
     return rec
 
 
-def merge_cells(raw_dir, tiles, keep_all_cells):
+def merge_cells(raw_dir, tiles, keep_all_cells, dem="copdem", landcover="worldcover"):
     """Concatenate the cached tables of `tiles` and apply the land filter."""
     parts = []
     for t in tiles:
-        p = cache_path(raw_dir, t)
+        p = cache_path(raw_dir, t, dem=dem, landcover=landcover)
         if not os.path.exists(p):
             continue
         df = pd.read_parquet(p)
@@ -133,16 +147,22 @@ def main(argv=None):
     ap.add_argument("--keep-tiles", action="store_true", help="keep downloaded GeoTIFFs")
     ap.add_argument("--keep-all-cells", action="store_true", help="do not require bare >= 0.5 in the merge")
     ap.add_argument("--log", default="", help="CSV log (default <raw_dir>/cells/log_s<i>of<N>.csv)")
+    ap.add_argument("--dem", default="copdem", choices=["copdem", "nasadem"],
+                    help="elevation source: Copernicus GLO-30 (default) or NASA NASADEM (56 S - 60 N)")
+    ap.add_argument("--landcover", default="worldcover", choices=["worldcover", "modis"],
+                    help="land cover: ESA WorldCover 2021 (default) or MODIS IGBP from NASA GIBS")
+    ap.add_argument("--modis-year", type=int, default=None, help="MODIS IGBP year (default landcover.MODIS_YEAR)")
     a = ap.parse_args(argv)
 
     tiles, (si, sn) = shard_tiles(read_tile_list(a.tiles), a.shard)
     os.makedirs(os.path.join(a.raw_dir, CELLS_SUBDIR), exist_ok=True)
-    log_path = a.log or os.path.join(a.raw_dir, CELLS_SUBDIR, "log_s%dof%d.csv" % (si, sn))
+    log_path = a.log or os.path.join(a.raw_dir, CELLS_SUBDIR, "log%s_s%dof%d.csv"
+                                     % (source_suffix(a.dem, a.landcover), si, sn))
     new_log = not os.path.exists(log_path)
-    print("earth_scan: %d tiles (shard %d/%d), %d workers, keep_tiles=%s, log %s"
-          % (len(tiles), si, sn, a.workers, a.keep_tiles, log_path), flush=True)
+    print("earth_scan: %d tiles (shard %d/%d), %d workers, keep_tiles=%s, dem=%s, landcover=%s, log %s"
+          % (len(tiles), si, sn, a.workers, a.keep_tiles, a.dem, a.landcover, log_path), flush=True)
     t0, counts = time.time(), {}
-    jobs = [(t, a.raw_dir, a.keep_tiles) for t in tiles]
+    jobs = [(t, a.raw_dir, a.keep_tiles, a.dem, a.landcover, a.modis_year) for t in tiles]
     with open(log_path, "a", newline="", encoding="utf-8") as lf:
         w = csv.DictWriter(lf, fieldnames=LOG_FIELDS)
         if new_log:
@@ -167,7 +187,7 @@ def main(argv=None):
                 pool.join()
     print("tiles by status: %s; %.0f s" % (counts, time.time() - t0), flush=True)
 
-    df = merge_cells(a.raw_dir, tiles, a.keep_all_cells)
+    df = merge_cells(a.raw_dir, tiles, a.keep_all_cells, a.dem, a.landcover)
     if df is None:
         print("nothing to merge")
         return 1
