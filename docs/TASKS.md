@@ -14,7 +14,7 @@ Challenge: https://www.spaceappschallenge.org/2026/challenges/permanent-moon-bas
 What is already measured (do not redo; read `docs/RAPORT-ANALOGI-KSIEZYCA-ZODIAK.pdf`, 12 pages):
 - All data loads without an account: lunar 20 m DEM (NASA PGDA product 90), Copernicus DEM GLO-30 (AWS), ESA WorldCover.
 - The same feature code runs on both bodies (`analysis/discovery_test.py`). On a 160 x 160 km window around the lunar pole: 6,889 cells, median slope 5.11 deg at 240 m and 4.96 deg at 570 m, closed depressions cover 1.8% of cell area on average (29% of cells have more than 1%).
-- On 38 Earth tiles: slope and roughness alone let fluvial terrain through; **adding closed depressions removes false hits** (Tassili n'Ajjer 15% -> 1% of cells, Hoggar 12% -> 0%) while volcanic and polar terrain stays (Mauna Kea 24%, Devon Island 20%, Lanzarote 18%, Ellesmere 14%). Gradient coherence adds nothing. Hurst exponent and temperature are not scorable.
+- On 37 Earth tiles: slope and roughness alone let fluvial terrain through; **adding closed depressions removes false hits** (Tassili n'Ajjer 15% -> 1% of cells, Hoggar 12% -> 0%) while volcanic and polar terrain stays (Mauna Kea 24%, Devon Island 20%, Lanzarote 18%, Ellesmere 14%). Gradient coherence adds nothing. Hurst exponent and temperature are not scorable.
 - Other Space Apps teams already compute relief, slope percentiles and hypsometry on DEMs. Our differentiators: same estimator on both bodies validated against a NASA product, closed depressions, novelty filter, measured effectiveness, laser/lidar close-ups.
 
 ## 2. Rules for every job
@@ -99,13 +99,14 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 **Read**: `analysis/discovery_test.py` (functions `features`, `transform`, `maha`, lunar strip reader), `analysis/pilot_scan.py` (`tile_name`, `fetch`, `landcover`).
 **Do**:
 1. Create `pipeline/features.py`, `io_earth.py`, `io_moon.py`, `landcover.py` with the API in section 3. Move the code, do not redesign it. Add the `EXTRA` columns (`elev_med`, `relief`, `f_le5/8/15`); rename `aniso` to `coh`.
-2. `io_earth`: download with timeout, 3 retries and a `.part` file; `raw_dir` parameter so existing tiles can be reused (on Wiktor's machine: `scratch/data/copdem30/`, 38 tiles). Resample x so pixels are square. Return cell-centre lat/lon helpers.
+2. `io_earth`: download with timeout, 3 retries and a `.part` file; `raw_dir` parameter so existing tiles can be reused (on Wiktor's machine: `scratch/data/copdem30/`, 37 tiles, hard-linked into `data/raw/copdem30/`). Resample x so pixels are square. Return cell-centre lat/lon helpers.
 3. `io_moon`: strip-wise remote read with retries and `.npy` cache (on Wiktor's machine the polar window is cached at `scratch/data/ldem_pole_160km_30m.npy`). Verify `moon_xy` against the file CRS (IAU 30135, south polar stereographic, R = 1,737,400 m) with a round trip.
 4. `tests/test_features.py`: tilted plane gives the analytic `s240`; flat plane gives zeros and no NaN; a synthetic bowl gives `dep_frac > 0`; the 8 scored features equal `analysis.discovery_test.features` on a random surface (regression).
 5. `requirements.txt`, `LICENSE` (Apache-2.0), `pipeline/README.md` (10 lines: API and how to run the tests).
 6. Fixtures: `data/out/sample/earth_cells_sample.parquet` from tiles N35W112, N75W090, N52E016 with every contract column; `data/out/sample/moon_cells_sample.parquet` from a 30 x 30 km window at the pole.
 **Done when**: `pytest tests/ -q` is green; fixtures committed; on the cached polar window the medians reproduce `s240` 5.108, `s570` 4.956, `r200` 1.091, mean `dep_frac` 0.0184 (source: `analysis/discovery_test_results.txt`).
 **Owns**: `pipeline/` (the four modules, `__init__.py`, `README.md`), `tests/`, `requirements.txt`, `LICENSE`, `data/out/sample/`, `docs/sources/j1.md`.
+**Status: DONE (Sat 18:05).** Also provides `pipeline/cells.py`: `earth_cells_for_tile(tile, raw_dir)` and `moon_cells_for_window(region, xmin, ymin, xmax, ymax, raw_dir)` return DataFrames with exactly the contract columns. J2 and J3 call these instead of assembling tables. API notes: `pipeline/README.md`.
 
 ### J2 — Moon: target regions and reference populations  (high, 90 min, after J1)
 **Goal**: reference statistics for named south-pole regions, so a user can pick the target.
@@ -130,7 +131,7 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 ### J3 — Earth scan: tile selection and the big scan  (high, milestone 1 in 45 min, milestone 2 overnight, after J1)
 **Goal**: features for as much bare, non-flat land as the night allows, in a resumable and shardable run.
 **Do**: `pipeline/tiles.py` (selection) and `pipeline/earth_scan.py` (run).
-- **Milestone 1** (first): the 38 pilot tiles -> `data/out/earth_cells_pilot.parquet`, all valid land cells kept (vegetated ones too; they are the negative controls). Tile list: `SITES` in `analysis/pilot_scan.py`. Announce in Axis when it is pushed; J4, J6 and J7 are waiting for it.
+- **Milestone 1** (first): the 37 pilot tiles -> `data/out/earth_cells_pilot.parquet`, all valid land cells kept (vegetated ones too; they are the negative controls). Tile list: `SITES` in `analysis/pilot_scan.py`. Announce in Axis when it is pushed; J4, J6 and J7 are waiting for it.
 - **Selection for milestone 2** (coarse to fine, because flat deserts scored 0-3% and waste the budget): for every 1 x 1 degree land tile read (a) WorldCover at overview level -> bare fraction, (b) the GLO-30 overview (about 500 m) -> coarse median slope. Keep tiles with bare fraction >= 0.4 and coarse slope >= 1.0 deg; rank by closeness of the coarse slope to the lunar 4.96 deg; take the top 600. Always include: the pilot tiles, the tiles of `data/known_analogs.csv` (J8) and high-latitude ice-free land up to 82.75 N. Write the full ranked list to `tiles_scanned.csv` before scanning, so the choice is documented. Check that the COG really has overviews (`ds.overviews(1)`); if not, fall back to a decimated read.
 - WorldCover does not cover Antarctica or land north of 82.75 N: set `lc_source = "none"`, `bare = NaN`, keep the cells.
 - **Run**: `python -m pipeline.earth_scan --shard i/N --raw-dir data/raw --workers K`. Per tile: download, features, land cover, write `data/raw/cells/<tile>.parquet`, delete the GeoTIFF (keep with `--keep`). Skip tiles already done. Log failures and continue. At the end merge the shard into `data/out/earth_cells_s<i>of<N>.parquet` keeping cells with `water < 0.5` and (`bare >= 0.5` or no land cover).

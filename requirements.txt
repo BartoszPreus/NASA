@@ -1,0 +1,12 @@
+numpy
+scipy
+pandas
+pyarrow
+rasterio
+pyproj
+scikit-image
+matplotlib
+pillow
+reportlab
+requests
+pytest
