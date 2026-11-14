@@ -133,7 +133,7 @@ S += [Spacer(1, 40 * mm), para("Analogi Księżyca na Ziemi", TITLE),
       para("Drużyna Zodiak · NASA Space Apps Challenge 2026 · Poznań", SUB), Spacer(1, 6 * mm),
       para("Stan na sobotę 14.11.2026, ok. 17:15. Termin oddania: niedziela 15.11.2026, 13:30.", P),
       para("Wyzwanie: <i>Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars</i>. "
-           "Dla porównania opisana jest też ścieżka oficjalnie wybrana przez zespół: <i>Harmonization of MODIS and VIIRS Hot Spots</i>.", P),
+           "Wersja z 15.11.2026: usunięto opis drugiej, porzuconej ścieżki projektu; pozostałe liczby są ze stanu z 14.11.", P),
       Spacer(1, 8 * mm),
       para("<b>Jak czytać ten raport.</b> Liczby w rozdziałach 2, 3 i 6 pochodzą ze skryptów uruchomionych na danych "
            "(folder <font face='Arial-Bold'>analysis/</font> w repozytorium). Rozdział 4 streszcza przegląd literatury i dokumentacji; "
@@ -161,11 +161,10 @@ S += [para("1. Streszczenie i rekomendacja", H1),
           "spada z 15% do 1%; tereny wulkaniczne i polarne zostają.",
           "<b>Nowość:</b> w literaturze recenzowanej nie znaleźliśmy globalnego szukania analogów Księżyca po modelu wysokości. "
           "Inne zespoły Space Apps 2026 liczą jednak podobne cechy, więc same nachylenia nie są wyróżnikiem.",
-          "<b>Pożary jako plan B:</b> dane dla Polski to 8,6 MB bez konta, prosta harmonizacja zmniejsza błąd z 94,6 do 40,2 detekcji miesięcznie.",
       ]),
       para("Rekomendacja", H2),
-      para("Księżyc, jeśli zespół przełączy wyzwanie w portalu i jedna osoba weźmie odpowiedzialność za część naukową. "
-           "W przeciwnym razie pożary. Decyzja o zmianie wyzwania należy do właściciela zespołu (Bartosz)."),
+      para("Idziemy w analogi Księżyca. Warunki: zespół przełącza wyzwanie w portalu (robi to właściciel zespołu) "
+           "i jedna osoba bierze odpowiedzialność za część naukową."),
       para("Co jest nadal otwarte", H2),
       bullets([
           "Nowość kandydatów, którzy zostali po teście (Ellesmere, Kunlun, Altiplano, Gobi Ałtaj), nie była sprawdzana w literaturze.",
@@ -175,26 +174,14 @@ S += [para("1. Streszczenie i rekomendacja", H1),
       PageBreak()]
 
 # 2
-S += [para("2. Dwie ścieżki projektu", H1),
-      table([["", "Pożary (MODIS + VIIRS)", "Księżyc (analogi)"],
-             ["Wyzwanie", "sztywna specyfikacja: harmonizacja + aplikacja z kalendarzem, medianą i CSV", "otwarte: znaleźć i scharakteryzować nowe analogi, „surprise us”"],
-             ["Dane", "FIRMS, 8,6 MB dla Polski, bez konta (rok 2026 wymaga MAP_KEY)", "PGDA 108 MB + kafle DEM ok. 35 MB, bez konta"],
-             ["Co już działa", "pobranie, filtr, przelicznik per miesiąc, test na odłożonych latach", "cechy terenu, skan 38 kafli, ranking, maska pokrycia terenu"],
-             ["Do zrobienia", "cała aplikacja + lepsza harmonizacja", "większy skan, cechy topologiczne, mapa z kartami miejsc, filtr nowości"],
-             ["Największe ryzyko", "wynik podobny do innych zespołów", "pytania jury o wiarygodność metody; zmiana wyzwania"],
-             ["Mocne kryteria jury", "Impact, Validity, Relevance", "Creativity, Relevance"]], [30, 72, 72]),
-      para("2.1. Pożary: co sprawdziliśmy", H2),
-      bullets([
-          "Roczne pliki krajowe FIRMS: MODIS 2000–2025, VIIRS S-NPP 2012–2025. Pobranie 11 s, przetworzenie ok. 1 s.",
-          "72% wierszy VIIRS to źródła stałe (przemysł). Po filtrze zostaje 16 401 detekcji MODIS i 23 691 VIIRS.",
-          "Stosunek VIIRS/MODIS jest stabilny w sezonie (marzec 3,0; kwiecień 3,2) i rośnie w czasie z ok. 3 (2012–15) do 4,4–8,1 (2018–25).",
-          "Biebrza, kwiecień 2020: MODIS 57 detekcji, VIIRS 182; mediana pozostałych lat wynosi 0.",
-      ]),
-      table([["Wariant (test na latach 2024–2025)", "Błąd średni (detekcje/miesiąc)", "Korelacja"],
-             ["surowy MODIS", "94,6", "0,881"], ["jeden przelicznik k = 3,99", "56,0", "0,881"], ["przelicznik per miesiąc", "40,2", "0,935"]], [84, 50, 40]),
-      Spacer(1, 3 * mm),
-      para("Średnia obserwowana liczba detekcji VIIRS w latach testowych to 116,7 miesięcznie, więc najlepszy wariant ma nadal ok. 35% błędu. "
-           "Mnożnik zawodzi, gdy MODIS ma zero detekcji.", SMALL),
+S += [para("2. Stan projektu w chwili raportu", H1),
+      table([["", "Analogi Księżyca"],
+             ["Wyzwanie", "otwarte: znaleźć i scharakteryzować nowe analogi, „surprise us”"],
+             ["Dane", "PGDA 108 MB + kafle DEM ok. 35 MB, bez konta"],
+             ["Co już działa", "cechy terenu, skan 38 kafli, ranking, maska pokrycia terenu"],
+             ["Do zrobienia", "większy skan, cechy topologiczne, mapa z kartami miejsc, filtr nowości"],
+             ["Największe ryzyko", "pytania jury o wiarygodność metody; zmiana wyzwania w portalu"],
+             ["Mocne kryteria jury", "Creativity, Relevance"]], [36, 138]),
       PageBreak()]
 
 # 3
@@ -393,7 +380,6 @@ S += [para("9. Źródła", H1),
           "NASA PGDA 90, A New View of the Lunar South Pole from LOLA: https://pgda.gsfc.nasa.gov/products/90 · Barker i in. 2023, doi:10.3847/PSJ/acf3e1",
           "Copernicus DEM GLO-30 (ESA, DLR, Airbus), AWS Open Data: https://registry.opendata.aws/copernicus-dem/",
           "ESA WorldCover 2021 v200: https://registry.opendata.aws/esa-worldcover-vito/",
-          "NASA FIRMS, archiwa krajowe MODIS i VIIRS: https://firms.modaps.eosdis.nasa.gov/country/",
           "Biblioteki: numpy, scipy, rasterio, scikit-image, pandas, matplotlib, reportlab",
       ]),
       para("Literatura i dokumentacja (pełna lista ze statusem weryfikacji w KRYTERIA-DEEP-RESEARCH.md)", H2),
@@ -411,9 +397,9 @@ S += [para("9. Źródła", H1),
           "https://www.spaceappschallenge.org/2026/challenges/modis-and-viirs-hot-spots/",
       ]),
       para("Pliki w repozytorium", H2),
-      bullets(["docs/PODSUMOWANIE-KIERUNKOW.md: porównanie obu ścieżek.", "docs/moon-analogs/KRYTERIA-DEEP-RESEARCH.md: pełny katalog kryteriów i źródeł.",
+      bullets(["docs/PODSUMOWANIE-KIERUNKOW.md: co sprawdziliśmy na danych przed startem.", "docs/moon-analogs/KRYTERIA-DEEP-RESEARCH.md: pełny katalog kryteriów i źródeł.",
                "docs/moon-analogs/WYZWANIE-PELNA-TRESC-I-WYBOR-KRYTERIOW.md: treść wyzwania i wybór wymiarów.",
-               "analysis/: skrypty i surowe wyniki (validate.py, pilot_scan.py, discovery_test.py, fires_check.py, build_report.py)."])]
+               "analysis/: skrypty i surowe wyniki (validate.py, pilot_scan.py, discovery_test.py, build_report.py)."])]
 
 doc = SimpleDocTemplate(OUT, pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=16 * mm, bottomMargin=18 * mm,
                         title="Analogi Księżyca na Ziemi: raport zespołu Zodiak", author="Zodiak")

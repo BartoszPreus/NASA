@@ -140,7 +140,7 @@ J22 will name. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 3
 
 ## 7. Open items that need a person
 
-- Has the team owner switched the challenge on the website? `CLAUDE.md` still names the fires challenge in its title.
+- Has the team owner switched the challenge on the website?
 - Who answers the jury on the science; who deploys the app; who takes J7 and J11.
 - Night scan: yes or no, on how many machines.
 - Still unverified and needed for the README and slides: current Artemis programme status, the exact Copernicus DEM attribution sentence, the WorldCover licence.

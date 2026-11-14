@@ -14,14 +14,13 @@ Oznaczenia: **[FAKT]** = treść ze strony (tłumaczenie/streszczenie), **[WNIOS
 | 2025 Global Winners | https://www.spaceappschallenge.org/2025/awards/global-winners/ | — |
 | Event Poznań (Details + Schedule) | https://www.spaceappschallenge.org/2026/local-events/poznan/ | — |
 | Drużyna Zodiak | https://www.spaceappschallenge.org/2026/find-a-team/zodiak/ | — |
-| Wyzwanie: MODIS & VIIRS Hot Spots | https://www.spaceappschallenge.org/2026/challenges/modis-and-viirs-hot-spots/ | — |
 | Wyzwanie: Earth Analogs Moon/Mars | https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/ | — |
 
 ---
 
 ## 1. Nasz status (ze strony drużyny)
 - **Drużyna Zodiak:** 4 osoby. **Team Owner: Bartosz Preus**, Hubert Włodzimierz Woźniak, Wiktor Witczak, Oliwier Gołembiewski.
-- **Local Event:** Poznań. **Wybrane wyzwanie:** *Harmonization of MODIS and VIIRS Hot Spots*.
+- **Local Event:** Poznań. **Wybrane wyzwanie:** *Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars* (przełączenie na stronie Space Apps robi Team Owner).
 - Kontakt drużyny: Messenger/Instagram.
 - [FAKT] Idealna wielkość zespołu to 4–5 osób. Limit to 6, a członków można dodawać do 15.11, 23:59. Zespół może pracować tylko nad **jednym** wyzwaniem. Zmienić je może Team Owner (About → Edit Details).
 
@@ -51,7 +50,7 @@ Oznaczenia: **[FAKT]** = treść ze strony (tłumaczenie/streszczenie), **[WNIOS
 - Zgoda na publikację: NASA może pokazywać rozwiązanie, nasze imiona, miasto, zdjęcia i nagrania. Wideo musi być naszym oryginalnym dziełem bez naruszeń praw.
 - Spotkania na żywo odbywają się na własne ryzyko. Za nagrody lokalne odpowiada lokalny organizator.
 
-[WNIOSEK] W README repo: licencja (np. Apache-2.0), sekcja „Data & licenses” (FIRMS/NASA i każda biblioteka) i bez nazw firm w roli reklamy.
+[WNIOSEK] W README repo: licencja (np. Apache-2.0), sekcja „Data & licenses” (dane NASA i każda biblioteka) i bez nazw firm w roli reklamy.
 
 ## 4. Zgłoszenie: wymagania formalne
 [FAKT]
@@ -98,31 +97,11 @@ Oznaczenia: **[FAKT]** = treść ze strony (tłumaczenie/streszczenie), **[WNIOS
 | **Local Impact** | **największy potencjał wpływu lokalnego** |
 
 [FAKT] W 2025 było **ponad 11 500 zgłoszonych projektów**. **Local Impact 2025** wygrał zespół **QUEÑARIS (Arequipa, Peru)** z wyzwaniem obserwacji Ziemi (BloomWatch, fenologia kwitnienia). Projekt dotyczył monitoringu lokalnych lasów Polylepis pod system zalesiania.
-[WNIOSEK] Wzorzec zwycięzcy Local Impact: **globalne dane NASA zastosowane do konkretnego, lokalnego ekosystemu i problemu**, czyli dokładnie to, co możemy zrobić z pożarami w Polsce.
+[WNIOSEK] Wzorzec zwycięzcy Local Impact: **globalne dane NASA zastosowane do konkretnego, lokalnego ekosystemu i problemu**.
 
 ---
 
-## 7. Czego wymaga jury przy NASZYM projekcie (pożary MODIS/VIIRS)
-Z treści wyzwania [FAKT] zestawione z kryteriami:
-
-| Kryterium | Co według treści wyzwania jury będzie sprawdzać |
-|---|---|
-| **Relevance** | (1) **Harmonizacja** MODIS + VIIRS, żeby „sensor źródłowy przestał mieć znaczenie”. (2) **Aplikacja webowa** na zharmonizowanych danych. (3) **Kalendarz aktywności ognia od początku lat 2000 do dziś** dla wybranego obszaru. (4) Porównanie bieżącego miesiąca z **medianą historyczną**. Dane **FIRMS** muszą być rdzeniem |
-| **Validity** | Harmonizacja musi być **sensowna naukowo**: inne rozdzielczości, czułości i harmonogramy obserwacji sensorów. Aplikacja ma działać i być użyteczna dla odbiorców: służb wczesnego ostrzegania i ratowniczych, naukowców, zarządców terenu, strażaków |
-| **Impact** | Przewidywanie krytycznych okresów, ukierunkowanie monitoringu, lepsza reakcja na pożary. Wczesne ostrzeganie |
-| **Creativity** | Sposób harmonizacji, wizualizacji i odczytu anomalii |
-| **Presentation** | Pokazać, *dlaczego* harmonizacja jest potrzebna i co daje użytkownikowi |
-
-Opcjonalne sugestie z wyzwania [FAKT]: **interaktywna mapa z rysowaniem obszaru** albo wpisaniem lat/lon · **dostępne skale kolorów** · kalendarz ognia · historyczne porównania i **anomalie względem średnich wieloletnich** · liczba wykrytych i zgłoszonych pożarów · **CSV** z hotspotami.
-
-**Czy można się wyróżnić? Tak** [WNIOSEK]:
-1. **Pokazać walidację harmonizacji.** To bezpośrednio podnosi Validity i Best Use of Science.
-2. **Przełącznik „przed i po harmonizacji”.** Widać, że sensor przestaje mieć znaczenie, a to jest dosłowny cel wyzwania (Relevance).
-3. **Lokalny przypadek z Polski** jako główna historia. Wzorzec zwycięzcy Local Impact 2025.
-4. **Dostępność:** palety przyjazne daltonistom, które wyzwanie wymienia z nazwy.
-5. **Pełne wykonanie listy opcjonalnej:** rysowanie obszaru, anomalie, CSV. Większość drużyn zrobi tylko część.
-
-## 8. Czego wymaga jury przy porównywaniu danych (analogi Księżyca/Marsa)
+## 7. Czego wymaga jury przy porównywaniu danych (analogi Księżyca/Marsa)
 Z treści wyzwania [FAKT]:
 - Użyć **otwartych danych NASA o Ziemi + danych o Księżycu i Marsie** (także innych agencji).
 - **Zidentyfikować i scharakteryzować** miejsca na Ziemi będące analogami **kandydatów na stałą bazę księżycową albo miejsc lądowania i eksploracji na Marsie**.
@@ -134,7 +113,7 @@ Z treści wyzwania [FAKT]:
 
 [WNIOSEK] Tu Validity zależy od **jawnej, mierzalnej metryki podobieństwa** i uczciwego „gdzie się łamie”, a Creativity od **nieoczywistego miejsca**.
 
-## 9. Co jest kluczowe przy pitchu
+## 8. Co jest kluczowe przy pitchu
 [FAKT] z Judging Guide i Submission Guide:
 - Jasno przekazać **wyzwanie → rozwiązanie → dlaczego to ważne**. Storytelling ma być angażujący i uporządkowany.
 - Mówić tak, żeby zrozumiała to osoba **bez kontekstu, bez wiedzy technicznej i bez znajomości tematu**.
@@ -145,7 +124,7 @@ Z treści wyzwania [FAKT]:
 
 [WNIOSEK] Na scenie: demo na żywo na polskim przykładzie i jeden slajd „przed i po harmonizacji”. Na Q&A trzeba mieć gotowe odpowiedzi: jak liczymy przelicznik, jak walidujemy, czego nie umiemy.
 
-## 10. Jak zdobyć nagrodę lokalną (Poznań)
+## 9. Jak zdobyć nagrodę lokalną (Poznań)
 [FAKT]
 - Lokalne jury ocenia **według tych samych 5 kryteriów NASA** i wybiera Global Nominees.
 - Nagrody lokalne i sponsorskie są **opcjonalne i zależą od Local Leada**. Strona Poznania zapowiada ogłoszenie „local award winners, sponsor prizes, and official NASA Global Nominees” w niedzielę o 18:00.

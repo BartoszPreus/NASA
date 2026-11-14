@@ -2,7 +2,7 @@
 Wyzwanie: **Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars**
 https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/
 Stan: sob 14.11.2026, ok. 14:40. Deadline lokalny w Poznaniu: **ndz 15.11, 13:30**.
-⚠️ Drużyna Zodiak ma oficjalnie wybrane wyzwanie z pożarami (MODIS/VIIRS). Zmianę robi Team Owner (Bartosz) w About → Edit Details.
+⚠️ Na stronie Space Apps drużyna Zodiak ma jeszcze zapisane inne wyzwanie. Zmianę robi Team Owner (Bartosz) w About → Edit Details.
 
 ---
 ## 1. Czego chce NASA (z treści wyzwania)
@@ -94,7 +94,7 @@ LiDAR GUGiK (Morasko) ──► walidacja w drobnej skali, polska historia na pi
 | Mars za grubo (MOLA 463 m) | MVP tylko Księżyc. Mars najwyżej w skali kilometrowej |
 | Las i budynki w DEM Ziemi | Maska pokrycia terenu / priorytet terenów bez lasu. Lokalnie LiDAR bare-earth |
 | „Odkrywamy znane” (lekcja z wątku X) | Filtr na listę znanych analogów + ręczna weryfikacja top-5 w literaturze |
-| Czas (ok. 23 h) i zmiana wyzwania | Decyzja zespołu teraz. Jeśli nie, zostajemy przy pożarach |
+| Czas (ok. 23 h) i zmiana wyzwania | Decyzja zespołu: idziemy w analogi Księżyca |
 
 ## 9. Jak trafia w kryteria jury
 - **Relevance:** LOLA + Diviner (NASA, wprost w zasobach) w rdzeniu.

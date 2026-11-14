@@ -314,6 +314,6 @@ If time runs out, drop in this order: J21, part 4 of J20, the "Method and source
 - The film of the app: only when Wiktor asks.
 
 ## 8. Things only a person can do
-- Bartosz (team owner): switch the team's challenge on the Space Apps website. `CLAUDE.md` still names the fires challenge in its title.
+- Bartosz (team owner): switch the team's challenge on the Space Apps website.
 - Wiktor: open the evidence for the five sites that J22 lists; decide where the app is hosted; confirm on an LROC image that the lunar crater of J10 (87.68 S, 306.40 E) is fresh; decide whether to send the usage notice that NASA POWER asks for.
 - Everyone: be listed in the Poznan local event; slides at the info desk by Sun 13:30.

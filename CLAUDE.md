@@ -1,4 +1,4 @@
-# Zodiak - NASA Space Apps 2026 (Harmonization of MODIS and VIIRS Hot Spots)
+# Zodiak - NASA Space Apps 2026 (Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars)
 
 ## Coordination: GitHub issues (Axis is no longer used)
 Since Sat 14 Nov 2026, 23:20 the team does not use Axis. Do not call the `axis` MCP server: no claims, no file locks, no notes there. Jobs live as GitHub issues of this repository.
@@ -9,7 +9,7 @@ Since Sat 14 Nov 2026, 23:20 the team does not use Axis. Do not call the `axis` 
 4. Commit with explicit paths, `git pull --rebase origin main` before every push, never force-push, mention the issue number in the commit message.
 5. When done or stopping for any reason: comment the result on the issue (status, numbers, evidence, files, what is not done); close it when its Accept checks pass.
 
-Rules: never put secrets/API keys (e.g. FIRMS MAP_KEY), private e-mail addresses or session links in issues, commit messages or files. The repository becomes public at submission.
+Rules: never put secrets/API keys (e.g. an Earthdata password), private e-mail addresses or session links in issues, commit messages or files. The repository becomes public at submission.
 
 ## Contest rules that affect code (NASA Space Apps T&C)
 - Everything in English. Cite EVERY source (data, libraries, code) in README - missing citations can cost the award.

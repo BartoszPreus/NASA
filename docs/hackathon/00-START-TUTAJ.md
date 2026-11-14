@@ -12,10 +12,9 @@
 - Wszyscy z Zodiaka muszą być w Local Event **Poznań** (nie na waitliście).
 
 ## Shortlista (z naszej wcześniejszej oceny)
-1. **MODIS + VIIRS Hot Spots**: harmonizacja hotspotów FIRMS i kalendarz pożarów w aplikacji webowej. Konkretne, jedno źródło danych, dobre pod „Local Impact” (wypalanie traw w PL).
-2. **Field Shift**: narzędzie do płodozmianu dla rolników. Dużo danych, część tylko z USA, dla PL: Sentinel-2, ERA5, SMAP, NASA POWER.
-3. **Dancing with the SARs**: aplikacja do zmian powierzchni z NISAR. Pitch eko/klimat, np. osiadanie terenu albo powodzie w PL.
-4. ➕ **Earth System Trend Detective**: szeregi czasowe plus test Mann-Kendall. Czysty Python, łatwe do domknięcia w 26 h.
+1. **Field Shift**: narzędzie do płodozmianu dla rolników. Dużo danych, część tylko z USA, dla PL: Sentinel-2, ERA5, SMAP, NASA POWER.
+2. **Dancing with the SARs**: aplikacja do zmian powierzchni z NISAR. Pitch eko/klimat, np. osiadanie terenu albo powodzie w PL.
+3. ➕ **Earth System Trend Detective**: szeregi czasowe plus test Mann-Kendall. Czysty Python, łatwe do domknięcia w 26 h.
 - ❓ SPHEREx (niepewne). ❌ gry, Martian Map, Lunar Navigator, health monitoring.
 
 ## Struktura folderu

@@ -1,52 +1,14 @@
-# Pożary czy Księżyc? Podsumowanie obu ścieżek po sprawdzeniu na danych
+# Analogi Księżyca: co sprawdziliśmy na danych przed startem
 Drużyna Zodiak · stan: **sob 14.11.2026, ok. 15:45** · deadline: **ndz 15.11, 13:30** (zostało ok. 22 h)
 Skrypty i surowe wyniki: folder `analysis/`. Analizę zrobił Wiktor z Claude Code (SI), wszystkie liczby pochodzą z uruchomionych skryptów.
 
-## Rekomendacja
-**Idziemy w Księżyc (analogi), jeśli Bartosz przełączy wyzwanie do ok. 16:30. Jeśli nie, robimy pożary bez dalszego dyskutowania.**
+> Stan z soboty 14.11.2026. Zespół wybrał ścieżkę analogów Księżyca; opis drugiej rozważanej ścieżki usunięto 15.11. Aktualny stan projektu: `HANDOFF.md`, metoda: `METHOD.md`.
 
+## Wniosek z 14.11
 - **Dlaczego Księżyc:** najtrudniejsza część już działa. W jedno popołudnie powstał skan, który stawia znane analogi (Devon Island, Atakama, Svalbard) na górze, kontrole (pola, wydmy) na dole i wskazuje kilka miejsc spoza list znanych analogów. Nie znaleźliśmy nikogo, kto robi to samo. Wyzwanie mówi „surprise us” i wprost prosi o metryki podobieństwa oraz o to, gdzie analogia się łamie.
 - **Dlaczego to nie jest pewniak:** sam odcisk nachyleń nie wystarcza (pasują też zalesione góry), Hurst się nie nadaje, a temperatury i skał z Divinera jeszcze nie sprawdziliśmy. Na Q&A trzeba umieć uczciwie powiedzieć, co metoda mierzy, a czego nie.
-- **Dlaczego pożary są dobrym planem B:** dane pobierają się w 11 sekund bez konta, najprostsza harmonizacja już zmniejsza błąd o ponad połowę, a pożar Biebrzy z kwietnia 2020 widać w danych jak na dłoni. Ryzyko techniczne jest niskie, ale specyfikacja jest sztywna, więc wszystkie zespoły zrobią podobną aplikację.
-- **Co odwraca rekomendację:** nikt w zespole nie chce prowadzić części naukowej Księżyca, albo zmiana wyzwania w portalu jest niemożliwa.
 
-## Porównanie
-| | Pożary (MODIS + VIIRS) | Księżyc (analogi) |
-|---|---|---|
-| Wyzwanie | sztywna specyfikacja: harmonizacja + web app z kalendarzem, medianą, CSV | otwarte: znaleźć i scharakteryzować nowe analogi, „surprise us” |
-| Dane | FIRMS, 8,6 MB dla Polski, bez konta (rok 2026 wymaga MAP_KEY) | PGDA 108 MB + Copernicus DEM ok. 35 MB/kafel, bez konta |
-| Co już działa | pobranie, filtr, przelicznik per miesiąc, test na odłożonych latach | odcisk nachyleń, skan 38 kafli, ranking, filtr pokrycia terenu |
-| Główna praca do zrobienia | cała aplikacja (API, mapa, heatmapa) + lepsza harmonizacja | większy skan, 2–3 dodatkowe wymiary, mapa z kartami miejsc, filtr nowości |
-| Największe ryzyko | wyjdzie poprawnie, ale podobnie jak u innych | pytania o wiarygodność metody; zmiana wyzwania w portalu |
-| Kryteria jury | mocne: Impact, Validity, Relevance · słabsze: Creativity | mocne: Creativity, Relevance · słabsze: Validity, Impact |
-| Historia na pitch | Biebrza, kwiecień 2020 | „gdzie na Ziemi przećwiczyć lądowanie przy biegunie Księżyca” + Morasko jako kontrprzykład |
-
----
-## Ścieżka A: pożary — co sprawdziliśmy
-Skrypt: `analysis/fires_check.py`.
-
-- **Dostęp:** roczne pliki krajowe FIRMS, wzorzec `https://firms.modaps.eosdis.nasa.gov/data/country/{modis|viirs-snpp}/{ROK}/{sensor}_{ROK}_Poland.csv`. MODIS 2000–2025 (rok 2000 to tylko listopad–grudzień), VIIRS S-NPP 2012–2025. Bez konta i bez klucza. Plików dla NOAA-20/21 nie ma. Rok bieżący (2026) i dane z ostatnich dni wymagają darmowego MAP_KEY (rejestracja przez człowieka).
-- **Objętość:** 40 plików, 8,6 MB, 110 tys. wierszy (MODIS 24 228, VIIRS 85 902). Pobranie 11 s, przetworzenie ok. 1 s.
-- **Filtr jest konieczny:** 72% wierszy VIIRS to typ 2 (źródła stałe, przemysł). Po odrzuceniu ich i detekcji o niskiej pewności zostaje MODIS 16 401, VIIRS 23 691.
-- **Stosunek VIIRS/MODIS:** w sezonie stabilny (marzec: mediana 3,0, IQR 2,6–3,9; kwiecień: 3,2, IQR 2,8–3,75). Poza sezonem szum, bo MODIS widzi 0–6 detekcji w miesiącu.
-- **Dryf w czasie:** stosunek roczny rośnie z 2,6 (2012) i ok. 3,3 (2013–15) do 4,4–8,1 (2018–25). Prawdopodobna przyczyna to dryf orbity i starzenie się MODIS (to hipoteza, niesprawdzona). Przelicznik musi zależeć od czasu i to jest nasz możliwy wyróżnik naukowy.
-- **Test na odłożonych latach 2024–2025** (uczenie na 2012–2023, miesięczne liczby detekcji; średnio 116,7 VIIRS/miesiąc):
-
-| Wariant | MAE | Korelacja |
-|---|---|---|
-| surowy MODIS | 94,6 | 0,881 |
-| jeden przelicznik k = 3,99 | 56,0 | 0,881 |
-| przelicznik per miesiąc | 40,2 | 0,935 |
-
-- **Słabość mnożnika:** gdy MODIS ma 0 detekcji, przewidujemy 0, a VIIRS widzi wtedy 7–36. Potrzebny model, który radzi sobie z zerami.
-- **Biebrza, kwiecień 2020:** MODIS 57 detekcji, VIIRS 182. W pozostałych latach mediana kwietnia wynosi 0, a maksimum 5.
-
-**MVP na 15 h pracy (4 osoby):** kontrakt `grid_month`, harmonizacja z przelicznikiem zależnym od miesiąca i roku, FastAPI + DuckDB, mapa z rysowaniem obszaru, heatmapa lata × miesiące, anomalia względem mediany, CSV, przełącznik surowe/zharmonizowane. Pełny plan: `fires/MODIS-VIIRS-PLAN-PROJEKTU.md`.
-
-**Otwarte:** MAP_KEY dla roku 2026; sprawdzenie metody na drugim kraju; Polska ma mało detekcji, więc na demo warto mieć też region z dużą liczbą pożarów.
-
----
-## Ścieżka B: Księżyc — co sprawdziliśmy
+## Co sprawdziliśmy
 Skrypty: `analysis/validate.py`, `analysis/pilot_scan.py`. Wyniki: `analysis/pilot_scan_results.txt`.
 
 ### 1. Dane da się pobrać, bez konta
@@ -131,15 +93,9 @@ Pełna tabela 38 kafli: `analysis/pilot_scan_results.txt`.
 6. **Pitch:** testy lądowników i łazików + Morasko jako uczciwy kontrprzykład („krater pod Poznaniem nie jest księżycowy i umiemy pokazać dlaczego”).
 
 ---
-## Co trzeba zdecydować teraz
-1. **Bartosz:** czy przełączamy wyzwanie w portalu (About → Edit Details)? Tylko Team Owner może to zrobić.
-2. **Kto prowadzi część naukową** wybranej ścieżki i odpowiada na pytania jury.
-3. **Kto od razu zaczyna pitch.** NASA pisze wprost, że zespoły zaniedbują prezentację.
-
 ## Źródła
 - NASA PGDA 70: https://pgda.gsfc.nasa.gov/products/70 · pliki: http://imbrium.mit.edu/EXTRAS/FRACTAL/IMG/ · Rosenburg i in. 2011, doi:10.1029/2010JE003716
 - Kreslavsky i Head 2000, doi:10.1029/2000JE001259
 - Copernicus DEM GLO-30: https://registry.opendata.aws/copernicus-dem/
 - ESA WorldCover 2021 v200: https://registry.opendata.aws/esa-worldcover-vito/
-- NASA FIRMS, archiwa krajowe: https://firms.modaps.eosdis.nasa.gov/country/
-- Wyzwania: https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/ · https://www.spaceappschallenge.org/2026/challenges/modis-and-viirs-hot-spots/
+- Wyzwanie: https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/
