@@ -58,9 +58,13 @@ MAX_PARALLEL = 4
 TIMEOUT = 60
 UA = {"User-Agent": "space-apps-moon-analog-pipeline/1.0 (python-requests)"}
 
-# Candidate dates (15th of the month, 2025), local summer first.
-DATES_NORTH = ["2025-07-15", "2025-06-15", "2025-08-15", "2025-05-15", "2025-09-15"]
-DATES_SOUTH = ["2025-01-15", "2025-02-15", "2025-12-15", "2025-11-15", "2025-03-15"]
+# Candidate dates (15th of the month), local summer first: 2025, then 2024 and 2023 for the sites that are
+# under cloud on every 2025 date (job J19: the Arctic sites at the top of the ranking). The first image with
+# less than GOOD_ENOUGH cloud and no-data pixels wins, otherwise the clearest of all candidates.
+DATES_NORTH = ["2025-07-15", "2025-06-15", "2025-08-15", "2025-05-15", "2025-09-15",
+               "2024-07-15", "2024-08-15", "2024-06-15", "2023-07-15", "2023-08-15"]
+DATES_SOUTH = ["2025-01-15", "2025-02-15", "2025-12-15", "2025-11-15", "2025-03-15",
+               "2024-01-15", "2024-02-15", "2023-12-15", "2023-01-15", "2023-02-15"]
 LAYERS = ["MODIS_Terra_CorrectedReflectance_TrueColor",
           "VIIRS_SNPP_CorrectedReflectance_TrueColor"]
 BOX_DEG = 0.6

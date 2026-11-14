@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-14T22:45:44",
+ "generated": "2026-11-14T23:02:52",
  "job": "J24",
  "sampling": "the one pixel that holds the site centre; no averaging over the site",
  "sites": 118,
@@ -116,7 +116,7 @@
    "PFR": "PFR permafrost area fraction",
    "T2m": "T2m solid earth subsurface temperature"
   },
-  "ground_temp_chunks_wanted": 8,
+  "ground_temp_chunks_wanted": 4,
   "ground_temp_chunks_read": 4
  },
  "failed_reads": [],
@@ -277,10 +277,10 @@
     "p90": 100.0
    },
    "esa_ground_temp_2m": {
-    "n": 0,
-    "median": null,
-    "p10": null,
-    "p90": null
+    "n": 4,
+    "median": -6.03,
+    "p10": -13.55,
+    "p90": 1.98
    }
   },
   "ranked": {
@@ -358,10 +358,10 @@
     "p90": 100.0
    },
    "esa_ground_temp_2m": {
-    "n": 47,
-    "median": -6.76,
-    "p10": -16.19,
-    "p90": -1.68
+    "n": 51,
+    "median": -6.58,
+    "p10": -16.18,
+    "p90": -1.46
    }
   }
  },

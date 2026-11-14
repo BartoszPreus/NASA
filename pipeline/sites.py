@@ -37,8 +37,8 @@ import pandas as pd
 from scipy import ndimage
 
 from . import paths
-from .score import (BARE_MIN, DEFAULT_REGION, DEFAULT_TARGET, ICE_MAX, NAMED_REGIONS, P_MIN, WATER_MAX,
-                    load_cells, p_col, regression_table, score_all_regions)
+from .score import (DEM_POLICIES, BARE_MIN, DEFAULT_REGION, DEFAULT_TARGET, ICE_MAX, NAMED_REGIONS, P_MIN, WATER_MAX,
+                    load_cells, p_col, regression_table, score_all_regions, dem_policy_from_rule)
 
 MIN_CELLS = 4
 BASE_REGION_KM = 15.0          # NASA Artemis candidate regions are about 15 x 15 km
@@ -443,8 +443,16 @@ def main(argv=None):
     ap.add_argument("--compare-targets", nargs="*", default=None,
                     help="only tabulate candidates / sites / reference-tile ranks for these targets (all regions "
                          "when empty) into <out-dir>/target_comparison*.csv; no other output is written")
+    ap.add_argument("--dem-policy", default=None, choices=list(DEM_POLICIES),
+                    help="elevation model per tile: copdem, or nasa-first (NASADEM where its cells exist). Default: "
+                         "the outcome of the rule in pipeline.score.dem_policy_from_rule (job J19)")
     a = ap.parse_args(argv)
-    df, path = load_cells(a.cells)
+    rule_policy, rule = dem_policy_from_rule(target=a.target)
+    dem_policy = a.dem_policy or rule_policy
+    print("dem policy: %s (%s; rule: %s; Spearman %s, top-50 overlap %s)" % (
+        dem_policy, "set on the command line" if a.dem_policy else rule["reason"], rule["rule"],
+        rule.get("spearman_tile_share"), rule.get("top50_overlap")))
+    df, path = load_cells(a.cells, dem_policy=dem_policy)
     scored, regions = score_all_regions(df, a.raw_dir, target=a.target)
     print("cells: %s  rows %d  valid %d  target %s  regions %s  rank key %s" % (
         path, len(df), int(df["valid"].sum()), a.target, regions, RANK_KEYS[a.rank_key]))
@@ -478,7 +486,7 @@ def main(argv=None):
     add_context(sites, known, CountryLookup(), load_novelty())
     scored["site_id"] = site_of_row
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",
-            "bare", "veg", "ice", "artefact_flag"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]
+            "bare", "veg", "ice", "artefact_flag", "dem_source"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]
     os.makedirs(a.out_dir, exist_ok=True)
     # Full scored table stays local (it grows to hundreds of MB with the big scan and can be rebuilt from the
     # committed earth_cells_*.parquet in minutes). The committed file holds the cells worth looking at.
@@ -489,6 +497,7 @@ def main(argv=None):
     tbl = pa.Table.from_pandas(scored[keep], preserve_index=False)
     md = dict(tbl.schema.metadata or {})
     md[b"j18_target"] = a.target.encode()
+    md[b"j19_dem_policy"] = dem_policy.encode()
     tbl = tbl.replace_schema_metadata(md)
     pq.write_table(tbl, os.path.join(a.raw_dir, os.path.basename(paths.SCORED_FULL)))
     compact = scored[scored["candidate"] | (scored["p_all"] >= 0.05)]
@@ -511,6 +520,7 @@ def main(argv=None):
     bw = pd.Series([s["best_window_km2"] for s in sites], index=[s["tile"] for s in sites], dtype=float)
     ts["best_window_km2_max"] = ts["tile"].map(bw.groupby(level=0).max()).fillna(0.0).round(2)
     ts["target"] = a.target
+    ts["dem_source"] = ts["tile"].map(scored.groupby("tile")["dem_source"].first())
     tile_summary = (paths.TILE_SUMMARY if os.path.abspath(a.out_dir) == os.path.abspath(paths.SITES)
                     else os.path.join(a.out_dir, os.path.basename(paths.TILE_SUMMARY)))
     os.makedirs(os.path.dirname(tile_summary), exist_ok=True)

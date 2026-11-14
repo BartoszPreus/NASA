@@ -36,6 +36,11 @@ STAGES = [
      [paths.MOON_DIVINER, paths.MOON_INSTRUMENTS]),
     ("scan", "cloud", "Terrain features of every planned Earth tile, per ~2 km cell (the expensive stage; runs on the cloud runner).",
      [[PY, "-m", "pipeline.cloud", "run-scan"]], [paths.EARTH_CELLS]),
+    ("scan-nasa", "cloud", "The same features from NASA inputs (NASADEM elevation, MODIS land cover) for the tiles between "
+     "56 S and 60 N; feeds the DEM rule of the sites stage.",
+     [[PY, "-m", "pipeline.cloud", "run-scan-nasa"]], [paths.EARTH_CELLS_NASADEM]),
+    ("validate-dem", "local", "NASA inputs against ESA inputs: features, bare mask, tile ranking (decides the DEM rule).",
+     [[PY, "validation/nasadem_vs_copdem.py"]], [paths.VALIDATION_NASADEM]),
     ("sites", "local", "Score every cell against the lunar reference, group candidate cells into sites, rank, add novelty flags.",
      [[PY, "-m", "pipeline.sites"]], [paths.SITES_GEOJSON, paths.RANKING, paths.SCORED_COMPACT, paths.TILE_SUMMARY]),
     ("novelty", "curated", "Literature verdict for the top unflagged sites (job J9; a person confirms the top five).",

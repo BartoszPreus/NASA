@@ -1,62 +1,79 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 19:50, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 23:20, by the conductor session (Claude Code, Fable) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
-## 0. START HERE (state at 19:50, Sat 14 Nov)
+## 0. START HERE (state at 23:20, Sat 14 Nov)
 
-**UPDATE 20:10: J17 and J18 were stopped on Wiktor's order. Their progress is committed and pushed (`52b429d` J17, `6289690` J18, `cf6dcab` outputs and catalogue). This block supersedes the "In flight" list and the "NOT committed" sentence below.**
-- **Both jobs are released in Axis and free to take.** What is done, what is left and the next commands: `docs/sources/j17.md`, `docs/sources/j18.md`, and the "State" paragraph of J18 in `docs/TASKS.md` section 5. Tests: 21 passed; every changed CLI starts.
-- **J18 left:** a full run of the new `python -m pipeline.sites`, the choice of ranking key on numbers, enrichment against `base_regions`. Finding so far: changing the lunar target does not demote the sand seas; the rule `relief / r200` below the lunar 5th percentile does (98.5% of sand-sea candidate cells against 5% of lunar cells) but also flags Devon Island tile N75W090 (62.8%).
-- **J17 left:** cloud run **43628647578** (`witczakw/moon-scan-runner`) FINISHED, 10 of 10 shards green, 76 MB of artifacts `cells-nasa-0..9`, kept 30 days. A download to `data/raw/cloud/43628647578/` (git-ignored) was started at 20:00 and may be incomplete. Nothing of it is ingested or in the repo yet. Run: `python -m pipeline.cloud download 43628647578`, `python -m pipeline.cloud ingest-nasa 43628647578`, `python validation/nasadem_vs_copdem.py`; then the recommendation and the licence checks.
-- **`data/sites/*` and `data/earth/tiles/tile_summary.csv` in the repo are now the full-scan run of the method BEFORE J18** (target `polar_160km`, key `weighted_area_km2`, 4,593 sites, sand seas on ranks 1-4). Not a result to present; the J18 run replaces them.
-- **Commit rule (Wiktor, 14 Nov): no `Claude-Session:` line or any session link in a commit, no keys, tokens or private e-mail addresses in the repo.** History was rewritten at about 19:45 to remove them, so every hash before `def42fd` changed: a clone made earlier should be replaced by a fresh clone (copy uncommitted files over).
-- Axis at 20:10: J21 is claimed by `codex-nasa-space-app`; J7, J11, J19, J20, J22, J23 are unclaimed.
+**The method is complete end to end and the final ranking is in the repo.** Read `docs/METHOD.md` (ten steps,
+the data source of each, the two decisions, the limits): it is the text the README and the pitch quote.
 
-**UPDATE 20:15:** J18's full-scan run and acceptance checks are now complete; the new `base_regions` ranking replaces the pre-J18 files above. The chosen key is `best_window_km2`; the dune flag moves the four named sand-sea tiles beyond the top 50 and also flags Devon Island N75W090. Counts, key comparison, rank changes and enrichment results are in `docs/sources/j18.md`. The full test suite passes (21 tests), and `python -m pipeline.run sites validate-enrichment catalog` exited 0 for all three stages. This update supersedes the earlier J18 remaining-work notes.
-- Current Axis state: J18 and J21 complete; J17 is in progress under `nasa-windows-worker`; J19 still depends on J17. J21 run `43631874981` succeeded, all 8 sites passed, and its outputs are integrated.
-- The J18 top ranking is Arctic-heavy, and this machine's country/place lookup is empty for those rows. Treat the rows as candidates pending the map review in J19/J22; do not describe them as discoveries.
+**What is in the repo now.**
+- **Ranking of the full scan** (2,101 tiles, 1.76 million cells): `data/sites/ranking.csv` (200 sites),
+  `sites.geojson` (3,175 sites, 521 with the dune-field flag), target `base_regions`, ranking key
+  `best_window_km2`. Computed by J18 on one machine and reproduced by J19 on another: same sites, same order,
+  same numbers.
+- **Review of the top 30**: `data/sites/top30_review.csv`, images `docs/figures/top30_sheet_1..3.png`. 26 not
+  artefacts, 4 unsure (haze or cloud on every image), no sand sea, lake bed, salt flat or glacier. **The top 30
+  is a handful of places:** 16 sites on the Putorana Plateau (Siberia), 5 in southern Peary Land (north
+  Greenland), 5 in Arctic Canada, then the Polar Urals, Chukotka, Atacama (rank 8) and Mauna Loa (rank 24).
+  Present regions, not ranks. The verdicts come from an SI model; a person has not looked yet.
+- **Which elevation model feeds the ranking is a rule in code** (`pipeline.score.dem_policy_from_rule`): NASADEM
+  where it exists if the comparison of J17b passes (Spearman of the per-tile candidate share at least 0.90 and
+  at least 35 of the top 50 tiles shared), else Copernicus. **It returns Copernicus now, because the comparison
+  has not been run** (job J17b, claimed by `nasa-windows-worker` at 22:22). The NASADEM cells of 619 tiles are in
+  `data/earth/cells_nasadem/`.
+- **Context for the new ranking**: NASA POWER for the top 150 sites, a NASA Worldview image for the top 60
+  (`data/sites/nasa_context.csv`, `data/sites/images/`); measured surface temperature (JAXA, NASA MODIS), soil
+  moisture (JAXA) and permafrost (ESA) for 118 sites (`data/sites/partner_context.csv`, job J24).
+- **Challenge resources**: 8 of the 11 links are used (`data/sources.csv`): all five NASA links, Copernicus, the
+  ESA Open Science Catalog, JAXA G-Portal. The three Canadian links are not; jobs J27 and J28.
+- **One entry point**: `python -m pipeline.run --list`. Tests: `python -m pytest tests -q`, 33 pass.
+  New dependency since 22:50: `numcodecs` (`pip install -r requirements.txt`).
 
-**Done since 19:00 and pushed.**
-- **Data layout v2 (J16).** Everything lives in `data/reference`, `data/moon`, `data/earth/cells`, `data/earth/tiles`, `data/sites`, `data/validation`, `data/sample`; `data/out/` is gone. Every script takes its paths from `pipeline/paths.py`. The catalogue is generated: `python -m pipeline.catalog` writes `data/README.md` (open this first), `data/catalog.csv` (every file and the command that makes it) and `data/sources.csv` (every external source, all 11 challenge links, with status).
-- **Full Earth scan (J3).** 2,101 tiles: `data/earth/cells/pilot.parquet`, `known.parquet`, `scan_s00of20.parquet` ... `scan_s19of20.parquet` (1.76 million cells, 97 MB, all in the repo). Ran on GitHub Actions (run 43623650020 in `witczakw/moon-scan-runner`), 2,023 of 2,023 tiles done, no errors. Nobody has to scan again.
-- **All LRO instruments (J13, J15).** `data/moon/instruments/`: Diviner (two products), LOLA shadow and illumination, Mini-RF, LEND, LAMP, LROC quicklooks, per region.
-- **NASA Earth context (J12).** `data/sites/nasa_context.csv` (NASA POWER) and `data/sites/images/` (Worldview).
-- **One entry point.** `python -m pipeline.run --list`; cloud execution with `python -m pipeline.cloud ...` and the workflows in `cloud/`.
+**What to do when J17b delivers `data/validation/nasadem_vs_copdem.json`.**
+`python -m pipeline.run sites validate-enrichment context partner-context catalog`, then read the first line
+of the newest `data/raw/run_logs/sites_*.log`. If it says `dem policy: nasa-first`, the ranking has changed:
+run `python -m pipeline.review`, look at the three sheets again, fill in `top30_review.csv`, update the numbers
+in `docs/METHOD.md` and here. If it says `copdem`, only write the two numbers into `docs/METHOD.md`.
 
-**The finding that drives the current work.** On the full scan the ranking put SAND SEAS on top (Niger 15.5 N 13.5 E; Rub' al Khali 17.5-18.5 N, 46-48 E): slopes of about 2 deg, bare ground, and hollows between dunes that count as closed depressions, all inside the broad 90% envelope of the reference `polar_160km`; the ranking key (similarity-weighted area) then rewards their size. The files `data/sites/ranking.csv`, `sites.geojson`, `scored_compact.parquet` and `data/earth/tiles/tile_summary.csv` in the working tree hold that flawed full-scan ranking and are NOT committed; the committed versions are still the 78-tile ones. Do not show either as final.
+**What is left** (specs: `docs/TASKS.md` section 5 and `docs/TASKS-PARTNER-DATA.md`; all on the Axis board):
+J17b comparison of the two elevation models (in progress, another agent) · J20 validation on the full scan ·
+J22 literature check of the top regions (start with Putorana Plateau, Peary Land, Hazen Plateau), ends with a
+person opening the evidence · J7 web app (`app/` is Wiktor's prototype, still uncommitted on his machine) ·
+J11 README, pitch, submission texts (no `README.md` exists yet) · J25 show the measured surface data in the site
+card and cite it · J26 test the dune-field flag against temperature and moisture · J27 radar look with CSA
+RADARSAT-1 · J28, J29 optional · J23 fresh-clone check and freeze, Sun 08:30.
 
-**In flight** (workers of the conductor session; on a context reset their reports are lost, their files are not):
-- **J18, algorithm fix.** Default target becomes `base_regions` (the seven named Artemis-candidate regions pooled; they are much steeper than the polar average) with `--target` selectable; measure what that does to the sand seas and to the known analogs; a terrain-based sand-sea flag if the existing columns allow one; a ranking key that does not reward sheer size (capped area or best 15 x 15 km window); `validation/enrichment.py` rewritten with a KD-tree so it runs on 1.3 million bare cells. Files: `pipeline/moon_reference.py`, `score.py`, `sites.py`, `validation/enrichment.py`, `data/moon/reference.json`, `data/sites/*`, `docs/sources/j18.md`. Verify: `python -m pytest tests -q`; `python -m pipeline.score --target polar_160km` must still print the old regression table; read the before/after tables in `docs/sources/j18.md`; look at the top 20 of the new `ranking.csv` on a map before believing it.
-- **J17, NASA data at the core of the Earth side.** `--dem nasadem|copdem` (NASADEM GeoTIFFs without login from OpenTopography's public bucket or Planetary Computer; exists only between 56 S and 60 N) and `--landcover modis|worldcover` (MODIS IGBP land cover through NASA GIBS); a cloud rescan of the non-polar tiles into `data/earth/cells_nasadem/`; comparison in `validation/nasadem_vs_copdem.py` -> `data/validation/nasadem_vs_copdem.json`. Files: `pipeline/io_earth.py`, `landcover.py`, `cells.py`, `earth_scan.py`, `cloud/earth-scan-nasa.yml`. Verify: default behaviour unchanged (tests green; one cached tile gives identical cells), then decide whether NASADEM becomes the primary DEM below 60 deg latitude.
-- **J14 is closed as BLOCKED** (the SlideRule client fails on Windows for 20 km boxes; no laser data was obtained; the script `validation/icesat2_profiles.py` is committed). Its replacement is **J21**: the same script on the cloud runner with 5 km boxes.
+**How to talk about the result** (details in section 9): the method finds terrain of a lunar shape; it is not a
+detector of the sites people chose. Known analogs lie in more lunar-like ground than random places (median
+enrichment 0.91 against 0.35) but below the average bare cell (0.91 is under 1). The top of the ranking is
+Arctic plateau terrain whose "bare ground" is partly tundra. The coldest site is still about 94 K warmer than
+the warmest lunar region. Nothing is called a discovery before J22.
 
-**Exact specifications of everything that is left: `docs/TASKS.md`, section 5** (J17, J19 final configuration and ranking, J20 validation on the full scan, J22 novelty check, J7 web app, J11 README and pitch, J23 freeze). Each spec has inputs, outputs and acceptance checks, so any capable model can take one. Order and timeline: section 6 there. The same jobs are on the Axis board.
+**Rules.** No `Claude-Session:` line or any session link in a commit; no keys, tokens or private e-mail
+addresses in the repo (Wiktor, 14 Nov; history was rewritten at about 19:45, so a clone made earlier must be
+replaced by a fresh one). Every analysis through code in the repo; heavy stages on the cloud runner
+(`python -m pipeline.cloud ...`, private repo `witczakw/moon-scan-runner`). Axis for every job and file
+(`CLAUDE.md`). Wiktor presents; he wants a film of the app later: do not prepare it until he asks.
 
-**After J18 and J17 are committed (this is job J19).**
-1. `python -m pipeline.run sites validate-enrichment context catalog`, then commit `data/sites/`, `data/earth/tiles/tile_summary.csv`, `data/validation/enrichment.json`, the catalogue.
-2. Novelty pass (as J9) on the new top unflagged sites; update `docs/VALIDATION.md` section 0 and `docs/HANDOFF.md` section 9 with the full-scan numbers.
-3. J7 web app: Wiktor confirmed the prototype in `app/` is his and may be taken over. Commit `app/`, point `app/build_data.py` at `data/sites/`, `data/moon/`, `data/validation/`, then the J7 scope in `docs/TASKS.md` (site card with the Diviner / POWER temperature gap, instrument quicklooks, Worldview image).
-4. J11 pitch and submission: Wiktor presents. He wants a film of the app made with "hyper frames": do NOT prepare it until he asks.
-
-**Decisions Wiktor made on 14 Nov.** Scan in the cloud on his account. Every NASA source of the challenge page is to be used (audit: `docs/moon-analogs/AUDYT-ZRODEL-DANYCH.md`; `data/sources.csv`). The algorithm must be finished and rest on data from NASA's sites (J17). Data sorted into folders with a catalogue (done). Every analysis through code in the repo, heavy stages in the cloud, no ad hoc terminal analysis.
-
-**People still owe.** Open the evidence for five sites (`docs/NOVELTY.md`); after J18 the list of sites will change, so wait for the new ranking. Bartosz: switch the challenge on the website. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 306.40 E) is fresh.
+**People still owe.** Bartosz: switch the team's challenge on the Space Apps website; make the repository public
+before submission, after deciding what to do with `docs/hackathon/` (it holds a private e-mail address of the
+Local Lead and a summary of Wiktor's mailbox). Someone: look at the three contact sheets and at the five sites
+J22 will name. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 306.40 E) is fresh.
 
 ## 1. Where things stand
 
 | Job | State |
 |---|---|
-| J1 pipeline, J2 lunar regions, J3 Earth scan (2,101 tiles), J5 NASA-product check, J6 effectiveness (on 78 tiles), J8 known analogs, J10 lidar, J12 NASA POWER + Worldview, J13 Diviner + LOLA from PDS, J15 LRO instruments, J16 layout and catalogue | **done and pushed** |
-| J4 scoring and sites | final full-scan results from J18; default target `base_regions`, key `best_window_km2` |
-| J9 novelty check | done for the 78-tile ranking; to be repeated on the new ranking; a person opens the evidence |
-| J17 NASA Earth core | partly implemented; cloud artifacts still need to be ingested and compared (section 0) |
-| J18 algorithm fix | **done**; full-scan results and caveats in `docs/sources/j18.md` |
-| J14 ICESat-2 | blocked; replaced by J21 |
-| J19 final configuration, J20 validation, J22 novelty, J23 freeze | to do; exact specs in `docs/TASKS.md` section 5 |
-| J21 ICESat-2 | **done**; run 43631874981, 8/8 sites passed; results in `docs/sources/j14.md` |
-| J7 app, J11 pitch | not started (section 0) |
+| J1 pipeline, J2 lunar regions, J3 Earth scan (2,101 tiles), J5 NASA-product check, J6 effectiveness (78 tiles), J8 known analogs, J10 lidar, J12 NASA POWER + Worldview, J13 Diviner + LOLA from PDS, J15 LRO instruments, J16 layout and catalogue, J18 algorithm fix, J21 ICESat-2 (8 sites), J24 partner data | **done and pushed** |
+| J19 final configuration and ranking | **done**; `docs/METHOD.md`, `docs/sources/j19.md`; to be revisited only if J17b switches the elevation model |
+| J17 NASA Earth core | code and NASADEM cells done; the comparison is J17b, in progress under `nasa-windows-worker` |
+| J9 novelty check | done for the old 78-tile ranking only; replaced by J22 |
+| J14 ICESat-2 on Windows | blocked; replaced by J21 (done) |
+| J20, J22, J7, J11, J25, J26, J27, J23 | to do |
+| J28, J29 | optional |
 
 ## 2. How the conductor works here
 
@@ -150,6 +167,25 @@ When the artifacts are on disk:
 Selection funnel behind `tiles_scanned.csv`: 26,450 GLO-30 tiles -> 18,836 with WorldCover land -> 3,763 with bare fraction >= 0.4 and ice < 0.5 -> 1,408 with coarse slope >= 1.0 deg. Scan priority: 0 = pilot and known-analog tiles (78, done), 1 = every non-polar tile that passes (558: Central Asia/Tibet 232, Sahara/Arabia 160, Americas 136, southern Africa 11, other 9), 2 = Arctic tiles that pass (826; tundra counts as bare, so it would dominate a rank-only list), 3 = flatter polar tiles (639). No Australian tile passes; Antarctica and land north of 82.75 N have no WorldCover. Say this bias out loud in the write-up.
 
 ## 9. What the validation says, and how to talk about it (read before writing the pitch)
+
+**Full scan, final method (14 Nov, 23:20; `data/validation/enrichment.json`, `docs/sources/j18.md`, `j19.md`).
+These numbers replace the 78-tile ones below wherever both exist.**
+- **Known analogs against random places**: 35 known sites could be tested; 15 lie above the base rate; median
+  enrichment 0.91. Random circles of the same radii: 0.35 (5 to 95%: 0.13 to 0.74); 2% of 500 repeats reach 0.91.
+  So known analogs sit in more lunar-like ground than random places, and still slightly below the average bare
+  cell of the scanned tiles. On 78 hand-picked tiles the same test gave 1.80: that number was optimistic and
+  must not be quoted for the full scan.
+- **The two lunar targets cannot be told apart by this test**: 0.91 (15 of 35) for the seven candidate regions
+  pooled, 0.97 (16 of 35) for the 160 km polar window. The pooled target is a choice of definition.
+- **Sand seas**: without the dune-field flag they hold the top ranks under every target; with it they are outside
+  the top 50. The flag also catches part of Devon Island, a real analog (rank 1,486 to 2,820 for tile N75W090).
+- **Laser against grid** (ICESat-2, 8 sites): the laser slope at 240 m is 0.43 to 1.16 times the grid slope,
+  median 0.87; the three lowest are lava fields. Footprints differ (a 20 km box against the site outline).
+- **Two elevation models**: on one tile NASADEM is 1.56 times rougher at 200 m than Copernicus; the comparison
+  at scale is not done (J17b).
+- **Top of the ranking**: Arctic plateaus (section 0). The closed-depression share of all top-30 sites is zero
+  in the median cell, so the lake artefact of the 78-tile ranking is not what puts them there; vegetation (tundra
+  counted as bare) is the weak point instead.
 
 Holds up:
 - **Our code matches NASA's lunar slope map**: median absolute difference 0.042 deg (20 m) and 0.064 deg (30 m) for a plane-fit slope at 200 m. This validates the data handling and a plane-fit estimator written for the test, not the two-point slopes used for scoring.

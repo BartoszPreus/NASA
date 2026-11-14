@@ -212,7 +212,7 @@ def ingest_nasa(run_id):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Cloud execution of heavy stages (GitHub Actions runner repository).")
     ap.add_argument("action", choices=["sync", "dispatch", "wait", "download", "ingest-scan", "ingest-nasa", "run-scan",
-                                       "tiles-left"])
+                                       "run-scan-nasa", "tiles-left"])
     ap.add_argument("arg", nargs="?", help="workflow name for dispatch, run id for wait/download/ingest-scan")
     a = ap.parse_args(argv)
     if a.action == "tiles-left":
@@ -237,6 +237,13 @@ def main(argv=None):
         wait(rid)
         download(rid)
         ingest_scan(rid)
+    elif a.action == "run-scan-nasa":
+        # the rescan of the tiles inside NASADEM coverage with NASA inputs (cloud/earth-scan-nasa.yml, job J17)
+        sync()
+        rid = dispatch("earth-scan-nasa")
+        wait(rid)
+        download(rid)
+        ingest_nasa(rid)
 
 
 if __name__ == "__main__":

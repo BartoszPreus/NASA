@@ -238,10 +238,52 @@ def default_cells_path():
     return pilot if os.path.exists(pilot) else paths.SAMPLE_EARTH_CELLS
 
 
-def load_cells(spec=None):
+# Which elevation model feeds the ranking (job J19). The rule is fixed here and evaluated on the numbers of
+# validation/nasadem_vs_copdem.py (job J17), not chosen by hand:
+#   NASADEM (with MODIS land cover) is primary for the tiles it covers, 56 S - 60 N, if the two inputs give the
+#   same picture: Spearman correlation of the per-tile candidate share >= 0.90 AND at least 35 of the top 50
+#   tiles in common. Otherwise, or while the comparison has not been run against the current scoring target,
+#   Copernicus (with WorldCover) stays primary and NASADEM is reported as a cross-check.
+DEM_POLICIES = ("copdem", "nasa-first")
+DEM_RULE = {"min_spearman_tile_share": 0.90, "min_top50_overlap": 35}
+
+
+def dem_policy_from_rule(path=None, target=None):
+    """Evaluate the DEM rule. Returns (policy, details); details says which numbers decided and why."""
+    path = path or paths.VALIDATION_NASADEM
+    target = target or DEFAULT_TARGET
+    out = {"rule": "nasa-first if spearman_tile_share >= %(min_spearman_tile_share).2f and top50_overlap >= "
+                   "%(min_top50_overlap)d, else copdem" % DEM_RULE, "comparison": paths.rel(path),
+           "scoring_target": target, "policy": "copdem"}
+    if not os.path.exists(path):
+        out["reason"] = "the comparison file does not exist yet (job J17): Copernicus stays primary"
+        return "copdem", out
+    with open(path, encoding="utf-8") as f:
+        js = json.load(f)
+    r = js.get("ranking_nasa_vs_esa") or {}
+    rho, top = r.get("spearman_tile_share"), r.get("top50_overlap")
+    compared = (js.get("target") or {}).get("region")
+    out.update(spearman_tile_share=rho, top50_overlap=top, comparison_target=compared, n_tiles=r.get("n_tiles"))
+    if compared != target:
+        out["reason"] = ("the comparison was scored against %r, the ranking against %r: rule not evaluated, "
+                         "Copernicus stays primary" % (compared, target))
+    elif rho is None or top is None:
+        out["reason"] = "the comparison file has no tile-level numbers: Copernicus stays primary"
+    elif rho >= DEM_RULE["min_spearman_tile_share"] and top >= DEM_RULE["min_top50_overlap"]:
+        out.update(policy="nasa-first", reason="both thresholds met: NASADEM is primary where it exists")
+    else:
+        out["reason"] = "threshold not met (Spearman %.3f, top-50 overlap %d): Copernicus stays primary" % (rho, top)
+    return out["policy"], out
+
+
+def load_cells(spec=None, dem_policy=None):
     """Load Earth cells. spec: None = every data/earth/cells/*.parquet (pilot, known-analog tiles, scan shards),
     falling back to the sample fixture; otherwise a parquet path, a glob, or a comma list of both.
-    Tables are concatenated and de-duplicated on (tile, row, col). Returns (DataFrame, description)."""
+    Tables are concatenated and de-duplicated on (tile, row, col). Returns (DataFrame, description).
+
+    dem_policy (only when spec is None): "copdem" = Copernicus cells for every tile; "nasa-first" = a tile's cells
+    come from data/earth/cells_nasadem/ (NASADEM + MODIS land cover) when the tile is there, from
+    data/earth/cells/ otherwise; None = the outcome of dem_policy_from_rule(). Every row gets `dem_source`."""
     import glob
     if spec is None:
         files = paths.earth_cell_tables() or [default_cells_path()]
@@ -251,7 +293,24 @@ def load_cells(spec=None):
             files += sorted(glob.glob(part)) or [part]
     df = pd.concat([pd.read_parquet(q) for q in files], ignore_index=True)
     df = df.drop_duplicates(["tile", "row", "col"], keep="first").reset_index(drop=True)
-    return df, "%d file(s): %s" % (len(files), ", ".join(os.path.basename(q) for q in files))
+    what = "%d file(s): %s" % (len(files), ", ".join(os.path.basename(q) for q in files))
+    if "dem_source" not in df.columns:
+        df["dem_source"] = "copdem"
+    df["dem_source"] = df["dem_source"].fillna("copdem")
+    if spec is not None:
+        return df, what
+    policy = dem_policy or dem_policy_from_rule()[0]
+    if policy not in DEM_POLICIES:
+        raise ValueError("dem_policy must be one of %s, got %r" % (DEM_POLICIES, policy))
+    if policy == "nasa-first":
+        nasa_files = sorted(glob.glob(os.path.join(paths.EARTH_CELLS_NASADEM, "*.parquet")))
+        if nasa_files:
+            nasa = pd.concat([pd.read_parquet(q) for q in nasa_files], ignore_index=True)
+            nasa = nasa.drop_duplicates(["tile", "row", "col"], keep="first")
+            nasa["dem_source"] = nasa["dem_source"].fillna("nasadem") if "dem_source" in nasa else "nasadem"
+            df = pd.concat([df[~df["tile"].isin(set(nasa["tile"]))], nasa], ignore_index=True)
+            what += "; %d NASADEM file(s), %d tiles taken from them" % (len(nasa_files), nasa["tile"].nunique())
+    return df, what + "; dem policy %s" % policy
 
 
 def main(argv=None):

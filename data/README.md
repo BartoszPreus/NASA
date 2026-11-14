@@ -25,13 +25,13 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | ?, 6 rows, 795 B | `UNKNOWN` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 13 rows, 1.7 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
 | `earth/cells_nasadem/*.parquet` | Earth cells of one shard of the NASA-input rescan (all valid land cells, 56 S - 60 N); never mixed into the ranking | `python -m pipeline.earth_scan --dem nasadem --landcover modis --keep-all-cells on the cloud runner (cloud/earth-scan-nasa.yml), then python -m pipeline.cloud ingest-nasa (job J17)` | nasadem, modis_igbp, data/earth/tiles/tiles_scanned.csv |
 | `earth/tiles/SCAN_STATUS.md` | human-readable status of the Earth scan (local loop; paths inside predate layout v2), 1.7 kB | `python -m pipeline.checkpoint` | data/earth/tiles/tiles_scanned.csv |
-| `earth/tiles/tile_summary.csv` | per tile: valid, bare, terrain-pass and candidate cells, sites, weighted area, 2060 rows, 153.3 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
+| `earth/tiles/tile_summary.csv` | per tile: valid, bare, terrain-pass and candidate cells, sites, weighted area, 2060 rows, 167.7 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `earth/tiles/tiles_scanned.csv` | scan plan in priority order with the status of every tile, 2101 rows, 134.1 kB | `python -m pipeline.tiles --select, then --update-status` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv, data/reference/pilot_tiles.csv |
 | `moon/cells.parquet` | lunar cells of all regions with the terrain features, 8464 rows, 619.7 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m |
 | `moon/reference.json` | lunar reference populations per region: mean, covariance, sorted distances, medians, 387.4 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
@@ -50,16 +50,17 @@ data/
 | `reference/known_analogs.csv` | known Moon and Mars analog sites: name, lat, lon, radius_km, type, source_url, verified, 75 rows, 9.7 kB | `hand-curated by jobs J8 and J9 (agent web research, no script)` | analog_literature, wikipedia, osm |
 | `reference/pilot_tiles.csv` | the 37 pilot tiles with label, known flag and negative controls, 37 rows, 1.2 kB | `python -m pipeline.tiles --pilot` | analysis/pilot_scan.py (SITES) |
 | `sample/*.parquet` | small fixture tables (3 Earth tiles, a 30 km lunar window) for tests and the app | `python -m pipeline.fixtures --raw-dir data/raw` | copernicus_dem, esa_worldcover, pgda90_lola_20m |
-| `sites/nasa_context.csv` | NASA POWER skin temperature, precipitation and wind per site, 145 rows, 40.9 kB | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power, data/sites/ranking.csv |
-| `sites/nasa_context_summary.json` | range of annual mean skin temperature over the sites, 730 B | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power |
+| `sites/nasa_context.csv` | NASA POWER skin temperature, precipitation and wind per site, 150 rows, 42.3 kB | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power, data/sites/ranking.csv |
+| `sites/nasa_context_summary.json` | range of annual mean skin temperature over the sites, 731 B | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power |
 | `sites/novelty_check.csv` | literature verdict for the top new sites, 12 rows, 12.4 kB | `hand-curated by job J9 (agent literature and map search, no script)` | osm, wikipedia, analog_literature, data/sites/ranking.csv |
 | `sites/partner_context.csv` | per site: measured day and night surface temperature (JAXA, NASA), soil moisture, permafrost fraction and ground temperature, 118 rows, 15.6 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/sites/ranking.csv, data/sites/sites.geojson |
 | `sites/partner_context_summary.json` | layers, medians by site group, the Diviner temperatures of the lunar regions, caveats, 12.1 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/moon/instruments/diviner_regions.json |
-| `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 161.4 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
+| `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 162.7 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
 | `sites/scored_compact.parquet` | scored cells with p_all >= 0.05 or candidate (full table: data/raw/earth_scored_full.parquet), 213668 rows, 16.9 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `sites/sites.geojson` | candidate sites: outline and properties (contract in docs/TASKS.md section 3), 3175 rows, 10.5 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet |
 | `sites/target_comparison.csv` | per lunar target: candidate cells, sites and the tile ranks of reference and sand-sea tiles, 9 rows, 752 B | `python -m pipeline.sites --compare-targets (job J18)` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `sites/target_comparison_top_tiles.csv` | top 25 tiles per lunar target with region and median slope of the candidate cells, 225 rows, 12.1 kB | `python -m pipeline.sites --compare-targets (job J18)` | data/earth/cells/*.parquet, data/moon/reference.json |
+| `sites/top30_review.csv` | what each of the top 30 sites is and whether it looks like an artefact of the method, 30 rows, 5.6 kB | `python -m pipeline.review; the verdict columns are filled in by a reviewer (job J19)` | data/sites/ranking.csv, data/sites/images/*.jpg, worldview_gibs |
 | `sites/images/*.jpg` | MODIS or VIIRS true-colour image around one site (NASA imagery, unmodified) | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `sites/images/index.csv` | bbox, date, layer and cloud share of every site image, 60 rows, 10.2 kB | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `validation/crater_profiles.json` | crater measurements: Earth lidar, 30 m DEM and the lunar DEM, 11.9 kB | `python lidar/crater_profiles.py --part all` | usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt |
@@ -68,8 +69,6 @@ data/
 | `validation/icesat2.json` | ICESat-2 along-track slopes against grid slopes and the Moon, 16.9 kB | `python validation/icesat2_profiles.py (job J21)` | icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json |
 | `validation/pds_lola.json` | PDS LOLA gridded DEM against the PGDA DEM, 5.9 kB | `python validation/pds_products.py --part lola` | pds_lola_gdr, pgda90_lola_20m |
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
-
-Files without a known producer (add them to `FILE_MAP` in `pipeline/catalog.py`): `data/run_log.csv`
 
 ## External sources by agency
 

@@ -318,6 +318,11 @@ FILE_MAP = [
      "top 25 tiles per lunar target with region and median slope of the candidate cells"),
     ("data/sites/novelty_check.csv", "hand-curated by job J9 (agent literature and map search, no script)",
      "osm, wikipedia, analog_literature, data/sites/ranking.csv", "literature verdict for the top new sites"),
+    ("data/run_log.csv", "python -m pipeline.run (one row appended per stage run)", "",
+     "log of the pipeline stages: command, start time, seconds, exit code, commit"),
+    ("data/sites/top30_review.csv", "python -m pipeline.review; the verdict columns are filled in by a reviewer "
+     "(job J19)", "data/sites/ranking.csv, data/sites/images/*.jpg, worldview_gibs",
+     "what each of the top 30 sites is and whether it looks like an artefact of the method"),
     ("data/sites/partner_context.csv", "python -m pipeline.partner_context (job J24)",
      "jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/sites/ranking.csv, "
      "data/sites/sites.geojson", "per site: measured day and night surface temperature (JAXA, NASA), soil "

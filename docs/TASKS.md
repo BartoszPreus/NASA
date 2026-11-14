@@ -99,14 +99,14 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 ### `sites.geojson` properties
 `site_id, lat, lon, area_km2, n_cells, score, score_amp, score_dep, best_region, tile, country, bare, ice, elev_med, s240, s570, r200, r1600, dep_frac, f_le5, f_le8, f_le15, nearest_known, nearest_known_km, is_known, novelty (J9: unreported | mentioned | established | unchecked), breaks (list of strings)`; geometry = polygon of the cells (a point is acceptable for v0).
 
-## 4. Status of the jobs (Sat 14 Nov, 20:10)
+## 4. Status of the jobs (Sat 14 Nov, 23:20)
 
 | Job | What | State |
 |---|---|---|
 | J1 | `pipeline/` package, tests, fixtures | done |
 | J2 | lunar regions and reference populations | done (J18 adds the pooled `base_regions`) |
 | J3 | Earth scan: 2,101 tiles, 1.76 million cells in `data/earth/cells/` | done (cloud run 43623650020) |
-| J4 | scoring, sites, ranking | works; changed by J18 |
+| J4 | scoring, sites, ranking | done; final method from J18, final run from J19 |
 | J5 | our estimator against NASA's lunar slope map | done |
 | J6 | effectiveness on the 78 pilot and known-analog tiles | done; refreshed by J20 |
 | J8, J9 | known-analog list; novelty check of the 78-tile ranking | done; J22 repeats the check on the final ranking |
@@ -116,9 +116,12 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | J14 | ICESat-2 laser profiles | **blocked** on Windows; replaced by J21 |
 | J15 | every LRO instrument per lunar region (`data/moon/instruments/`) | done |
 | J16 | data layout v2 and generated catalogue | done |
-| J17 | NASA data at the core of the Earth side (NASADEM, MODIS land cover) | **partly done, stopped at 19:55, free to take.** Code, tests and the cloud rescan are done; the comparison at scale, the recommendation and the licence checks are left. Continue from `docs/sources/j17.md` and the "State" paragraph in section 5 |
+| J17 | NASA data at the core of the Earth side (NASADEM, MODIS land cover) | code, tests and the NASADEM cell tables (`data/earth/cells_nasadem/`, 619 tiles) are in the repo; the comparison at scale, the recommendation and the licence checks are job **J17b**, in progress under `nasa-windows-worker` since 22:22 |
 | J18 | algorithm fix: target, ranking key, sand seas, fast enrichment | **done**; full-scan outputs, key comparison, flag impact and enrichment are recorded in `docs/sources/j18.md` |
-| J19-J20, J22-J23, J7, J11 | see section 5 | **to do** |
+| J19 | final configuration and ranking | **done** (conductor, 23:20): the DEM rule is code, the ranking of J18 was reproduced, top-30 review in `data/sites/top30_review.csv`, `docs/METHOD.md`. The rule returns Copernicus until J17b delivers the comparison; if it then switches, rerun the stages and the review (`docs/sources/j19.md`) |
+| J20, J22, J23, J7, J11 | see section 5 | **to do**; J20 and J22 are unblocked |
+| J24 | partner-agency data per site (JAXA, ESA Open Science Catalog, NASA MODIS temperature) | **done**; `docs/sources/j24.md` |
+| J25-J29 | use of the partner data, CSA RADARSAT, a third elevation model | **to do**; specs in `docs/TASKS-PARTNER-DATA.md` |
 | J21 | ICESat-2 profiles in the cloud | **done**; 8/8 sites passed the 60 m sample threshold; results in `data/validation/icesat2.json` |
 
 ## 5. Remaining jobs: exact specifications
