@@ -1,0 +1,36 @@
+name: partner-context
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install sampling dependencies
+        run: python -m pip install numpy pandas requests rasterio pyproj numcodecs
+      - name: Reuse previous satellite samples
+        uses: actions/cache@v4
+        with:
+          path: data/raw/partner_context/samples.json
+          key: partner-context-samples-v1-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: partner-context-samples-v1-${{ runner.os }}-
+      - name: Sample partner data for J26
+        run: python -m pipeline.partner_context --top 200 --flagged 600 --known 400
+      - uses: actions/upload-artifact@v4
+        with:
+          name: partner-context-results
+          path: |
+            data/sites/partner_context.csv
+            data/sites/partner_context_summary.json
+          if-no-files-found: error
+          retention-days: 30

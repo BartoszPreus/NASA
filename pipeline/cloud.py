@@ -16,6 +16,8 @@ Needs the GitHub CLI (`gh`) logged in with the `repo` and `workflow` scopes.
     python -m pipeline.cloud run-scan             # all of the above for the Earth scan
     python -m pipeline.cloud dispatch earth-scan-nasa   # J17: NASADEM + MODIS rescan of the tiles in tiles_nasa.txt
     python -m pipeline.cloud ingest-nasa <run_id> # its shards -> data/earth/cells_nasadem/nasadem_sNNofMM.parquet
+    python -m pipeline.cloud run-partner-context # J26: sync, dispatch, download and ingest the expanded partner sample
+    python -m pipeline.cloud ingest-partner-context <run_id> # ingest an already downloaded partner-context artifact
 Written with SI assistance (Claude Code).
 """
 import argparse
@@ -35,6 +37,7 @@ from . import paths
 RUNNER_REPO = os.environ.get("MOON_RUNNER_REPO", "witczakw/moon-scan-runner")
 RUNNER_DIR = os.path.join(paths.RAW_CLOUD, "runner")
 CLOUD_DIR = os.path.join(paths.ROOT, "cloud")
+PARTNER_CONTEXT_ARTIFACT = "partner-context-results"
 
 
 def sh(*cmd, cwd=None, check=False):
@@ -80,7 +83,7 @@ def sync():
     for f in glob.glob(os.path.join(CLOUD_DIR, "requirements-*.txt")) + [os.path.join(paths.ROOT, "LICENSE")]:
         shutil.copy2(f, RUNNER_DIR)
     # small inputs that cloud stages read
-    for src in (paths.MOON_REFERENCE, paths.RANKING, paths.SITES_GEOJSON):
+    for src in (paths.MOON_REFERENCE, paths.RANKING, paths.SITES_GEOJSON, paths.MOON_DIVINER):
         if os.path.exists(src):
             d = paths.ensure(os.path.join(RUNNER_DIR, os.path.dirname(paths.rel(src))))
             shutil.copy2(src, d)
@@ -209,11 +212,34 @@ def ingest_nasa(run_id):
     return n_files, rows
 
 
+def ingest_partner_context(run_id):
+    """Validate the J26 download and copy it into the local analysis cache."""
+    if not str(run_id).isdigit():
+        raise SystemExit("ingest-partner-context requires a numeric run id")
+    artifact = os.path.join(paths.RAW_CLOUD, str(run_id), PARTNER_CONTEXT_ARTIFACT)
+    filenames = [os.path.basename(p) for p in (paths.PARTNER_CONTEXT, paths.PARTNER_CONTEXT_SUMMARY)]
+    sources = [os.path.join(artifact, filename) for filename in filenames]
+    for source in sources:
+        if not os.path.isfile(source):
+            raise SystemExit("missing %s; download the partner-context artifact first" % paths.rel(source))
+    sites = pd.read_csv(sources[0], usecols=["site_id"])
+    with open(sources[1], encoding="utf-8") as f:
+        summary = json.load(f)
+    if sites.empty or not sites["site_id"].is_unique or len(sites) != summary.get("sites"):
+        raise SystemExit("the partner-context table has duplicate IDs, or its site count is empty or inconsistent")
+    output_dir = paths.ensure(os.path.join(paths.RAW, "j26", str(run_id)))
+    for source in sources:
+        shutil.copy2(source, output_dir)
+    print("partner context ingested: %d sites -> %s" % (len(sites), paths.rel(output_dir)))
+    return len(sites)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Cloud execution of heavy stages (GitHub Actions runner repository).")
-    ap.add_argument("action", choices=["sync", "dispatch", "wait", "download", "ingest-scan", "ingest-nasa", "run-scan",
-                                       "run-scan-nasa", "tiles-left"])
-    ap.add_argument("arg", nargs="?", help="workflow name for dispatch, run id for wait/download/ingest-scan")
+    ap.add_argument("action", choices=["sync", "dispatch", "wait", "download", "ingest-scan", "ingest-nasa",
+                                       "ingest-partner-context", "run-scan", "run-scan-nasa",
+                                       "run-partner-context", "tiles-left"])
+    ap.add_argument("arg", nargs="?", help="workflow name for dispatch, run id for wait, download and ingest")
     a = ap.parse_args(argv)
     if a.action == "tiles-left":
         print(len(remaining_tiles()))
@@ -229,6 +255,8 @@ def main(argv=None):
         ingest_scan(a.arg)
     elif a.action == "ingest-nasa":
         ingest_nasa(a.arg)
+    elif a.action == "ingest-partner-context":
+        ingest_partner_context(a.arg)
     elif a.action == "run-scan":
         if sync() == 0:
             print("nothing left to scan")
@@ -244,6 +272,16 @@ def main(argv=None):
         wait(rid)
         download(rid)
         ingest_nasa(rid)
+    elif a.action == "run-partner-context":
+        sync()
+        rid = dispatch("partner-context")
+        conclusion, _ = wait(rid)
+        if conclusion != "success":
+            raise SystemExit("partner-context run %s finished with %s" % (rid, conclusion))
+        _, missing = download(rid)
+        if PARTNER_CONTEXT_ARTIFACT in missing:
+            raise SystemExit("could not download %s from run %s" % (PARTNER_CONTEXT_ARTIFACT, rid))
+        ingest_partner_context(rid)
 
 
 if __name__ == "__main__":
