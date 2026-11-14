@@ -80,7 +80,7 @@ def sync():
     for f in glob.glob(os.path.join(CLOUD_DIR, "requirements-*.txt")) + [os.path.join(paths.ROOT, "LICENSE")]:
         shutil.copy2(f, RUNNER_DIR)
     # small inputs that cloud stages read
-    for src in (paths.MOON_REFERENCE, paths.RANKING):
+    for src in (paths.MOON_REFERENCE, paths.RANKING, paths.SITES_GEOJSON):
         if os.path.exists(src):
             d = paths.ensure(os.path.join(RUNNER_DIR, os.path.dirname(paths.rel(src))))
             shutil.copy2(src, d)

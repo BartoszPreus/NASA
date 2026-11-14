@@ -228,30 +228,73 @@ def moon_pgda_summary():
 
 
 def load_sites():
-    """Site rows from the ranking (match by site_id, else nearest site within 5 km)."""
+    """Resolve the eight fixed validation sites against the current full-scan outputs.
+
+    ranking.csv contains only the top 200; use the full sites.geojson when a fixed site is
+    outside that cut, then retain its measured fallback coordinates if no current candidate
+    exists within 5 km.
+    """
     if not os.path.exists(paths.RANKING):
         return ({s: {"lat": v[0], "lon": v[1], "slope_240m_deg": v[2], "slope_570m_deg": v[3],
-                     "country": v[4], "matched": "fallback copy"} for s, v in FALLBACK_SITES.items()},
+                     "country": v[4], "matched": "fallback coordinates"} for s, v in FALLBACK_SITES.items()},
                 "fallback copy in validation/icesat2_profiles.py (ranking file missing)")
     rank = pd.read_csv(paths.RANKING)
+    full = {}
+    if os.path.exists(paths.SITES_GEOJSON):
+        with open(paths.SITES_GEOJSON, encoding="utf-8") as f:
+            fc = json.load(f)
+        full = {str(x["properties"]["site_id"]): x["properties"] for x in fc.get("features", [])}
+
+    def as_site(row, sid, how, chosen_as):
+        d = dict(row)
+        country = d.get("country")
+        if pd.isna(country):
+            country = None
+        known = d.get("is_known")
+        if pd.isna(known):
+            known = None
+        elif isinstance(known, str):
+            known = known.strip().lower() == "true"
+        slope240 = d.get("slope_240m_deg", d.get("s240"))
+        slope570 = d.get("slope_570m_deg", d.get("s570"))
+        return {"lat": float(d["lat"]), "lon": float(d["lon"]),
+                "rank": int(d["rank"]) if d.get("rank") is not None and not pd.isna(d["rank"]) else None,
+                "country": country, "known": bool(known) if known is not None else None,
+                "nearest_known": d.get("nearest_known"), "slope_240m_deg": float(slope240),
+                "slope_570m_deg": float(slope570), "matched": how, "chosen_as": chosen_as}
+
     sites = {}
-    for sid in FALLBACK_SITES:
+    for sid, fallback in FALLBACK_SITES.items():
         hit = rank[rank.site_id == sid]
         how = "site_id"
         if hit.empty:
-            lat0, lon0 = FALLBACK_SITES[sid][:2]
+            lat0, lon0 = fallback[:2]
             dkm = 111.32 * np.hypot(rank.lat - lat0, (rank.lon - lon0) * np.cos(np.radians(lat0)))
-            if dkm.min() > 5:
+            if len(dkm) and dkm.min() <= 5:
+                hit, how = rank.loc[[dkm.idxmin()]], f"nearest in ranking within {dkm.min():.1f} km"
+            elif sid in full:
+                sites[sid] = as_site(full[sid], sid, "site_id in sites.geojson (outside top-200 ranking)", sid)
                 continue
-            hit, how = rank.loc[[dkm.idxmin()]], f"nearest within {dkm.min():.1f} km"
+            else:
+                candidates = list(full.values())
+                if candidates:
+                    fd = np.asarray([111.32 * np.hypot(x["lat"] - lat0,
+                                   (x["lon"] - lon0) * np.cos(np.radians(lat0))) for x in candidates])
+                    if fd.min() <= 5:
+                        chosen = candidates[int(fd.argmin())]
+                        sites[str(chosen["site_id"])] = as_site(
+                            chosen, str(chosen["site_id"]), f"nearest in sites.geojson within {fd.min():.1f} km", sid)
+                        continue
+                # Keep a fixed reference location if the final candidate list has no site within 5 km.
+                sites[sid] = {"lat": fallback[0], "lon": fallback[1],
+                              "slope_240m_deg": fallback[2], "slope_570m_deg": fallback[3],
+                              "country": fallback[4], "rank": None, "known": None, "nearest_known": None,
+                              "matched": "fixed reference coordinates (no candidate within 5 km)",
+                              "chosen_as": sid}
+                continue
         r = hit.iloc[0]
-        sites[str(r.site_id)] = {"lat": float(r.lat), "lon": float(r.lon), "rank": int(r["rank"]),
-                                 "country": r.get("country"), "known": bool(r.get("is_known")),
-                                 "nearest_known": r.get("nearest_known"),
-                                 "slope_240m_deg": float(r.slope_240m_deg),
-                                 "slope_570m_deg": float(r.slope_570m_deg), "matched": how,
-                                 "chosen_as": sid}
-    return sites, paths.rel(paths.RANKING)
+        sites[str(r.site_id)] = as_site(r, str(r.site_id), how, sid)
+    return sites, paths.rel(paths.RANKING) + " (full sites.geojson used for candidates outside top 200)"
 
 
 def figure(sites, moon_p, moon_g):

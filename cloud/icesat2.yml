@@ -10,7 +10,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
       - name: Install analysis dependencies
         run: pip install sliderule==5.8.1 pandas pyarrow numpy scipy matplotlib
       - name: Run ICESat-2 profiles
