@@ -1,0 +1,64 @@
+name,lat,lon,radius_km,analog_for,type,source_url,verified
+Araguainha impact structure,-16.7833,-52.9833,25,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Clearwater West impact structure,56.2000,-74.5000,25,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Clearwater East impact structure,56.0500,-74.0833,25,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Haughton impact structure (Haughton-Mars Project),75.3833,-89.6500,25,both,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Meteor Crater (Barringer),35.0275,-111.0222,10,both,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Mistastin (Kamestastin) impact structure,55.8833,-63.3111,25,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Ries impact structure (ESA PANGAEA),48.8692,10.5781,25,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Rochechouart impact structure,45.8242,0.7817,25,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Steinheim impact structure,48.6867,10.0672,10,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Sudbury impact structure,46.6000,-81.1833,100,both,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Talemzane impact structure,33.3139,4.0261,10,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Vredefort impact structure,-27.0500,27.4833,100,moon,impact,https://doi.org/10.3389/fspas.2023.1186173,opened
+Space Analog for the Moon and Mars (SAM) Biosphere 2,32.5795,-110.8480,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Mars Desert Research Station (Hanksville Utah),38.4065,-110.7919,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Svalbard (AMASE region),78.0000,16.0000,150,both,polar,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Rio Tinto,37.4040,-6.3358,25,both,desert,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+McMurdo Dry Valleys,-77.4667,162.5167,100,both,polar,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Atacama Desert hyper-arid core,-24.5000,-69.2500,150,both,desert,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Kilauea Volcano (BASALT caldera region),19.4250,-155.2919,25,both,volcanic,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Teide National Park,28.2630,-16.6160,25,both,volcanic,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Lunar Mars Analog Station (LMAS) Sainte-Rose Reunion,-21.2436,55.7138,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Concordia Station,-75.1000,123.5580,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Pavilion Lake,50.8650,-121.7374,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Gros Morne National Park (Tablelands),49.6217,-57.7528,25,both,volcanic,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Laguna de Tirez,39.5382,-3.3578,10,mars,desert,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+NEEMO Aquarius Reef Base,24.9500,-80.4536,10,moon,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Marseille Bay (underwater analog),43.2640,5.3308,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+HI-SEAS habitat (Mauna Loa),19.6021,-155.4872,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+CHILL-ICE lava tube (Iceland),64.7869,-20.7144,10,both,cave,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+LunAres habitat (Pila Poland),53.1745,16.7261,10,both,operational,https://en.wikipedia.org/wiki/Terrestrial_analogue_site,secondary
+Mount Etna,37.7550,14.9950,25,both,volcanic,https://en.wikipedia.org/wiki/Mount_Etna,secondary
+SP Crater (Desert RATS),35.5822,-111.6318,10,moon,volcanic,https://en.wikipedia.org/wiki/SP_Crater,secondary
+Black Point Lava Flow (Desert RATS),35.6900,-111.3700,10,moon,volcanic,https://eol.jsc.nasa.gov/SearchPhotos/photo.pl?mission=ISS020&roll=E&frame=33530,opened
+Cinder Lake Crater Field (Apollo training),35.3080,-111.5049,10,moon,impact,https://naturalatlas.com/historical-places/cinder-lake-crater-field-2306791,secondary
+Sunset Crater,35.3644,-111.5036,10,moon,volcanic,https://en.wikipedia.org/wiki/Sunset_Crater,secondary
+Craters of the Moon (BASALT and Apollo training),43.4617,-113.5627,25,both,volcanic,https://en.wikipedia.org/wiki/Craters_of_the_Moon_National_Monument_and_Preserve,secondary
+Kilbourne Hole,31.9719,-106.9647,10,moon,volcanic,https://en.wikipedia.org/wiki/Kilbourne_Hole,secondary
+Potrillo volcanic field,31.9000,-107.2000,25,moon,volcanic,https://en.wikipedia.org/wiki/Potrillo_volcanic_field,secondary
+Mauna Kea (PISCES ISRU field tests),19.8206,-155.4681,25,moon,volcanic,https://en.wikipedia.org/wiki/Mauna_Kea,secondary
+Mauna Ulu (BASALT),19.3672,-155.2014,10,mars,volcanic,https://en.wikipedia.org/wiki/Mauna_Ulu,secondary
+Timanfaya Lanzarote (ESA PANGAEA),28.9942,-13.7933,10,both,volcanic,https://en.wikipedia.org/wiki/Timanfaya_National_Park,secondary
+La Corona lava tube - Cueva de los Verdes Lanzarote,29.1611,-13.4389,10,both,cave,https://en.wikipedia.org/wiki/Cueva_de_los_Verdes,secondary
+Askja (Apollo training),65.0330,-16.7830,25,both,volcanic,https://en.wikipedia.org/wiki/Askja,secondary
+Holuhraun lava field,64.8500,-16.8300,25,mars,volcanic,https://en.wikipedia.org/wiki/Holuhraun,secondary
+Laki 1783-1784 lava flow field,64.0647,-18.2261,25,mars,volcanic,https://en.wikipedia.org/wiki/Laki,secondary
+Krysuvik geothermal area,63.8952,-22.0561,10,mars,volcanic,https://en.wikipedia.org/wiki/Kr%C3%BDsuv%C3%ADk,secondary
+University Valley - Beacon Valley (Dry Valleys),-77.8500,160.7500,10,mars,polar,https://en.wikipedia.org/wiki/University_Valley,secondary
+Yungay hyper-arid core (Atacama),-24.0760,-69.9950,25,mars,desert,https://bg.copernicus.org/articles/21/5305/2024/bg-21-5305-2024.html,opened
+Death Valley,36.2469,-116.8169,50,mars,desert,https://en.wikipedia.org/wiki/Death_Valley,secondary
+Mars Hill (Death Valley),36.3823,-116.8528,10,mars,desert,https://geo.mytopo.com/feature/california/inyo/summit/1667292/mars-hill/,secondary
+Dallol hydrothermal field (Danakil),14.2417,40.3000,10,mars,volcanic,https://en.wikipedia.org/wiki/Dallol_(volcano),secondary
+Qaidam Basin,37.2670,94.4500,150,mars,desert,https://en.wikipedia.org/wiki/Qaidam_Basin,secondary
+Dalangtan (DLT) area Qaidam Basin,38.3333,91.6667,50,mars,desert,https://pmc.ncbi.nlm.nih.gov/articles/PMC6205091,opened
+Makgadikgadi Salt Pans,-20.8000,25.3330,100,mars,desert,https://en.wikipedia.org/wiki/Makgadikgadi_Pan,secondary
+Kangerlussuaq field site (Greenland),67.0086,-50.6892,25,mars,polar,https://en.wikipedia.org/wiki/Kangerlussuaq,secondary
+Lofoten anorthosite - Flakstadoya (ESA PANGAEA),68.0670,13.2988,25,moon,volcanic,https://en.wikipedia.org/wiki/Flakstad%C3%B8ya,secondary
+Stillwater igneous complex (anorthosite),45.3861,-109.9031,25,moon,volcanic,https://en.wikipedia.org/wiki/Stillwater_igneous_complex,secondary
+Bletterbach canyon (ESA PANGAEA),46.3578,11.4342,10,mars,desert,https://en.wikipedia.org/wiki/Bletterbach,secondary
+Grand Prismatic Spring Yellowstone,44.5250,-110.8381,10,mars,volcanic,https://en.wikipedia.org/wiki/Grand_Prismatic_Spring,secondary
+Lonar crater,19.9750,76.5075,10,both,impact,https://en.wikipedia.org/wiki/Lonar_Lake,secondary
+Devon Island (Haughton-Mars Project region),75.2500,-88.0000,100,both,polar,https://en.wikipedia.org/wiki/Devon_Island,secondary
+McGill Arctic Research Station Expedition Fiord Axel Heiberg Island,79.4333,-90.7667,10,mars,polar,https://journals.lib.unb.ca/index.php/GC/article/download/10224/10596?inline=1,opened
+Bockfjorden - Sverrefjellet volcano Svalbard (AMASE),79.4690,13.3287,25,mars,volcanic,https://en.wikipedia.org/wiki/Bockfjorden,secondary
