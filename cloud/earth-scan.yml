@@ -1,0 +1,45 @@
+name: earth-scan
+# Scans Copernicus GLO-30 tiles for lunar-like terrain features (team Zodiak, NASA Space Apps 2026).
+# 20 shards in parallel; each uploads one merged cell table as an artifact.
+on:
+  workflow_dispatch:
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-scan.txt
+      - run: pip install -r requirements-scan.txt
+      - name: scan shard
+        run: |
+          mkdir -p out
+          S=$(printf '%02d' ${{ matrix.shard }})
+          python -W ignore -m pipeline.earth_scan --tiles tiles.txt --raw-dir data/raw             --out out/earth_cells_scan_s${S}of20.parquet --shard ${{ matrix.shard }}/20 --workers 3
+      - name: collect logs
+        if: always()
+        run: |
+          mkdir -p out
+          cp data/raw/cells/log_*.csv out/ 2>/dev/null || true
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cells-${{ matrix.shard }}
+          path: out/
+          retention-days: 30
+      - name: rescue per-tile caches if the shard did not finish
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rescue-${{ matrix.shard }}
+          path: data/raw/cells/*.parquet
+          retention-days: 30
