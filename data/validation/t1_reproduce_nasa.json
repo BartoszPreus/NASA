@@ -1,7 +1,7 @@
 {
   "job": "J5 validation T1",
-  "generated_utc": "2026-11-14T17:09:04Z",
-  "runtime_s": 85.3,
+  "generated_utc": "2026-11-14T18:14:16Z",
+  "runtime_s": 29.5,
   "crs": "+proj=stere +lat_0=-90 +lat_ts=-90 +lon_0=0 +R=1737400 +units=m (from the GeoTIFFs)",
   "window": {
     "xmin": -20000.0,

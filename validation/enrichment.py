@@ -1,6 +1,6 @@
 """Enrichment test: is lunar-like terrain more common around known analog sites than elsewhere in the scan?
 
-For every known analog site (data/known_analogs.csv, operational sites excluded) with at least MIN_CELLS bare cells
+For every known analog site (data/reference/known_analogs.csv, operational sites excluded) with at least MIN_CELLS bare cells
 inside its radius: the share of those bare cells that are lunar-like (p_all >= 0.10), divided by the same share
 over all scanned bare cells (the base rate). Baseline: the same statistic for circles of the same radii centred on
 random bare cells of the scan (N_PERM repeats).
@@ -9,19 +9,24 @@ Why this and not "best cell within the radius" (validation/effectiveness.py, par
 cells per circle the maximum is almost always in the top few percent, for known sites and for random points alike,
 so that statistic cannot separate them. A share does not saturate.
 
-Inputs : data/out/earth_scored.parquet (job J4), data/known_analogs.csv (jobs J8, J9)
-Outputs: data/out/validation_enrichment.json, docs/figures/eff_enrichment.png
+Inputs : data/raw/earth_scored_full.parquet (written by `python -m pipeline.sites`, job J4),
+         data/reference/known_analogs.csv (jobs J8, J9)
+Outputs: data/validation/enrichment.json, docs/figures/eff_enrichment.png
 Run    : .venv/Scripts/python validation/enrichment.py
 Libraries: numpy, pandas, matplotlib. Written with SI assistance (Claude Code).
 """
 import json
 import os
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pipeline import paths  # noqa: E402
 
 MIN_CELLS, N_PERM, SEED = 20, 500, 11
 
@@ -39,12 +44,12 @@ def circle_share(lat, lon, radius, blat, blon, like):
 
 
 def main():
-    full = os.path.join("data", "raw", "earth_scored_full.parquet")  # written by `python -m pipeline.sites`
+    full = paths.SCORED_FULL  # written by `python -m pipeline.sites`
     if not os.path.exists(full):
         raise SystemExit("run `python -m pipeline.sites` first: it writes data/raw/earth_scored_full.parquet "
-                         "(the committed data/out/earth_scored.parquet only holds cells with p_all >= 0.05)")
+                         "(the committed data/sites/scored_compact.parquet only holds cells with p_all >= 0.05)")
     sc = pd.read_parquet(full)
-    known = pd.read_csv(os.path.join("data", "known_analogs.csv"))
+    known = pd.read_csv(paths.KNOWN_ANALOGS)
     known = known[known["type"] != "operational"].reset_index(drop=True)
     bare = sc[(sc["bare"] >= 0.8) & (sc["ice"] < 0.05)]
     blat, blon = bare["lat"].to_numpy(float), bare["lon"].to_numpy(float)
@@ -94,7 +99,8 @@ def main():
                        "Circles of different known rows overlap (for example Kilauea, Mauna Ulu and the Island of Hawaii row).",
                        "Sites under vegetation or without WorldCover data have no bare cells and are not tested.",
                        "The known-analog list comes mostly from secondary sources (see docs/sources/j8.md, j9.md)."]}
-    json.dump(out, open(os.path.join("data", "out", "validation_enrichment.json"), "w"), indent=1)
+    paths.ensure(paths.VALIDATION)
+    json.dump(out, open(paths.VALIDATION_ENRICHMENT, "w"), indent=1)
 
     fig, ax = plt.subplots(figsize=(8.6, 0.27 * len(r) + 1.6), dpi=170)
     colors = {"volcanic": "#d9822b", "impact": "#7a4fb5", "polar": "#2f6db5", "desert": "#b59b2f", "region": "#8a8f98", "cave": "#4a9a5b"}
@@ -116,8 +122,8 @@ def main():
     fig.text(0.01, 0.005, "Data: Copernicus DEM GLO-30, LOLA 20 m DEM (NASA PGDA product 90), ESA WorldCover; %d tiles. Plot made from data."
              % out["n_scanned_tiles"], fontsize=6, color="#555555")
     fig.tight_layout(rect=(0, 0.02, 1, 1))
-    os.makedirs(os.path.join("docs", "figures"), exist_ok=True)
-    fig.savefig(os.path.join("docs", "figures", "eff_enrichment.png"))
+    os.makedirs(paths.FIGURES, exist_ok=True)
+    fig.savefig(os.path.join(paths.FIGURES, "eff_enrichment.png"))
 
     print("tiles %d, bare cells %d, base rate %.4f" % (out["n_scanned_tiles"], len(bare), base))
     print(r[["name", "type", "radius_km", "bare_cells", "share_lunar_like", "enrichment"]].round(3).to_string(index=False, max_colwidth=44))

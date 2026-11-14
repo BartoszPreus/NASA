@@ -1,7 +1,7 @@
 # Validation: does the Moon-analog search find what it should?
 
 All numbers below come from `validation/effectiveness.py` (job J6) and `validation/t1_reproduce.py` (job J5); raw
-results in `data/out/validation.json` and `data/out/validation_t1.json`. Scope: the 37 hand-picked pilot tiles
+results in `data/validation/effectiveness.json` and `data/validation/t1_reproduce_nasa.json`. Scope: the 37 hand-picked pilot tiles
 (76,574 valid ~2 km cells), lunar reference `polar_160km`, J4 scoring (`p_all >= 0.10` and bare >= 0.8, ice < 0.05,
 water < 0.05 = candidate cell; >= 4 connected candidate cells = site; 81 sites ranked by `weighted_area_km2`).
 Written with SI assistance (Claude Code).
@@ -25,7 +25,7 @@ Figures: `docs/figures/eff_hidden_known.png`, `docs/figures/eff_stability.png`.
 
 ## 0. Enrichment test (added by the conductor after J6; 78 tiles)
 
-Script `validation/enrichment.py`, results `data/out/validation_enrichment.json`, figure `docs/figures/eff_enrichment.png`.
+Script `validation/enrichment.py`, results `data/validation/enrichment.json`, figure `docs/figures/eff_enrichment.png`.
 Scope: the 37 pilot tiles plus the 41 tiles that contain known analog sites (68,667 bare cells). Sections 1-4 below
 were computed earlier on the 37 pilot tiles only.
 
@@ -53,7 +53,7 @@ Hawaii row); sites under vegetation or without land-cover data cannot be tested;
 come from secondary sources.
 
 ## 1. Hidden-known test
-17 non-operational rows of `data/known_analogs.csv` (63 rows read, 54 non-operational) lie inside the 37 tiles.
+17 non-operational rows of `data/reference/known_analogs.csv` (63 rows read, 54 non-operational) lie inside the 37 tiles.
 For each, the best `p_all` among bare cells within its `radius_km`, and the share of all scanned bare cells that
 score at least as high. **The known sites do not score better than random points in the same tiles**: 10 of 17
 reach the top 5%, against a random median of 9 (a random run does at least as well in 99 of the 200 runs). The reason
@@ -116,7 +116,7 @@ Earth terrain with lunar-like slopes and roughness mostly lacks the closed crate
 - **Hand-picked pilot tiles.** The 37 tiles were chosen to contain known analogs and four controls; nothing here is
   a detection rate on unseen ground, and the random-point test shows that within these tiles the known sites are not
   distinguishable from random points.
-- **Known-analog list** (`data/known_analogs.csv`) comes mostly from secondary sources; radii are approximate and
+- **Known-analog list** (`data/reference/known_analogs.csv`) comes mostly from secondary sources; radii are approximate and
   several entries describe a region rather than a point.
 - **Land-cover dependence.** Candidates require WorldCover "bare / sparse vegetation" >= 80%. Sparse shrubland on
   lava and cinder fields (Arizona) and areas without WorldCover (Antarctica) can never become candidates.

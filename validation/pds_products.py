@@ -1,6 +1,6 @@
 """J13: use the NASA PDS lunar products listed on the challenge page directly.
 
-Part "diviner": LRO Diviner Polar Resource Product (PRP), south pole, per region of data/out/moon_reference.json.
+Part "diviner": LRO Diviner Polar Resource Product (PRP), south pole, per region of data/moon/reference.json.
   Product: LRO-L-DLRE-5-PRP-V2.0, file DLRE_PRP_SOUTH.TAB (2,880,000 triangles x 210 bytes, ASCII, comma separated),
   https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_prp/dlre_prp_south.tab
   Label DLRE_PRP_SOUTH.LBL, column format label/dlre_prp.fmt, data set description catalog/prpds.cat (same bundle).
@@ -12,7 +12,7 @@ Part "diviner": LRO Diviner Polar Resource Product (PRP), south pole, per region
   Product documentation: document/Diviner_RDR_SIS.pdf (section 7, PRP), same bundle.
   110 K reference line: Li, S. et al. (2018), Direct evidence of surface exposed water ice in the lunar polar
   regions, PNAS 115, 8907-8912, doi:10.1073/pnas.1802345115 (abstract: ice exposures "exhibit annual maximum
-  temperatures below 110 K"). Earth band: data/out/site_nasa_context_summary.json (job J12, NASA POWER, MERRA-2).
+  temperatures below 110 K"). Earth band: data/sites/nasa_context_summary.json (job J12, NASA POWER, MERRA-2).
   The full table is 605 MB. If the complete local copy exists (data/raw/pds/dlre_prp_south.tab) it is read in
   chunks; otherwise only the byte ranges covering the regions are fetched with HTTP Range requests (the mesh is
   stored column by column: 1200 columns of 2400 triangles, column index follows Moon-centred X, triangle index
@@ -42,11 +42,11 @@ import numpy as np
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pipeline import paths  # noqa: E402
 from pipeline.io_moon import MOON_RADIUS_M, load_moon_window, moon_xy  # noqa: E402
 
-RAW = os.path.join("data", "raw", "pds")
-OUT = os.path.join("data", "out")
-FIG = os.path.join("docs", "figures")
+RAW = paths.RAW_PDS
+FIG = paths.FIGURES
 
 PRP_URL = ("https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/"
            "data_derived_prp/dlre_prp_south.tab")
@@ -187,7 +187,7 @@ def diviner_stats(d, reg):
 
 
 def part_diviner():
-    ref = json.load(open(os.path.join(OUT, "moon_reference.json")))
+    ref = json.load(open(paths.MOON_REFERENCE))
     regions = ref["regions"]
     d, how = load_prp(regions)
     print("PRP records loaded: %d (%s); centre latitude range %.3f..%.3f" %
@@ -219,7 +219,7 @@ def part_diviner():
                     "lies inside it (largest |x|,|y| about 168 km vs about 300 km half-width).",
         "centre_latitude_range_loaded_deg": [round(float(d[:, 1].min()), 3), round(float(d[:, 1].max()), 3)],
         "region_selection": "triangle centre (tri_clon, tri_clat) projected with pipeline.io_moon.moon_xy and "
-                            "tested against window_m of data/out/moon_reference.json",
+                            "tested against window_m of data/moon/reference.json",
         "caveats": [
             "Model product: thermal model fits to the first year of Diviner mapping (prpds.cat), not raw "
             "measurements; temp_avg is at 2 cm depth, temp_max at the surface.",
@@ -235,9 +235,10 @@ def part_diviner():
         ],
         "regions": res,
     }
-    with open(os.path.join(OUT, "moon_diviner_regions.json"), "w") as f:
+    paths.ensure(paths.MOON_INSTRUMENTS)
+    with open(paths.MOON_DIVINER, "w") as f:
         json.dump(out, f, indent=1)
-    print("wrote", os.path.join(OUT, "moon_diviner_regions.json"))
+    print("wrote", paths.MOON_DIVINER)
     plot_diviner(d, ref["regions"], res)
 
 
@@ -265,8 +266,8 @@ def plot_diviner(d, regions, res):
             med.set_color("black")
     h_ref = [ax.axhline(110, color="#555555", ls="--", lw=1.2)]
     l_ref = ["110 K: annual-maximum threshold for water-ice cold traps (Li et al. 2018, PNAS 115, 8907)"]
-    earth = os.path.join(OUT, "site_nasa_context_summary.json")
-    earth_note = "Earth candidate-site range not shown (data/out/site_nasa_context_summary.json not present)."
+    earth = paths.SITE_CONTEXT_SUMMARY
+    earth_note = "Earth candidate-site range not shown (data/sites/nasa_context_summary.json not present)."
     if os.path.exists(earth):
         e = json.load(open(earth))
         lo, hi = e["ts_mean_k_min"], e["ts_mean_k_max"]
@@ -274,7 +275,7 @@ def plot_diviner(d, regions, res):
         l_ref.append("Earth candidate sites: annual mean skin temperature %.1f-%.1f K (%d sites, job J12)"
                      % (lo, hi, e.get("n_sites_with_values", 0)))
         earth_note = ("Earth band: NASA POWER climatology API (MERRA-2), parameter TS, annual mean, %s, "
-                      "via data/out/site_nasa_context_summary.json." % e.get("climatology_period", ""))
+                      "via data/sites/nasa_context_summary.json." % e.get("climatology_period", ""))
     ax.set_xticks(pos)
     ax.set_xticklabels([regions[k]["name"].replace(" (", "\n(") for k in keys], fontsize=7.5)
     ax.set_ylabel("Temperature (K)")
@@ -350,7 +351,7 @@ def diff_stats(a, b):
 
 def part_lola():
     pds = load_lola_window()
-    pg30 = load_moon_window(-80000, -80000, 80000, 80000, raw_dir=os.path.join("data", "raw"))
+    pg30 = load_moon_window(-80000, -80000, 80000, 80000, raw_dir=paths.RAW)
     print("PDS window", pds.shape, "PGDA 30 m window", pg30.shape)
     trials = []
     for sy in (-1.0, -0.5, 0.0, 0.5, 1.0):
@@ -413,11 +414,12 @@ def part_lola():
         "slope_method": "two-point slope atan(hypot(dz_x, dz_y)/L) with L = 3 and 7 pixels of 80 m, same code on "
                         "both grids; median over all valid pixels",
     }
-    with open(os.path.join(OUT, "validation_pds_lola.json"), "w") as f:
+    paths.ensure(paths.VALIDATION)
+    with open(paths.VALIDATION_PDS_LOLA, "w") as f:
         json.dump(out, f, indent=1)
     print(json.dumps({k: out[k] for k in ("best_shift_px", "difference_pds_minus_pgda", "correlation", "slopes")},
                      indent=1))
-    print("wrote", os.path.join(OUT, "validation_pds_lola.json"))
+    print("wrote", paths.VALIDATION_PDS_LOLA)
 
 
 if __name__ == "__main__":

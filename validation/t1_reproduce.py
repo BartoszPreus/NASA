@@ -19,7 +19,7 @@ What it does
    at ~57/225/560 m, compared with the area median of the PGDA product 70 maps
    (MAS_57M_16 / MAS_225M_16 / MAS_560M_16, along-track LOLA profile statistics).
 
-Outputs: data/out/validation_t1.json, docs/figures/t1_reproduce_nasa.png
+Outputs: data/validation/t1_reproduce_nasa.json, docs/figures/t1_reproduce_nasa.png
 Run from the repo root:  .venv/Scripts/python.exe validation/t1_reproduce.py
 
 Sources
@@ -36,6 +36,7 @@ Written with SI assistance (Claude Code).
 """
 import json
 import os
+import sys
 import time
 
 import numpy as np
@@ -44,7 +45,10 @@ from rasterio.windows import from_bounds
 from scipy.ndimage import map_coordinates
 from pyproj import CRS, Transformer
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pipeline import paths  # noqa: E402
+
+ROOT = paths.ROOT
 BASE = "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/"
 URL_DEM = BASE + "LDEM_80S_20MPP_ADJ.TIF"
 URL_SLP = BASE + "LDRM_80S_50MPP_ADJ_SLP_200M.TIF"
@@ -52,9 +56,9 @@ URL_RGH = BASE + "LDRM_80S_50MPP_ADJ_ROUGH_200M.TIF"
 PGDA70_DIR = os.path.join(ROOT, "scratch", "data", "pgda70")
 PGDA70_URL = "http://imbrium.mit.edu/EXTRAS/FRACTAL/IMG/"
 CACHE30 = os.path.join(ROOT, "scratch", "data", "ldem_pole_160km_30m.npy")  # x,y -80..+80 km
-RAW = os.path.join(ROOT, "data", "raw", "moon")
-OUT_JSON = os.path.join(ROOT, "data", "out", "validation_t1.json")
-OUT_FIG = os.path.join(ROOT, "docs", "figures", "t1_reproduce_nasa.png")
+RAW = paths.RAW_MOON
+OUT_JSON = paths.VALIDATION_T1
+OUT_FIG = os.path.join(paths.FIGURES, "t1_reproduce_nasa.png")
 
 HALF = 20000.0          # comparison window: x, y in [-HALF, +HALF] m
 MARGIN = 400.0          # extra DEM around the window (>= b/2 + interpolation; multiple of 60 m)

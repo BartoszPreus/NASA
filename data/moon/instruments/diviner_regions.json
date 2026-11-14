@@ -16,7 +16,7 @@
   -89.992,
   -83.35
  ],
- "region_selection": "triangle centre (tri_clon, tri_clat) projected with pipeline.io_moon.moon_xy and tested against window_m of data/out/moon_reference.json",
+ "region_selection": "triangle centre (tri_clon, tri_clat) projected with pipeline.io_moon.moon_xy and tested against window_m of data/moon/reference.json",
  "caveats": [
   "Model product: thermal model fits to the first year of Diviner mapping (prpds.cat), not raw measurements; temp_avg is at 2 cm depth, temp_max at the surface.",
   "The mesh comes from a Kaguya laser-altimeter DEM (Araki et al. 2009, prpds.cat), about 0.5 km triangles, so features below ~1 km (small craters, ridge crests) are smoothed.",

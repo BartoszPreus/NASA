@@ -10,7 +10,9 @@ Written with SI assistance (Claude Code). Licence: Apache-2.0.
 | `io_moon.py` | `load_moon_window` (LOLA 20 m DEM read in strips with retries, cached), `moon_xy`, `moon_latlon`, `moon_cell_centres` |
 | `landcover.py` | `landcover_fractions(bounds, R, C)` from ESA WorldCover (bare, veg, ice, water, built) |
 | `cells.py` | `earth_cells_for_tile(tile, raw_dir)` and `moon_cells_for_window(region, xmin, ymin, xmax, ymax, raw_dir)` -> DataFrames with the contract columns (`EARTH_COLUMNS`, `MOON_COLUMNS`). **Use these two instead of assembling tables yourself.** |
-| `fixtures.py` | builds `data/out/sample/*.parquet` |
+| `fixtures.py` | builds `data/sample/*.parquet` |
+| `paths.py` | every file location of the project (data layout v2); scripts import their paths from here |
+| `catalog.py` | `python -m pipeline.catalog` writes `data/README.md`, `data/catalog.csv`, `data/sources.csv` |
 
 ## Use
 ```

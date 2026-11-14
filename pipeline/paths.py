@@ -68,6 +68,15 @@ VALIDATION_PDS_LOLA = os.path.join(VALIDATION, "pds_lola.json")
 VALIDATION_ICESAT2 = os.path.join(VALIDATION, "icesat2.json")
 CRATER_PROFILES = os.path.join(VALIDATION, "crater_profiles.json")
 
+# --- small fixtures (pipeline.fixtures)
+SAMPLE_EARTH_CELLS = os.path.join(SAMPLE, "earth_cells_sample.parquet")
+SAMPLE_MOON_CELLS = os.path.join(SAMPLE, "moon_cells_sample.parquet")
+
+# --- generated catalogue (pipeline.catalog)
+DATA_README = os.path.join(DATA, "README.md")
+CATALOG = os.path.join(DATA, "catalog.csv")
+SOURCES = os.path.join(DATA, "sources.csv")
+
 # --- raw downloads and caches (git-ignored), one folder per source
 RAW_COPDEM = os.path.join(RAW, "copdem30")          # Copernicus DEM GLO-30 tiles
 RAW_CELLS = os.path.join(RAW, "cells")              # per-tile feature tables and scan logs
@@ -80,6 +89,9 @@ RAW_LIDAR = os.path.join(RAW, "lidar")              # USGS 3DEP, GUGiK
 RAW_NATURALEARTH = os.path.join(RAW, "naturalearth")
 RAW_CLOUD = os.path.join(RAW, "cloud")              # artifacts downloaded from the cloud runner, one folder per run
 RAW_COWORK = os.path.join(RAW, "cowork")            # files a person downloaded from sources that need a login
+RAW_VALIDATION = os.path.join(RAW, "validation")    # slow intermediate tables of validation/effectiveness.py
+NATURALEARTH_COUNTRIES = os.path.join(RAW_NATURALEARTH, "ne_50m_admin_0_countries.geojson")
+SCAN_PARTS_MANIFEST = os.path.join(RAW, "scan_parts.json")  # pipeline.checkpoint (local loop, superseded by the cloud run)
 SCORED_FULL = os.path.join(RAW, "earth_scored_full.parquet")
 
 

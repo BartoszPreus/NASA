@@ -52,27 +52,27 @@ Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476
 
 ## 3. Verification checklist before committing a worker's output
 
-**J5** (files: `validation/`, `data/out/validation_t1.json`, `docs/figures/t1_*`, `docs/sources/j5.md`)
+**J5** (files: `validation/`, `data/validation/t1_reproduce_nasa.json`, `docs/figures/t1_*`, `docs/sources/j5.md`)
 - The JSON holds, for native 20 m and for 30 m: bias, median absolute difference, correlation and pixel count for slope and for roughness against NASA's `LDRM_80S_50MPP_ADJ_SLP_200M.TIF` / `ROUGH_200M.TIF`; the grid/profile slope ratios at 57, 225, 560 m; the exact URLs; a `caveats` list.
 - Look at the figure. Target was a median absolute slope difference at or below 0.3 deg; whatever the value is, report it unchanged.
 - If the script can be rerun from the caches in `data/raw/moon/`, rerun it once and compare with the JSON.
 
-**J10** (files: `lidar/`, `data/out/crater_profiles.json`, `docs/figures/crater_*`, `docs/figures/morasko_*`, `docs/sources/j10.md`)
+**J10** (files: `lidar/`, `data/validation/crater_profiles.json`, `docs/figures/crater_*`, `docs/figures/morasko_*`, `docs/sources/j10.md`)
 - Open both figures. Measurements must say how they were made. Meteor Crater numbers should be near the published ones (about 1.2 km across, about 170 m deep; these come from snippet-level sources, so use them only as a plausibility check).
 - The lunar crater has coordinates and a rim diameter between 1 and 1.5 km.
 - Morasko is presented as a counter-example, not an analog.
 
-**J3** (files: `pipeline/earth_scan.py`, `pipeline/tiles.py`, `data/out/earth_cells_pilot.parquet`, `data/out/pilot_tiles.csv`, `data/out/tiles_scanned.csv`, `docs/sources/j3.md`)
-- Pilot parquet: 37 tiles, columns equal `pipeline.cells.EARTH_COLUMNS`, under 50 MB. Rows of tiles N35W112, N75W090, N52E016 must equal `data/out/sample/earth_cells_sample.parquet`.
+**J3** (files: `pipeline/earth_scan.py`, `pipeline/tiles.py`, `data/earth/cells/pilot.parquet`, `data/reference/pilot_tiles.csv`, `data/earth/tiles/tiles_scanned.csv`, `docs/sources/j3.md`)
+- Pilot parquet: 37 tiles, columns equal `pipeline.cells.EARTH_COLUMNS`, under 50 MB. Rows of tiles N35W112, N75W090, N52E016 must equal `data/sample/earth_cells_sample.parquet`.
 - `tiles_scanned.csv` lists the planned tiles with `bare_frac`, `coarse_slope`, `rank`; the worker reports the regional split and the launch command.
 - **Do not start the night scan without Wiktor**: about 600 tiles, about 20 GB of downloads over several hours; it depends on the laptop staying on and on which network. The scan is resumable and can be split in shards across machines.
 
-**J4** (files: `pipeline/score.py`, `pipeline/sites.py`, `data/out/earth_scored.parquet`, `data/out/sites.geojson`, `data/out/ranking.csv`, `docs/sources/j4.md`)
+**J4** (files: `pipeline/score.py`, `pipeline/sites.py`, `data/sites/scored_compact.parquet`, `data/sites/sites.geojson`, `data/sites/ranking.csv`, `docs/sources/j4.md`)
 - Regression: share of valid cells with `p_all >= 0.10` per pilot tile, no land-cover mask, must match the `dep_all` column of `analysis/discovery_test_results.txt` within 2 points: N75W090 20%, N19W156 24%, N29W014 18%, N80W079 14%, N36E088 8%, N35W112 5%, N25E008 1%, N23E005 0%, N49E020 3%, N45E006 0%, N52E016 1%.
-- Novelty fields are filled from `data/known_analogs.csv` (it exists now). If the worker ran before the file or the pilot parquet existed, rerun the two CLIs.
-- Rerun again when `data/out/moon_reference.json` (J2) and the night-scan shards exist.
+- Novelty fields are filled from `data/reference/known_analogs.csv` (it exists now). If the worker ran before the file or the pilot parquet existed, rerun the two CLIs.
+- Rerun again when `data/moon/reference.json` (J2) and the night-scan shards exist.
 
-**J2** (files: `pipeline/moon_reference.py`, `data/out/moon_cells.parquet`, `data/out/moon_reference.json`, `data/out/moon_regions.geojson`, `data/out/moon_hillshade/`, `docs/sources/j2.md`)
+**J2** (files: `pipeline/moon_reference.py`, `data/moon/cells.parquet`, `data/moon/reference.json`, `data/moon/regions.geojson`, `data/moon/hillshade/`, `docs/sources/j2.md`)
 - `polar_160km` valid-cell medians: s240 5.108, s570 4.956, r200 1.091; mean dep_frac 0.0184.
 - At least 4 named regions, each with `coord_source` and `coord_status`; regions with fewer than 150 valid cells use the polar covariance.
 
@@ -120,9 +120,9 @@ Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476
 - A background command in the conductor session waits for the run and downloads the artifacts to `data/raw/cloud_scan/cells-<i>/`. If that session is gone: `gh run download 43623650020 -R witczakw/moon-scan-runner -D data/raw/cloud_scan`.
 
 When the artifacts are on disk:
-1. Copy the 20 parquet files to `data/out/` (each should be well under 50 MB; if one is larger, split it by tile).
+1. Copy the 20 parquet files to `data/earth/cells/` renamed to `scan_s<NN>of20.parquet` (each should be well under 50 MB; if one is larger, split it by tile).
 2. Concatenate the log CSVs into `data/raw/cells/log_cloud.csv`, then `python -m pipeline.tiles --update-status`.
-3. `python -m pipeline.sites` (reads every `data/out/earth_cells_*.parquet`), `python validation/enrichment.py`, `python -m pipeline.nasa_context --top 150 --images 60`.
+3. `python -m pipeline.sites` (reads every `data/earth/cells/*.parquet`), `python validation/enrichment.py`, `python -m pipeline.nasa_context --top 150 --images 60`.
 4. Commit the cell tables and the rebuilt outputs with explicit paths and push. Pushing about 150-200 MB from the venue network may be slow: push the small outputs first, the cell tables in a second commit.
 5. Run a J9 pass on the new unflagged top sites.
 

@@ -13,7 +13,7 @@ on disk are never deleted. At the end the cached tables of the shard are merged 
 bare >= 0.5 or no land cover.
 
 --tiles: a comma list (N35W112,N75W090) or a file: one tile per line, or a CSV with a `tile` column
-(e.g. data/out/tiles_scanned.csv). Shard i/N takes the tiles whose position in that list mod N == i.
+(e.g. data/earth/tiles/tiles_scanned.csv). Shard i/N takes the tiles whose position in that list mod N == i.
 
 Data: Copernicus DEM GLO-30 (https://registry.opendata.aws/copernicus-dem/), ESA WorldCover 2021 v200
 (https://registry.opendata.aws/esa-worldcover-vito/). Libraries: pandas, pyarrow, numpy, rasterio.
@@ -28,6 +28,8 @@ import time
 import traceback
 
 import pandas as pd
+
+from . import paths
 
 CELLS_SUBDIR = "cells"
 LOG_FIELDS = ["tile", "status", "n_cells", "n_valid", "seconds", "error", "finished_at"]
@@ -124,7 +126,7 @@ def merge_cells(raw_dir, tiles, keep_all_cells):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--tiles", required=True, help="file or comma list of tile ids such as N35W112")
-    ap.add_argument("--raw-dir", default="data/raw")
+    ap.add_argument("--raw-dir", default=paths.RAW)
     ap.add_argument("--out", required=True, help="merged parquet for this shard")
     ap.add_argument("--shard", default="", help="i/N: take tiles with list index mod N == i")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))

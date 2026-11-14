@@ -1,0 +1,45 @@
+# J15: LRO instrument products (LOLA PSR / illumination, Diviner PCP, Mini-RF, LEND, LAMP, LROC) for the lunar
+# south-pole regions. Runs pipeline/lunar_products.py on a GitHub-hosted runner, where downloads are fast.
+# Expected volume: ~2.3 GB downloaded by --fetch (LROC WAC browse 1.13 GB, Mini-RF CPR + S1 0.86 GB, LOLA PSR 20 m
+# 0.15 GB, illumination 0.13 GB, LAMP 0.05 GB, LEND 4.5 MB) plus ~3 GB of HTTP range reads from the 24 Diviner PCP
+# tables (not stored). Disk peak ~2.5 GB. Written with SI assistance (Claude Code).
+name: lunar-products
+
+on:
+  workflow_dispatch:
+    inputs:
+      products:
+        description: "registry ids (comma separated) or all"
+        default: "all"
+      pcp_files:
+        description: "Diviner PCP local-time files to read (1-24)"
+        default: "24"
+
+jobs:
+  lunar-products:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install numpy rasterio requests matplotlib
+      - name: Registry
+        run: python -m pipeline.lunar_products --list
+      - name: Fetch
+        run: python -m pipeline.lunar_products --fetch "${{ inputs.products }}" --raw-dir data/raw --max-mb 2000
+      - name: Extract
+        run: >
+          python -m pipeline.lunar_products --extract "${{ inputs.products }}" --raw-dir data/raw
+          --pcp-files "${{ inputs.pcp_files }}"
+      - name: Disk use
+        if: always()
+        run: du -sh data/raw || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lunar-instruments
+          path: data/moon/instruments/
+          if-no-files-found: warn

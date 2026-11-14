@@ -2,10 +2,11 @@
 
 Every cycle it
   1. merges the tiles that the scan has finished (per-tile caches in <raw_dir>/cells/) into part files
-     data/out/earth_cells_scan_pNN.parquet (blocks of PART_TILES tiles in scan order, each under 45 MB);
-  2. copies the scan logs into data/out/tiles_scanned.csv;
+     data/earth/cells/scan_pNN.parquet (blocks of PART_TILES tiles in scan order, each under 45 MB; manifest
+     data/raw/scan_parts.json);
+  2. copies the scan logs into data/earth/tiles/tiles_scanned.csv;
   3. every few cycles rebuilds the ranking (`python -m pipeline.sites`) from all committed cell tables;
-  4. writes data/out/SCAN_STATUS.md;
+  4. writes data/earth/tiles/SCAN_STATUS.md;
   5. commits exactly these files and pushes them.
 When the scan has ended (both shard outputs exist) or has shown no activity for --stall-min minutes, it writes
 the remaining partial parts, rebuilds the ranking, reruns the enrichment test, pushes and exits.
@@ -15,6 +16,7 @@ Run from the repo root:
     .venv/Scripts/python -m pipeline.checkpoint                 # loop until the scan ends
     .venv/Scripts/python -m pipeline.checkpoint --once --no-push   # one dry cycle
     .venv/Scripts/python -m pipeline.checkpoint --final          # flush everything now and stop
+Superseded by the cloud scan (shards data/earth/cells/scan_sNNof20.parquet); kept for a local rerun.
 Written with SI assistance (Claude Code).
 """
 import argparse
@@ -29,7 +31,9 @@ import traceback
 
 import pandas as pd
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from . import paths
+
+ROOT = paths.ROOT
 PART_TILES, MAX_MB = 150, 45
 OK_STATUS = {"done", "cached"}
 TRAILER = "Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>"
@@ -64,7 +68,7 @@ def log_status(raw_dir):
 def tiles_elsewhere(out_dir):
     """Tiles already committed in the pilot and known-analog tables (not repeated in the scan parts)."""
     t = set()
-    for name in ("earth_cells_pilot.parquet", "earth_cells_known.parquet"):
+    for name in (os.path.basename(paths.EARTH_CELLS_PILOT), os.path.basename(paths.EARTH_CELLS_KNOWN)):
         p = os.path.join(out_dir, name)
         if os.path.exists(p):
             t |= set(pd.read_parquet(p, columns=["tile"])["tile"].unique())
@@ -90,12 +94,12 @@ def write_parts(tiles_csv, raw_dir, out_dir, final):
     skip = tiles_elsewhere(out_dir)
     scan_tiles = [t for t in order if t not in skip]
     status = log_status(raw_dir)
-    man_path = os.path.join(out_dir, "scan_parts.json")
+    man_path = paths.SCAN_PARTS_MANIFEST   # local bookkeeping, git-ignored
     manifest = json.load(open(man_path)) if os.path.exists(man_path) else {}
     touched = []
     for k in range(0, len(scan_tiles), PART_TILES):
         block = scan_tiles[k:k + PART_TILES]
-        name = "earth_cells_scan_p%02d" % (k // PART_TILES)
+        name = "scan_p%02d" % (k // PART_TILES)
         ok = [t for t in block if status.get(t) in OK_STATUS and os.path.exists(os.path.join(raw_dir, "cells", t + ".parquet"))]
         complete = all(t in status for t in block)
         if not ok or not (complete or final):
@@ -134,7 +138,7 @@ def write_parts(tiles_csv, raw_dir, out_dir, final):
         say("part", name, "tiles", len(ok), "of", len(block), "rows", manifest[name]["rows"], "files", files,
             "" if complete else "(partial)")
     json.dump(manifest, open(man_path, "w"), indent=1)
-    return touched + [man_path], manifest, status, scan_tiles
+    return touched, manifest, status, scan_tiles
 
 
 def scan_state(raw_dir, markers, stall_min):
@@ -192,7 +196,7 @@ def write_status(out_dir, tiles_csv, manifest, status, scan_tiles, state, ranked
              "Updated: %s. Scan state: **%s**." % (now(), state), "",
              "- Tiles in the plan: %d (%d of them were already in the pilot and known-analog tables)." % (len(sel), len(sel) - len(scan_tiles)),
              "- Scan tiles finished: **%d of %d**; problems: %d." % (done_scan, len(scan_tiles), len(bad)),
-             "- Cells in the committed part files: %d in %d parts (`data/out/earth_cells_scan_p*.parquet`, manifest `scan_parts.json`)." % (rows, len(manifest)),
+             "- Cells in the committed part files: %d in %d parts (`data/earth/cells/scan_p*.parquet`, manifest `data/raw/scan_parts.json`)." % (rows, len(manifest)),
              "- Ranking last rebuilt: %s (`ranking.csv`, `sites.geojson`, `tile_summary.csv`)." % (ranked_at or "not yet in this run"),
              "", "## Tiles by scan priority", "", "```", by.to_string() if len(by) else "(no prio column)", "```",
              "", "## Tiles by region", "", "```", reg.to_string() if len(reg) else "(no region column)", "```", ""]
@@ -200,25 +204,25 @@ def write_status(out_dir, tiles_csv, manifest, status, scan_tiles, state, ranked
         lines += ["## Tiles with problems", "", ", ".join("%s (%s)" % kv for kv in sorted(bad.items())[:80]), ""]
     lines += ["## How to continue", "",
               "- The part files hold every valid cell with bare fraction >= 0.5 (or no land-cover data). Nobody has to rescan:",
-              "  `python -m pipeline.sites` rebuilds scores, sites and the ranking from all `data/out/earth_cells_*.parquet` in minutes.",
+              "  `python -m pipeline.sites` rebuilds scores, sites and the ranking from all `data/earth/cells/*.parquet` in minutes.",
               "- To resume an interrupted scan on a machine that has `data/raw/cells/`: rerun the two `pipeline.earth_scan` commands",
               "  from `docs/HANDOFF.md` section 8 (finished tiles are skipped), then `python -m pipeline.checkpoint`.",
               "- On another machine the per-tile caches are missing; the scan would redo the unfinished tiles only if the",
-              "  finished ones are listed as done in `data/out/tiles_scanned.csv` (pass a tile file with the remaining ones).", ""]
-    p = os.path.join(out_dir, "SCAN_STATUS.md")
+              "  finished ones are listed as done in `data/earth/tiles/tiles_scanned.csv` (pass a tile file with the remaining ones).", ""]
+    p = paths.SCAN_STATUS
     open(p, "w", encoding="utf-8").write("\n".join(lines))
     return p
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Checkpoint the Earth scan into committed part files.")
-    ap.add_argument("--raw-dir", default="data/raw")
-    ap.add_argument("--out-dir", default="data/out")
-    ap.add_argument("--tiles", default="data/out/tiles_scanned.csv")
+    ap.add_argument("--raw-dir", default=paths.RAW)
+    ap.add_argument("--out-dir", default=paths.EARTH_CELLS, help="where the scan part files go")
+    ap.add_argument("--tiles", default=paths.TILES_PLAN)
     ap.add_argument("--interval", type=int, default=1200, help="seconds between cycles")
     ap.add_argument("--rank-every", type=int, default=4, help="rebuild the ranking every N cycles")
     ap.add_argument("--stall-min", type=int, default=45)
-    ap.add_argument("--markers", default="data/raw/earth_cells_s0of2.parquet,data/raw/earth_cells_s1of2.parquet")
+    ap.add_argument("--markers", default=",".join(os.path.join(paths.RAW, "earth_cells_s%dof2.parquet" % i) for i in (0, 1)))
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--final", action="store_true", help="flush partial parts, rebuild everything, stop")
     ap.add_argument("--no-push", action="store_true")
@@ -234,18 +238,18 @@ def main(argv=None):
             final = a.final or state != "running"
             touched, manifest, status, scan_tiles = write_parts(a.tiles, a.raw_dir, a.out_dir, final)
             run([py, "-W", "ignore", "-m", "pipeline.tiles", "--update-status", "--out", a.tiles, "--raw-dir", a.raw_dir], runlog)
-            paths = touched + [a.tiles]
+            commit_paths = touched + [a.tiles]
             if final or a.once or cycle % a.rank_every == 0:
-                if run([py, "-W", "ignore", "-m", "pipeline.sites", "--raw-dir", a.raw_dir, "--out-dir", a.out_dir], runlog) == 0:
+                if run([py, "-W", "ignore", "-m", "pipeline.sites", "--raw-dir", a.raw_dir], runlog) == 0:
                     ranked_at = now()
-                    paths += [os.path.join(a.out_dir, f) for f in ("sites.geojson", "ranking.csv", "earth_scored.parquet", "tile_summary.csv")]
+                    commit_paths += [paths.SITES_GEOJSON, paths.RANKING, paths.SCORED_COMPACT, paths.TILE_SUMMARY]
                 if final and run([py, "-W", "ignore", os.path.join("validation", "enrichment.py")], runlog) == 0:
-                    paths += [os.path.join(a.out_dir, "validation_enrichment.json"), os.path.join("docs", "figures", "eff_enrichment.png")]
-            paths.append(write_status(a.out_dir, a.tiles, manifest, status, scan_tiles, state, ranked_at))
+                    commit_paths += [paths.VALIDATION_ENRICHMENT, os.path.join(paths.FIGURES, "eff_enrichment.png")]
+            commit_paths.append(write_status(a.out_dir, a.tiles, manifest, status, scan_tiles, state, ranked_at))
             done = sum(1 for t in scan_tiles if status.get(t) in OK_STATUS)
             msg = "Scan checkpoint: %d of %d scan tiles done, %d parts%s" % (
                 done, len(scan_tiles), len(manifest), " (final: scan %s)" % state if final else "")
-            say(msg, "|", "dry run" if a.no_push and a.once else commit_push(paths, msg, push=not a.no_push))
+            say(msg, "|", "dry run" if a.no_push and a.once else commit_push(commit_paths, msg, push=not a.no_push))
             if final or a.once:
                 break
         except Exception:

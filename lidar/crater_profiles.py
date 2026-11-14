@@ -14,7 +14,7 @@ surrounding plain, maximum wall slope) from azimuthally averaged radial profiles
 Run from the repo root:
     .venv/Scripts/python.exe lidar/crater_profiles.py --part all      # or a, b, c, d
 
-Outputs: data/out/crater_profiles.json, docs/figures/crater_profile_overlay.png,
+Outputs: data/validation/crater_profiles.json, docs/figures/crater_profile_overlay.png,
 docs/figures/morasko_1m_vs_30m.png. Raw windows and caches go to data/raw/lidar/ (git-ignored).
 
 Sources (data):
@@ -41,16 +41,20 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 import time
 import urllib.request
 from pathlib import Path
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
-RAW = ROOT / "data" / "raw" / "lidar"
-OUT_JSON = ROOT / "data" / "out" / "crater_profiles.json"
-FIG_DIR = ROOT / "docs" / "figures"
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from pipeline import paths  # noqa: E402
+
+ROOT = Path(paths.ROOT)
+RAW = Path(paths.RAW_LIDAR)
+OUT_JSON = Path(paths.CRATER_PROFILES)
+FIG_DIR = Path(paths.FIGURES)
 
 URL_3DEP = ("https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/"
             "AZ_NorthEast_D23/TIFF/USGS_1M_12_x49y388_AZ_NorthEast_D23.tif")

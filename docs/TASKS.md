@@ -64,22 +64,30 @@ def landcover_fractions(bounds, R, C) -> dict(bare, veg, ice, water, built) | No
 | `elev_med`, `relief` | median elevation; P95 - P5 of elevation | m |
 | `f_le5`, `f_le8`, `f_le15` | share of pixels with 3x3-gradient slope at or below 5, 8, 15 deg | 0-1 |
 
-### Files in `data/out/` (committed, each under 50 MB)
+### Contract v2: data files (committed, each under 50 MB; locations in `pipeline/paths.py`, catalogue in `data/README.md`)
+Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old name is given in brackets.
 | File | Written by | Content |
 |---|---|---|
-| `sample/earth_cells_sample.parquet`, `sample/moon_cells_sample.parquet` | J1 | small fixture with the full column set, for J4 and J7 to start on |
-| `moon_cells.parquet` | J2 | `region, x, y, lat, lon` + all features |
-| `moon_reference.json` | J2 | per region: `name, lat, lon, n_cells, features, mean, cov, d2_p90, d2_sorted_sample, medians, p10, p90, coord_source, coord_status` |
-| `moon_regions.geojson`, `moon_hillshade/<region>.png` | J2 | region footprints (lunar lat/lon) and a hillshade per region |
-| `earth_cells_pilot.parquet`, `earth_cells_s<i>of<N>.parquet` | J3 | `tile, row, col, lat, lon, cell_m` + features + `bare, veg, ice, water, built, lc_source, valid` |
-| `tiles_scanned.csv` | J3 | `tile, status, n_cells, bare_frac, coarse_slope, seconds, error` |
-| `earth_scored.parquet` | J4 | cell keys + `d2_all, p_all, p_amp, p_dep, candidate, site_id` per reference region |
-| `sites.geojson`, `ranking.csv` | J4 | one feature per site, see below |
-| `validation_t1.json` | J5 | our estimator against the NASA slope and roughness product |
-| `validation.json` | J6 | hidden-known test, negative controls, stability, ablation |
-| `novelty_check.csv` | J9 | literature verdict for the top new sites |
-| `crater_profiles.json` | J10 | crater measurements, Earth lidar against the lunar DEM |
-`data/known_analogs.csv` (J8): `name, lat, lon, radius_km, analog_for, type, source_url, verified`.
+| `data/reference/known_analogs.csv` [`data/known_analogs.csv`] | J8, J9 | `name, lat, lon, radius_km, analog_for, type, source_url, verified` |
+| `data/reference/pilot_tiles.csv` [`pilot_tiles.csv`] | J3 | `tile, label, known, control` |
+| `data/sample/earth_cells_sample.parquet`, `data/sample/moon_cells_sample.parquet` [`sample/`] | J1 | small fixture with the full column set, for J4 and J7 to start on |
+| `data/moon/cells.parquet` [`moon_cells.parquet`] | J2 | `region, x, y, lat, lon` + all features |
+| `data/moon/reference.json` [`moon_reference.json`] | J2 | per region: `name, lat, lon, n_cells, features, mean, cov, d2_p90, d2_sorted_sample, medians, p10, p90, coord_source, coord_status` |
+| `data/moon/regions.geojson`, `data/moon/hillshade/<region>.png` [`moon_regions.geojson`, `moon_hillshade/`] | J2 | region footprints (lunar lat/lon) and a hillshade per region |
+| `data/moon/instruments/diviner_regions.json` [`moon_diviner_regions.json`] | J13 | Diviner temperatures and ice-stability depths per lunar region |
+| `data/earth/cells/pilot.parquet`, `known.parquet`, `scan_s<NN>of20.parquet` [`earth_cells_pilot.parquet`, `earth_cells_known.parquet`] | J3 | `tile, row, col, lat, lon, cell_m` + features + `bare, veg, ice, water, built, lc_source, valid`; every `*.parquet` here is read by `pipeline.score.load_cells()` |
+| `data/earth/tiles/tiles_scanned.csv`, `SCAN_STATUS.md` [same names] | J3 | `tile, status, n_cells, bare_frac, coarse_slope, seconds, error`; scan status |
+| `data/earth/tiles/tile_summary.csv` [`tile_summary.csv`] | J4 | per-tile counts of valid, bare and candidate cells, weighted area |
+| `data/sites/scored_compact.parquet` [`earth_scored.parquet`] | J4 | cell keys + `d2_all, p_all, p_amp, p_dep, candidate, site_id` per reference region (cells with `p_all >= 0.05` or candidate; the full table is `data/raw/earth_scored_full.parquet`) |
+| `data/sites/sites.geojson`, `data/sites/ranking.csv` [same names] | J4 | one feature per site, see below |
+| `data/sites/novelty_check.csv` [same name] | J9 | literature verdict for the top new sites |
+| `data/sites/nasa_context.csv`, `nasa_context_summary.json`, `images/` [`site_nasa_context*`, `site_images/`] | J12 | NASA POWER climatology and Worldview images per site |
+| `data/validation/t1_reproduce_nasa.json` [`validation_t1.json`] | J5 | our estimator against the NASA slope and roughness product |
+| `data/validation/effectiveness.json` [`validation.json`] | J6 | hidden-known test, negative controls, stability, ablation |
+| `data/validation/enrichment.json` [`validation_enrichment.json`] | J6 | enrichment of lunar-like terrain around known analog sites |
+| `data/validation/pds_lola.json` [`validation_pds_lola.json`] | J13 | PDS LOLA gridded DEM against the PGDA DEM |
+| `data/validation/crater_profiles.json` [`crater_profiles.json`] | J10 | crater measurements, Earth lidar against the lunar DEM |
+| `data/validation/icesat2.json` [`validation_icesat2.json`] | J14 | ICESat-2 profiles against our grid slopes |
 
 ### Scoring (as tested; J4 implements)
 - Reference population = lunar cells of one region (default `polar_160km`).
@@ -104,14 +112,14 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 3. `io_moon`: strip-wise remote read with retries and `.npy` cache (on Wiktor's machine the polar window is cached at `scratch/data/ldem_pole_160km_30m.npy`). Verify `moon_xy` against the file CRS (IAU 30135, south polar stereographic, R = 1,737,400 m) with a round trip.
 4. `tests/test_features.py`: tilted plane gives the analytic `s240`; flat plane gives zeros and no NaN; a synthetic bowl gives `dep_frac > 0`; the 8 scored features equal `analysis.discovery_test.features` on a random surface (regression).
 5. `requirements.txt`, `LICENSE` (Apache-2.0), `pipeline/README.md` (10 lines: API and how to run the tests).
-6. Fixtures: `data/out/sample/earth_cells_sample.parquet` from tiles N35W112, N75W090, N52E016 with every contract column; `data/out/sample/moon_cells_sample.parquet` from a 30 x 30 km window at the pole.
+6. Fixtures: `data/sample/earth_cells_sample.parquet` from tiles N35W112, N75W090, N52E016 with every contract column; `data/sample/moon_cells_sample.parquet` from a 30 x 30 km window at the pole.
 **Done when**: `pytest tests/ -q` is green; fixtures committed; on the cached polar window the medians reproduce `s240` 5.108, `s570` 4.956, `r200` 1.091, mean `dep_frac` 0.0184 (source: `analysis/discovery_test_results.txt`).
-**Owns**: `pipeline/` (the four modules, `__init__.py`, `README.md`), `tests/`, `requirements.txt`, `LICENSE`, `data/out/sample/`, `docs/sources/j1.md`.
+**Owns**: `pipeline/` (the four modules, `__init__.py`, `README.md`), `tests/`, `requirements.txt`, `LICENSE`, `data/sample/`, `docs/sources/j1.md`.
 **Status: DONE (Sat 18:05).** Also provides `pipeline/cells.py`: `earth_cells_for_tile(tile, raw_dir)` and `moon_cells_for_window(region, xmin, ymin, xmax, ymax, raw_dir)` return DataFrames with exactly the contract columns. J2 and J3 call these instead of assembling tables. API notes: `pipeline/README.md`.
 
 ### J2 — Moon: target regions and reference populations  (high, 90 min, after J1)
 **Goal**: reference statistics for named south-pole regions, so a user can pick the target.
-**Do**: `pipeline/moon_reference.py` that builds `moon_cells.parquet`, `moon_reference.json`, `moon_regions.geojson`, `moon_hillshade/*.png`.
+**Do**: `pipeline/moon_reference.py` that builds `data/moon/cells.parquet`, `reference.json`, `regions.geojson`, `hillshade/*.png`.
 - Regions: `polar_160km` (window -80..+80 km in x and y; the tested default) plus 30 x 30 km windows centred on named sites. NASA's Artemis regions are 15 x 15 km but have no published centre coordinates; we use 30 km so each region has about 225 cells. If a region has fewer than 150 valid cells, use its own mean with the `polar_160km` covariance and say so in the JSON.
 - Starting coordinates (from `docs/moon-analogs/research-notes/illumination_engineering_thresholds.md`, rows 166-182; verify each against an opened primary source and record `coord_source`, `coord_status`):
 
@@ -127,19 +135,19 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 - Optional quality mask: drop cells where the product's effective-resolution raster (`..._EFFRES`, see https://pgda.gsfc.nasa.gov/products/90) exceeds 60 m. If the file is awkward to read, skip and list it as a limitation.
 - `d2_sorted_sample`: 500 sorted `d2` values of the reference cells, so J4 and the app can turn any `d2` into `p_all` without the parquet.
 **Done when**: files committed; a printed table of medians per region; `polar_160km` reproduces the J1 numbers; at least 4 named regions.
-**Owns**: `pipeline/moon_reference.py`, `data/out/moon_*`, `docs/sources/j2.md`.
+**Owns**: `pipeline/moon_reference.py`, `data/moon/` (except `instruments/`), `docs/sources/j2.md`.
 
 ### J3 — Earth scan: tile selection and the big scan  (high, milestone 1 in 45 min, milestone 2 overnight, after J1)
 **Goal**: features for as much bare, non-flat land as the night allows, in a resumable and shardable run.
 **Do**: `pipeline/tiles.py` (selection) and `pipeline/earth_scan.py` (run).
-- **Milestone 1** (first): the 37 pilot tiles -> `data/out/earth_cells_pilot.parquet`, all valid land cells kept (vegetated ones too; they are the negative controls). Tile list: `SITES` in `analysis/pilot_scan.py`. Announce in Axis when it is pushed; J4, J6 and J7 are waiting for it.
-- **Selection for milestone 2** (coarse to fine, because flat deserts scored 0-3% and waste the budget): for every 1 x 1 degree land tile read (a) WorldCover at overview level -> bare fraction, (b) the GLO-30 overview (about 500 m) -> coarse median slope. Keep tiles with bare fraction >= 0.4 and coarse slope >= 1.0 deg; rank by closeness of the coarse slope to the lunar 4.96 deg; take the top 600. Always include: the pilot tiles, the tiles of `data/known_analogs.csv` (J8) and high-latitude ice-free land up to 82.75 N. Write the full ranked list to `tiles_scanned.csv` before scanning, so the choice is documented. Check that the COG really has overviews (`ds.overviews(1)`); if not, fall back to a decimated read.
+- **Milestone 1** (first): the 37 pilot tiles -> `data/earth/cells/pilot.parquet`, all valid land cells kept (vegetated ones too; they are the negative controls). Tile list: `SITES` in `analysis/pilot_scan.py`. Announce in Axis when it is pushed; J4, J6 and J7 are waiting for it.
+- **Selection for milestone 2** (coarse to fine, because flat deserts scored 0-3% and waste the budget): for every 1 x 1 degree land tile read (a) WorldCover at overview level -> bare fraction, (b) the GLO-30 overview (about 500 m) -> coarse median slope. Keep tiles with bare fraction >= 0.4 and coarse slope >= 1.0 deg; rank by closeness of the coarse slope to the lunar 4.96 deg; take the top 600. Always include: the pilot tiles, the tiles of `data/reference/known_analogs.csv` (J8) and high-latitude ice-free land up to 82.75 N. Write the full ranked list to `tiles_scanned.csv` before scanning, so the choice is documented. Check that the COG really has overviews (`ds.overviews(1)`); if not, fall back to a decimated read.
 - WorldCover does not cover Antarctica or land north of 82.75 N: set `lc_source = "none"`, `bare = NaN`, keep the cells.
-- **Run**: `python -m pipeline.earth_scan --shard i/N --raw-dir data/raw --workers K`. Per tile: download, features, land cover, write `data/raw/cells/<tile>.parquet`, delete the GeoTIFF (keep with `--keep`). Skip tiles already done. Log failures and continue. At the end merge the shard into `data/out/earth_cells_s<i>of<N>.parquet` keeping cells with `water < 0.5` and (`bare >= 0.5` or no land cover).
+- **Run**: `python -m pipeline.earth_scan --shard i/N --raw-dir data/raw --workers K`. Per tile: download, features, land cover, write `data/raw/cells/<tile>.parquet`, delete the GeoTIFF (keep with `--keep`). Skip tiles already done. Log failures and continue. At the end merge the shard into `data/earth/cells/scan_s<NN>of<N>.parquet` keeping cells with `water < 0.5` and (`bare >= 0.5` or no land cover).
 - Shards let several machines split the list (`i` = tile index mod `N`). Agree on `N` in the Axis notepad before starting.
 - Measured speed on the hackathon network: about 35 MB and 20-25 s per tile download with 8 threads, about 6 s of compute per tile.
 **Done when**: milestone 1 pushed; at least 300 tiles scanned by Sun 07:00; `tiles_scanned.csv` complete; every output file under 50 MB.
-**Owns**: `pipeline/tiles.py`, `pipeline/earth_scan.py`, `data/out/earth_cells_*`, `data/out/tiles_scanned.csv`, `docs/sources/j3.md`.
+**Owns**: `pipeline/tiles.py`, `pipeline/earth_scan.py`, `data/earth/cells/`, `data/earth/tiles/tiles_scanned.csv`, `docs/sources/j3.md`.
 
 ### J4 — Scoring, sites and ranking  (high, v0 in 60 min on the fixture, after J1)
 **Goal**: from cells to a ranked list of places a person can look at.
@@ -147,13 +155,13 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 - Scores exactly as in section 3, for `polar_160km` and for every region in `moon_reference.json` (until J2 lands, build the reference from the J1 moon fixture).
 - Regression check on the pilot tiles against `analysis/discovery_test_results.txt`, column `dep_all` (share of land cells with `p_all >= 0.10`, no land-cover mask, land = `s240 > 0.02`): Devon Island 20%, Mauna Kea 24%, Lanzarote 18%, Ellesmere 14%, Kunlun 8%, Meteor Crater tile 5%, Tassili 1%, Hoggar 0%, Tatry 3%, Alps 0%. Within 2 percentage points, or explain the difference.
 - Sites: connected components per tile (merge across tile borders if cheap), properties per the contract. `best_region` = region with the highest site score.
-- Novelty fields from `data/known_analogs.csv` (J8): great-circle distance to the nearest entry; `is_known` when inside that entry's `radius_km` (default 50).
+- Novelty fields from `data/reference/known_analogs.csv` (J8): great-circle distance to the nearest entry; `is_known` when inside that entry's `radius_km` (default 50).
 - `country`: offline lookup (for example Natural Earth admin-0, public domain); no geocoding API.
 - `breaks`: the fixed items (gravity 1/6 g, vacuum, radiation, regolith mechanics, features under about 100 m not resolved) plus data-driven ones: vegetation share if `veg > 0.05`; summer-solstice noon sun elevation `90 - |lat| + 23.44` deg against 1.5 deg at the lunar pole; ambient pressure from `elev_med` with the barometric formula.
 - `ranking.csv`: top 200 sites, human-readable.
 - The depression features are zero-inflated, so the Gaussian distance is an approximation. If you add a rank-based alternative, keep the tested one as the default and report both.
 **Done when**: `sites.geojson` and `ranking.csv` from the pilot parquet are pushed; the top 20 are printed in the Axis outcome with `is_known`; rerun and push again when J3 milestone 2 and J2 arrive.
-**Owns**: `pipeline/score.py`, `pipeline/sites.py`, `data/out/earth_scored.parquet`, `data/out/sites.geojson`, `data/out/ranking.csv`, `docs/sources/j4.md`.
+**Owns**: `pipeline/score.py`, `pipeline/sites.py`, `data/sites/scored_compact.parquet`, `data/sites/sites.geojson`, `data/sites/ranking.csv`, `docs/sources/j4.md`.
 
 ### J5 — Validation T1: reproduce a NASA product with our code  (high, 90 min, independent, start now)
 **Goal**: one hard number for the jury: "our estimator reproduces NASA's lunar slope map to within X degrees".
@@ -163,29 +171,29 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 - Repeat with the DEM averaged to 30 m (what Earth gets) to measure the resolution effect.
 - Second check: median two-point slopes at 57, 225, 560 m along north-south pixel columns of the same window against the PGDA product 70 map values at that latitude (files at http://imbrium.mit.edu/EXTRAS/FRACTAL/IMG/, reader in `analysis/validate.py`). This measures the profile-against-grid factor.
 - Remote reads of this file are flaky: read in strips with retries (pattern in `analysis/discovery_test.py`).
-**Done when**: `data/out/validation_t1.json` and the figure are pushed with a 5-line summary. Target: median absolute slope difference at or below 0.3 deg. Report the real value either way.
-**Owns**: `validation/t1_reproduce.py`, `data/out/validation_t1.json`, `docs/figures/t1_*`, `docs/sources/j5.md`.
+**Done when**: `data/validation/t1_reproduce_nasa.json` and the figure are pushed with a 5-line summary. Target: median absolute slope difference at or below 0.3 deg. Report the real value either way.
+**Owns**: `validation/t1_reproduce.py`, `data/validation/t1_reproduce_nasa.json`, `docs/figures/t1_*`, `docs/sources/j5.md`.
 
 ### J6 — Effectiveness: does the search find what it should?  (high, 2 h, after J4 on pilot data)
 **Goal**: measured answers to "how good is it at finding real analogs and not junk".
 **Do**: `validation/effectiveness.py`, `docs/VALIDATION.md` (English, one page).
-1. **Hidden-known test**: for each entry of `data/known_analogs.csv` inside scanned tiles, the best `p_all` within its radius and its percentile among all scanned bare cells. Headline: "k of n known sites in the top 5% and top 10%". Leave operational analogs (habitats, underwater labs) out of n.
+1. **Hidden-known test**: for each entry of `data/reference/known_analogs.csv` inside scanned tiles, the best `p_all` within its radius and its percentile among all scanned bare cells. Headline: "k of n known sites in the top 5% and top 10%". Leave operational analogs (habitats, underwater labs) out of n.
 2. **Negative controls**: share of candidate cells in the control tiles (Wielkopolska N52E016, Tatry N49E020, Alps N45E006, Sahara erg N27E001), with and without the land-cover mask.
 3. **Stability**: recompute the pilot tiles with the grid shifted by 32 pixels, and with cells of 48 and 96 pixels; overlap of the top 10 and top 50 sites (match within 5 km). Also drop one feature at a time.
 4. **Ablation**: slope and roughness only, against the full set (reproduce the table in `analysis/discovery_test_results.txt`).
-**Done when**: `data/out/validation.json`, two figures in `docs/figures/` and `docs/VALIDATION.md` are pushed. State the limits plainly (hand-picked pilot tiles, zero-inflated depression feature, 30 m DSM).
-**Owns**: `validation/effectiveness.py`, `data/out/validation.json`, `docs/VALIDATION.md`, `docs/figures/eff_*`, `docs/sources/j6.md`.
+**Done when**: `data/validation/effectiveness.json`, two figures in `docs/figures/` and `docs/VALIDATION.md` are pushed. State the limits plainly (hand-picked pilot tiles, zero-inflated depression feature, 30 m DSM).
+**Owns**: `validation/effectiveness.py`, `data/validation/effectiveness.json`, `docs/VALIDATION.md`, `docs/figures/eff_*`, `docs/sources/j6.md`.
 
 ### J7 — Web app  (high, 3-4 h, start now on existing data)
 **Goal**: the demo the jury sees. Static site, no backend, public URL.
 **State**: a prototype exists in `app/` (Leaflet, world map of scanned tiles, ranking, cell view, site card; reads `app/data/index.json` and `app/data/cells/<tile>.json` built from the old slope-only pilot). It is **not committed yet**; its author commits it first.
 **Do**:
-1. `app/build_data.py`: read `data/out/sites.geojson`, `earth_scored.parquet`, `moon_reference.json`, `validation*.json` and write the app JSON. Start on `data/out/sample/`.
+1. `app/build_data.py`: read `data/sites/sites.geojson`, `data/sites/scored_compact.parquet`, `data/moon/reference.json`, `data/validation/*.json` and write the app JSON. Start on `data/sample/`.
 2. Map: sites coloured by `score`; toggle "hide known analogs"; cells of the selected tile.
 3. Ranking list with a novelty badge (`is_known`, `novelty`).
 4. Site card: Earth value against the lunar median and 10-90% range for `s240`, `s570`, `r200` ... `r1600`, `dep_frac`; land cover; landing and mobility shares (`f_le5`, `f_le8`, `f_le15`); nearest known analog and distance; the `breaks` list under the heading "Where the analogy breaks"; link to the place in NASA Worldview.
 5. Lunar target selector fed by `moon_reference.json`, with the region hillshade.
-6. "Method and sources" page: the method in 150 words, validation numbers from `validation_t1.json` and `validation.json`, all sources.
+6. "Method and sources" page: the method in 150 words, validation numbers from `data/validation/t1_reproduce_nasa.json` and `effectiveness.json`, all sources.
 7. Deploy as a static site (GitHub Pages needs the repo owner). Test the link in a private window. No API keys.
 **Constraints**: UI text in English; footer line about SI assistance; no NASA logo; colour scale readable for colour-blind users.
 **Done when**: works with `python -m http.server --directory app`; shows real sites from J4; public URL in the Axis notepad.
@@ -193,19 +201,19 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 
 ### J8 — Known-analog list  (high, 60 min, independent, start now)
 **Goal**: the list the novelty filter and the validation depend on.
-**Do**: `data/known_analogs.csv` with at least 40 rows. Start from `docs/moon-analogs/research-notes/analog_frameworks_prior_work.md` (tables near lines 165 and 183: 11 impact structures from Lambert & Reimold 2023, the Wikipedia table), add the sites named in the challenge text (Antarctica, Atacama, Iceland, Hawaii, Haughton Crater, Death Valley) and agency field sites (NASA Desert RATS at Black Point Lava Flow and SP Crater, Cinder Lake crater field, Craters of the Moon, Kilbourne Hole, HI-SEAS on Mauna Loa, ESA PANGAEA sites on Lanzarote and at Ries, Mistastin, Haughton-Mars Project, McMurdo Dry Valleys, Svalbard AMASE, MDRS Utah, Rio Tinto, Qaidam, Askja and Holuhraun, Teide, Etna).
+**Do**: `data/reference/known_analogs.csv` with at least 40 rows. Start from `docs/moon-analogs/research-notes/analog_frameworks_prior_work.md` (tables near lines 165 and 183: 11 impact structures from Lambert & Reimold 2023, the Wikipedia table), add the sites named in the challenge text (Antarctica, Atacama, Iceland, Hawaii, Haughton Crater, Death Valley) and agency field sites (NASA Desert RATS at Black Point Lava Flow and SP Crater, Cinder Lake crater field, Craters of the Moon, Kilbourne Hole, HI-SEAS on Mauna Loa, ESA PANGAEA sites on Lanzarote and at Ries, Mistastin, Haughton-Mars Project, McMurdo Dry Valleys, Svalbard AMASE, MDRS Utah, Rio Tinto, Qaidam, Askja and Holuhraun, Teide, Etna).
 - Every row needs a `source_url` you opened and `verified` = `opened` or `secondary`. No coordinates from memory.
 - `radius_km`: 10 for a crater or a field site, 50-150 for a region such as the Atacama core or the Dry Valleys.
 - `type`: impact, volcanic, polar, desert, cave, operational. `analog_for`: moon, mars, both.
 **Done when**: CSV pushed; count by type in the Axis outcome.
-**Owns**: `data/known_analogs.csv`, `docs/sources/j8.md`.
+**Owns**: `data/reference/known_analogs.csv`, `docs/sources/j8.md`.
 
 ### J9 — Novelty check of the top sites  (high, 90 min, after J4 and J8; needs a human spot-check)
 **Goal**: avoid presenting a known site as a discovery. This is where an earlier AI-led "discovery" went wrong (see `docs/moon-analogs/ANALOGI-LIDAR-RESEARCH-I-PLAN.md`, section 2).
 **Do**: for the top 10 sites with `is_known = false` in `ranking.csv`: identify the place (nearest named feature, country, geology in two lines, access, protection status), then search for "<place> lunar analog", "Mars analog", "planetary analog", "analogue site". Record up to three hits with URLs and a verdict: `unreported`, `mentioned`, `established`.
-**Output**: `data/out/novelty_check.csv` (`site_id, place, verdict, evidence_urls, notes`) and `docs/NOVELTY.md`. Wording to use: "not found in the analog catalogues and searches listed here", never "unknown to science".
+**Output**: `data/sites/novelty_check.csv` (`site_id, place, verdict, evidence_urls, notes`) and `docs/NOVELTY.md`. Wording to use: "not found in the analog catalogues and searches listed here", never "unknown to science".
 **Done when**: files pushed, and a human has opened the evidence for the top 5 (write who and when in the Axis notepad).
-**Owns**: `data/out/novelty_check.csv`, `docs/NOVELTY.md`, `docs/sources/j9.md`.
+**Owns**: `data/sites/novelty_check.csv`, `docs/NOVELTY.md`, `docs/sources/j9.md`.
 
 ### J10 — Lidar close-up: Meteor Crater, a lunar crater and Morasko  (medium, 2 h, independent)
 **Goal**: two figures for the pitch that show we understand resolution limits, plus validation test T5.
@@ -215,8 +223,8 @@ Order of value if time runs out: J1 -> J3 (pilot milestone) -> J4 -> J7 -> J11 -
 - The same on a fresh simple lunar crater of 1-1.5 km diameter from the 20 m lunar DEM (or a 5 m site DEM from https://pgda.gsfc.nasa.gov/products/78). Overlay the normalised profiles: `docs/figures/crater_profile_overlay.png`.
 - Morasko reserve near Poznan (52.489 N, 16.896 E) from GUGiK NMT 1 m through the WCS at https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/GRID1/WCS/DigitalTerrainModelFormatTIFF : the craters are visible at 1 m and gone at 30 m. Figure `docs/figures/morasko_1m_vs_30m.png`. Morasko is our honest counter-example, not an analog.
 - Published crater dimensions in our notes are snippet-level; trust your measurements and say how they were made.
-**Done when**: two figures, `data/out/crater_profiles.json`, `lidar/README.md` (10 lines). If the 3DEP download fails for 20 minutes, do the GLO-30 and lunar parts only and report PARTIAL.
-**Owns**: `lidar/`, `data/out/crater_profiles.json`, `docs/figures/crater_*`, `docs/figures/morasko_*`, `docs/sources/j10.md`.
+**Done when**: two figures, `data/validation/crater_profiles.json`, `lidar/README.md` (10 lines). If the 3DEP download fails for 20 minutes, do the GLO-30 and lunar parts only and report PARTIAL.
+**Owns**: `lidar/`, `data/validation/crater_profiles.json`, `docs/figures/crater_*`, `docs/figures/morasko_*`, `docs/sources/j10.md`.
 
 ### J11 — Pitch, slides and submission  (high, human-led, start now)
 **Goal**: the Presentation criterion and a complete, rule-compliant submission.

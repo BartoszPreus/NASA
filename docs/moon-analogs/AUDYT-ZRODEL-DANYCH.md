@@ -48,7 +48,7 @@ Konto jest darmowe: https://urs.earthdata.nasa.gov/. Nazwy kolekcji poniżej pod
 - Jeśli czasu mało, wystarczy pierwszych 15 z listy pilotażowej: `n19w156 n25e039 n35w112 n36e088 n36w117 n38w111 n43w114 n44e100 n30e058 n23e005 n25e008 n27e001 n49e020 n52e016 s23w069`.
 
 **B. MODIS LST (temperatura powierzchni lądu z satelity)**. Cel: zmierzona temperatura miejsc na Ziemi obok temperatur Divinera dla Księżyca (blok „tu analogia się łamie”). Uwaga techniczna: nasze środowisko **nie czyta formatu HDF4**, w którym jest ten produkt.
-- Najprostsza droga: NASA AppEEARS (https://appeears.earthdatacloud.nasa.gov/, to samo logowanie), „Point Sample”: wgrać `data/out/ranking.csv` (kolumny `site_id, lat, lon`; pierwsze 100 wierszy), produkt MOD11A2 (LST dzień i noc), okres 2025-01-01 do 2025-12-31, wynik w CSV.
+- Najprostsza droga: NASA AppEEARS (https://appeears.earthdatacloud.nasa.gov/, to samo logowanie), „Point Sample”: wgrać `data/sites/ranking.csv` (kolumny `site_id, lat, lon`; pierwsze 100 wierszy), produkt MOD11A2 (LST dzień i noc), okres 2025-01-01 do 2025-12-31, wynik w CSV.
 - Zapisać do: `C:\Users\CP24\projekty\NASA\data\raw\cowork\modis_lst\`
 - Jeśli się nie uda, zostajemy przy NASA POWER (J12), który daje to samo w grubszej siatce.
 
@@ -58,7 +58,7 @@ Folder `data/raw/` jest poza gitem, więc dużych plików nie trzeba się bać. 
 
 ## 5. Gotowy prompt dla co-worka (do wklejenia)
 > Zaloguj się w przeglądarce do NASA Earthdata (https://urs.earthdata.nasa.gov/; jeśli nie ma konta, zatrzymaj się i poproś mnie o założenie). W https://search.earthdata.nasa.gov/ znajdź kolekcję „NASADEM Merged DEM Global 1 arc second” (NASADEM_HGT v001) i pobierz pliki ZIP dla kafli z listy poniżej. Zapisz je bez rozpakowywania do `C:\Users\CP24\projekty\NASA\data\raw\cowork\nasadem\`. Na koniec zapisz tam plik `MANIFEST.txt`: nazwa każdego pliku, rozmiar, adres, z którego został pobrany, data pobrania. Niczego nie zmieniaj w innych folderach. Jeśli kolekcja ma inną nazwę albo któregoś kafla nie ma, zapisz to w `MANIFEST.txt` zamiast zgadywać. Lista kafli: [wkleić listę z sekcji 4A].
-> Potem, jeśli zostanie czas: w https://appeears.earthdatacloud.nasa.gov/ zrób „Point Sample” dla pierwszych 100 wierszy pliku `C:\Users\CP24\projekty\NASA\data\out\ranking.csv` (ID = `site_id`, szerokość = `lat`, długość = `lon`), produkt MOD11A2 wersja 061, warstwy LST_Day_1km i LST_Night_1km, daty 2025-01-01 do 2025-12-31, format CSV. Wynik zapisz do `C:\Users\CP24\projekty\NASA\data\raw\cowork\modis_lst\` razem z plikiem opisu zamówienia.
+> Potem, jeśli zostanie czas: w https://appeears.earthdatacloud.nasa.gov/ zrób „Point Sample” dla pierwszych 100 wierszy pliku `C:\Users\CP24\projekty\NASA\data\sites\ranking.csv` (ID = `site_id`, szerokość = `lat`, długość = `lon`), produkt MOD11A2 wersja 061, warstwy LST_Day_1km i LST_Night_1km, daty 2025-01-01 do 2025-12-31, format CSV. Wynik zapisz do `C:\Users\CP24\projekty\NASA\data\raw\cowork\modis_lst\` razem z plikiem opisu zamówienia.
 
 ## 6. Jak to opisać w zgłoszeniu (pole „NASA Data”)
 Po zakończeniu J12–J14 będzie można uczciwie napisać: LRO LOLA (model wysokości bieguna z PGDA oraz siatka z PDS), LRO Diviner (produkt polarny z PDS), ICESat-2 (profile lasera, Earthdata), MODIS (zdjęcia przez Worldview) i NASA POWER. Do tego czasu: tylko LOLA. Każde źródło z adresem i cytowaniem trafia do `docs/sources/`.

@@ -9,7 +9,7 @@ Per cell:
   candidate      p_all >= 0.10 and bare >= 0.8 and ice < 0.05 and water < 0.05 and valid
                  (cells without land cover, lc_source == "none", have bare = NaN and can never be candidates)
 
-Reference: data/out/moon_reference.json (job J2) when it exists and holds the region; otherwise built here from
+Reference: data/moon/reference.json (job J2) when it exists and holds the region; otherwise built here from
 pipeline.cells.moon_cells_for_window("polar_160km", -80 km .. +80 km) using valid cells only, cached in
 data/raw/j4_reference_<region>.json.
 
@@ -28,6 +28,7 @@ import os
 import numpy as np
 import pandas as pd
 
+from . import paths
 from .features import AMP, DEP, SCORED, feature_matrix, mahalanobis, p_from_d2, reference_stats, transform
 
 DEFAULT_REGION = "polar_160km"
@@ -35,7 +36,7 @@ REGION_WINDOWS = {"polar_160km": (-80000, -80000, 80000, 80000)}   # polar stere
 GROUPS = {"all": SCORED, "amp": AMP, "dep": DEP}
 P_MIN = 0.10
 BARE_MIN, ICE_MAX, WATER_MAX = 0.8, 0.05, 0.05
-MOON_REF_JSON = os.path.join("data", "out", "moon_reference.json")
+MOON_REF_JSON = paths.MOON_REFERENCE
 
 # Pilot tiles of the regression check and the expected dep_all [%] from analysis/discovery_test_results.txt
 REGRESSION = [("Devon Island", "N75W090", 20), ("Mauna Kea", "N19W156", 24), ("Lanzarote", "N29W014", 18),
@@ -50,7 +51,7 @@ def _group_ref(X, names):
             "n_cells": int(X.shape[0])}
 
 
-def build_reference(region=DEFAULT_REGION, raw_dir=os.path.join("data", "raw")):
+def build_reference(region=DEFAULT_REGION, raw_dir=paths.RAW):
     """Reference for the three groups from the lunar cells of `region` (valid cells only)."""
     from .cells import moon_cells_for_window
     xmin, ymin, xmax, ymax = REGION_WINDOWS[region]
@@ -93,7 +94,7 @@ def _ref_from_json_entry(e):
             idx = [names.index(n) for n in GROUPS[g]]
             ref[g] = {"features": GROUPS[g], "mean": mean[idx], "cov": cov[np.ix_(idx, idx)], "d2_sorted": None,
                       "p_method": "chi2"}
-    ref["source"] = "data/out/moon_reference.json"
+    ref["source"] = paths.rel(paths.MOON_REFERENCE)
     return ref
 
 
@@ -118,7 +119,7 @@ def _from_jsonable(js):
     return ref
 
 
-def load_reference(region=DEFAULT_REGION, raw_dir=os.path.join("data", "raw"), moon_json=MOON_REF_JSON,
+def load_reference(region=DEFAULT_REGION, raw_dir=paths.RAW, moon_json=MOON_REF_JSON,
                    prefer_json=True):
     """Group references {"all", "amp", "dep"} for one lunar region.
 
@@ -182,7 +183,7 @@ def candidate_mask(df):
             (df["water"] < WATER_MAX) & df["valid"]).to_numpy()
 
 
-def score_all_regions(df, raw_dir=os.path.join("data", "raw"), regions=None):
+def score_all_regions(df, raw_dir=paths.RAW, regions=None):
     """Default region into d2_all/p_all/p_amp/p_dep/candidate; other regions into p_all_<region> etc."""
     regions = regions or available_regions()
     out = score_cells(df, load_reference(regions[0], raw_dir))
@@ -209,30 +210,30 @@ def regression_table(scored):
 
 
 def default_cells_path():
-    pilot = os.path.join("data", "out", "earth_cells_pilot.parquet")
-    return pilot if os.path.exists(pilot) else os.path.join("data", "out", "sample", "earth_cells_sample.parquet")
+    pilot = paths.EARTH_CELLS_PILOT
+    return pilot if os.path.exists(pilot) else paths.SAMPLE_EARTH_CELLS
 
 
 def load_cells(spec=None):
-    """Load Earth cells. spec: None = every data/out/earth_cells_*.parquet (pilot, known-analog tiles, scan shards),
+    """Load Earth cells. spec: None = every data/earth/cells/*.parquet (pilot, known-analog tiles, scan shards),
     falling back to the sample fixture; otherwise a parquet path, a glob, or a comma list of both.
     Tables are concatenated and de-duplicated on (tile, row, col). Returns (DataFrame, description)."""
     import glob
     if spec is None:
-        paths = sorted(glob.glob(os.path.join("data", "out", "earth_cells_*.parquet"))) or [default_cells_path()]
+        files = paths.earth_cell_tables() or [default_cells_path()]
     else:
-        paths = []
+        files = []
         for part in str(spec).split(","):
-            paths += sorted(glob.glob(part)) or [part]
-    df = pd.concat([pd.read_parquet(q) for q in paths], ignore_index=True)
+            files += sorted(glob.glob(part)) or [part]
+    df = pd.concat([pd.read_parquet(q) for q in files], ignore_index=True)
     df = df.drop_duplicates(["tile", "row", "col"], keep="first").reset_index(drop=True)
-    return df, "%d file(s): %s" % (len(paths), ", ".join(os.path.basename(q) for q in paths))
+    return df, "%d file(s): %s" % (len(files), ", ".join(os.path.basename(q) for q in files))
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Score Earth cells against the lunar reference; print the regression.")
     ap.add_argument("--cells", default=None, help="Earth cell parquet (default: pilot if present, else sample)")
-    ap.add_argument("--raw-dir", default=os.path.join("data", "raw"))
+    ap.add_argument("--raw-dir", default=paths.RAW)
     ap.add_argument("--out", default=None, help="write the scored table here (sites.py writes the final one)")
     a = ap.parse_args(argv)
     df, path = load_cells(a.cells)

@@ -7,7 +7,7 @@ least MIN_CELLS cells. Properties follow docs/TASKS.md, section 3 ("sites.geojso
   score        median p_all of the cells; score_amp / score_dep = medians of p_amp / p_dep
   weighted_area_km2   sum of p_all over the cells x cell area: the ranking key (similarity-weighted area)
   best_region  lunar region with the highest median p_all (only polar_160km until moon_reference.json lands)
-  nearest_known, nearest_known_km, is_known   from data/known_analogs.csv (job J8, rows of type "operational"
+  nearest_known, nearest_known_km, is_known   from data/reference/known_analogs.csv (job J8, rows of type "operational"
                ignored); great-circle distance (haversine, R = 6371.0088 km) from the site centroid;
                is_known = centroid inside the radius_km of any entry (default 50 km)
   country      offline point-in-polygon on Natural Earth 1:50m admin-0 countries (public domain),
@@ -36,14 +36,15 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
+from . import paths
 from .score import (BARE_MIN, DEFAULT_REGION, ICE_MAX, WATER_MAX, load_cells, regression_table,
                     score_all_regions)
 
 MIN_CELLS = 4
 EARTH_R_KM = 6371.0088
 DEFAULT_RADIUS_KM = 50.0
-KNOWN_CSV = os.path.join("data", "known_analogs.csv")
-NE_GEOJSON = os.path.join("data", "raw", "naturalearth", "ne_50m_admin_0_countries.geojson")
+KNOWN_CSV = paths.KNOWN_ANALOGS
+NE_GEOJSON = paths.NATURALEARTH_COUNTRIES
 MEDIAN_COLS = ["bare", "ice", "elev_med", "s240", "s570", "r200", "r1600", "dep_frac", "f_le5", "f_le8", "f_le15"]
 FIXED_BREAKS = ["Gravity is 1 g here, 1/6 g on the Moon",
                 "Atmosphere and weather; the Moon has a vacuum",
@@ -186,7 +187,7 @@ def find_sites(scored, regions, min_cells=MIN_CELLS):
     return sites, site_of_row
 
 
-NOVELTY_CSV = os.path.join("data", "out", "novelty_check.csv")
+NOVELTY_CSV = paths.NOVELTY
 
 
 def load_novelty(path=NOVELTY_CSV):
@@ -261,8 +262,10 @@ def write_ranking(sites, path, top=200):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Score Earth cells, find candidate sites, write the J4 outputs.")
     ap.add_argument("--cells", default=None, help="Earth cell parquet (default: pilot if present, else sample)")
-    ap.add_argument("--raw-dir", default=os.path.join("data", "raw"))
-    ap.add_argument("--out-dir", default=os.path.join("data", "out"))
+    ap.add_argument("--raw-dir", default=paths.RAW)
+    ap.add_argument("--out-dir", default=paths.SITES,
+                    help="sites.geojson, ranking.csv, scored_compact.parquet (default data/sites/); tile_summary.csv "
+                         "goes to data/earth/tiles/ unless --out-dir is given")
     ap.add_argument("--known", default=KNOWN_CSV)
     ap.add_argument("--min-cells", type=int, default=MIN_CELLS)
     a = ap.parse_args(argv)
@@ -288,9 +291,9 @@ def main(argv=None):
     # Full scored table stays local (it grows to hundreds of MB with the big scan and can be rebuilt from the
     # committed earth_cells_*.parquet in minutes). The committed file holds the cells worth looking at.
     os.makedirs(a.raw_dir, exist_ok=True)
-    scored[keep].to_parquet(os.path.join(a.raw_dir, "earth_scored_full.parquet"), index=False)
+    scored[keep].to_parquet(os.path.join(a.raw_dir, os.path.basename(paths.SCORED_FULL)), index=False)
     compact = scored[scored["candidate"] | (scored["p_all"] >= 0.05)]
-    compact[keep].to_parquet(os.path.join(a.out_dir, "earth_scored.parquet"), index=False)
+    compact[keep].to_parquet(os.path.join(a.out_dir, os.path.basename(paths.SCORED_COMPACT)), index=False)
     # Per-tile summary: the unit that stays stable when the grid is shifted or resized (docs/VALIDATION.md).
     ok = scored["valid"]
     barem = ok & (scored["bare"] >= BARE_MIN) & (scored["ice"] < ICE_MAX) & (scored["water"] < WATER_MAX)
@@ -304,10 +307,13 @@ def main(argv=None):
     ts["n_sites"] = ts["tile"].map(pd.Series([s["tile"] for s in sites]).value_counts()).fillna(0).astype(int)
     wa = pd.Series([s["weighted_area_km2"] for s in sites], index=[s["tile"] for s in sites], dtype=float)
     ts["weighted_area_km2"] = ts["tile"].map(wa.groupby(level=0).sum()).fillna(0.0).round(2)
+    tile_summary = (paths.TILE_SUMMARY if os.path.abspath(a.out_dir) == os.path.abspath(paths.SITES)
+                    else os.path.join(a.out_dir, os.path.basename(paths.TILE_SUMMARY)))
+    os.makedirs(os.path.dirname(tile_summary), exist_ok=True)
     ts.round({"lat": 3, "lon": 3, "median_p_bare": 4}).sort_values("weighted_area_km2", ascending=False).to_csv(
-        os.path.join(a.out_dir, "tile_summary.csv"), index=False)
-    write_geojson(sites, os.path.join(a.out_dir, "sites.geojson"))
-    ranked = write_ranking(sites, os.path.join(a.out_dir, "ranking.csv"))
+        tile_summary, index=False)
+    write_geojson(sites, os.path.join(a.out_dir, os.path.basename(paths.SITES_GEOJSON)))
+    ranked = write_ranking(sites, os.path.join(a.out_dir, os.path.basename(paths.RANKING)))
     print("sites %d (>= %d cells), in ranking.csv %d" % (len(sites), a.min_cells, len(ranked)))
     show = pd.DataFrame([{k: s[k] for k in ("site_id", "country", "lat", "lon", "weighted_area_km2", "score",
                                             "area_km2", "is_known",

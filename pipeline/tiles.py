@@ -1,7 +1,7 @@
 """Coarse-to-fine selection of Copernicus GLO-30 tiles worth a full Earth scan (job J3, milestone 2).
 
-  python -m pipeline.tiles --pilot             # data/out/pilot_tiles.csv (tile,label,known,control)
-  python -m pipeline.tiles --select            # data/out/tiles_scanned.csv (ranked selection, status=planned)
+  python -m pipeline.tiles --pilot             # data/reference/pilot_tiles.csv (tile,label,known,control)
+  python -m pipeline.tiles --select            # data/earth/tiles/tiles_scanned.csv (ranked selection, status=planned)
   python -m pipeline.tiles --update-status     # copy earth_scan logs (status, n_cells, seconds, error) into it
 
 Steps of --select (all remote reads are small, overview-level COG reads over HTTP, cached in
@@ -17,7 +17,7 @@ Steps of --select (all remote reads are small, overview-level COG reads over HTT
  4. Keep coarse_slope >= MIN_COARSE_SLOPE, rank by |ln(s570_pred / 4.96)| where s570_pred is the fine
     570 m slope predicted from the coarse slope (calibrated on the pilot tiles, see CALIB) and 4.96 deg is
     the lunar median s570 of the polar reference; take the top N_TOP.
- 5. Always add: the pilot tiles, the tiles of data/known_analogs.csv (rows that parse), and polar land
+ 5. Always add: the pilot tiles, the tiles of data/reference/known_analogs.csv (rows that parse), and polar land
     (|lat| >= 60) that passes the bare and ice thresholds regardless of step 4.
 
 Output order = scan priority (pilot and known tiles, then the top N_TOP by rank, then the remaining polar
@@ -41,6 +41,7 @@ import pandas as pd
 import rasterio
 from rasterio.enums import Resampling
 
+from . import paths
 from .io_earth import COP_URL, M_PER_DEG, tile_corner, tile_file, tile_id, tile_path
 from .landcover import WC_URL
 
@@ -61,7 +62,7 @@ OUT_COLS = ["tile", "status", "n_cells", "bare_frac", "ice_frac", "coarse_slope"
 
 
 # ---------------------------------------------------------------- pilot list
-def pilot_tiles(raw_dir="data/raw", only_existing=True):
+def pilot_tiles(raw_dir=paths.RAW, only_existing=True):
     """Unique tiles of SITES in analysis/pilot_scan.py: list of dicts tile,label,known,control."""
     from analysis.pilot_scan import SITES
     out, seen = [], set()
@@ -165,7 +166,7 @@ def worldcover_fractions(tiles, raw_dir, threads=16):
 
 
 # ---------------------------------------------------------------- step 3
-def coarse_slope(tile, raw_dir="data/raw", factor=8, baseline_m=500.0, retries=3):
+def coarse_slope(tile, raw_dir=paths.RAW, factor=8, baseline_m=500.0, retries=3):
     """Median absolute two-point slope [deg] over ~baseline_m on the GLO-30 overview (x and y pooled).
 
     Returns (slope, seconds, error). Uses the local file if it is on disk, otherwise the remote COG.
@@ -229,7 +230,7 @@ def coarse_slopes(tiles, raw_dir, threads=16):
 
 
 # ---------------------------------------------------------------- step 5 helpers
-def known_tiles(path="data/known_analogs.csv"):
+def known_tiles(path=paths.KNOWN_ANALOGS):
     """{tile: name} for the rows of the J8 list that parse (re-read at run time)."""
     out = {}
     if not os.path.exists(path):
@@ -271,7 +272,7 @@ def predicted_s570(coarse, calib=CALIB):
 
 
 # ---------------------------------------------------------------- selection
-def select(raw_dir="data/raw", out="data/out/tiles_scanned.csv", calib=CALIB, n_top=N_TOP,
+def select(raw_dir=paths.RAW, out=paths.TILES_PLAN, calib=CALIB, n_top=N_TOP,
            min_coarse=MIN_COARSE_SLOPE, threads=16):
     t_all = time.time()
     tiles = glo30_tiles(raw_dir)
@@ -335,7 +336,7 @@ def select(raw_dir="data/raw", out="data/out/tiles_scanned.csv", calib=CALIB, n_
     return sel, df
 
 
-def update_status(raw_dir="data/raw", out="data/out/tiles_scanned.csv"):
+def update_status(raw_dir=paths.RAW, out=paths.TILES_PLAN):
     """Copy status, n_cells, seconds and error from the earth_scan logs (<raw_dir>/cells/log_*.csv) into `out`.
     Run it after (or during) the scan; the last log line per tile wins."""
     import glob
@@ -357,10 +358,10 @@ def update_status(raw_dir="data/raw", out="data/out/tiles_scanned.csv"):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Tile selection for the Earth scan (J3).")
-    ap.add_argument("--pilot", action="store_true", help="write data/out/pilot_tiles.csv")
-    ap.add_argument("--select", action="store_true", help="write data/out/tiles_scanned.csv")
-    ap.add_argument("--raw-dir", default="data/raw")
-    ap.add_argument("--out", default="data/out/tiles_scanned.csv")
+    ap.add_argument("--pilot", action="store_true", help="write data/reference/pilot_tiles.csv")
+    ap.add_argument("--select", action="store_true", help="write data/earth/tiles/tiles_scanned.csv")
+    ap.add_argument("--raw-dir", default=paths.RAW)
+    ap.add_argument("--out", default=paths.TILES_PLAN)
     ap.add_argument("--n-top", type=int, default=N_TOP)
     ap.add_argument("--threads", type=int, default=16)
     ap.add_argument("--update-status", action="store_true", help="copy earth_scan log results into --out")
@@ -369,7 +370,7 @@ def main(argv=None):
         update_status(a.raw_dir, a.out)
     if a.pilot:
         rows = pilot_tiles(a.raw_dir)
-        with open("data/out/pilot_tiles.csv", "w", newline="", encoding="utf-8") as f:
+        with open(paths.ensure(paths.REFERENCE) and paths.PILOT_TILES, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=["tile", "label", "known", "control"])
             w.writeheader()
             w.writerows(rows)

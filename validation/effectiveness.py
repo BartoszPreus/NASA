@@ -10,7 +10,7 @@ Four parts, each a sub-command (run from the repo root):
   figures    the two figures in docs/figures/ (eff_hidden_known.png, eff_stability.png)
   all        everything above, in that order
 
-Results are merged into data/out/validation.json (each part writes its own key). Slow intermediate tables
+Results are merged into data/validation/effectiveness.json (each part writes its own key). Slow intermediate tables
 (recomputed Earth features per tile and grid variant, a 8-pixel land-cover class map per tile, lunar features
 per cell size) are cached in data/raw/validation/.
 
@@ -24,7 +24,7 @@ Data:
   ESA WorldCover 2021 v200, https://esa-worldcover.org (CC BY 4.0), read from
     https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/
   LOLA south-pole DEM LDEM_80S_20MPP_ADJ, NASA PGDA, https://pgda.gsfc.nasa.gov/products/90
-  data/known_analogs.csv (job J8; sources per row in its source_url column)
+  data/reference/known_analogs.csv (job J8; sources per row in its source_url column)
   analysis/discovery_test_results.txt (our own earlier prototype run)
 Libraries: numpy, pandas, scipy (stats.spearmanr, ndimage), matplotlib, shapely (via pipeline.sites).
 Written with SI assistance (Claude Code). Licence: Apache-2.0.
@@ -41,16 +41,16 @@ import pandas as pd
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from pipeline import paths  # noqa: E402
 from pipeline.features import AMP, DEP, SCORED, EXTRA, cell_features, feature_matrix, reference_stats, transform  # noqa: E402
 from pipeline.io_earth import cell_grid, load_earth_tile, tile_corner, tile_id  # noqa: E402
 from pipeline.score import DEFAULT_REGION, P_MIN, BARE_MIN, ICE_MAX, WATER_MAX, score_cells  # noqa: E402
 from pipeline.sites import find_sites, haversine_km  # noqa: E402
 
-RAW = os.path.join("data", "raw")
-CACHE = os.path.join(RAW, "validation")
-OUT = os.path.join("data", "out")
-OUT_JSON = os.path.join(OUT, "validation.json")
-FIG_DIR = os.path.join("docs", "figures")
+RAW = paths.RAW
+CACHE = paths.RAW_VALIDATION
+OUT_JSON = paths.VALIDATION_EFFECTIVENESS
+FIG_DIR = paths.FIGURES
 CONTROLS = {"N52E016": "Wielkopolska", "N49E020": "Tatry", "N45E006": "Alps (Mont Blanc)", "N27E001": "Sahara erg"}
 MOON_WINDOW = (-80000, -80000, 80000, 80000)   # polar_160km, polar stereographic metres
 MATCH_KM = 5.0
@@ -63,7 +63,7 @@ BLUE, ORANGE, GREY, INK, INK2, SURF = "#2a78d6", "#eb6834", "#b8b6ae", "#0b0b0b"
 
 # ------------------------------------------------------------------------------------------------ helpers
 def merge_json(key, value):
-    """Write one part's results under `key` of data/out/validation.json, keeping the other parts."""
+    """Write one part's results under `key` of data/validation/effectiveness.json, keeping the other parts."""
     js = {}
     if os.path.exists(OUT_JSON):
         with open(OUT_JSON, encoding="utf-8") as f:
@@ -72,16 +72,17 @@ def merge_json(key, value):
     js["job"] = "J6 effectiveness"
     js["script"] = "validation/effectiveness.py"
     js["updated_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    paths.ensure(paths.VALIDATION)
     with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump(js, f, indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o))
 
 
 def load_cells():
     """Pilot cells (features, land cover, valid) joined with the J4 scores."""
-    cells = pd.read_parquet(os.path.join(OUT, "earth_cells_pilot.parquet"))
-    # the committed data/out/earth_scored.parquet only holds cells with p_all >= 0.05; the full table is local
-    _full = os.path.join("data", "raw", "earth_scored_full.parquet")
-    sc = pd.read_parquet(_full if os.path.exists(_full) else os.path.join(OUT, "earth_scored.parquet"))
+    cells = pd.read_parquet(paths.EARTH_CELLS_PILOT)
+    # the committed data/sites/scored_compact.parquet only holds cells with p_all >= 0.05; the full table is local
+    _full = paths.SCORED_FULL
+    sc = pd.read_parquet(_full if os.path.exists(_full) else paths.SCORED_COMPACT)
     keep = ["tile", "row", "col", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id"]
     return cells.merge(sc[keep], on=["tile", "row", "col"], how="left", validate="1:1")
 
@@ -92,7 +93,7 @@ def bare_mask(df):
 
 
 def load_known():
-    k = pd.read_csv(os.path.join("data", "known_analogs.csv"))
+    k = pd.read_csv(paths.KNOWN_ANALOGS)
     n_all = len(k)
     k = k[k["type"].astype(str).str.strip().str.lower() != "operational"].copy()
     k["radius_km"] = pd.to_numeric(k["radius_km"], errors="coerce").fillna(50.0)
@@ -101,7 +102,7 @@ def load_known():
 
 
 def ranking():
-    r = pd.read_csv(os.path.join(OUT, "ranking.csv"))
+    r = pd.read_csv(paths.RANKING)
     return r[["rank", "site_id", "tile", "lat", "lon", "weighted_area_km2", "score"]]
 
 
@@ -296,7 +297,7 @@ def part_ablation():
     ref = own_reference(64)
     s = score_cells(v, ref)   # own reference, full sorted lunar distances (empirical p for amp too)
     v["p_amp_emp"], v["p_all_emp"] = s["p_amp"].to_numpy(), s["p_all"].to_numpy()
-    pilot = pd.read_csv(os.path.join(OUT, "pilot_tiles.csv"))
+    pilot = pd.read_csv(paths.PILOT_TILES)
     disc = parse_discovery()
     lab2tile = {l[:33].strip(): t for t, l in zip(pilot["tile"], pilot["label"])}
     rows = []
@@ -427,10 +428,10 @@ def compare(name, base, base_share, var, var_share):
 def part_stability(procs=8, check64=False):
     t0 = time.time()
     os.makedirs(CACHE, exist_ok=True)
-    pilot = pd.read_parquet(os.path.join(OUT, "earth_cells_pilot.parquet"))
+    pilot = pd.read_parquet(paths.EARTH_CELLS_PILOT)
     tiles = sorted(pilot["tile"].unique())
     # official baseline: ranking.csv and the J4 candidate shares
-    rk = pd.read_csv(os.path.join(OUT, "ranking.csv"))
+    rk = pd.read_csv(paths.RANKING)
     sc = load_cells()
     base_share = sc[sc["valid"]].groupby("tile")["candidate"].mean()
     base = rk[["tile", "lat", "lon", "weighted_area_km2", "score"]]
@@ -488,7 +489,7 @@ def part_stability(procs=8, check64=False):
                   "spearman_vs_own64": b["spearman_tile_candidate_share"]})
         loo.append(a)
         print(a, flush=True)
-    res = {"baseline": "data/out/ranking.csv (J4, %d sites) and the J4 per-tile candidate share" % len(base),
+    res = {"baseline": "data/sites/ranking.csv (J4, %d sites) and the J4 per-tile candidate share" % len(base),
            "match_rule": "two sites match if their centroids are within %.0f km; overlap = share of the baseline "
                          "top-n with a match in the variant top-n" % MATCH_KM,
            "grid_variants": results, "leave_one_out": loo,
@@ -523,7 +524,7 @@ def figures():
         js = json.load(f)
     os.makedirs(FIG_DIR, exist_ok=True)
     src = ("Data: Copernicus GLO-30 DEM, ESA WorldCover 2021, LOLA LDEM_80S_20MPP_ADJ (NASA PGDA), "
-           "data/known_analogs.csv. Team Zodiak, validation/effectiveness.py")
+           "data/reference/known_analogs.csv. Team Zodiak, validation/effectiveness.py")
     if "hidden_known" in js:
         h = js["hidden_known"]
         n = h["n_in_scanned_tiles"]
@@ -576,7 +577,7 @@ def figures():
         ax.axhline(len(s["leave_one_out"]) - 0.5, color=GREY, linewidth=1, linestyle=":")
         ax.legend(frameon=False, fontsize=11, loc="lower right", bbox_to_anchor=(1.0, 1.05), ncol=2)
         ax.set_title("Does the ranking survive a changed grid or a dropped feature?", fontsize=14, color=INK, loc="left")
-        fig.text(0.01, 0.01, src + ".\nBaseline: data/out/ranking.csv (J4). Above the dotted line: grid variants; "
+        fig.text(0.01, 0.01, src + ".\nBaseline: data/sites/ranking.csv (J4). Above the dotted line: grid variants; "
                  "below: one scored feature left out.", fontsize=8, color=INK2)
         fig.tight_layout(rect=(0, 0.06, 1, 1))
         fig.savefig(os.path.join(FIG_DIR, "eff_stability.png"), dpi=150, facecolor=SURF)

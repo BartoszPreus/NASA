@@ -41,12 +41,14 @@ import pandas as pd
 import requests
 from PIL import Image
 
-ROOT = Path(__file__).resolve().parents[1]
-RANKING = ROOT / "data" / "out" / "ranking.csv"
-CACHE = ROOT / "data" / "raw" / "nasa_context"
-OUT_CSV = ROOT / "data" / "out" / "site_nasa_context.csv"
-OUT_SUMMARY = ROOT / "data" / "out" / "site_nasa_context_summary.json"
-IMG_DIR = ROOT / "data" / "out" / "site_images"
+from . import paths
+
+ROOT = Path(paths.ROOT)
+RANKING = Path(paths.RANKING)
+CACHE = Path(paths.RAW_NASA_CONTEXT)
+OUT_CSV = Path(paths.SITE_CONTEXT)
+OUT_SUMMARY = Path(paths.SITE_CONTEXT_SUMMARY)
+IMG_DIR = Path(paths.SITE_IMAGES)
 
 POWER_URL = "https://power.larc.nasa.gov/api/temporal/climatology/point"
 POWER_PARAMS = "TS,TS_MAX,TS_MIN,PRECTOTCORR,WS10M"
@@ -150,7 +152,7 @@ def run_power(sites: pd.DataFrame) -> pd.DataFrame:
         "site_coldest": None if ok.empty else ok.loc[ok.ts_mean_k.idxmin(), "site_id"],
         "site_warmest": None if ok.empty else ok.loc[ok.ts_mean_k.idxmax(), "site_id"],
         "ts_min_c_lowest": None if ok.empty else float(ok.ts_min_c.min()),
-        "lunar_reference": "see data/out/moon_diviner_regions.json (job J13)",
+        "lunar_reference": "see %s (job J13)" % paths.rel(paths.MOON_DIVINER),
         "note": ("Earth annual mean skin temperature of the analog sites, to be set against "
                  "lunar south-pole surface temperatures from job J13. Grid cells are about "
                  "50 km, so values describe the surroundings, not the exact site."),
@@ -236,7 +238,7 @@ def image_row(site: pd.Series) -> dict:
         out.write_bytes(buf.getvalue())
     else:
         out.write_bytes(jpg)
-    row.update({"date": date, "layer": layer, "file": f"data/out/site_images/{out.name}",
+    row.update({"date": date, "layer": layer, "file": paths.rel(str(out)),
                 "white_share": round(white, 4), "dark_share": round(dark, 4),
                 "bytes": out.stat().st_size, "note": ""})
     return row

@@ -9,6 +9,6 @@
   "site_coldest": "N80W079-02",
   "site_warmest": "N13E040-01",
   "ts_min_c_lowest": -60.59,
-  "lunar_reference": "see data/out/moon_diviner_regions.json (job J13)",
+  "lunar_reference": "see data/moon/instruments/diviner_regions.json (job J13)",
   "note": "Earth annual mean skin temperature of the analog sites, to be set against lunar south-pole surface temperatures from job J13. Grid cells are about 50 km, so values describe the surroundings, not the exact site."
 }

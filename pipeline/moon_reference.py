@@ -1,13 +1,13 @@
 """Reference populations of lunar cells for named south-pole regions (job J2, docs/TASKS.md).
 
-Writes, under --out-dir:
-  moon_cells.parquet        all cells of all regions (contract columns, pipeline.cells.MOON_COLUMNS)
-  moon_reference.json       per region: mean / covariance / sorted own distances of the transformed features,
+Writes, under --out-dir (default data/moon/):
+  cells.parquet             all cells of all regions (contract columns, pipeline.cells.MOON_COLUMNS)
+  reference.json            per region: mean / covariance / sorted own distances of the transformed features,
                             the same for the AMP and DEP groups, medians / P10 / P90 in natural units, sources
-  moon_regions.geojson      region footprints in LUNAR latitude / east longitude
-  moon_hillshade/<id>.png   plain grey hillshade of each window (sun from the upper left, 512 px)
+  regions.geojson           region footprints in LUNAR latitude / east longitude
+  hillshade/<id>.png        plain grey hillshade of each window (sun from the upper left, 512 px)
 
-Run: python -m pipeline.moon_reference --raw-dir data/raw --out-dir data/out
+Run: python -m pipeline.moon_reference --raw-dir data/raw --out-dir data/moon
 
 Data: LOLA south-pole DEM, NASA PGDA product 90 (https://pgda.gsfc.nasa.gov/products/90), Barker et al. (2023),
 PSJ 4, 183, doi:10.3847/PSJ/acf3e1. Region centres: USGS Gazetteer of Planetary Nomenclature
@@ -24,6 +24,7 @@ import time
 import numpy as np
 import pandas as pd
 
+from . import paths
 from .cells import moon_cells_for_window
 from .features import AMP, DEP, EXTRA, SCORED, feature_matrix, mahalanobis, transform
 from .io_moon import load_moon_window, moon_latlon, moon_xy
@@ -205,7 +206,7 @@ def effres_share(window, limit_m=60.0, sample_m=100.0, tries=6):
 
 
 def add_effres(out_dir):
-    path = os.path.join(out_dir, "moon_reference.json")
+    path = os.path.join(out_dir, os.path.basename(paths.MOON_REFERENCE))
     with open(path, encoding="utf-8") as f:
         doc = json.load(f)
     for rid, r in doc["regions"].items():
@@ -234,8 +235,8 @@ def cells_with_retry(rid, window, raw_dir):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--raw-dir", default="data/raw")
-    ap.add_argument("--out-dir", default="data/out")
+    ap.add_argument("--raw-dir", default=paths.RAW)
+    ap.add_argument("--out-dir", default=paths.MOON)
     ap.add_argument("--only", nargs="*", help="named region ids to build (default: all)")
     ap.add_argument("--effres-only", action="store_true",
                     help="only add the effective-resolution share to an existing moon_reference.json")
@@ -243,8 +244,9 @@ def main(argv=None):
     if a.effres_only:
         add_effres(a.out_dir)
         return 0
-    os.makedirs(os.path.join(a.out_dir, "moon_hillshade"), exist_ok=True)
-    ref_path = os.path.join(a.out_dir, "moon_reference.json")
+    hill_dir = os.path.join(a.out_dir, os.path.basename(paths.MOON_HILLSHADE))
+    os.makedirs(hill_dir, exist_ok=True)
+    ref_path = os.path.join(a.out_dir, os.path.basename(paths.MOON_REFERENCE))
 
     tasks = [("polar_160km", "South pole, 160 x 160 km (default)", -90.0, 0.0, (-80000.0, -80000.0, 80000.0, 80000.0),
               "window centred on the pole (pipeline default; analysis/discovery_test.py)", "opened primary",
@@ -279,22 +281,23 @@ def main(argv=None):
             write_reference(ref_path, regions)
             log("  wrote %s (polar_160km only)" % ref_path)
         z = load_moon_window(*window, res_m=30.0, raw_dir=a.raw_dir)
-        hillshade_png(z, 30.0, os.path.join(a.out_dir, "moon_hillshade", rid + ".png"))
+        hillshade_png(z, 30.0, os.path.join(hill_dir, rid + ".png"))
         log("  n_cells %d  n_valid %d  cov %s  %.0f s" % (ref["n_cells"], ref["n_valid"], ref["covariance_source"],
                                                        time.time() - t0))
 
     write_reference(ref_path, regions)
     cells = pd.concat(frames, ignore_index=True)
-    tmp = os.path.join(a.out_dir, "moon_cells.parquet.tmp")
+    cells_path = os.path.join(a.out_dir, os.path.basename(paths.MOON_CELLS))
+    tmp = cells_path + ".tmp"
     cells.to_parquet(tmp, index=False)
-    os.replace(tmp, os.path.join(a.out_dir, "moon_cells.parquet"))
+    os.replace(tmp, cells_path)
     gj = {"type": "FeatureCollection",
           "note": "Coordinates are LUNAR latitude / east longitude (degrees), not Earth. Longitudes are unwrapped "
                   "around each region (may fall slightly outside 0-360); polar_160km encloses the pole.",
           "features": [{"type": "Feature", "properties": {"id": rid, "name": r["name"], "window_m": r["window_m"]},
                         "geometry": {"type": "Polygon", "coordinates": [footprint(r["window_m"])]}}
                        for rid, r in regions.items()]}
-    _atomic_write_text(os.path.join(a.out_dir, "moon_regions.geojson"), json.dumps(gj))
+    _atomic_write_text(os.path.join(a.out_dir, os.path.basename(paths.MOON_REGIONS)), json.dumps(gj))
 
     cols = ["s240", "s570", "r200", "dep_frac", "f_le8"]
     log("\n%-22s %8s %8s %7s " % ("id", "lat", "lon", "n_valid") + " ".join("%8s" % c for c in cols) + "  cov    status")
