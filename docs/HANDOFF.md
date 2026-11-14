@@ -21,9 +21,10 @@ the data source of each, the two decisions, the limits): it is the text the READ
   Present regions, not ranks. The verdicts come from an SI model; a person has not looked yet.
 - **Which elevation model feeds the ranking is a rule in code** (`pipeline.score.dem_policy_from_rule`): NASADEM
   where it exists if the comparison of J17b passes (Spearman of the per-tile candidate share at least 0.90 and
-  at least 35 of the top 50 tiles shared), else Copernicus. **It returns Copernicus now, because the comparison
-  has not been run** (job J17b, claimed by `nasa-windows-worker` at 22:22). The NASADEM cells of 619 tiles are in
-  `data/earth/cells_nasadem/`.
+  at least 35 of the top 50 tiles shared), else Copernicus. **The comparison is done (J17b, 23:20): 0.637 and 21
+  of 50, so the rule returns Copernicus and the ranking stands.** NASADEM (619 tiles in
+  `data/earth/cells_nasadem/`) is the cross-check: same slopes, different closed depressions, and therefore a
+  different list of candidate cells (33,911 against 2,996; `docs/sources/j17.md`, last section).
 - **Context for the new ranking**: NASA POWER for the top 150 sites, a NASA Worldview image for the top 60
   (`data/sites/nasa_context.csv`, `data/sites/images/`); measured surface temperature (JAXA, NASA MODIS), soil
   moisture (JAXA) and permafrost (ESA) for 118 sites (`data/sites/partner_context.csv`, job J24).
@@ -32,14 +33,12 @@ the data source of each, the two decisions, the limits): it is the text the READ
 - **One entry point**: `python -m pipeline.run --list`. Tests: `python -m pytest tests -q`, 33 pass.
   New dependency since 22:50: `numcodecs` (`pip install -r requirements.txt`).
 
-**What to do when J17b delivers `data/validation/nasadem_vs_copdem.json`.**
-`python -m pipeline.run sites validate-enrichment context partner-context catalog`, then read the first line
-of the newest `data/raw/run_logs/sites_*.log`. If it says `dem policy: nasa-first`, the ranking has changed:
-run `python -m pipeline.review`, look at the three sheets again, fill in `top30_review.csv`, update the numbers
-in `docs/METHOD.md` and here. If it says `copdem`, only write the two numbers into `docs/METHOD.md`.
+**If the comparison of the two elevation models is ever rerun** (`python -m pipeline.run validate-dem`): the
+`sites` stage reads its outcome by itself. Should the first line of a new `data/raw/run_logs/sites_*.log` say
+`dem policy: nasa-first`, the ranking has changed and `python -m pipeline.review` has to be redone.
 
 **What is left** (specs: `docs/TASKS.md` section 5 and `docs/TASKS-PARTNER-DATA.md`; all on the Axis board):
-J17b comparison of the two elevation models (in progress, another agent) · J20 validation on the full scan ·
+J20 validation on the full scan ·
 J22 literature check of the top regions (start with Putorana Plateau, Peary Land, Hazen Plateau), ends with a
 person opening the evidence · J7 web app (`app/` is Wiktor's prototype, still uncommitted on his machine) ·
 J11 README, pitch, submission texts (no `README.md` exists yet) · J25 show the measured surface data in the site
@@ -69,7 +68,7 @@ J22 will name. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 3
 |---|---|
 | J1 pipeline, J2 lunar regions, J3 Earth scan (2,101 tiles), J5 NASA-product check, J6 effectiveness (78 tiles), J8 known analogs, J10 lidar, J12 NASA POWER + Worldview, J13 Diviner + LOLA from PDS, J15 LRO instruments, J16 layout and catalogue, J18 algorithm fix, J21 ICESat-2 (8 sites), J24 partner data | **done and pushed** |
 | J19 final configuration and ranking | **done**; `docs/METHOD.md`, `docs/sources/j19.md`; to be revisited only if J17b switches the elevation model |
-| J17 NASA Earth core | code and NASADEM cells done; the comparison is J17b, in progress under `nasa-windows-worker` |
+| J17 NASA Earth core (with J17b) | **done**: code, NASADEM cells of 619 tiles, comparison at scale, recommendation (Copernicus stays primary). Open: the LP DAAC citation pages could not be opened (HTTP 403), a person has to |
 | J9 novelty check | done for the old 78-tile ranking only; replaced by J22 |
 | J14 ICESat-2 on Windows | blocked; replaced by J21 (done) |
 | J20, J22, J7, J11, J25, J26, J27, J23 | to do |
@@ -181,8 +180,10 @@ These numbers replace the 78-tile ones below wherever both exist.**
   the top 50. The flag also catches part of Devon Island, a real analog (rank 1,486 to 2,820 for tile N75W090).
 - **Laser against grid** (ICESat-2, 8 sites): the laser slope at 240 m is 0.43 to 1.16 times the grid slope,
   median 0.87; the three lowest are lava fields. Footprints differ (a 20 km box against the site outline).
-- **Two elevation models**: on one tile NASADEM is 1.56 times rougher at 200 m than Copernicus; the comparison
-  at scale is not done (J17b).
+- **Two elevation models** (618 tiles, 1.12 million common cells): slopes and roughness from 400 m up agree
+  (correlation 0.99 and above), closed depressions do not (0.76). Candidate cells: 33,911 with Copernicus,
+  2,996 with NASADEM, 2,237 in common; per-tile Spearman 0.637, 21 of the top 50 tiles shared. **The ranking
+  depends on the elevation model.** Say it: sites that are candidates under both models are the stronger claim.
 - **Top of the ranking**: Arctic plateaus (section 0). The closed-depression share of all top-30 sites is zero
   in the median cell, so the lake artefact of the 78-tile ranking is not what puts them there; vegetation (tundra
   counted as bare) is the weak point instead.

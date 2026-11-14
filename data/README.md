@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 13 rows, 1.7 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 17 rows, 2.3 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -67,6 +67,7 @@ data/
 | `validation/effectiveness.json` | hidden-known test, negative controls, ablation, stability, 43.9 kB | `python validation/effectiveness.py all` | data/earth/cells/pilot.parquet, data/sites/ranking.csv, data/reference/known_analogs.csv, copernicus_dem, esa_worldcover, pgda90_lola_20m |
 | `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 9.0 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
 | `validation/icesat2.json` | ICESat-2 along-track slopes against grid slopes and the Moon, 16.9 kB | `python validation/icesat2_profiles.py (job J21)` | icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json |
+| `validation/nasadem_vs_copdem.json` | NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile, 14.2 kB | `python validation/nasadem_vs_copdem.py (job J17)` | data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json |
 | `validation/pds_lola.json` | PDS LOLA gridded DEM against the PGDA DEM, 5.9 kB | `python validation/pds_products.py --part lola` | pds_lola_gdr, pgda90_lola_20m |
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
 
@@ -93,8 +94,8 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 - `nasa_power`: NASA POWER climatology API v2 (MERRA-2): skin temperature, precipitation, wind. *used*. https://power.larc.nasa.gov/api/temporal/climatology/point
 - `icesat2_atl06` (link 1): ICESat-2 ATL06 v7 land ice height, subset through SlideRule (NSIDC DAAC). *used*. https://nsidc.org/data/atl06
 - `icesat2_atl03` (link 1): ICESat-2 ATL03 v7 geolocated photons (SlideRule atl03x). *looked at, not used*. https://nsidc.org/data/atl03
-- `nasadem` (link 1): NASADEM Merged DEM Global 1 arc second V001 (NASADEM_HGT, NASA JPL), 56 S - 60 N. *being added*. https://opentopography.s3.sdsc.edu/raster?list-type=2&prefix=NASADEM/NASADEM_be/
-- `modis_igbp` (link 2): MODIS MCD12Q1 v061 land cover type 1 (IGBP), yearly, about 500 m, as the NASA GIBS layer MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual. *being added*. https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi
+- `nasadem` (link 1): NASADEM Merged DEM Global 1 arc second V001 (NASADEM_HGT, NASA JPL), 56 S - 60 N. *used*. https://opentopography.s3.sdsc.edu/raster?list-type=2&prefix=NASADEM/NASADEM_be/
+- `modis_igbp` (link 2): MODIS MCD12Q1 v061 land cover type 1 (IGBP), yearly, about 500 m, as the NASA GIBS layer MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual. *used*. https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi
 - `modis_lst` (link 1): MODIS/Terra land surface temperature MOD11C1 v061, 0.05 deg, monthly normals 2012-2021, day and night, read from the copy in the JAXA Earth API catalogue (collections NASA.EOSDIS_Terra.MODIS_MOD11C1-LST.<daytime|nighttime>.v061_global_monthly-normal). *used*. https://data.earth.jaxa.jp/stac/cog/v1/catalog.json
 - `nasa_moon_factsheet`: NSSDC Moon fact sheet (Earth obliquity, lunar spin-axis tilt). *used*. https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
 

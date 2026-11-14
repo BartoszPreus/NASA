@@ -25,11 +25,14 @@ Written with SI assistance (Claude Code).
 (`pipeline.score.dem_policy_from_rule`): NASADEM, with MODIS land cover, is primary for the tiles it covers
 (56 S to 60 N) if the per-tile share of candidate cells from the two inputs has a Spearman correlation of at
 least 0.90 and at least 35 of the top 50 tiles are shared; otherwise Copernicus stays primary and NASADEM is a
-cross-check. Above 60 N and below 56 S Copernicus is the only source either way. **State now: the comparison
-at scale has not been run against the current target (job J17b), so the rule returns Copernicus.** The NASADEM
-cells are in the repository (1.40 million cells); on one tile NASADEM is 1.56 times rougher at 200 m, so the
-outcome is open. When `data/validation/nasadem_vs_copdem.json` exists, `python -m pipeline.run sites` applies
-the rule by itself; if it switches, the review of the top 30 has to be repeated.
+cross-check. Above 60 N and below 56 S Copernicus is the only source either way. **Outcome: not met.** On 618
+tiles and 1.12 million common cells the Spearman correlation is 0.637 and 21 of the top 50 tiles are shared
+(`data/validation/nasadem_vs_copdem.json`, `docs/figures/nasadem_vs_copdem.png`). Copernicus is the elevation
+model of the ranking; NASADEM is the cross-check. What the cross-check shows: slopes and roughness from 400 m
+up are the same in both models (correlation 0.99 and above, median ratio within 3%), roughness at 200 m
+scatters, and closed depressions do not agree (correlation 0.76; NASADEM has small depressions almost
+everywhere). Through the depression features the list of candidate cells depends on the elevation model:
+33,911 candidate cells with Copernicus, 2,996 with NASADEM, 2,237 in common.
 
 **Which lunar target and which ranking key.** Default target: the seven candidate regions pooled; ranking key:
 best 15 km window. The numbers do not choose between the pooled target and the 160 km polar window: known
@@ -51,6 +54,9 @@ replaces total area because total area rewarded sheer size: with it, sand seas h
 - Laser profiles of ICESat-2 over eight sites give 0.43 to 1.16 times the grid slope at 240 m (median 0.87);
   the three lowest are lava fields, and the laser samples a 20 km box, not the site outline.
 - The dune-field flag removes the sand seas from the top 50 and also flags part of Devon Island, a real analog.
+- A second elevation model (NASADEM, NASA) gives the same slopes and a different set of candidate cells: three
+  quarters of its candidates are also candidates with Copernicus, but only 7% of the Copernicus candidates
+  survive. The ranking depends on the elevation model more than on anything else we varied.
 
 ## Limits
 

@@ -159,17 +159,21 @@ SOURCES = [
       "https://opentopography.s3.sdsc.edu/raster?list-type=2&prefix=NASADEM/NASADEM_be/ ; "
       "https://portal.opentopography.org/datasetMetadata?otCollectionID=OT.032021.4326.2 ; "
       "doi:10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001 (LP DAAC page not opened)",
-      "UNVERIFIED: OpenTopography's page says 'Not Provided'; LP DAAC's citation request not read yet "
-      "(docs/sources/j17.md)", "no (OpenTopography public mirror; LP DAAC itself needs Earthdata login)",
-      "being added", "pipeline/io_earth.py (dem='nasadem'), cloud/earth-scan-nasa.yml, "
-      "validation/nasadem_vs_copdem.py (job J17, comparison at scale not finished)", "data/raw/nasadem/"),
+      "OpenTopography terms (opened): data 'free of all copyright restrictions', attribute the source and "
+      "OpenTopography; citation on its page: NASADEM Merged DEM Global 1 arc second V001, 2020, distributed by "
+      "NASA EOSDIS LP DAAC, doi:10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001. LP DAAC's own page UNVERIFIED (HTTP "
+      "403, docs/sources/j17.md)", "no (OpenTopography public mirror; LP DAAC itself needs Earthdata login)",
+      "used", "cross-check of the ranking, not its input: pipeline/io_earth.py (dem='nasadem'), "
+      "cloud/earth-scan-nasa.yml, validation/nasadem_vs_copdem.py, pipeline.score.dem_policy_from_rule (jobs J17, "
+      "J17b, J19)", "data/raw/nasadem/"),
     S("modis_igbp", "NASA", "MODIS MCD12Q1 v061 land cover type 1 (IGBP), yearly, about 500 m, as the NASA GIBS "
       "layer MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual", 2,
       "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi ; "
       "https://gibs.earthdata.nasa.gov/colormaps/v1.3/MODIS_IGBP_Land_Cover_Type.xml",
-      "GIBS acknowledgement as for worldview_gibs; MCD12Q1 citation UNVERIFIED (LP DAAC page not opened, "
-      "docs/sources/j17.md)", "no", "being added", "pipeline/landcover.py (landcover='modis'), "
-      "cloud/earth-scan-nasa.yml (job J17)", "data/raw/modis_igbp/"),
+      "GIBS acknowledgement as for worldview_gibs (read on nasa-gibs.github.io/gibs-api-docs); MCD12Q1 citation "
+      "UNVERIFIED (LP DAAC page answered HTTP 403, docs/sources/j17.md)", "no", "used",
+      "land-cover mask of the NASA variant in the cross-check: pipeline/landcover.py (landcover='modis'), "
+      "cloud/earth-scan-nasa.yml, validation/nasadem_vs_copdem.py (jobs J17, J17b)", "data/raw/modis_igbp/"),
     S("modis_lst", "NASA", "MODIS/Terra land surface temperature MOD11C1 v061, 0.05 deg, monthly normals 2012-2021, "
       "day and night, read from the copy in the JAXA Earth API catalogue (collections "
       "NASA.EOSDIS_Terra.MODIS_MOD11C1-LST.<daytime|nighttime>.v061_global_monthly-normal)", 1,

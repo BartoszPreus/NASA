@@ -10,10 +10,14 @@ and writes data/validation/nasadem_vs_copdem.json and docs/figures/nasadem_vs_co
      median ratio NASA/ESA, robust spread = 1.4826 * MAD of log10 ratio, median difference);
   2. bare-mask agreement MODIS vs WorldCover: on the unfiltered local caches (all cells) and at scale on the cells
      of the ESA tables (conditional on WorldCover bare >= 0.5); plus five named tiles read directly from GIBS;
-  3. agreement of the result: both sets scored with pipeline.score against the default lunar target that
-     pipeline/score.py has at run time; per-tile candidate share (candidates / NASA valid land cells of the tile,
-     the same denominator for both), Spearman over tiles, overlap of the top 50 tiles. A "DEM only" variant scores
-     NASADEM features with the WorldCover mask, to separate the DEM effect from the land-cover effect.
+  3. agreement of the result: both sets scored with pipeline.score against the scoring target that
+     pipeline/score.py has at run time (DEFAULT_TARGET, base_regions since job J18); per-tile candidate share
+     (candidates / NASA valid land cells of the tile, the same denominator for both), Spearman over tiles, overlap
+     of the top 50 tiles. A "DEM only" variant scores NASADEM features with the WorldCover mask, to separate the DEM
+     effect from the land-cover effect. The same numbers are given (a) with the cells that carry the dune-field
+     flag of pipeline/sites.py left out ("unflagged": the final ranking puts flagged sites last, and the flag uses
+     the 200 m roughness, which differs between the two elevation models) and (b) for the regression reference
+     polar_160km under "other_targets".
 
     python validation/nasadem_vs_copdem.py              # everything
     python validation/nasadem_vs_copdem.py --local-only # parts that need no cloud output (five tiles, one-tile DEM)
@@ -142,6 +146,54 @@ def ranking_agreement(share_a, share_b, n_top=TOP_N):
             "tiles_with_candidates_esa": int((a > 0).sum()), "tiles_with_candidates_nasa": int((b > 0).sum())}
 
 
+def result_agreement(esa, nasa, common, target):
+    """Both sets scored against one lunar target. Returns (dict for the JSON, per-tile shares for the figure)."""
+    from pipeline import score, sites
+    ref = score.load_reference(target)
+    s_esa = score.score_cells(esa, ref)
+    s_nasa = score.score_cells(nasa, ref)
+    dem_only = common[KEYS].copy()
+    for f in SCORED + ["relief"]:
+        dem_only[f] = common[f + "_nasa"]
+    for f in ("bare", "ice", "water"):
+        dem_only[f] = common[f + "_esa"]
+    dem_only["valid"] = True
+    s_dem = score.score_cells(dem_only, ref)
+    denom = nasa[nasa["valid"]].groupby("tile").size().astype(float)
+    sets = (("esa", s_esa), ("nasa", s_nasa), ("dem_only", s_dem))
+    shares, counts = {}, {}
+    for key, sc in sets:
+        shares[key], counts[key] = tile_shares(sc, denom)
+    res = {"target": {"region": target, "P_MIN": score.P_MIN, "BARE_MIN": score.BARE_MIN},
+           "candidates": {k: int(v.sum()) for k, v in counts.items()},
+           "ranking_nasa_vs_esa": ranking_agreement(shares["esa"], shares["nasa"]),
+           "ranking_dem_only_vs_esa": ranking_agreement(shares["esa"], shares["dem_only"])}
+    cand = s_esa[s_esa["candidate"]][KEYS].merge(s_nasa[s_nasa["candidate"]][KEYS], on=KEYS)
+    res["candidate_cells_shared_esa_nasa"] = len(cand)
+    p_ok = s_esa[KEYS + ["p_all"]].merge(s_nasa[KEYS + ["p_all"]], on=KEYS, suffixes=("_esa", "_nasa"))
+    res["p_all_agreement_common_cells"] = feature_agreement(p_ok["p_all_esa"], p_ok["p_all_nasa"])
+    top = shares["esa"].sort_values(ascending=False).index[:TOP_N]
+    res["top_tiles_esa"] = [{"tile": t, "share_esa": _r(shares["esa"][t]), "share_nasa": _r(shares["nasa"][t]),
+                             "share_dem_only": _r(shares["dem_only"][t])} for t in top[:20]]
+    # the same without the cells that carry the dune-field flag of pipeline/sites.py (relief / r200 below the 5th
+    # percentile of the target's lunar cells). Cell-level proxy: the pipeline flags whole sites (>= 50% of cells).
+    thr = sites.artefact_threshold(target)
+    if thr is not None:
+        u_shares, u_counts, flagged = {}, {}, {}
+        for key, sc in sets:
+            fl = sites.artefact_flags(sc, thr)
+            c = sc["candidate"].to_numpy(bool)
+            flagged[key] = _r(float((c & fl).sum() / max(1, c.sum())))
+            u_shares[key], u_counts[key] = tile_shares(sc.assign(unflagged=c & ~fl), denom, col="unflagged")
+        res["unflagged"] = {
+            "rule": "candidate cells with relief / r200 >= %.2f (pipeline.sites.artefact_threshold)" % thr,
+            "share_of_candidates_flagged": flagged,
+            "candidates": {k: int(v.sum()) for k, v in u_counts.items()},
+            "ranking_nasa_vs_esa": ranking_agreement(u_shares["esa"], u_shares["nasa"]),
+            "ranking_dem_only_vs_esa": ranking_agreement(u_shares["esa"], u_shares["dem_only"])}
+    return res, shares
+
+
 def figure(common, shares, out):
     import matplotlib
     matplotlib.use("Agg")
@@ -175,7 +227,7 @@ def figure(common, shares, out):
         hi = 100 * max(s_esa.max(), s_b.max(), 1e-3) * 1.05
         A.plot([0, hi], [0, hi], color="#c0392b", lw=1)
         A.set_xlabel("candidate cells per tile [%], Copernicus + WorldCover")
-        A.set_ylabel("candidate cells per tile [%], %s" % lab)
+        A.set_ylabel("candidate cells per tile [%%], %s" % lab)
         rho = spearmanr(s_esa[common_t], s_b[common_t])[0]
         A.set_title("per-tile candidate share, %d tiles, Spearman %.3f" % (len(common_t), rho), fontsize=10)
     fig.suptitle("NASA inputs (NASADEM, MODIS via GIBS) against ESA inputs (Copernicus DEM, WorldCover), 56 S - 60 N",
@@ -220,34 +272,17 @@ def main(argv=None):
             r = mask_agreement(m["bare_wc"].to_numpy(), m["bare_md"].to_numpy())
             r["n_tiles"] = int(m["tile"].nunique())
             res["bare_mask_all_cells_local_caches"] = r
-        # result agreement against the default lunar target of pipeline/score.py
-        region = score.DEFAULT_REGION
-        ref = score.load_reference(region)
-        res["target"] = {"region": region, "P_MIN": score.P_MIN, "BARE_MIN": score.BARE_MIN,
-                         "read_from": "pipeline.score.DEFAULT_REGION at run time"}
-        s_esa = score.score_cells(esa, ref)
-        s_nasa = score.score_cells(nasa, ref)
-        dem_only = common[KEYS].copy()
-        for f in SCORED:
-            dem_only[f] = common[f + "_nasa"]
-        for f in ("bare", "ice", "water"):
-            dem_only[f] = common[f + "_esa"]
-        dem_only["valid"] = True
-        s_dem = score.score_cells(dem_only, ref)
-        denom = nasa[nasa["valid"]].groupby("tile").size().astype(float)
-        shares, counts = {}, {}
-        for key, sc in (("esa", s_esa), ("nasa", s_nasa), ("dem_only", s_dem)):
-            shares[key], counts[key] = tile_shares(sc, denom)
-        res["candidates"] = {k: int(v.sum()) for k, v in counts.items()}
-        res["ranking_nasa_vs_esa"] = ranking_agreement(shares["esa"], shares["nasa"])
-        res["ranking_dem_only_vs_esa"] = ranking_agreement(shares["esa"], shares["dem_only"])
-        cand = s_esa[s_esa["candidate"]][KEYS].merge(s_nasa[s_nasa["candidate"]][KEYS], on=KEYS)
-        res["candidate_cells_shared_esa_nasa"] = len(cand)
-        p_ok = s_esa[["tile", "row", "col", "p_all"]].merge(s_nasa[KEYS + ["p_all"]], on=KEYS, suffixes=("_esa", "_nasa"))
-        res["p_all_agreement_common_cells"] = feature_agreement(p_ok["p_all_esa"], p_ok["p_all_nasa"])
-        top = shares["esa"].sort_values(ascending=False).index[:TOP_N]
-        res["top_tiles_esa"] = [{"tile": t, "share_esa": _r(shares["esa"][t]), "share_nasa": _r(shares["nasa"][t]),
-                                 "share_dem_only": _r(shares["dem_only"][t])} for t in top[:20]]
+        # result agreement against the scoring target of pipeline/score.py (top-level keys), then the same for
+        # the regression reference polar_160km (other_targets)
+        target = getattr(score, "DEFAULT_TARGET", score.DEFAULT_REGION)
+        primary, shares = result_agreement(esa, nasa, common, target)
+        primary["target"]["read_from"] = "pipeline.score.DEFAULT_TARGET at run time"
+        res.update(primary)
+        res["other_targets"] = {}
+        if score.DEFAULT_REGION != target:
+            other, _ = result_agreement(esa, nasa, common, score.DEFAULT_REGION)
+            other.pop("top_tiles_esa", None)
+            res["other_targets"][score.DEFAULT_REGION] = other
         figure(common, shares, a.figure)
         res["figure"] = paths.rel(a.figure)
     paths.ensure(os.path.dirname(a.out))

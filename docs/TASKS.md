@@ -116,9 +116,9 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | J14 | ICESat-2 laser profiles | **blocked** on Windows; replaced by J21 |
 | J15 | every LRO instrument per lunar region (`data/moon/instruments/`) | done |
 | J16 | data layout v2 and generated catalogue | done |
-| J17 | NASA data at the core of the Earth side (NASADEM, MODIS land cover) | code, tests and the NASADEM cell tables (`data/earth/cells_nasadem/`, 619 tiles) are in the repo; the comparison at scale, the recommendation and the licence checks are job **J17b**, in progress under `nasa-windows-worker` since 22:22 |
+| J17 | NASA data at the core of the Earth side (NASADEM, MODIS land cover) | **done** (with J17b, 23:20): code, NASADEM cells of 619 tiles, comparison at scale. The rule of J19 is not met (Spearman 0.637, 21 of the top 50 tiles), so Copernicus stays primary and NASADEM is a cross-check (`docs/sources/j17.md`). The LP DAAC citation pages still have to be opened by a person |
 | J18 | algorithm fix: target, ranking key, sand seas, fast enrichment | **done**; full-scan outputs, key comparison, flag impact and enrichment are recorded in `docs/sources/j18.md` |
-| J19 | final configuration and ranking | **done** (conductor, 23:20): the DEM rule is code, the ranking of J18 was reproduced, top-30 review in `data/sites/top30_review.csv`, `docs/METHOD.md`. The rule returns Copernicus until J17b delivers the comparison; if it then switches, rerun the stages and the review (`docs/sources/j19.md`) |
+| J19 | final configuration and ranking | **done** (conductor, 23:20): the DEM rule is code, the ranking of J18 was reproduced, top-30 review in `data/sites/top30_review.csv`, `docs/METHOD.md`. The rule was evaluated at 23:20 and returns Copernicus (`docs/sources/j17.md`) |
 | J20, J22, J23, J7, J11 | see section 5 | **to do**; J20 and J22 are unblocked |
 | J24 | partner-agency data per site (JAXA, ESA Open Science Catalog, NASA MODIS temperature) | **done**; `docs/sources/j24.md` |
 | J25-J29 | use of the partner data, CSA RADARSAT, a third elevation model | **to do**; specs in `docs/TASKS-PARTNER-DATA.md` |

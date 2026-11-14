@@ -13,3 +13,7 @@ partner-context,python.exe -m pipeline.partner_context,2026-11-14 23:02:39,12.4,
 catalog,python.exe -m pipeline.catalog,2026-11-14 23:02:52,2.1,0,7ee5fa1,data/raw/run_logs/catalog_20261114_230252.log
 context,python.exe -m pipeline.nasa_context --top 150 --images 60,2026-11-14 23:03:06,93.7,0,7ee5fa1,data/raw/run_logs/context_20261114_230306.log
 catalog,python.exe -m pipeline.catalog,2026-11-14 23:08:06,1.7,0,7ee5fa1,data/raw/run_logs/catalog_20261114_230806.log
+validate-dem,python.exe validation/nasadem_vs_copdem.py,2026-11-14 23:10:19,31.2,1,123f9f3,data/raw/run_logs/validate-dem_20261114_231019.log
+validate-dem,python.exe validation/nasadem_vs_copdem.py,2026-11-14 23:16:25,25.3,0,123f9f3,data/raw/run_logs/validate-dem_20261114_231625.log
+catalog,python.exe -m pipeline.catalog,2026-11-14 23:17:57,1.5,0,123f9f3,data/raw/run_logs/catalog_20261114_231757.log
+catalog,python.exe -m pipeline.catalog,2026-11-14 23:18:26,2.3,0,123f9f3,data/raw/run_logs/catalog_20261114_231826.log
