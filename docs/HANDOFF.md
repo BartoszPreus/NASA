@@ -1,31 +1,43 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 19:10, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 19:45, by the conductor session (Claude Code, Fable) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
+## 0. START HERE (state at 19:45, Sat 14 Nov)
+
+**In flight** (workers of the conductor session; on a context reset their reports are lost, their files are not):
+- **J16, data layout v2.** The committed data files have already been MOVED from `data/out/` to `data/moon/`, `data/earth/`, `data/sites/`, `data/validation/`, `data/reference/`, `data/sample/` (layout in `pipeline/paths.py`). `git status` therefore shows about a hundred deletions under `data/out/` and new untracked folders: that is the move, not a loss. The worker is switching every script to `pipeline/paths.py` and writing `pipeline/catalog.py` (generates `data/README.md`, `data/catalog.csv`, `data/sources.csv`). To verify before committing: `python -m pytest tests -q` (9 green); `python -m pipeline.sites` must reproduce `data/raw/j16_before/ranking.csv`; `python validation/enrichment.py` must give 21 of 31 sites and median 1.80. Commit with explicit folders (`git add -A data pipeline validation lidar docs tests`), never `app/`.
+- **J15, the other LRO instruments.** `pipeline/lunar_products.py` (registry + extractor), `cloud/lunar-products.yml`, outputs in `data/moon/instruments/`. Big files are meant for the cloud runner: `python -m pipeline.cloud sync`, `python -m pipeline.cloud dispatch lunar-products`, `wait`, `download`, then copy the artifact into `data/moon/instruments/` and commit.
+- **J14, ICESat-2 laser profiles.** First attempt (photon-level fit through SlideRule) returned nothing; the worker was resumed to use the standard ATL06 product (baselines 60 / 220 / 560 m). Outputs: `data/validation/icesat2.json`, `docs/figures/icesat2_vs_grid_vs_moon.png`, script `validation/icesat2_profiles.py`.
+
+**Waiting on disk, not yet ingested: the full Earth scan.**
+`data/raw/cloud_scan/cells-<i>/earth_cells_scan_s<NN>of20.parquet`: 20 files, 92 MB, 2,023 of 2,023 tiles done, 1,610,960 cells, no errors (cloud run 43623650020, about 18 minutes). After J16 is committed:
+1. copy the 20 files to `data/earth/cells/scan_s<NN>of20.parquet`; concatenate the 20 `log_*.csv` into `data/raw/cells/log_cloud_43623650020.csv` (or re-download with `python -m pipeline.cloud download 43623650020` and run `python -m pipeline.cloud ingest-scan 43623650020`, which does both);
+2. `python -m pipeline.tiles --update-status`, `python -m pipeline.sites`, `python validation/enrichment.py`, `python -m pipeline.nasa_context --top 150 --images 60`, `python -m pipeline.catalog`;
+3. commit the cell tables (92 MB: push them in two or three commits, the venue network is slow) and the rebuilt outputs;
+4. novelty pass (as in J9) on the new unflagged top sites.
+
+**Next jobs, not started.**
+- **J17, NASA data at the core of the Earth side.** Wiktor's requirement: the algorithm must rest on data from NASA's sites. Today the Earth side uses ESA data (Copernicus DEM, WorldCover). Checked on 14 Nov, both without login: (a) NASADEM (NASA's 1 arc-second DEM, 56 S to 60 N) is listed as GeoTIFFs in OpenTopography's public bucket, `https://opentopography.s3.sdsc.edu/raster?list-type=2&prefix=NASADEM/NASADEM_be/` (keys like `NASADEM/NASADEM_be/NASADEM_HGT_n00e006.tif`), and as COGs in Microsoft Planetary Computer (STAC collection `nasadem`, anonymous token from `https://planetarycomputer.microsoft.com/api/sas/v1/token/nasadem`); (b) NASA GIBS WMS answers for the MODIS land-cover layer `MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual` (the colour-to-class table still has to be found in GetCapabilities). Plan: add a `--dem nasadem|copdem` and a `--landcover modis|worldcover` choice to the scan, rescan the non-polar tiles in the cloud with NASA inputs, report how far the ranking agrees with the ESA-based one, then make NASADEM the primary DEM where it exists and keep Copernicus for latitudes above 60 deg. Do not start before J16 is committed (same files).
+- **J7, web app.** Wiktor confirmed the prototype in `app/` is his and may be taken over: commit `app/`, switch `app/build_data.py` to `data/sites/`, `data/moon/`, `data/validation/`, then the scope of J7 in `docs/TASKS.md`.
+- **J11, pitch and submission.** Wiktor presents. He also wants a film of the app made with "hyper frames": do NOT prepare it until he asks.
+
+**Decisions Wiktor made on 14 Nov.** Scan in the cloud on his account (done). Every NASA source of the challenge page is to be used (audit: `docs/moon-analogs/AUDYT-ZRODEL-DANYCH.md`). Data sorted into folders with a catalogue (J16). Every analysis goes through code in the repo (`python -m pipeline.run --list`), heavy stages in the cloud (`pipeline/cloud.py`, `cloud/`), not through ad hoc terminal work.
+
+**People still owe.** Open the evidence for five sites (`docs/NOVELTY.md`; table in the chat of 19:20). Bartosz: switch the challenge on the website. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 306.40 E) is fresh. Optional: Earthdata login downloads (audit, section 4) if J17 cannot do without them.
+
 ## 1. Where things stand
 
-| Job | State | What exists | Next action |
-|---|---|---|---|
-| J1 pipeline package | **done** | `pipeline/`, `tests/` (9 green), fixtures | none |
-| J2 lunar regions | **done** | `data/out/moon_reference.json` (8 regions), `moon_cells.parquet`, footprints, hillshades | none |
-| J3 Earth scan | pilot (37 tiles) and known-analog tiles (41) **done and pushed**; selection of 2,101 tiles done. **Big scan not started** | `data/out/earth_cells_pilot.parquet`, `earth_cells_known.parquet`, `tiles_scanned.csv` (78 done, 2,023 planned) | **needs Wiktor's go** (section 8); job stays open in Axis until the scan has run |
-| J4 scoring and sites | **done**, rerun on 78 tiles with 8 lunar regions, region-level known flags and J9 verdicts | `data/out/earth_scored.parquet`, `sites.geojson`, `ranking.csv` (145 sites) | rerun `python -m pipeline.sites` after the big scan (it reads every `data/out/earth_cells_*.parquet`) |
-| J5 reproduce NASA product | **done** | `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png` | none |
-| J6 effectiveness | **done** | `docs/VALIDATION.md`, `data/out/validation.json`, `validation_enrichment.json`, `docs/figures/eff_*.png` | rerun `validation/enrichment.py` after the big scan; section 3 of the doc (stability) is the weak spot |
-| J8 known analogs | **done** | `data/known_analogs.csv` (75 rows incl. 12 region rows from J9) | none |
-| J9 novelty check | agent part **done and pushed**; job still open in Axis | `data/out/novelty_check.csv`, `docs/NOVELTY.md` | **a human opens the evidence for the top 5** (Harrat Khaybar, Chang Tang, Ikh Bogd, Lut, Ellesmere), then `complete_job`; repeat for new top sites after the big scan |
-| J10 lidar close-up | **done** | `lidar/`, `data/out/crater_profiles.json`, two figures | a human confirms on an LROC image that the lunar crater (87.68 S, 306.40 E) is fresh |
-| J12 NASA Earth context | **done, pushed** | `pipeline/nasa_context.py`, `data/out/site_nasa_context.csv` (NASA POWER skin temperature, precipitation, wind for 145 sites), `data/out/site_images/` (60 MODIS/VIIRS true-colour images from Worldview Snapshots) | rerun `python -m pipeline.nasa_context --top 150 --images 60` after the scan; join into the app's site card |
-| J13 PDS lunar products | worker running since 18:50 | Diviner polar product for our regions, LOLA PDS grid against the PGDA DEM. The 600 MB Diviner table downloads at a few tens of kB/s on the venue network | verify and commit; if the download cannot finish, run `validation/pds_products.py --part diviner` in the cloud runner |
-| J14 ICESat-2 profiles | worker running since 18:50 | along-track laser slopes over top sites through SlideRule | verify and commit |
-| J7 web app | **open for a teammate** | uncommitted prototype in `app/` (another session); data to show: `data/out/sites.geojson`, `ranking.csv`, `moon_reference.json`, `moon_hillshade/` | its author commits it first |
-| J11 pitch and submission | **open for a teammate** (human-led) | figures in `docs/figures/`; numbers in sections 6 and 9 | start now |
+| Job | State |
+|---|---|
+| J1 pipeline, J2 lunar regions, J4 scoring and sites, J5 NASA-product check, J6 effectiveness, J8 known analogs, J10 lidar, J12 NASA POWER + Worldview, J13 Diviner + LOLA from PDS | **done and pushed** |
+| J3 Earth scan | all 2,101 planned tiles computed (78 local, 2,023 in the cloud); cloud results on disk, not yet ingested or committed |
+| J9 novelty check | agent part done; a person must open the evidence; repeat for the new top sites after the full ranking |
+| J14 ICESat-2, J15 LRO instruments, J16 layout and catalogue | workers running (section 0) |
+| J17 NASA Earth core, J7 app, J11 pitch | not started (section 0) |
 
-Data-source audit (which of the 11 challenge links we really use, and what needs an Earthdata login): `docs/moon-analogs/AUDYT-ZRODEL-DANYCH.md`.
-
-If the context was cleared while workers were running, their final reports are gone. Their results are the files listed above: judge a job by its files and the checklist in section 3, not by a report.
+Code entry points: `python -m pipeline.run --list` (every stage, its command and outputs), `pipeline/paths.py` (where every file lives), `pipeline/cloud.py` + `cloud/` (cloud execution in the private runner repository `witczakw/moon-scan-runner`).
 
 ## 2. How the conductor works here
 
