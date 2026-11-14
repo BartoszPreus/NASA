@@ -1,6 +1,6 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 18:40, by the conductor session (Claude Code, Fable) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
@@ -8,17 +8,19 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
 | Job | State | What exists | Next action |
 |---|---|---|---|
-| J1 pipeline package | **done, pushed** (`2ca3719`) | `pipeline/`, `tests/` (9 green), fixtures in `data/out/sample/` | none |
-| J8 known analogs | **done, pushed** (`fa0ef98`) | `data/known_analogs.csv` (63 rows; 16 from opened primary sources, 47 secondary) | J9 is appending `type = region` rows (Hawaii, Iceland, Atacama) |
-| J5 reproduce NASA product | **done, pushed** (`df7fcc8`); rerun by the conductor gave identical numbers | `validation/t1_reproduce.py`, `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png` | optional second window near 84-85 S |
-| J10 lidar close-up | **done, pushed** (`05ae5b7`); rerun gave identical numbers | `lidar/`, `data/out/crater_profiles.json`, two figures in `docs/figures/` | a human confirms on an LROC image that the lunar crater (87.68 S, 306.40 E) is fresh |
-| J3 Earth scan | milestone 1 and the selection **done, pushed** (`6ad8e44`, `741fd2c`). Known-analog tiles (41) being scanned in the background since 18:25 -> `data/out/earth_cells_known.parquet`. **Big scan not started** | `pipeline/earth_scan.py`, `pipeline/tiles.py`, `data/out/tiles_scanned.csv` (2,101 planned tiles with `prio` and `region`) | commit `earth_cells_known.parquet` when the background run ends; **the big scan (section 8) needs Wiktor's go**; do not `complete_job` J3 until it has run |
-| J4 scoring and sites | v0 **done, pushed** (`ca8c37b`), completed in Axis | `pipeline/score.py`, `pipeline/sites.py`, `data/out/earth_scored.parquet`, `sites.geojson`, `ranking.csv` (81 sites) | rerun `python -m pipeline.sites` after J2 regions, after J9's region rows, after the night scan |
-| J2 lunar regions | **done, pushed**; conductor checked self-consistency (each region against itself: median p 0.50, 90% inside its envelope) | `pipeline/moon_reference.py`, `data/out/moon_reference.json` (8 regions), `moon_cells.parquet`, `moon_regions.geojson`, `moon_hillshade/*.png` | rerun `python -m pipeline.sites` once J6 and J9 are done (it then fills `best_region` and the per-region scores; a trial run with all 8 regions worked) |
-| J6 effectiveness | worker running since 18:16 | nothing yet | verify, commit, `complete_job` |
-| J9 novelty check | worker running since 18:16 | nothing yet | verify, rerun J4, commit; **a human must open the evidence for the top 5** |
-| J7 web app | **open for a teammate** | uncommitted prototype in `app/` from another session; real data to show is now in `data/out/sites.geojson` | its author commits it first |
-| J11 pitch and submission | **open for a teammate** (human-led) | figures ready: `docs/figures/t1_reproduce_nasa.png`, `crater_profile_overlay.png`, `morasko_1m_vs_30m.png` | start now |
+| J1 pipeline package | **done** | `pipeline/`, `tests/` (9 green), fixtures | none |
+| J2 lunar regions | **done** | `data/out/moon_reference.json` (8 regions), `moon_cells.parquet`, footprints, hillshades | none |
+| J3 Earth scan | pilot (37 tiles) and known-analog tiles (41) **done and pushed**; selection of 2,101 tiles done. **Big scan not started** | `data/out/earth_cells_pilot.parquet`, `earth_cells_known.parquet`, `tiles_scanned.csv` (78 done, 2,023 planned) | **needs Wiktor's go** (section 8); job stays open in Axis until the scan has run |
+| J4 scoring and sites | **done**, rerun on 78 tiles with 8 lunar regions, region-level known flags and J9 verdicts | `data/out/earth_scored.parquet`, `sites.geojson`, `ranking.csv` (145 sites) | rerun `python -m pipeline.sites` after the big scan (it reads every `data/out/earth_cells_*.parquet`) |
+| J5 reproduce NASA product | **done** | `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png` | none |
+| J6 effectiveness | **done** | `docs/VALIDATION.md`, `data/out/validation.json`, `validation_enrichment.json`, `docs/figures/eff_*.png` | rerun `validation/enrichment.py` after the big scan; section 3 of the doc (stability) is the weak spot |
+| J8 known analogs | **done** | `data/known_analogs.csv` (75 rows incl. 12 region rows from J9) | none |
+| J9 novelty check | agent part **done and pushed**; job still open in Axis | `data/out/novelty_check.csv`, `docs/NOVELTY.md` | **a human opens the evidence for the top 5** (Harrat Khaybar, Chang Tang, Ikh Bogd, Lut, Ellesmere), then `complete_job`; repeat for new top sites after the big scan |
+| J10 lidar close-up | **done** | `lidar/`, `data/out/crater_profiles.json`, two figures | a human confirms on an LROC image that the lunar crater (87.68 S, 306.40 E) is fresh |
+| J7 web app | **open for a teammate** | uncommitted prototype in `app/` (another session); data to show: `data/out/sites.geojson`, `ranking.csv`, `moon_reference.json`, `moon_hillshade/` | its author commits it first |
+| J11 pitch and submission | **open for a teammate** (human-led) | figures in `docs/figures/`; numbers in sections 6 and 9 | start now |
+
+No worker is running as of 18:40. Everything produced so far is committed and pushed.
 
 If the context was cleared while workers were running, their final reports are gone. Their results are the files listed above: judge a job by its files and the checklist in section 3, not by a report.
 
@@ -68,11 +70,11 @@ Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476
 
 ## 5. Order of work from here
 
-1. Verify and commit J5, J10, J3 (pilot), J2, J4 as they finish.
-2. Rerun J4 with the pilot parquet, `known_analogs.csv` and `moon_reference.json`; push `sites.geojson` and `ranking.csv`. Tell the J7 owner.
-3. Start J6 (effectiveness numbers) and J9 (novelty check of the top 10 new sites).
-4. With Wiktor's go, launch the night scan (J3 milestone 2); in the morning rerun J4, J6, J9.
-5. Feed final numbers to J11 (pitch, README, submission fields). Sun 09:30 freeze.
+1. Big scan (J3 milestone 2), with Wiktor's go: non-polar tiles first (section 8).
+2. After the scan: `python -m pipeline.sites`, `python validation/enrichment.py`, `python -m pipeline.tiles --update-status`; commit; then a J9 pass on the new unflagged top sites.
+3. Cheap improvements worth doing before the freeze: (a) flag sites that are stable under a half-cell grid shift (compute the shifted grid for candidate tiles only); (b) drop candidate cells that touch water or salt flats; (c) per-region ranking in the app (lunar target selector).
+4. J7 (app) and J11 (pitch, README, submission fields) by teammates, using sections 6 and 9.
+5. Sun 09:30 freeze.
 
 ## 6. Results so far (details in `docs/RAPORT-ANALOGI-KSIEZYCA-ZODIAK.pdf`)
 
@@ -116,3 +118,18 @@ Estimate: prio 0+1 is about 20 GB of downloads (non-polar tiles are 35-45 MB eac
 To stop after prio 1, pass a file with only those tiles instead of the full CSV (as done for prio 0: `data/raw/tiles_prio0.txt`).
 
 After the scan: `pipeline/score.py::default_cells_path` reads one parquet (the pilot). The final ranking needs the pilot, `earth_cells_known.parquet` and the shard files concatenated (deduplicate on `tile,row,col`), passed with `--cells`.
+
+## 9. What the validation says, and how to talk about it (read before writing the pitch)
+
+Holds up:
+- **Our code matches NASA's lunar slope map**: median absolute difference 0.042 deg (20 m) and 0.064 deg (30 m) for a plane-fit slope at 200 m. This validates the data handling and a plane-fit estimator written for the test, not the two-point slopes used for scoring.
+- **Negative controls are clean**: Wielkopolska, the Tatra, the Alps and a Sahara sand sea give 0 candidate cells and 0 sites.
+- **Known analog sites are enriched in lunar-like terrain** (78 tiles): 21 of 31 sites above the base rate, median 1.80 x; random circles of the same radii give 0.33 x (5-95%: 0.14-0.67), and none of 500 random repeats reaches 1.80. Strongest: Kilauea 13 x, Island of Hawaii 12 x, Devon Island 6.7 x, Mauna Kea 5.4 x, Yungay 5.2 x, Haughton 5.0 x. Not enriched: salt pans, hydrothermal fields, flat young lava (Craters of the Moon, Laki, Potrillo), the Lut desert.
+- **Closed depressions are the feature that matters**: without `dep_frac` only 2 of the top 10 sites survive.
+
+Does not hold up, say it plainly:
+- **Exact top sites are not stable.** Top-10 overlap is 6 of 10 after a half-cell grid shift and 4 of 10 with 48 px or 96 px cells. Which tiles and regions score high is stable (Spearman 0.88-0.97). Present results as regions and areas, not as "the best 2 km patch".
+- **The first hidden-known test was uninformative**: the best cell near a known site is in the top 5% for 10 of 17 sites, and for 9 of 17 random points. The statistic saturates; the enrichment test replaced it.
+- **Nothing in the current top list can be called new.** Of the 12 unflagged top sites: 3 established analogs, 7 in regions that appear in analog work, 2 not found (northern Chang Tang, Tibet), and those two sit next to lakes, so their depressions are probably lake basins. The most defensible "not found in the catalogues and searches we list" candidates so far: the Harrat Khaybar lava field (Saudi Arabia), the Ikh Bogd piedmont (Gobi-Altai, Mongolia), the uplands of east-central Ellesmere Island. A wider scan is the only way to get better candidates.
+- **Six known analog sites cannot be evaluated at all** because the land-cover mask removes them (Meteor Crater, SP Crater, Sunset Crater, Cinder Lake are under sparse vegetation in WorldCover; the Dry Valleys have no WorldCover data).
+- **Earth artefacts of the depression feature**: lakes, playas, salt flats, yardang troughs, thermokarst. A water / salt mask or a manual look is needed before a site is shown as a candidate.
