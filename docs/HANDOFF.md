@@ -37,7 +37,8 @@ the data source of each, the two decisions, the limits): it is the text the READ
 `sites` stage reads its outcome by itself. Should the first line of a new `data/raw/run_logs/sites_*.log` say
 `dem policy: nasa-first`, the ranking has changed and `python -m pipeline.review` has to be redone.
 
-**What is left** (specs: `docs/TASKS.md` section 5 and `docs/TASKS-PARTNER-DATA.md`; all on the Axis board):
+**What is left** (every job is a GitHub issue with its full spec; the board is the pinned issue 13; the same
+specs are in `docs/TASKS.md` section 5 and `docs/TASKS-PARTNER-DATA.md`):
 J20 validation on the full scan ·
 J22 literature check of the top regions (start with Putorana Plateau, Peary Land, Hazen Plateau), ends with a
 person opening the evidence · J7 web app (`app/` is Wiktor's prototype, still uncommitted on his machine) ·
@@ -54,8 +55,8 @@ the warmest lunar region. Nothing is called a discovery before J22.
 **Rules.** No `Claude-Session:` line or any session link in a commit; no keys, tokens or private e-mail
 addresses in the repo (Wiktor, 14 Nov; history was rewritten at about 19:45, so a clone made earlier must be
 replaced by a fresh one). Every analysis through code in the repo; heavy stages on the cloud runner
-(`python -m pipeline.cloud ...`, private repo `witczakw/moon-scan-runner`). Axis for every job and file
-(`CLAUDE.md`). Wiktor presents; he wants a film of the app later: do not prepare it until he asks.
+(`python -m pipeline.cloud ...`, private repo `witczakw/moon-scan-runner`). **Jobs are GitHub issues; Axis is
+not used since 23:20 on 14 Nov** (`CLAUDE.md`): take an issue before you start, comment the result, close it. Wiktor presents; he wants a film of the app later: do not prepare it until he asks.
 
 **People still owe.** Bartosz: switch the team's challenge on the Space Apps website; make the repository public
 before submission, after deciding what to do with `docs/hackathon/` (it holds a private e-mail address of the
@@ -76,14 +77,13 @@ J22 will name. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 3
 
 ## 2. How the conductor works here
 
-- Jobs J2, J3, J4, J5, J10 are claimed in Axis (project `nasa-space-app`) by agent id **`claude-code-fable-conductor`**. Use the same id for `complete_job`, or the call is refused.
-- Workers are `opus-worker` sub-agents. They were told: write only the job's files, no git commands that change state, no Axis calls. The conductor verifies, commits and reports.
+- Jobs are GitHub issues (board: pinned issue 13). Axis was the coordination tool until Sat 14 Nov, 23:20 and is retired: do not call it. Open jobs as GitHub issues: J20 = issue 1, J22 = 2, J7 = 3, J11 = 4, J25 = 5, J26 = 6, J27 = 7, J23 = 8, J28 = 9, J29 = 10; checklist for people = 11; backlog = 12; the board with order and deadlines = 13 (pinned).
+- Workers are `opus-worker` sub-agents. They were told: write only the job's files, no git commands that change state, no issue or board changes. The conductor verifies, commits and reports.
 - Commit protocol (several agents share one working tree): `git fetch`; `git add <explicit paths of one job>`; commit; `git push origin main`. Never `git add -A`. Use `git pull --rebase` only when the remote is ahead and no worker is writing files.
 - Commit message trailer: only `Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>`. Never a session line or link (see the update in section 0).
-- After each job: a 1-3 line note in the Axis notepad, then `complete_job` with a factual outcome.
+- After each job: a result comment on its issue (status, numbers, evidence, files, what is not done), then close it.
 - Never touch or commit `app/` (another session's work in progress) or `scratch/`.
 
-Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476a-ab63-6e35e9880c19` · J3 `8271bacb-1472-449c-8812-3e83510e790f` · J4 `ab37f145-9a47-44b1-8544-fc6652e419d4` · J5 `58f1d556-928a-440d-b9d0-fe1f25b12de1` · J6 `c3e1a105-04cb-426e-a35a-ee1031c0ea57` · J7 `bca8f49c-4912-4163-9762-62428249a3bc` · J8 `e9f21535-c175-4638-bd8a-0783b1870d8a` · J9 `61e58427-311a-4461-be16-092d23e094ce` · J10 `29168446-e704-4751-8087-e8d39229e313` · J11 `27b2e0f1-8d97-4c15-9698-aa59b50e4654`. · J12 `269abe59-3684-4dd5-8ab7-886ce2c2fb75` · J13 `dabb8952-3491-43f6-a2c1-f43ab614a0b4` · J15 `30ea5b03-b103-46d1-8af0-63940a7d8d38` · J16 `ee990d37-784a-42e1-93b1-349c754a966c` · J17 `cac38a05-52dd-47a2-944b-9770c0108cc7` · J18 `a75e4fb3-586b-4200-a6be-00a6a80fb5ca` · J19 `79d900f3-f210-4e70-9ed6-f50fec43dc7f` · J20 `8010a28b-b7b9-4c22-97a5-87ffa7c8f21c` · J21 `cdcb1f34-e49f-49fe-a97c-eeb9675385a9` · J22 `b29c8286-096a-4e11-b07d-0e770ae41c1f` · J23 `ac92e644-e9b5-4361-945b-6c856adaad29`. J17 and J18 are claimed by the conductor id; J9 is still open under it (human check pending); J7, J11, J19-J23 are unclaimed.
 
 ## 3. Verification checklist before committing a worker's output
 

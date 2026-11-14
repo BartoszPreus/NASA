@@ -2,11 +2,11 @@
 
 Written Sat 14 Nov 2026, about 22:50, by the conductor session on Wiktor's machine, at Wiktor's request.
 These jobs sit next to `docs/TASKS.md` (section 5 there has the same format and the general rules; read its
-sections 2 and 3 first). They are on the Axis board under the same numbers. `docs/TASKS.md` was locked by
-another agent when this was written, which is why this is a separate file: merge it there when the lock is gone.
+sections 2 and 3 first). They are GitHub issues 5 (J25), 6 (J26), 7 (J27), 9 (J28) and 10 (J29); the board is
+issue 13. Axis is not used since Sat 14 Nov, 23:20.
 
 Start line for any agent: `Read CLAUDE.md, docs/HANDOFF.md (section 0), docs/TASKS.md (sections 2, 3),
-docs/sources/j24.md and this file. Claim job J<n> in Axis (project nasa-space-app) and do exactly that job.`
+docs/sources/j24.md and this file. Take the GitHub issue of job J<n> and do exactly that job.`
 
 ## Why these resources were not used, and what they are good for
 

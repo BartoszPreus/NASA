@@ -2,10 +2,10 @@
 
 State: Sat 14 Nov 2026, 19:45 Europe/Warsaw. **Hard deadline: Sun 15 Nov, 13:30** (portal submission + slides at the info desk). Feature freeze: Sun 09:30.
 **Live status of every job, and how to pick up after a context reset: `docs/HANDOFF.md`.**
-Every job below is also posted in Axis (project `nasa-space-app`) with the same number. This file is the full spec; the Axis card is the short version.
+Every open job below is also a GitHub issue of this repository with the same text (the board is the pinned issue 13). Axis is not used since Sat 14 Nov 2026, 23:20.
 
 **How to start an agent on a job** (paste into Claude Code):
-> Read `CLAUDE.md` and `docs/TASKS.md`. Claim job **J<n>** in Axis (project `nasa-space-app`) and do exactly that job. Touch only the files in its "Owns" list. Report in the STATUS / RESULT / EVIDENCE / BLOCKERS / NEXT format.
+> Read `CLAUDE.md` and `docs/TASKS.md`. Take the GitHub issue of job **J<n>** and do exactly that job. Touch only the files in its "Owns" list. Report in the STATUS / RESULT / EVIDENCE / BLOCKERS / NEXT format.
 
 ## 1. What we are building
 
@@ -20,8 +20,8 @@ What is already measured (do not redo; read `docs/RAPORT-ANALOGI-KSIEZYCA-ZODIAK
 
 ## 2. Rules for every job
 
-1. **Axis** as in `CLAUDE.md`: claim the job, `propose_file_access` before editing, a 1-3 line note after each milestone, `complete_job` at the end. No secrets in Axis.
-2. **Files**: edit only what your job owns. Need a change elsewhere? Write it in the Axis notepad for the owner. The "Owns" list overrides the default folder in `.claude/agents/opus-worker.md`.
+1. **GitHub issues** as in `CLAUDE.md`: every job is an issue with its full specification; take the issue before you start, comment when you stop, close it with the result. Axis is not used since Sat 14 Nov, 23:20. No secrets in issues.
+2. **Files**: edit only what your job owns. Need a change elsewhere? Comment on the issue of the job that owns the file. The "Owns" list overrides the default folder in `.claude/agents/opus-worker.md`.
 3. **Git**: small commits to `main`, `git pull --rebase origin main` before every push, never force-push. Never commit raw data, files over 50 MB, or keys. Raw downloads go to `data/raw/` (git-ignored).
 4. **Python**: repo-root `.venv` (Python 3.12, Windows). Run everything from the repo root. Add packages to `requirements.txt`.
 5. **English** in code, comments and every file that can end up in the submission. Polish only in `docs/` notes for the team.
@@ -122,13 +122,15 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | J20, J22, J23, J7, J11 | see section 5 | **to do**; J20 and J22 are unblocked |
 | J24 | partner-agency data per site (JAXA, ESA Open Science Catalog, NASA MODIS temperature) | **done**; `docs/sources/j24.md` |
 | J25-J29 | use of the partner data, CSA RADARSAT, a third elevation model | **to do**; specs in `docs/TASKS-PARTNER-DATA.md` |
+
+Open jobs as GitHub issues: J20 = issue 1, J22 = 2, J7 = 3, J11 = 4, J25 = 5, J26 = 6, J27 = 7, J23 = 8, J28 = 9, J29 = 10; checklist for people = 11; backlog = 12; the board with order and deadlines = 13 (pinned).
 | J21 | ICESat-2 profiles in the cloud | **done**; 8/8 sites passed the 60 m sample threshold; results in `data/validation/icesat2.json` |
 
 ## 5. Remaining jobs: exact specifications
 
 How to read a spec. **Inputs** are files that exist (or the job named in brackets produces them). **Outputs** are the only files you create or change. **Accept** is the list of checks that must pass before you report DONE; run them and paste the result lines into your report. If a check cannot pass, report PARTIAL or BLOCKED with the exact error; never adjust a number, a threshold or a test to make a check pass.
 
-Start line for any agent: `Read CLAUDE.md, docs/HANDOFF.md (sections 0 and 9) and docs/TASKS.md (sections 2, 3 and the job). Claim job J<n> in Axis (project nasa-space-app) and do exactly that job.`
+Start line for any agent: `Read CLAUDE.md, docs/HANDOFF.md (sections 0 and 9) and docs/TASKS.md (sections 2, 3 and the job). Take the GitHub issue of job J<n> (board: issue 13) and do exactly that job.`
 
 Python: `.venv\Scripts\python.exe` from the repo root (Windows). All locations: `pipeline/paths.py`. Catalogue of files and sources: `data/README.md`. The venue network gives about 0.3 MB/s: anything that downloads more than about 30 MB runs on the cloud runner (`cloud/README.md`, `python -m pipeline.cloud ...`).
 

@@ -1,5 +1,7 @@
 # Współpraca agentów Claude Code w zespole Zodiak: Axis / Agent Talk / alternatywy
 
+> **Stan na sob. 14.11.2026, 23:20:** zespół zakończył korzystanie z Axisa. Zadania są w GitHub Issues repozytorium (tablica: przypięte issue nr 13), zasady w `CLAUDE.md`. Poniższy tekst zostaje jako zapis tego, jak wybieraliśmy narzędzie.
+
 Stan na: sobota 14.11.2026 (NASA Space Apps Poznań, deadline **ndz 15.11, 13:30**).
 Cel: agenci różnych osób widzą nawzajem, kto co robi, dzielą kontekst i nie depczą sobie po plikach.
 

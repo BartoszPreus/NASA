@@ -1,15 +1,15 @@
 # Zodiak - NASA Space Apps 2026 (Harmonization of MODIS and VIIRS Hot Spots)
 
-## Axis - team agent coordination (MCP server `axis`, project `nasa-space-app`)
-Every Claude Code session in this repo uses Axis so agents of different teammates do not collide.
+## Coordination: GitHub issues (Axis is no longer used)
+Since Sat 14 Nov 2026, 23:20 the team does not use Axis. Do not call the `axis` MCP server: no claims, no file locks, no notes there. Jobs live as GitHub issues of this repository.
 
-1. Session start: call `get_project_soul`, then `list_jobs` and `get_shared_context` (contracts, status of others).
-2. Before non-trivial work (2+ files or 2+ steps): `post_job`, then `claim_job` / `claim_next_job`. Do not start work someone else has claimed.
-3. Before editing any file: `propose_file_access`. If denied, do not edit it - pick other work or write in the notepad.
-4. After each meaningful step or any change of a shared contract (API, data schema, column names): `update_shared_context` with 1-3 lines: who, what, where.
-5. When done: `complete_job` with the same agentId (releases locks). Before stopping for any reason: `finalize_session`.
+1. Session start: read `docs/HANDOFF.md` section 0, then the board (`gh issue view 13`, pinned: open jobs, order, deadlines) and `gh issue list`.
+2. Every job is one issue with its full specification (inputs, do, outputs, accept). Before non-trivial work (2+ files or 2+ steps): take the issue (assign yourself, or comment "taking this" with the name of your agent). Do not start work on an issue someone else has taken. Work that has no issue yet: open one first.
+3. Edit only the files the issue lists under Outputs or Owns. Need a change elsewhere, or a change of a shared contract (API, data schema, column names)? Comment on the issue first.
+4. Commit with explicit paths, `git pull --rebase origin main` before every push, never force-push, mention the issue number in the commit message.
+5. When done or stopping for any reason: comment the result on the issue (status, numbers, evidence, files, what is not done); close it when its Accept checks pass.
 
-Rules: never put secrets/API keys (e.g. FIRMS MAP_KEY) in Axis. Keep notes short.
+Rules: never put secrets/API keys (e.g. FIRMS MAP_KEY), private e-mail addresses or session links in issues, commit messages or files. The repository becomes public at submission.
 
 ## Contest rules that affect code (NASA Space Apps T&C)
 - Everything in English. Cite EVERY source (data, libraries, code) in README - missing citations can cost the award.
