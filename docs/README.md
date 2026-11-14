@@ -1,6 +1,8 @@
 # docs/: research i zasady NASA Space Apps 2026 (drużyna Zodiak, Poznań)
 Materiały przygotowane 14.11.2026 z oficjalnych stron spaceappschallenge.org i researchu. Kod projektu jest poza tym folderem.
 
+**➡️ Decyzja pożary czy Księżyc: przeczytaj `PODSUMOWANIE-KIERUNKOW.md`** (obie ścieżki sprawdzone na danych, sob 14.11 ok. 15:45; skrypty w `/analysis`).
+
 | Folder | Co jest w środku |
 |---|---|
 | `hackathon/` | **Start tutaj** (`00-START-TUTAJ.md`), harmonogram Poznania (deadline **ndz 13:30**, pitch 3+2 min), **pełne zasady konkursu** (`ZASADY-KONKURSU-PELNE.md`), checklista zgłoszenia, kryteria oceny i nagrody, FAQ, maile |

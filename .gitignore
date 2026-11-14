@@ -1,1 +1,5 @@
 .agents
+.venv/
+scratch/
+analysis/data/
+__pycache__/
