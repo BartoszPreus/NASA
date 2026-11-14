@@ -12,7 +12,7 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 | J8 known analogs | **done, pushed** (`fa0ef98`) | `data/known_analogs.csv` (63 rows; 16 from opened primary sources, 47 secondary) | J9 is appending `type = region` rows (Hawaii, Iceland, Atacama) |
 | J5 reproduce NASA product | **done, pushed** (`df7fcc8`); rerun by the conductor gave identical numbers | `validation/t1_reproduce.py`, `data/out/validation_t1.json`, `docs/figures/t1_reproduce_nasa.png` | optional second window near 84-85 S |
 | J10 lidar close-up | **done, pushed** (`05ae5b7`); rerun gave identical numbers | `lidar/`, `data/out/crater_profiles.json`, two figures in `docs/figures/` | a human confirms on an LROC image that the lunar crater (87.68 S, 306.40 E) is fresh |
-| J3 Earth scan | milestone 1 **done, pushed** (`6ad8e44`): pilot table. Worker still running since 18:04 on the tile selection | `data/out/earth_cells_pilot.parquet` (76,574 cells, 37 tiles), `pilot_tiles.csv`; on disk, uncommitted: `pipeline/earth_scan.py`, `pipeline/tiles.py`, `docs/sources/j3.md` | verify and commit the code and `tiles_scanned.csv`; **night scan needs Wiktor's go** |
+| J3 Earth scan | milestone 1 and the selection **done, pushed** (`6ad8e44`, `741fd2c`). Known-analog tiles (41) being scanned in the background since 18:25 -> `data/out/earth_cells_known.parquet`. **Big scan not started** | `pipeline/earth_scan.py`, `pipeline/tiles.py`, `data/out/tiles_scanned.csv` (2,101 planned tiles with `prio` and `region`) | commit `earth_cells_known.parquet` when the background run ends; **the big scan (section 8) needs Wiktor's go**; do not `complete_job` J3 until it has run |
 | J4 scoring and sites | v0 **done, pushed** (`ca8c37b`), completed in Axis | `pipeline/score.py`, `pipeline/sites.py`, `data/out/earth_scored.parquet`, `sites.geojson`, `ranking.csv` (81 sites) | rerun `python -m pipeline.sites` after J2 regions, after J9's region rows, after the night scan |
 | J2 lunar regions | **done, pushed**; conductor checked self-consistency (each region against itself: median p 0.50, 90% inside its envelope) | `pipeline/moon_reference.py`, `data/out/moon_reference.json` (8 regions), `moon_cells.parquet`, `moon_regions.geojson`, `moon_hillshade/*.png` | rerun `python -m pipeline.sites` once J6 and J9 are done (it then fills `best_region` and the per-region scores; a trial run with all 8 regions worked) |
 | J6 effectiveness | worker running since 18:16 | nothing yet | verify, commit, `complete_job` |
@@ -92,3 +92,27 @@ Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476
 - Who answers the jury on the science; who deploys the app; who takes J7 and J11.
 - Night scan: yes or no, on how many machines.
 - Still unverified and needed for the README and slides: current Artemis programme status, the exact Copernicus DEM attribution sentence, the WorldCover licence.
+
+## 8. The big scan (J3 milestone 2): plan and launch
+
+Selection funnel: 26,450 GLO-30 tiles -> 18,836 with WorldCover land -> 3,763 with bare fraction >= 0.4 and ice < 0.5 -> 1,408 with coarse slope >= 1.0 deg. The coarse slope (2-pixel baseline on the factor-8 overview) predicts the fine `s570` well on the pilot tiles: r = 0.992, s570 = 1.11 x coarse.
+
+Scan order in `data/out/tiles_scanned.csv` (column `prio`), decided by the conductor:
+| prio | Tiles | What |
+|---|---|---|
+| 0 | 78 | pilot and known-analog tiles (37 done, 41 running now) |
+| 1 | 558 | every non-polar tile that passes the thresholds: Central Asia/Tibet 232, Sahara/Arabia 160, Americas 136, southern Africa 11, other 9 |
+| 2 | 826 | Arctic tiles that pass (WorldCover class 100, moss and lichen, counts as bare, so tundra dominates a rank-only list) |
+| 3 | 639 | flatter polar tiles |
+No Australian tile passes (flat or shrub-covered). Antarctica and land north of 82.75 N have no WorldCover, so only pilot and known tiles are included there. Say this bias out loud in the write-up.
+
+Launch (two consoles, repo root; resumable; GeoTIFFs are deleted after processing):
+```
+.venv\Scripts\python.exe -m pipeline.earth_scan --tiles data/out/tiles_scanned.csv --raw-dir data/raw --out data/out/earth_cells_s0of2.parquet --shard 0/2 --workers 4
+.venv\Scripts\python.exe -m pipeline.earth_scan --tiles data/out/tiles_scanned.csv --raw-dir data/raw --out data/out/earth_cells_s1of2.parquet --shard 1/2 --workers 4
+.venv\Scripts\python.exe -m pipeline.tiles --update-status
+```
+Estimate: prio 0+1 is about 20 GB of downloads (non-polar tiles are 35-45 MB each), prio 2 about 8 GB more. Measured speed here was 1.5 MB/s shared and 5 MB/s in one test, so 1.5 to 4 hours for prio 0+1. Feature computation is about 8 s per tile per process. If a merged shard exceeds 50 MB, re-merge from the cache with `--shard i/3` (instant).
+To stop after prio 1, pass a file with only those tiles instead of the full CSV (as done for prio 0: `data/raw/tiles_prio0.txt`).
+
+After the scan: `pipeline/score.py::default_cells_path` reads one parquet (the pilot). The final ranking needs the pilot, `earth_cells_known.parquet` and the shard files concatenated (deduplicate on `tile,row,col`), passed with `--cells`.
