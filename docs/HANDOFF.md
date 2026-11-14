@@ -1,6 +1,6 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 18:40, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 19:10, by the conductor session (Claude Code, Fable) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
@@ -17,10 +17,13 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 | J8 known analogs | **done** | `data/known_analogs.csv` (75 rows incl. 12 region rows from J9) | none |
 | J9 novelty check | agent part **done and pushed**; job still open in Axis | `data/out/novelty_check.csv`, `docs/NOVELTY.md` | **a human opens the evidence for the top 5** (Harrat Khaybar, Chang Tang, Ikh Bogd, Lut, Ellesmere), then `complete_job`; repeat for new top sites after the big scan |
 | J10 lidar close-up | **done** | `lidar/`, `data/out/crater_profiles.json`, two figures | a human confirms on an LROC image that the lunar crater (87.68 S, 306.40 E) is fresh |
+| J12 NASA Earth context | **done, pushed** | `pipeline/nasa_context.py`, `data/out/site_nasa_context.csv` (NASA POWER skin temperature, precipitation, wind for 145 sites), `data/out/site_images/` (60 MODIS/VIIRS true-colour images from Worldview Snapshots) | rerun `python -m pipeline.nasa_context --top 150 --images 60` after the scan; join into the app's site card |
+| J13 PDS lunar products | worker running since 18:50 | Diviner polar product for our regions, LOLA PDS grid against the PGDA DEM. The 600 MB Diviner table downloads at a few tens of kB/s on the venue network | verify and commit; if the download cannot finish, run `validation/pds_products.py --part diviner` in the cloud runner |
+| J14 ICESat-2 profiles | worker running since 18:50 | along-track laser slopes over top sites through SlideRule | verify and commit |
 | J7 web app | **open for a teammate** | uncommitted prototype in `app/` (another session); data to show: `data/out/sites.geojson`, `ranking.csv`, `moon_reference.json`, `moon_hillshade/` | its author commits it first |
 | J11 pitch and submission | **open for a teammate** (human-led) | figures in `docs/figures/`; numbers in sections 6 and 9 | start now |
 
-No worker is running as of 18:40. Everything produced so far is committed and pushed.
+Data-source audit (which of the 11 challenge links we really use, and what needs an Earthdata login): `docs/moon-analogs/AUDYT-ZRODEL-DANYCH.md`.
 
 If the context was cleared while workers were running, their final reports are gone. Their results are the files listed above: judge a job by its files and the checklist in section 3, not by a report.
 
@@ -95,29 +98,25 @@ Axis job ids: J1 `eac4e00f-9cfd-4f15-b0c5-18744dad3996` · J2 `e77db83f-b03e-476
 - Night scan: yes or no, on how many machines.
 - Still unverified and needed for the README and slides: current Artemis programme status, the exact Copernicus DEM attribution sentence, the WorldCover licence.
 
-## 8. The big scan (J3 milestone 2): plan and launch
+## 8. The big scan (J3 milestone 2): running in the cloud since 18:54
 
-Selection funnel: 26,450 GLO-30 tiles -> 18,836 with WorldCover land -> 3,763 with bare fraction >= 0.4 and ice < 0.5 -> 1,408 with coarse slope >= 1.0 deg. The coarse slope (2-pixel baseline on the factor-8 overview) predicts the fine `s570` well on the pilot tiles: r = 0.992, s570 = 1.11 x coarse.
+**The local scan was stopped at 18:52**: the venue network gave 0.26 MB/s for all downloads together, so 28 GB would have taken about 30 hours. With Wiktor's approval the scan now runs on GitHub Actions in a private repository on his account.
 
-Scan order in `data/out/tiles_scanned.csv` (column `prio`), decided by the conductor:
-| prio | Tiles | What |
-|---|---|---|
-| 0 | 78 | pilot and known-analog tiles (37 done, 41 running now) |
-| 1 | 558 | every non-polar tile that passes the thresholds: Central Asia/Tibet 232, Sahara/Arabia 160, Americas 136, southern Africa 11, other 9 |
-| 2 | 826 | Arctic tiles that pass (WorldCover class 100, moss and lichen, counts as bare, so tundra dominates a rank-only list) |
-| 3 | 639 | flatter polar tiles |
-No Australian tile passes (flat or shrub-covered). Antarctica and land north of 82.75 N have no WorldCover, so only pilot and known tiles are included there. Say this bias out loud in the write-up.
+- Repository: `witczakw/moon-scan-runner` (private; copy of `pipeline/` scan code, `tiles.txt` with the 2,023 remaining tiles in priority order, workflow `.github/workflows/earth-scan.yml`). Local copy: `scratch/runner/`.
+- Run: https://github.com/witczakw/moon-scan-runner/actions/runs/43623650020 (20 shards in parallel, 3 worker processes each). Check with `gh run view 43623650020 -R witczakw/moon-scan-runner`.
+- Each shard uploads an artifact `cells-<i>` holding `earth_cells_scan_s<NN>of20.parquet` (valid cells, water < 0.5, bare >= 0.5 or no land cover) and its log CSV. Artifacts are kept 30 days. A shard that fails uploads its per-tile caches as `rescue-<i>`.
+- A background command in the conductor session waits for the run and downloads the artifacts to `data/raw/cloud_scan/cells-<i>/`. If that session is gone: `gh run download 43623650020 -R witczakw/moon-scan-runner -D data/raw/cloud_scan`.
 
-Launch (two consoles, repo root; resumable; GeoTIFFs are deleted after processing):
-```
-.venv\Scripts\python.exe -m pipeline.earth_scan --tiles data/out/tiles_scanned.csv --raw-dir data/raw --out data/out/earth_cells_s0of2.parquet --shard 0/2 --workers 4
-.venv\Scripts\python.exe -m pipeline.earth_scan --tiles data/out/tiles_scanned.csv --raw-dir data/raw --out data/out/earth_cells_s1of2.parquet --shard 1/2 --workers 4
-.venv\Scripts\python.exe -m pipeline.tiles --update-status
-```
-Estimate: prio 0+1 is about 20 GB of downloads (non-polar tiles are 35-45 MB each), prio 2 about 8 GB more. Measured speed here was 1.5 MB/s shared and 5 MB/s in one test, so 1.5 to 4 hours for prio 0+1. Feature computation is about 8 s per tile per process. If a merged shard exceeds 50 MB, re-merge from the cache with `--shard i/3` (instant).
-To stop after prio 1, pass a file with only those tiles instead of the full CSV (as done for prio 0: `data/raw/tiles_prio0.txt`).
+When the artifacts are on disk:
+1. Copy the 20 parquet files to `data/out/` (each should be well under 50 MB; if one is larger, split it by tile).
+2. Concatenate the log CSVs into `data/raw/cells/log_cloud.csv`, then `python -m pipeline.tiles --update-status`.
+3. `python -m pipeline.sites` (reads every `data/out/earth_cells_*.parquet`), `python validation/enrichment.py`, `python -m pipeline.nasa_context --top 150 --images 60`.
+4. Commit the cell tables and the rebuilt outputs with explicit paths and push. Pushing about 150-200 MB from the venue network may be slow: push the small outputs first, the cell tables in a second commit.
+5. Run a J9 pass on the new unflagged top sites.
 
-After the scan: `pipeline/score.py::default_cells_path` reads one parquet (the pilot). The final ranking needs the pilot, `earth_cells_known.parquet` and the shard files concatenated (deduplicate on `tile,row,col`), passed with `--cells`.
+`pipeline/checkpoint.py` (local checkpoint loop) was stopped with the local scan. It is still the right tool if a scan ever runs on this machine again (see its docstring).
+
+Selection funnel behind `tiles_scanned.csv`: 26,450 GLO-30 tiles -> 18,836 with WorldCover land -> 3,763 with bare fraction >= 0.4 and ice < 0.5 -> 1,408 with coarse slope >= 1.0 deg. Scan priority: 0 = pilot and known-analog tiles (78, done), 1 = every non-polar tile that passes (558: Central Asia/Tibet 232, Sahara/Arabia 160, Americas 136, southern Africa 11, other 9), 2 = Arctic tiles that pass (826; tundra counts as bare, so it would dominate a rank-only list), 3 = flatter polar tiles (639). No Australian tile passes; Antarctica and land north of 82.75 N have no WorldCover. Say this bias out loud in the write-up.
 
 ## 9. What the validation says, and how to talk about it (read before writing the pitch)
 

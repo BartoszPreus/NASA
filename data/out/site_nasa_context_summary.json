@@ -1,0 +1,14 @@
+{
+  "source": "NASA POWER climatology API v2 (MERRA-2), parameter TS annual (ANN) mean",
+  "climatology_period": "January 2001 - December 2025 (as reported by the API header)",
+  "n_sites_requested": 145,
+  "n_sites_with_values": 145,
+  "ts_mean_k_min": 250.56,
+  "ts_mean_k_max": 309.93,
+  "ts_mean_k_median": 285.19,
+  "site_coldest": "N80W079-02",
+  "site_warmest": "N13E040-01",
+  "ts_min_c_lowest": -60.59,
+  "lunar_reference": "see data/out/moon_diviner_regions.json (job J13)",
+  "note": "Earth annual mean skin temperature of the analog sites, to be set against lunar south-pole surface temperatures from job J13. Grid cells are about 50 km, so values describe the surroundings, not the exact site."
+}
