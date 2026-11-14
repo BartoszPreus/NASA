@@ -96,10 +96,33 @@ SOURCES = [
       "https://copernicus-dem-30m.s3.amazonaws.com/", COP_DEM, "portal: yes; AWS copy: no", "used",
       "pipeline/io_earth.py, pipeline/earth_scan.py, pipeline/tiles.py, validation/effectiveness.py, "
       "lidar/crater_profiles.py", "data/raw/copdem30/, data/raw/tiles_cache/"),
-    S("esa_osc", "ESA", "ESA Open Science Catalog", 10, "https://opensciencedata.esa.int/", "not checked", "no",
-      "looked at, not used", "none: no use in a method based on the shape of the terrain", ""),
-    S("jaxa_gportal", "JAXA", "JAXA G-Portal", 11, "https://gportal.jaxa.jp/gpr/index/index", "not checked", "yes",
-      "looked at, not used", "none: no use in a method based on the shape of the terrain", ""),
+    S("esa_osc", "ESA", "ESA Open Science Catalog (the catalogue; the product taken from it is the row "
+      "esa_osc_permafrost)", 10, "https://opensciencedata.esa.int/ ; "
+      "https://esa-earthcode.github.io/open-science-catalog-metadata/catalog.json", "catalogue metadata, open", "no",
+      "used", "pipeline/partner_context.py (job J24): searched for products that fit; one does", ""),
+    S("esa_osc_permafrost", "ESA", "ESA CCI Permafrost, combined yearly dataset 2000-2019: permafrost area fraction "
+      "and ground temperature, 927 m, north of about 16 N (product esa-cci-permafrost of the Open Science Catalog)",
+      10, "https://esa-earthcode.github.io/open-science-catalog-metadata/products/esa-cci-permafrost/collection.json ; "
+      "https://deep-esdl-public.s3.eu-central-1.amazonaws.com/esa-cci-permafrost-1x1151x1641-1.0.0.zarr/",
+      "UNVERIFIED: the catalogue label is 'proprietary'; the product's own terms were not opened (docs/sources/j24.md)",
+      "no", "used", "pipeline/partner_context.py (job J24)", "data/raw/partner_context/"),
+    S("jaxa_gportal", "JAXA", "JAXA G-Portal (the portal itself needs an account; its products are read through "
+      "the JAXA Earth API, rows jaxa_gportal_sgli_lst and jaxa_gportal_amsr2_smc)", 11,
+      "https://gportal.jaxa.jp/gpr/index/index ; https://data.earth.jaxa.jp/en/ ; "
+      "https://data.earth.jaxa.jp/stac/cog/v1/catalog.json",
+      "JAXA terms (https://earth.jaxa.jp/en/data/policy/): indicate the source (JAXA and the data name); commercial "
+      "use free with advance notice; copyright JAXA", "portal: yes; JAXA Earth API: no", "used",
+      "pipeline/partner_context.py (job J24)", ""),
+    S("jaxa_gportal_sgli_lst", "JAXA", "GCOM-C/SGLI L3 land surface temperature, monthly, day and night, 1/24 deg "
+      "(collections JAXA.G-Portal_GCOM-C.SGLI_standard.L3-LST.<daytime|nighttime>.v3_global_monthly), year 2021", 11,
+      "https://data.earth.jaxa.jp/stac/cog/v1/catalog.json ; doi:10.57746/EO.01gs73bfs5sbzhyxg4j9ytajsa",
+      "as jaxa_gportal; citation given by the catalogue: Japan Aerospace Exploration Agency. 2018. GCOM-C/SGLI L3 "
+      "Map Land surface temperature (LST) (1-Month,1/24 deg)", "no", "used",
+      "pipeline/partner_context.py (job J24)", "data/raw/partner_context/"),
+    S("jaxa_gportal_amsr2_smc", "JAXA", "GCOM-W/AMSR2 L3 soil moisture content, monthly normals 2012-2021, day and "
+      "night (collections JAXA.G-Portal_GCOM-W.AMSR2_standard.L3-SMC.<daytime|nighttime>.v3_global_monthly-normal)",
+      11, "https://data.earth.jaxa.jp/stac/cog/v1/catalog.json", "as jaxa_gportal; no DOI in the catalogue entry",
+      "no", "used", "pipeline/partner_context.py (job J24)", "data/raw/partner_context/"),
     # --- NASA, not on the challenge page
     S("pgda90_lola_20m", "NASA", "LOLA south-pole 20 m DEM LDEM_80S_20MPP_ADJ.TIF and its EFFRES layer (NASA PGDA "
       "product 90)", "", "https://pgda.gsfc.nasa.gov/products/90", PGDA90_CITE, "no", "used",
@@ -147,10 +170,14 @@ SOURCES = [
       "GIBS acknowledgement as for worldview_gibs; MCD12Q1 citation UNVERIFIED (LP DAAC page not opened, "
       "docs/sources/j17.md)", "no", "being added", "pipeline/landcover.py (landcover='modis'), "
       "cloud/earth-scan-nasa.yml (job J17)", "data/raw/modis_igbp/"),
-    S("modis_lst", "NASA", "MODIS land surface temperature MOD11A2 v061 via AppEEARS point sample", 1,
-      "https://appeears.earthdatacloud.nasa.gov/", "NASA open data", "yes (Earthdata)",
-      "needs login, not downloaded", "planned: measured Earth surface temperature next to Diviner",
-      "data/raw/cowork/modis_lst/"),
+    S("modis_lst", "NASA", "MODIS/Terra land surface temperature MOD11C1 v061, 0.05 deg, monthly normals 2012-2021, "
+      "day and night, read from the copy in the JAXA Earth API catalogue (collections "
+      "NASA.EOSDIS_Terra.MODIS_MOD11C1-LST.<daytime|nighttime>.v061_global_monthly-normal)", 1,
+      "https://data.earth.jaxa.jp/stac/cog/v1/catalog.json ; doi:10.5067/MODIS/MOD11C1.061",
+      "citation given by the catalogue: Wan, Z., Hook, S., Hulley, G. (2021), MODIS/Terra Land Surface "
+      "Temperature/Emissivity Daily L3 Global 0.05Deg CMG V061, NASA EOSDIS LP DAAC; LP DAAC's own citation page "
+      "not opened: UNVERIFIED", "no (JAXA-hosted copy; LP DAAC itself needs Earthdata login)", "used",
+      "pipeline/partner_context.py (job J24)", "data/raw/partner_context/"),
     S("nasa_moon_factsheet", "NASA", "NSSDC Moon fact sheet (Earth obliquity, lunar spin-axis tilt)", "",
       "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html", "NASA public web page", "no", "used",
       "pipeline/sites.py (breaks)", ""),
@@ -291,6 +318,14 @@ FILE_MAP = [
      "top 25 tiles per lunar target with region and median slope of the candidate cells"),
     ("data/sites/novelty_check.csv", "hand-curated by job J9 (agent literature and map search, no script)",
      "osm, wikipedia, analog_literature, data/sites/ranking.csv", "literature verdict for the top new sites"),
+    ("data/sites/partner_context.csv", "python -m pipeline.partner_context (job J24)",
+     "jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/sites/ranking.csv, "
+     "data/sites/sites.geojson", "per site: measured day and night surface temperature (JAXA, NASA), soil "
+     "moisture, permafrost fraction and ground temperature"),
+    ("data/sites/partner_context_summary.json", "python -m pipeline.partner_context (job J24)",
+     "jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, "
+     "data/moon/instruments/diviner_regions.json", "layers, medians by site group, the Diviner temperatures of "
+     "the lunar regions, caveats"),
     ("data/sites/nasa_context.csv", "python -m pipeline.nasa_context --top 150 --images 60", "nasa_power, "
      "data/sites/ranking.csv", "NASA POWER skin temperature, precipitation and wind per site"),
     ("data/sites/nasa_context_summary.json", "python -m pipeline.nasa_context --top 150 --images 60", "nasa_power",

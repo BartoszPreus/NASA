@@ -1,6 +1,6 @@
 # Tasks: the challenge resources we did not use (partner agencies) — J24 to J29
 
-Written Sat 14 Nov 2026, about 23:00, by the conductor session on Wiktor's machine, at Wiktor's request.
+Written Sat 14 Nov 2026, about 22:50, by the conductor session on Wiktor's machine, at Wiktor's request.
 These jobs sit next to `docs/TASKS.md` (section 5 there has the same format and the general rules; read its
 sections 2 and 3 first). They are on the Axis board under the same numbers. `docs/TASKS.md` was locked by
 another agent when this was written, which is why this is a separate file: merge it there when the lock is gone.
@@ -34,8 +34,9 @@ global land surface temperature has a product attached (the variables exist, wit
 ## J24 — Partner data in the data layer (done by the conductor, 14 Nov)
 `pipeline/partner_context.py`, stage `partner-context` in `pipeline/run.py`, outputs
 `data/sites/partner_context.csv` and `data/sites/partner_context_summary.json`, sources and first numbers in
-`docs/sources/j24.md`, tests in `tests/test_partner_context.py`. Not done: registry rows in
-`pipeline/catalog.py` (the file was locked), licence texts, any use of the columns. Those are J25.
+`docs/sources/j24.md`, tests in `tests/test_partner_context.py`, and the registry rows in `pipeline/catalog.py`
+(`data/sources.csv`: challenge links 10 and 11 are "used"). Not done: licence texts, any use of the columns.
+Those are J25.
 
 ## J25 — Use the surface data in the product: registry, site card, "where the analogy breaks", citations (high; about 90 min; can start now)
 **Why.** The columns exist but nothing reads them. The jury sees the app and the README.
@@ -45,10 +46,9 @@ global land surface temperature has a product attached (the variables exist, wit
 `app/` (job J7), `docs/sources/j24.md`.
 
 **Do.**
-1. `pipeline/catalog.py`: new source rows `jaxa_gportal_sgli_lst`, `jaxa_gportal_amsr2_smc` (challenge link 11),
-   `esa_osc_permafrost` (link 10), and turn the row `modis_lst` into "used" with the JAXA-hosted copy as the
-   access path; set the rows `jaxa_gportal` and `esa_osc` to "used"; `FILE_MAP` entries for the two new files;
-   then `python -m pipeline.run catalog`.
+1. (Done by the conductor on 14 Nov: the registry rows and `FILE_MAP` entries exist.) Only replace the licence
+   fields that say UNVERIFIED in `pipeline/catalog.py` once the terms are read (step 5), then
+   `python -m pipeline.run catalog`.
 2. Rerun `python -m pipeline.run partner-context` after the final ranking of J19 (cached values are reused).
 3. Site card of the app: a block "Surface conditions (measured)": day mean, night mean and day-night difference
    from JAXA GCOM-C with the number of months behind them, the same from NASA MODIS, soil moisture, permafrost
@@ -65,8 +65,8 @@ global land surface temperature has a product attached (the variables exist, wit
 `pipeline/sites.py` (breaks only), `app/` (card), `README.md` section, `docs/sources/j25.md`.
 
 **Accept.**
-- `python -m pipeline.run catalog` reports no UNKNOWN producer for the two new files; `data/sources.csv` shows
-  challenge links 10 and 11 with at least one row "used".
+- `data/sources.csv` shows challenge links 10 and 11 with at least one row "used" (true since 14 Nov) and no
+  UNVERIFIED licence in the rows `jaxa_gportal*`, `esa_osc_permafrost` and `modis_lst`.
 - The card of a site that is in `partner_context.csv` shows the block with numbers equal to the CSV; a site
   without a row shows "not sampled", not zeros.
 - `python -m pytest tests -q` passes.

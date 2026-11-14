@@ -25,10 +25,11 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | ?, 5 rows, 675 B | `UNKNOWN` |  |
+| `run_log.csv` | ?, 6 rows, 795 B | `UNKNOWN` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
+| `earth/cells_nasadem/*.parquet` | Earth cells of one shard of the NASA-input rescan (all valid land cells, 56 S - 60 N); never mixed into the ranking | `python -m pipeline.earth_scan --dem nasadem --landcover modis --keep-all-cells on the cloud runner (cloud/earth-scan-nasa.yml), then python -m pipeline.cloud ingest-nasa (job J17)` | nasadem, modis_igbp, data/earth/tiles/tiles_scanned.csv |
 | `earth/tiles/SCAN_STATUS.md` | human-readable status of the Earth scan (local loop; paths inside predate layout v2), 1.7 kB | `python -m pipeline.checkpoint` | data/earth/tiles/tiles_scanned.csv |
 | `earth/tiles/tile_summary.csv` | per tile: valid, bare, terrain-pass and candidate cells, sites, weighted area, 2060 rows, 153.3 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `earth/tiles/tiles_scanned.csv` | scan plan in priority order with the status of every tile, 2101 rows, 134.1 kB | `python -m pipeline.tiles --select, then --update-status` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv, data/reference/pilot_tiles.csv |
@@ -36,14 +37,14 @@ data/
 | `moon/reference.json` | lunar reference populations per region: mean, covariance, sorted distances, medians, 387.4 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/regions.geojson` | region footprints in lunar latitude / east longitude, 8 rows, 33.9 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/hillshade/*.png` | grey hillshade of one lunar region window | `python -m pipeline.moon_reference` | pgda90_lola_20m |
-| `moon/instruments/diviner_pcp_regions.json` | Diviner polar temperatures per lunar region, 10.9 kB | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp, data/moon/reference.json |
+| `moon/instruments/diviner_pcp_regions.json` | Diviner polar temperatures per lunar region, 10.7 kB | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp, data/moon/reference.json |
 | `moon/instruments/diviner_regions.json` | Diviner temperatures and ice-stability depths per lunar region, 12.4 kB | `python validation/pds_products.py --part diviner` | diviner_prp, data/moon/reference.json, data/sites/nasa_context_summary.json |
 | `moon/instruments/lamp*` | LAMP Lyman-alpha albedo per lunar region | `python -m pipeline.lunar_products --extract lamp (job J15)` | lamp, data/moon/reference.json |
 | `moon/instruments/lend*` | LEND neutron counts per lunar region | `python -m pipeline.lunar_products --extract lend (job J15)` | lend, data/moon/reference.json |
-| `moon/instruments/lola_regions.json` | permanent shadow, sun and Earth visibility per lunar region, 18.8 kB | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination, data/moon/reference.json |
+| `moon/instruments/lola_regions.json` | permanent shadow, sun and Earth visibility per lunar region, 18.2 kB | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination, data/moon/reference.json |
 | `moon/instruments/lroc*` | LROC images per lunar region | `python -m pipeline.lunar_products --extract lroc (job J15)` | lroc, data/moon/reference.json |
 | `moon/instruments/minirf*` | Mini-RF radar values per lunar region | `python -m pipeline.lunar_products --extract minirf (job J15)` | minirf, data/moon/reference.json |
-| `moon/instruments/registry.json` | registry of the LRO instrument products, their URLs and citations, 21.9 kB | `python -m pipeline.lunar_products --list (job J15)` | pgda90_lola_20m, pgda69_illumination, diviner_pcp, minirf, lend, lamp, lroc |
+| `moon/instruments/registry.json` | registry of the LRO instrument products, their URLs and citations, 21.6 kB | `python -m pipeline.lunar_products --list (job J15)` | pgda90_lola_20m, pgda69_illumination, diviner_pcp, minirf, lend, lamp, lroc |
 | `moon/instruments/diviner/*` | map of one Diviner layer for one lunar region | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp |
 | `moon/instruments/lola/*` | map of one LOLA-derived layer for one lunar region | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination |
 | `reference/known_analogs.csv` | known Moon and Mars analog sites: name, lat, lon, radius_km, type, source_url, verified, 75 rows, 9.7 kB | `hand-curated by jobs J8 and J9 (agent web research, no script)` | analog_literature, wikipedia, osm |
@@ -52,6 +53,8 @@ data/
 | `sites/nasa_context.csv` | NASA POWER skin temperature, precipitation and wind per site, 145 rows, 40.9 kB | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power, data/sites/ranking.csv |
 | `sites/nasa_context_summary.json` | range of annual mean skin temperature over the sites, 730 B | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power |
 | `sites/novelty_check.csv` | literature verdict for the top new sites, 12 rows, 12.4 kB | `hand-curated by job J9 (agent literature and map search, no script)` | osm, wikipedia, analog_literature, data/sites/ranking.csv |
+| `sites/partner_context.csv` | per site: measured day and night surface temperature (JAXA, NASA), soil moisture, permafrost fraction and ground temperature, 118 rows, 15.6 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/sites/ranking.csv, data/sites/sites.geojson |
+| `sites/partner_context_summary.json` | layers, medians by site group, the Diviner temperatures of the lunar regions, caveats, 12.1 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/moon/instruments/diviner_regions.json |
 | `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 161.4 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
 | `sites/scored_compact.parquet` | scored cells with p_all >= 0.05 or candidate (full table: data/raw/earth_scored_full.parquet), 213668 rows, 16.9 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `sites/sites.geojson` | candidate sites: outline and properties (contract in docs/TASKS.md section 3), 3175 rows, 10.5 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet |
@@ -93,7 +96,7 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 - `icesat2_atl03` (link 1): ICESat-2 ATL03 v7 geolocated photons (SlideRule atl03x). *looked at, not used*. https://nsidc.org/data/atl03
 - `nasadem` (link 1): NASADEM Merged DEM Global 1 arc second V001 (NASADEM_HGT, NASA JPL), 56 S - 60 N. *being added*. https://opentopography.s3.sdsc.edu/raster?list-type=2&prefix=NASADEM/NASADEM_be/
 - `modis_igbp` (link 2): MODIS MCD12Q1 v061 land cover type 1 (IGBP), yearly, about 500 m, as the NASA GIBS layer MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual. *being added*. https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi
-- `modis_lst` (link 1): MODIS land surface temperature MOD11A2 v061 via AppEEARS point sample. *needs login, not downloaded*. https://appeears.earthdatacloud.nasa.gov/
+- `modis_lst` (link 1): MODIS/Terra land surface temperature MOD11C1 v061, 0.05 deg, monthly normals 2012-2021, day and night, read from the copy in the JAXA Earth API catalogue (collections NASA.EOSDIS_Terra.MODIS_MOD11C1-LST.<daytime|nighttime>.v061_global_monthly-normal). *used*. https://data.earth.jaxa.jp/stac/cog/v1/catalog.json
 - `nasa_moon_factsheet`: NSSDC Moon fact sheet (Earth obliquity, lunar spin-axis tilt). *used*. https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html
 
 **CSA**
@@ -103,11 +106,14 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 
 **ESA**
 - `copernicus_dem` (link 9): Copernicus DEM GLO-30 (read from the AWS Open Data copy, the same product as in the Copernicus Data Space Ecosystem). *used*. https://dataspace.copernicus.eu/
-- `esa_osc` (link 10): ESA Open Science Catalog. *looked at, not used*. https://opensciencedata.esa.int/
+- `esa_osc` (link 10): ESA Open Science Catalog (the catalogue; the product taken from it is the row esa_osc_permafrost). *used*. https://opensciencedata.esa.int/
+- `esa_osc_permafrost` (link 10): ESA CCI Permafrost, combined yearly dataset 2000-2019: permafrost area fraction and ground temperature, 927 m, north of about 16 N (product esa-cci-permafrost of the Open Science Catalog). *used*. https://esa-earthcode.github.io/open-science-catalog-metadata/products/esa-cci-permafrost/collection.json
 - `esa_worldcover`: ESA WorldCover 10 m 2021 v200. *used*. https://esa-worldcover.org
 
 **JAXA**
-- `jaxa_gportal` (link 11): JAXA G-Portal. *looked at, not used*. https://gportal.jaxa.jp/gpr/index/index
+- `jaxa_gportal` (link 11): JAXA G-Portal (the portal itself needs an account; its products are read through the JAXA Earth API, rows jaxa_gportal_sgli_lst and jaxa_gportal_amsr2_smc). *used*. https://gportal.jaxa.jp/gpr/index/index
+- `jaxa_gportal_sgli_lst` (link 11): GCOM-C/SGLI L3 land surface temperature, monthly, day and night, 1/24 deg (collections JAXA.G-Portal_GCOM-C.SGLI_standard.L3-LST.<daytime|nighttime>.v3_global_monthly), year 2021. *used*. https://data.earth.jaxa.jp/stac/cog/v1/catalog.json
+- `jaxa_gportal_amsr2_smc` (link 11): GCOM-W/AMSR2 L3 soil moisture content, monthly normals 2012-2021, day and night (collections JAXA.G-Portal_GCOM-W.AMSR2_standard.L3-SMC.<daytime|nighttime>.v3_global_monthly-normal). *used*. https://data.earth.jaxa.jp/stac/cog/v1/catalog.json
 
 **USGS**
 - `usgs_3dep`: USGS 3DEP 1 m lidar DEM, tile USGS_1M_12_x49y388_AZ_NorthEast_D23 (Meteor Crater). *used*. https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/AZ_NorthEast_D23/TIFF/USGS_1M_12_x49y388_AZ_NorthEast_D23.tif
@@ -159,8 +165,24 @@ Tests: `python -m pytest tests -q`.
 
 Git-ignored. One folder per source; every script recreates what it needs, so the folder is safe to delete (rebuilding needs the network, about 0.3 MB/s at the venue). Folders present now:
 
+- `raw/cells/`: per-tile Earth feature tables and scan logs
 - `raw/cloud/`: artifacts from the cloud runner
+- `raw/cloud_check/`: test artifacts of the cloud runner
+- `raw/copdem30/`: Copernicus GLO-30 tiles
 - `raw/icesat2/`: ICESat-2 subsets (job J14)
+- `raw/j16_before/`: copies taken before the layout-v2 migration (regression check)
+- `raw/j4_check/`: intermediate checks of job J4
+- `raw/lidar/`: USGS 3DEP and GUGiK windows
+- `raw/lro/`: other LRO instrument products (job J15)
+- `raw/modis_igbp/`
+- `raw/moon/`: LOLA DEM windows (NASA PGDA)
+- `raw/nasa_context/`: NASA POWER and Worldview responses
+- `raw/nasadem/`
+- `raw/naturalearth/`: country outlines
+- `raw/partner_context/`
+- `raw/pds/`: PDS Geosciences files (LOLA GDR, Diviner PRP columns)
 - `raw/run_logs/`
+- `raw/tiles_cache/`: tile list, WorldCover fractions and coarse slopes of the tile selection
+- `raw/validation/`: slow intermediate tables of the effectiveness tests
 
 Written with SI assistance (Claude Code).
