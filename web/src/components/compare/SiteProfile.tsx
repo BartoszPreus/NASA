@@ -5,7 +5,6 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { Atlas, Site } from "../../lib/types";
 import { loadContext, type SiteContext } from "../../lib/data";
 import { criteriaFor, evaluate, thresholdsFor, type Criterion, type Eval } from "../../lib/criteria";
-import { int } from "../../lib/format";
 import { clamp01, ContextStrips, Distribution, RegionScores } from "./ProfileCharts";
 
 type SetId = "default" | "strict";
@@ -55,19 +54,6 @@ export function SiteProfile({ atlas, set, site, region, onRegion, canTarget }: P
 
   const measured = crits.filter((c) => ev[c.id]?.value != null);
   const passed = measured.filter((c) => ev[c.id].pass).length;
-  // how many patches of the pool do at least as well: in the best part of as many criteria or more
-  const reach = useMemo(() => {
-    let n = 0;
-    for (const s of pool) {
-      const e = evals.get(s.site_id);
-      if (!e) continue;
-      let k = 0;
-      for (const c of crits) if (e[c.id]?.pass) k++;
-      if (k >= passed) n++;
-    }
-    return n;
-  }, [pool, evals, crits, passed]);
-
   const [sel, setSel] = useState("score");
   const selCrit = crits.find((c) => c.id === sel) ?? crits[0];
   const loadingCtx = context == null;
@@ -79,7 +65,6 @@ export function SiteProfile({ atlas, set, site, region, onRegion, canTarget }: P
         <div className="ccard pf-card">
           <div className="ccard-h">
             <h3>Criteria profile</h3>
-            <span className="mono dim">position among {int(pool.length)} patches · right is better</span>
           </div>
           <div className="pf-th">
             <label className="pf-slider">
@@ -96,12 +81,7 @@ export function SiteProfile({ atlas, set, site, region, onRegion, canTarget }: P
                 onChange={(e) => setPct(Number(e.target.value))}
               />
             </label>
-            <p className="pf-sum" aria-live="polite">
-              <b className="mono tab">{passed}</b> of {measured.length} measured criteria in the best {dPct}%.{" "}
-              <span className="mono tab">{int(reach)}</span> of {int(pool.length)} patches reach {passed} or more
-              {passed === 0 ? " (every patch)" : ""}.
-            </p>
-            <p className="fine">Count criteria ("of 5") need {th.inrange ?? "–"} of 5 at this setting, as in the explorer.</p>
+            <p className="pf-sum" aria-live="polite"><b className="mono tab">{passed}/{measured.length}</b> criteria matched</p>
           </div>
           <div className="pf-rows" role="list">
             {crits.map((c) => (
@@ -110,10 +90,10 @@ export function SiteProfile({ atlas, set, site, region, onRegion, canTarget }: P
           </div>
           <div className="pf-legend mono">
             <span>
-              <i className="dot earth" /> this site, in the best part
+              <i className="dot earth" /> matched
             </span>
             <span>
-              <i className="dot hollow" /> outside it
+              <i className="dot hollow" /> below threshold
             </span>
             <span>
               <i className="zone-k" /> best {dPct}%
@@ -138,17 +118,15 @@ const srcOf = (c: Criterion, file: string, set: SetId) =>
 
 /* ------------------------------------------------------------------ one criterion row */
 
-function ProfileRow({ c, e, n, t, on, loading, onPick, file, set }: { c: Criterion; e?: Eval; n: number; t: number; on: boolean; loading: boolean; onPick: () => void; file: string; set: SetId }) {
+function ProfileRow({ c, e, n, t, on, loading, onPick }: { c: Criterion; e?: Eval; n: number; t: number; on: boolean; loading: boolean; onPick: () => void; file: string; set: SetId }) {
   const v = e?.value ?? null;
   const score = e?.score ?? null;
   const max = c.kind === "min" ? c.max ?? 5 : 1;
   // start of the passing zone on the 0..1 track (1 = best patch)
   const zone = c.kind === "min" ? t / max : n > 1 ? 1 - (Math.max(1, Math.ceil((t / 100) * n)) - 1) / (n - 1) : 0;
-  const best = score == null || c.kind === "min" ? null : Math.max(1, Math.round((1 - score) * 100));
-  const src = srcOf(c, file, set);
   const missing = loading ? "loading" : "not sampled";
   return (
-    <button role="listitem" className={`pf-row ${on ? "on" : ""}`} onClick={onPick} aria-pressed={on} title={`${c.why} Source: ${src}`}>
+    <button role="listitem" className={`pf-row ${on ? "on" : ""}`} onClick={onPick} aria-pressed={on}>
       <span className="pf-name">{c.label}</span>
       <span className="pf-track" aria-hidden>
         <span className="pf-zone" style={{ left: `${zone * 100}%` }} />
@@ -156,7 +134,6 @@ function ProfileRow({ c, e, n, t, on, loading, onPick, file, set }: { c: Criteri
       </span>
       <span className="pf-val mono tab">
         {v == null ? <span className="dim">{missing}</span> : c.fmt(v)}
-        <span className="pf-sub">{v == null ? "" : c.kind === "min" ? (e?.pass ? `needs ${t}: yes` : `needs ${t}: no`) : `best ${best}%`}</span>
       </span>
       <span className="sr">{v == null ? "" : e?.pass ? "inside the threshold" : "outside the threshold"}</span>
     </button>

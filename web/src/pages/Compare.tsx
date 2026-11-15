@@ -301,11 +301,8 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
         </div>
         <aside className="cmp-score">
           <div className="sc-top">
-            <div className="label">Similarity score</div>
+            <div className="label">Terrain similarity</div>
             <div className="sc-num mono tab">{score == null ? "–" : num(score, 3)}</div>
-            <p className="fine">
-              Median similarity of the patch's 2 km cells to {reg.display_name}, from 0 to 1 (sites.json · region_scores). It is not a probability of being an analog.
-            </p>
             {site.best_region !== region && moon.regions[site.best_region] && man.moon[site.best_region] && (
               <button className="link" onClick={() => setRegion(site.best_region)}>
                 Best region for this site: {moon.regions[site.best_region].display_name}
@@ -370,9 +367,6 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
       <section id="c-ground" className="cmp-sec">
         <div className="sec-head">
           <h2>Terrain at one scale</h2>
-          <p className="chrome">
-            {kmE === kmM ? `Both blocks show ${kmE} x ${kmE} km of ground` : `The blocks show ${kmE} km of Earth and ${kmM} km of the Moon`} at one horizontal and vertical scale. Rotate either view to compare both landscapes from the same angle. The gold line marks the west to east slice drawn below.
-          </p>
         </div>
         <div className={`stage ${full ? "full" : ""}`} ref={stage}>
           <div className="stage-tags">
@@ -434,7 +428,6 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
                 { value: "6", label: "6x" },
               ]}
             />
-            <span className="mono dim hint">linked views · drag either side · ctrl + wheel to zoom</span>
             <button
               className="btn sm"
               onClick={() => {
@@ -461,7 +454,6 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
           <div className="ccard">
             <div className="ccard-h">
               <h3>West to east slice</h3>
-              <span className="mono dim">heights about each slice's mean, one scale</span>
             </div>
             {eGrid && mGrid ? <CrossSection earth={eGrid} moon={mGrid} /> : <div className="msg dim">Loading</div>}
             <div className="legend mono">
@@ -524,17 +516,11 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
             )}
           </div>
         </div>
-        <p className="fine note">
-          Computed here from the 128 x 128 grids (about {num((kmE * 1000) / man.grid, 0)} m per pixel); the ranking used 30 m cells. The last two rows are the ranking's own medians, the values the score rests on.
-        </p>
       </section>
 
       <section id="c-site" className="cmp-sec">
         <div className="sec-head">
-          <h2>This site among all patches</h2>
-          <p className="chrome">
-            Where {siteName(site)} stands on each explorer criterion, against every patch of the {set === "strict" ? "bare-ground" : "default"} run. Pick a criterion to see its distribution, move the threshold to see which criteria the site passes, and pick a lunar region to change the target. Only terrain shape enters the similarity score; climate, vegetation and geology are context.
-          </p>
+          <h2>Site profile</h2>
         </div>
         <SiteProfile atlas={atlas} set={set} site={site} region={region} onRegion={setRegion} canTarget={(id) => !!man.moon[id]} />
       </section>
@@ -542,9 +528,6 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
       <section id="c-limits" className="cmp-sec">
         <div className="sec-head">
           <h2>Where the analogy breaks</h2>
-          <p className="chrome">
-            The comparison covers slope and roughness statistics at 240 m to 1.6 km and closed depressions. Features smaller than about 100 m are not resolved, and everything below differs.
-          </p>
         </div>
         <ul className="limits">
           {site.breaks.map((b) => (

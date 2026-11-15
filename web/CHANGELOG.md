@@ -2,6 +2,10 @@
 
 Issues #29 and #32. Newest first. Written with SI assistance (Claude Code, OpenAI Codex).
 
+## 2026-11-15, cleaner Compare (#36)
+
+- Removed explanatory paragraphs, technical hover text, repeated row subtitles and interaction instructions from Compare. Retained values, units, concise legends, controls, source credits and the limitations list.
+
 ## 2026-11-15, frontend CI and repeatable deployment (#35)
 
 - Added GitHub Actions for locked dependency installation, mission and packaging tests, TypeScript checking, a production build and validation of all copied public assets and terrain-grid sizes. Successful builds are available as seven-day artifacts.

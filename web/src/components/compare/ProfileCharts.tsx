@@ -1,5 +1,5 @@
 // Charts of the Compare page's site profile: the distribution of one criterion, the similarity to each lunar
-// target and the Earth context strips. Every value carries its file and key in a title.
+// target and the Earth context strips. Source definitions remain alongside each metric.
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import type { Atlas, Site } from "../../lib/types";
 import { MOON_ALBEDO, type Criterion, type Eval } from "../../lib/criteria";
@@ -12,7 +12,7 @@ const BINS = 30;
 
 /* ------------------------------------------------------------------ histogram of the selected criterion */
 
-export function Distribution({ c, pool, me, e, values, cut, pct, t, src, loading }: { c: Criterion; pool: Site[]; me: Site; e?: Eval; values: number[]; cut: number | null; pct: number; t: number; src: string; loading: boolean }) {
+export function Distribution({ c, pool, me, e, values, cut, pct, t, loading }: { c: Criterion; pool: Site[]; me: Site; e?: Eval; values: number[]; cut: number | null; pct: number; t: number; src: string; loading: boolean }) {
   // brightness is ranked by its distance from the Moon's 0.12; the chart shows the albedo itself
   const raw = c.id === "albedo";
   const vals = useMemo(() => (raw ? pool.map((s) => num0(s.ctx?.albedo)).filter((v): v is number => v != null) : values), [raw, pool, values]);
@@ -53,16 +53,13 @@ export function Distribution({ c, pool, me, e, values, cut, pct, t, src, loading
   };
   const bHov = hov != null ? bins[hov] : null;
   const range = (b: Bin) => (c.kind === "min" ? fmt(Math.round((b.lo + b.hi) / 2)) : `${fmt(b.lo)} to ${fmt(b.hi)}`);
-  const srcHist = raw ? src.split(";")[0] : src;
   const passWord = c.kind === "min" ? `${t} of 5 or more` : `the best ${pct}%`;
 
   return (
     <div className="ccard pf-dist">
       <div className="ccard-h">
         <h3>{raw ? "Surface albedo" : c.label}</h3>
-        <span className="mono dim">{int(vals.length)} patches with a value</span>
       </div>
-      <p className="fine pf-why">{c.why}</p>
       {loading ? (
         <div className="msg dim">Loading the context values</div>
       ) : !vals.length ? (
@@ -81,13 +78,13 @@ export function Distribution({ c, pool, me, e, values, cut, pct, t, src, loading
             {pass && <span className="h-pass" style={{ left: `${x(Math.max(lo, pass[0]))}%`, width: `${x(Math.min(hi, pass[1])) - x(Math.max(lo, pass[0]))}%` }} />}
             <div className="h-bars">
               {bins.map((b, i) => (
-                <span key={i} className={`h-col ${hov === i ? "hov" : ""}`} onPointerEnter={() => setHov(i)} title={`${int(b.n)} patches · ${range(b)} · ${srcHist}`}>
+                <span key={i} className={`h-col ${hov === i ? "hov" : ""}`} onPointerEnter={() => setHov(i)}>
                   <i className={i === meBin ? "me" : inPass(b) ? "pass" : ""} style={{ height: `${b.n ? Math.max(2, (b.n / top) * 100) : 0}%` }} />
                 </span>
               ))}
             </div>
             {moonV != null && (
-              <span className="h-mark moon" style={{ left: `${x(moonV)}%` }} title={`Moon geometric albedo ${MOON_ALBEDO} (NASA Moon fact sheet; lib/criteria.ts · MOON_ALBEDO)`}>
+              <span className="h-mark moon" style={{ left: `${x(moonV)}%` }}>
                 <b className="mono">Moon {num(moonV, 2)}</b>
               </span>
             )}
@@ -118,12 +115,6 @@ export function Distribution({ c, pool, me, e, values, cut, pct, t, src, loading
               </>
             )}
           </p>
-          <p className="fine">
-            {c.kind === "min"
-              ? "One bar per count."
-              : `${BINS} equal bins from the 1st to the 99th percentile${moonV != null ? ", widened to include the Moon value" : ""}; the end bars also hold the values beyond.`}{" "}
-            Gold: the patches that pass. Source: {srcHist}.
-          </p>
         </>
       )}
     </div>
@@ -132,7 +123,7 @@ export function Distribution({ c, pool, me, e, values, cut, pct, t, src, loading
 
 /* ------------------------------------------------------------------ similarity to each lunar target */
 
-export function RegionScores({ atlas, pool, site, region, onRegion, canTarget, file }: { atlas: Atlas; pool: Site[]; site: Site; region: string; onRegion: (id: string) => void; canTarget: (id: string) => boolean; file: string }) {
+export function RegionScores({ atlas, pool, site, region, onRegion, canTarget }: { atlas: Atlas; pool: Site[]; site: Site; region: string; onRegion: (id: string) => void; canTarget: (id: string) => boolean; file: string }) {
   const rows = useMemo(
     () =>
       Object.values(atlas.moon.regions)
@@ -149,11 +140,10 @@ export function RegionScores({ atlas, pool, site, region, onRegion, canTarget, f
   return (
     <div className="ccard">
       <div className="ccard-h">
-        <h3>Similarity to each lunar target</h3>
-        <span className="mono dim">scale 0 to {num(scale, 1)} · click to compare</span>
+        <h3>Lunar similarity</h3>
       </div>
       <div className="rs-rows">
-        {rows.map(({ r, v, med, below, n }) => {
+        {rows.map(({ r, v, med }) => {
           const ok = canTarget(r.id);
           const cur = r.id === region;
           return (
@@ -163,7 +153,6 @@ export function RegionScores({ atlas, pool, site, region, onRegion, canTarget, f
               disabled={!ok}
               aria-pressed={cur}
               onClick={() => onRegion(r.id)}
-              title={`${file} · region_scores.${r.id} = ${v == null ? "null" : v}; median of ${int(n)} patches ${num(med, 3)}${ok ? "" : ". No lunar terrain window for this region on this page."}`}
             >
               <span className="rs-name">
                 {r.display_name}
@@ -175,7 +164,6 @@ export function RegionScores({ atlas, pool, site, region, onRegion, canTarget, f
               </span>
               <span className="rs-val mono tab">
                 {v == null ? "–" : num(v, 3)}
-                <span className="pf-sub">{below == null ? "" : `above ${Math.round(below * 100)}%`}</span>
               </span>
             </button>
           );
@@ -186,10 +174,9 @@ export function RegionScores({ atlas, pool, site, region, onRegion, canTarget, f
           <i className="bar-k" /> this site
         </span>
         <span>
-          <i className="med-k" /> median of all patches
+          <i className="med-k" /> median
         </span>
       </div>
-      <p className="fine">Median similarity of the patch's 2 km cells to each region, 0 to 1 (region_scores). "Above" is the share of patches of this run with a lower score.</p>
     </div>
   );
 }
@@ -206,8 +193,7 @@ interface CtxRow {
   moon?: { v: number; label: string; src: string };
 }
 
-export function ContextStrips({ pool, me, region, atlas, file, ctxFile, loading, runName }: { pool: Site[]; me: Site; region: string; atlas: Atlas; file: string; ctxFile: string; loading: boolean; runName: string }) {
-  const reg = atlas.moon.regions[region];
+export function ContextStrips({ pool, me, file, ctxFile, loading }: { pool: Site[]; me: Site; region: string; atlas: Atlas; file: string; ctxFile: string; loading: boolean; runName: string }) {
   const rows = useMemo(() => {
     const defs: CtxRow[] = [
       { key: "albedo", label: "Surface albedo", get: (s) => num0(s.ctx?.albedo), has: (s) => !!s.ctx, fmt: (v) => num(v, 2), src: `${ctxFile} · albedo (MODIS MCD43)`, moon: { v: MOON_ALBEDO, label: "Moon 0.12", src: "NASA Moon fact sheet, geometric albedo (lib/criteria.ts · MOON_ALBEDO)" } },
@@ -219,14 +205,10 @@ export function ContextStrips({ pool, me, region, atlas, file, ctxFile, loading,
     ];
     return defs.map((d) => ({ d, s: summary(pool.map(d.get).filter((v): v is number => v != null)) }));
   }, [pool, file, ctxFile]);
-  const tAvg = num0(reg?.headline?.temp_avg_k);
-  const tMax = num0(reg?.headline?.temp_max_k);
-  const rAvg = reg?.headline_range?.temp_avg_k;
   return (
     <div className="ccard">
       <div className="ccard-h">
         <h3>Earth context</h3>
-        <span className="mono dim">against all patches of the {runName}</span>
       </div>
       {loading ? (
         <div className="msg dim">Loading the context values</div>
@@ -242,32 +224,12 @@ export function ContextStrips({ pool, me, region, atlas, file, ctxFile, loading,
           <i className="dot earth" /> this site
         </span>
         <span>
-          <i className="band-k" /> 10–90% of patches, median
+          <i className="band-k" /> 10–90% · median
         </span>
         <span>
           <i className="moon-k" /> Moon
         </span>
       </div>
-      <p className="fine" title={`moon.json · regions.${region}.headline.temp_avg_k, temp_max_k${rAvg ? "; headline_range.temp_avg_k" : ""}`}>
-        Moon, {reg?.display_name ?? region} (LRO Diviner):{" "}
-        {tAvg != null ? (
-          <>
-            annual mean surface temperature <span className="mono tab">{num(tAvg, 1)} K</span>
-            {tMax != null && (
-              <>
-                , maximum <span className="mono tab">{num(tMax, 1)} K</span>
-              </>
-            )}
-          </>
-        ) : rAvg ? (
-          <>
-            annual mean surface temperature <span className="mono tab">{num(rAvg[0], 1)}</span> to <span className="mono tab">{num(rAvg[1], 1)} K</span> across the regions
-          </>
-        ) : (
-          "no temperature in the data"
-        )}
-        . The Earth rows are air temperature at 2 m (NASA POWER) and land-surface temperature (MODIS, ranked patches only): different products, periods and summaries, side by side and not merged. Context only; the terrain score does not use these values.
-      </p>
     </div>
   );
 }
@@ -301,12 +263,11 @@ function CtxStrip({ d, s, me }: { d: CtxRow; s: ReturnType<typeof summary>; me: 
   a -= pad;
   b += pad;
   const x = (t: number) => `${clamp01((t - a) / (b - a)) * 100}%`;
-  const below = v == null ? null : shareBelow(s.sorted, v);
   const hv = hx == null ? null : a + hx * (b - a);
   const hb = hv == null ? null : shareBelow(s.sorted, hv);
   const missing = d.has(me) ? "not measured" : "not sampled";
   return (
-    <div className="cx-row" title={`${d.src}; ${int(s.n)} patches with a value`}>
+    <div className="cx-row">
       <div className="fr-top">
         <span>{d.label}</span>
         <span className="mono tab">
@@ -328,13 +289,13 @@ function CtxStrip({ d, s, me }: { d: CtxRow; s: ReturnType<typeof summary>; me: 
         {v != null && <span className="val in" style={{ left: x(v) }} />}
         {hx != null && <span className="cx-hair" style={{ left: `${hx * 100}%` }} />}
       </div>
-      <div className="cx-foot mono dim">
+      <div className="cx-foot mono dim" hidden={hx == null}>
         {hv != null && hb != null ? (
           <span>
             {d.fmt(hv)}: {Math.round(hb * 100)}% of patches lower
           </span>
         ) : (
-          <span>{below == null ? `${int(s.n)} patches with a value` : `${Math.round(below * 100)}% of ${int(s.n)} patches lower`}</span>
+          null
         )}
         {mv != null && (
           <span className="moon-c cx-moon-l" style={{ left: x(mv) }}>
