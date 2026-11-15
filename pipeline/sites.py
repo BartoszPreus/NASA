@@ -311,9 +311,24 @@ DIVINER_JSON = paths.MOON_DIVINER
 DIVINER_FALLBACK = "polar_160km"   # Diviner region used when a site's best_region has no Diviner entry
 
 
+NOVELTY_STRICT_CSV = os.path.join(paths.VALIDATION, "landcover_sensitivity", "novelty_check_strict.csv")  # J40
+LIT_TOP = 30   # the literature checks (J22 default, J40 strict) covered the top 30 of each ranking
+
+
 def load_novelty(path=NOVELTY_CSV):
-    """Literature verdicts of job J9 (site coordinates, place name, verdict), or None."""
-    return pd.read_csv(path) if os.path.exists(path) else None
+    """Literature verdicts (site coordinates, place name, verdict) of one CSV or a list of CSVs, or None.
+    The bare_strict variant reads the J22 table and the J40 table (sites with is_known = False of its top 30)."""
+    frames = [pd.read_csv(p) for p in ([path] if isinstance(path, str) else path) if os.path.exists(p)]
+    return pd.concat(frames, ignore_index=True) if frames else None
+
+
+def mark_known_established(ranked, top=LIT_TOP):
+    """In the literature-checked top of a ranking, a site inside a known analog radius (is_known) that has no
+    verdict row is `established` (definition of docs/NOVELTY.md, item 4). Same rule for every ranking."""
+    for s in ranked[:top]:
+        if s.get("novelty") == "unchecked" and s.get("is_known"):
+            s["novelty"] = "established"
+    return ranked
 
 
 def load_partner(path=PARTNER_CSV):
@@ -333,8 +348,9 @@ def load_diviner(path=DIVINER_JSON):
 def partner_break(row, region, diviner):
     """One sentence with the measured numbers of a partner_context.csv row against Diviner, or None.
 
-    Uses the JAXA SGLI means over the months that have both a day and a night value (*_diff_months), and the
-    NASA MODIS means where SGLI has none; a missing value is never written as a number."""
+    Uses the JAXA SGLI means of 2021 when all 12 months have both a day and a night value (*_diff_months == 12),
+    else the NASA MODIS 12-month means (monthly normals 2012-2021), so the difference never rests on a partial year
+    (review of issue #5); a missing value is never written as a number."""
     def num(c):
         v = row.get(c)
         return float(v) if v is not None and np.isfinite(float(v)) else None
@@ -344,12 +360,14 @@ def partner_break(row, region, diviner):
     if reg not in diviner:
         return None
     moon_avg, _ = diviner[reg]
-    for sensor, pre in (("JAXA GCOM-C/SGLI", "jaxa_sgli_lst"), ("NASA MODIS MOD11C1", "nasa_modis_lst")):
+    for sensor, pre, period in (("JAXA GCOM-C/SGLI L3 LST", "jaxa_sgli_lst", "monthly means of 2021"),
+                                ("NASA MODIS MOD11C1 v061", "nasa_modis_lst", "monthly normals 2012-2021")):
         day, night, n = num(pre + "_day_mean_k"), num(pre + "_night_mean_k"), num(pre + "_diff_months")
-        if day is not None and night is not None and n:
-            return ("Measured surface temperature %.0f K by day and %.0f K by night (%s, %d months with both) "
-                    "against a median annual mean of %.0f K 2 cm below the surface in the lunar region %s (LRO "
-                    "Diviner): %.0f K warmer at night" % (day, night, sensor, n, moon_avg, reg, night - moon_avg))
+        if day is not None and night is not None and n is not None and int(n) == 12:
+            return ("Measured surface temperature %.0f K by day and %.0f K by night (mean of all 12 months, %s, "
+                    "%s) against a median annual mean of %.0f K 2 cm below the surface in the lunar region %s (LRO "
+                    "Diviner): %.0f K warmer at night" % (day, night, sensor, period, moon_avg, reg,
+                                                         night - moon_avg))
     return None
 
 
@@ -616,7 +634,9 @@ def main(argv=None):
     known = load_known(a.known)
     print("known analogs: %s" % ("%d entries (operational excluded)" % len(known) if known is not None
                                  else "file missing, novelty fields null"))
-    add_context(sites, known, countries, load_novelty(), load_partner(), load_diviner())
+    add_context(sites, known, countries, load_novelty([NOVELTY_CSV, NOVELTY_STRICT_CSV] if variant else NOVELTY_CSV),
+                load_partner(), load_diviner())
+    mark_known_established(rank_sites(sites, a.rank_key, a.flagged))
     scored["site_id"] = site_of_row
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",
             "bare", "veg", "ice", "artefact_flag", "dem_source"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]
