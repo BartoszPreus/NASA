@@ -1520,7 +1520,7 @@
    "definition": "Great-circle distance from the site centre to the nearest of the catalogued known analog sites, a yes or no for lying inside that site's radius, and the verdict of a literature search for the top sites.",
    "dimension": "Terrain, elevation, slope, roughness and craters",
    "status": "context",
-   "status_note": "Shown per site, not scored. The list of known sites has a source for each row (77 rows: 19 moon, 34 both, 24 mars; data/reference/known_analogs.csv). Literature verdicts of the 200 ranked sites (data/sites/ranking.csv · novelty): 168 unchecked, 26 unreported, 4 mentioned, 2 established. 'mentioned' means an opened page names the region, not the site, and today every such page is a Mars statement (docs/NOVELTY.md section 3). The verdicts were judged by an SI model; a person has not confirmed them. No site is called a discovery.",
+   "status_note": "Shown per site, not scored. The list of known sites has a source for each row (77 rows: 19 moon, 34 both, 24 mars; data/reference/known_analogs.csv). Literature verdicts of the 200 ranked sites (data/sites/ranking.csv · novelty): 168 unchecked, 19 unreported, 11 mentioned, 2 established. 'mentioned' means an opened page names the region, not the site, and today every such page is a Mars statement (docs/NOVELTY.md section 3). The verdicts were judged by an SI model; a person has not confirmed them. No site is called a discovery.",
    "moon_data": "Not applicable",
    "earth_data": "data/reference/known_analogs.csv (one source per row); data/sites/novelty_check.csv",
    "comparability": "Not a similarity measure.",
