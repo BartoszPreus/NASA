@@ -52,7 +52,6 @@
   "b_meteor_glo30": {
     "dataset": "Copernicus DEM GLO-30 (DSM, 1 arc-second)",
     "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N35_00_W112_00_DEM/Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif",
-    "local_file": "scratch\\data\\copdem30\\Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif",
     "crs": "EPSG:4326 lon/lat, heights EGM2008; pixel centres transformed to EPSG:26912 for distances",
     "pixel_spacing_m": [
       25.35,
@@ -303,5 +302,12 @@
       "method": "GLO-30 reprojected bilinearly onto a 30 m EPSG:2180 grid over the same 1 x 1 km box; closed-depression depth by sink filling (morphological reconstruction, box border as outlet)."
     },
     "caveat": "Morasko is a counter-example, not a Moon analog: small craters in forest on glacial sediment; the largest may hold water, so its lidar floor is the water/ground surface at survey time."
+  },
+  "c_wall_slope_at_similar_pixel_size": {
+    "moon_lola_20m_deg": 27.9,
+    "meteor_lidar_avg30m_deg": 36.5,
+    "meteor_glo30_deg": 36.8,
+    "meteor_lidar_1m_deg": 40.7,
+    "note": "The steepest slope of an averaged profile falls with pixel size, so the lunar crater (20 m pixels) is to be compared with Meteor Crater at 30 m, not at 1 m. One crater on each body: an illustration, not a statistic."
   }
 }

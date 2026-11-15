@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 22 rows, 2.9 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 24 rows, 3.2 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -37,14 +37,14 @@ data/
 | `moon/reference.json` | lunar reference populations per region: mean, covariance, sorted distances, medians, 387.4 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/regions.geojson` | region footprints in lunar latitude / east longitude, 8 rows, 33.9 kB | `python -m pipeline.moon_reference` | pgda90_lola_20m, usgs_planetary_names, lunar_site_literature |
 | `moon/hillshade/*.png` | grey hillshade of one lunar region window | `python -m pipeline.moon_reference` | pgda90_lola_20m |
-| `moon/instruments/diviner_pcp_regions.json` | Diviner polar temperatures per lunar region, 10.9 kB | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp, data/moon/reference.json |
+| `moon/instruments/diviner_pcp_regions.json` | Diviner polar temperatures per lunar region, 10.7 kB | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp, data/moon/reference.json |
 | `moon/instruments/diviner_regions.json` | Diviner temperatures and ice-stability depths per lunar region, 12.4 kB | `python validation/pds_products.py --part diviner` | diviner_prp, data/moon/reference.json, data/sites/nasa_context_summary.json |
 | `moon/instruments/lamp*` | LAMP Lyman-alpha albedo per lunar region | `python -m pipeline.lunar_products --extract lamp (job J15)` | lamp, data/moon/reference.json |
 | `moon/instruments/lend*` | LEND neutron counts per lunar region | `python -m pipeline.lunar_products --extract lend (job J15)` | lend, data/moon/reference.json |
-| `moon/instruments/lola_regions.json` | permanent shadow, sun and Earth visibility per lunar region, 18.8 kB | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination, data/moon/reference.json |
+| `moon/instruments/lola_regions.json` | permanent shadow, sun and Earth visibility per lunar region, 18.2 kB | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination, data/moon/reference.json |
 | `moon/instruments/lroc*` | LROC images per lunar region | `python -m pipeline.lunar_products --extract lroc (job J15)` | lroc, data/moon/reference.json |
 | `moon/instruments/minirf*` | Mini-RF radar values per lunar region | `python -m pipeline.lunar_products --extract minirf (job J15)` | minirf, data/moon/reference.json |
-| `moon/instruments/registry.json` | registry of the LRO instrument products, their URLs and citations, 21.9 kB | `python -m pipeline.lunar_products --list (job J15)` | pgda90_lola_20m, pgda69_illumination, diviner_pcp, minirf, lend, lamp, lroc |
+| `moon/instruments/registry.json` | registry of the LRO instrument products, their URLs and citations, 21.6 kB | `python -m pipeline.lunar_products --list (job J15)` | pgda90_lola_20m, pgda69_illumination, diviner_pcp, minirf, lend, lamp, lroc |
 | `moon/instruments/diviner/*` | map of one Diviner layer for one lunar region | `python -m pipeline.lunar_products --extract diviner (job J15)` | diviner_pcp |
 | `moon/instruments/lola/*` | map of one LOLA-derived layer for one lunar region | `python -m pipeline.lunar_products --extract lola (job J15)` | pgda90_lola_20m, pgda69_illumination |
 | `reference/known_analogs.csv` | known Moon and Mars analog sites: name, lat, lon, radius_km, type, source_url, verified, 77 rows, 10.1 kB | `hand-curated by jobs J8 and J9 (agent web research, no script)` | analog_literature, wikipedia, osm |
@@ -64,7 +64,7 @@ data/
 | `sites/images/*.jpg` | MODIS or VIIRS true-colour image around one site (NASA imagery, unmodified) | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `sites/images/index.csv` | bbox, date, layer and cloud share of every site image, 60 rows, 10.2 kB | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `validation/aw3d30_comparison.json` | terrain feature agreement across Copernicus, NASADEM and optical AW3D30 on ten reference tiles, 79.5 kB | `python validation/nasadem_vs_copdem.py --aw3d30-comparison (job J29)` | jaxa_aw3d30, data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet |
-| `validation/crater_profiles.json` | crater measurements: Earth lidar, 30 m DEM and the lunar DEM, 11.9 kB | `python lidar/crater_profiles.py --part all` | usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt |
+| `validation/crater_profiles.json` | crater measurements: Earth lidar, 30 m DEM and the lunar DEM, 12.3 kB | `python lidar/crater_profiles.py --part all` | usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt |
 | `validation/effectiveness.json` | known analog tile recovery, negative controls, ablation, stability, 528.4 kB | `python validation/effectiveness.py all` | data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, copernicus_dem, esa_worldcover, pgda90_lola_20m |
 | `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 9.5 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
 | `validation/icesat2.json` | ICESat-2 along-track slopes against grid slopes and the Moon, 16.9 kB | `python validation/icesat2_profiles.py (job J21)` | icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json |
@@ -170,6 +170,24 @@ Tests: `python -m pytest tests -q`.
 
 Git-ignored. One folder per source; every script recreates what it needs, so the folder is safe to delete (rebuilding needs the network, about 0.3 MB/s at the venue). Folders present now:
 
+- `raw/cells/`: per-tile Earth feature tables and scan logs
+- `raw/cloud/`: artifacts from the cloud runner
+- `raw/cloud_check/`: test artifacts of the cloud runner
+- `raw/copdem30/`: Copernicus GLO-30 tiles
+- `raw/icesat2/`: ICESat-2 subsets (job J14)
+- `raw/j16_before/`: copies taken before the layout-v2 migration (regression check)
+- `raw/j4_check/`: intermediate checks of job J4
+- `raw/lidar/`: USGS 3DEP and GUGiK windows
+- `raw/lro/`: other LRO instrument products (job J15)
+- `raw/modis_igbp/`
+- `raw/moon/`: LOLA DEM windows (NASA PGDA)
+- `raw/nasa_context/`: NASA POWER and Worldview responses
+- `raw/nasadem/`
 - `raw/naturalearth/`: country outlines
+- `raw/partner_context/`
+- `raw/pds/`: PDS Geosciences files (LOLA GDR, Diviner PRP columns)
+- `raw/run_logs/`
+- `raw/tiles_cache/`: tile list, WorldCover fractions and coarse slopes of the tile selection
+- `raw/validation/`: slow intermediate tables of the effectiveness tests
 
 Written with SI assistance (Claude Code).

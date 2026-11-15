@@ -16,6 +16,8 @@ Run from the repo root:
 
 Outputs: data/validation/crater_profiles.json, docs/figures/crater_profile_overlay.png,
 docs/figures/morasko_1m_vs_30m.png. Raw windows and caches go to data/raw/lidar/ (git-ignored).
+Inputs that the pipeline also uses come from its caches (data/raw/copdem30/, data/raw/moon/) and are
+fetched when missing; nothing is read from scratch/. The script exits with an error if a part fails.
 
 Sources (data):
   - USGS 3D Elevation Program (3DEP) 1 m DEM, tile USGS_1M_12_x49y388_AZ_NorthEast_D23, found with
@@ -41,6 +43,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 import time
 import urllib.request
@@ -49,7 +52,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pipeline import paths  # noqa: E402
+from pipeline import io_earth, io_moon, paths  # noqa: E402
 
 ROOT = Path(paths.ROOT)
 RAW = Path(paths.RAW_LIDAR)
@@ -62,11 +65,16 @@ URL_TNM_QUERY = ("https://tnmaccess.nationalmap.gov/api/v1/products?datasets=Dig
                  "%20(DEM)%201%20meter&bbox=-111.04,35.015,-111.005,35.04")
 URL_LDEM = "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF"
 URL_WCS = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/GRID1/WCS/DigitalTerrainModelFormatTIFF"
-GLO30_AZ = ROOT / "scratch" / "data" / "copdem30" / "Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif"
-GLO30_PL = ROOT / "scratch" / "data" / "copdem30" / "Copernicus_DSM_COG_10_N52_00_E016_00_DEM.tif"
+GLO30_TILE_AZ, GLO30_TILE_PL = "N35W112", "N52E016"
 URL_GLO30_AZ = "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N35_00_W112_00_DEM/Copernicus_DSM_COG_10_N35_00_W112_00_DEM.tif"
 URL_GLO30_PL = "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N52_00_E016_00_DEM/Copernicus_DSM_COG_10_N52_00_E016_00_DEM.tif"
-MOON_NPY = ROOT / "scratch" / "data" / "ldem_pole_160km_30m.npy"
+MOON_SEARCH_HALF_M = 80000.0   # crater search window: +-80 km around the pole, 30 m copy (pipeline.io_moon cache)
+
+
+def glo30_source(tile, url):
+    """The Copernicus tile of the pipeline cache if it is there, else the public file read by HTTP range requests."""
+    p = io_earth.tile_path(tile, paths.RAW)
+    return p if os.path.exists(p) else "/vsicurl/" + url
 
 # First guesses only; every centre is refined from the data.
 METEOR_GUESS_LATLON = (35.027, -111.022)
@@ -361,7 +369,7 @@ def part_b(res, prof):
     if "a_meteor_3dep_1m" not in res:
         part_a(res, prof)
     a = res["a_meteor_3dep_1m"]
-    z, X, Y, dx, dy, tr, lat, lon = load_glo30_projected(GLO30_AZ, meteor_bounds_ll(), UTM12,
+    z, X, Y, dx, dy, tr, lat, lon = load_glo30_projected(glo30_source(GLO30_TILE_AZ, URL_GLO30_AZ), meteor_bounds_ll(), UTM12,
                                                          RAW / "meteor_glo30_window.npz")
     pix = math.sqrt(dx * dy)
     log(f"  GLO-30 window {z.shape}, pixel {dx:.1f} x {dy:.1f} m")
@@ -414,7 +422,7 @@ def part_b(res, prof):
     keys = ["rim_crest_diameter_m", "depth_m", "rim_height_m", "depth_to_diameter",
             "max_wall_slope_profile_deg", "wall_slope_pixel_p95_deg", "wall_slope_pixel_max_deg"]
     res["b_meteor_glo30"] = {
-        "dataset": "Copernicus DEM GLO-30 (DSM, 1 arc-second)", "url": URL_GLO30_AZ, "local_file": str(GLO30_AZ.relative_to(ROOT)),
+        "dataset": "Copernicus DEM GLO-30 (DSM, 1 arc-second)", "url": URL_GLO30_AZ,
         "crs": "EPSG:4326 lon/lat, heights EGM2008; pixel centres transformed to EPSG:26912 for distances",
         "pixel_spacing_m": [round(dx, 2), round(dy, 2)], **g}
     res["b_meteor_lidar_avg30m"] = {"dataset": "3DEP 1 m lidar block-averaged to 30 m", **l30}
@@ -430,11 +438,12 @@ MOON_CRS = "+proj=stere +lat_0=-90 +lat_ts=-90 +lon_0=0 +x_0=0 +y_0=0 +R=1737400
 MOON_LL = "+proj=longlat +R=1737400 +no_defs"
 
 
-def moon_search(npy=MOON_NPY, n_cand=2500):
-    """Search the cached 30 m polar window for clean, fresh bowl craters with D = 1-1.5 km."""
+def moon_search(n_cand=2500):
+    """Search the 30 m polar window for clean, fresh bowl craters with D = 1-1.5 km."""
     from scipy.ndimage import gaussian_filter
     from skimage.feature import peak_local_max
-    z = np.load(npy).astype(np.float64)
+    h = MOON_SEARCH_HALF_M
+    z = io_moon.load_moon_window(-h, -h, h, h, res_m=30.0, raw_dir=paths.RAW, log=log).astype(np.float64)
     H, W = z.shape
     px = 30.0
     zf = np.where(np.isfinite(z), z, np.nanmedian(z))
@@ -507,6 +516,14 @@ def part_c(res, prof):
                              if k in ("centre_xy_m", "rim_crest_diameter_m", "depth_to_diameter", "circ", "tilt_deg", "score")}
                             for c in cands[:5]],
         "read": f"windowed /vsicurl/ read with retries, {z.shape[0]} x {z.shape[1]} px", **m}
+    if "b_meteor_lidar_avg30m" in res and "a_meteor_3dep_1m" in res:
+        key = "max_wall_slope_profile_deg"
+        res["c_wall_slope_at_similar_pixel_size"] = {
+            "moon_lola_20m_deg": m[key], "meteor_lidar_avg30m_deg": res["b_meteor_lidar_avg30m"][key],
+            "meteor_glo30_deg": res["b_meteor_glo30"][key], "meteor_lidar_1m_deg": res["a_meteor_3dep_1m"][key],
+            "note": "The steepest slope of an averaged profile falls with pixel size, so the lunar crater (20 m pixels) "
+                    "is to be compared with Meteor Crater at 30 m, not at 1 m. One crater on each body: an "
+                    "illustration, not a statistic."}
     log("  " + json.dumps({k: v for k, v in m.items() if not k.startswith("_")}))
     overlay_figure(res, prof)
 
@@ -516,7 +533,7 @@ def overlay_figure(res, prof):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     series = [("meteor_1m", "a_meteor_3dep_1m", "Meteor Crater, 3DEP lidar 1 m", "#2a78d6", "-"),
-              ("meteor_glo30", "b_meteor_glo30", "Meteor Crater, Copernicus GLO-30", "#eb6834", "--"),
+              ("meteor_glo30", "b_meteor_glo30", "Meteor Crater, Copernicus GLO-30 (30 m)", "#eb6834", "--"),
               ("moon_20m", "c_moon_lola_20m", "Lunar crater, LOLA 20 m", "#1baf7a", "-.")]
     fig, ax = plt.subplots(figsize=(11, 6.2), dpi=150)
     fig.patch.set_facecolor("#fcfcfb")
@@ -537,7 +554,13 @@ def overlay_figure(res, prof):
     ax.set_xlim(0, 2.6)
     ax.set_xlabel("Radius / rim-crest radius", fontsize=13)
     ax.set_ylabel("(Height − rim crest) / rim-crest diameter", fontsize=13)
-    ax.set_title("Azimuthally averaged crater profiles, normalised", fontsize=15, loc="left")
+    ax.set_title("Azimuthally averaged crater profiles, normalised", fontsize=15, loc="left", pad=40)
+    if "a_meteor_3dep_1m" in res and "b_meteor_lidar_avg30m" in res:
+        key = "max_wall_slope_profile_deg"
+        ax.text(0.0, 1.015, "The steepest wall falls with pixel size: the Meteor Crater lidar gives %.1f° at 1 m and %.1f° averaged to 30 m.\n"
+                "Compare the lunar crater (20 m pixels) with the 30 m curve, not with the 1 m curve."
+                % (res["a_meteor_3dep_1m"][key], res["b_meteor_lidar_avg30m"][key]),
+                transform=ax.transAxes, fontsize=9.5, color="#52514e", va="bottom", linespacing=1.35)
     ax.tick_params(labelsize=11)
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
@@ -645,7 +668,7 @@ def part_d(res, prof):
     # GLO-30 over the same extent, reprojected onto a 30 m EPSG:2180 grid (bilinear)
     pad = 0.01
     bll = Transformer.from_crs(PL1992, "EPSG:4326", always_xy=True).transform_bounds(*b)
-    zg, trg, _ = read_window(str(GLO30_PL), (bll[0] - pad, bll[1] - pad, bll[2] + pad, bll[3] + pad),
+    zg, trg, _ = read_window(glo30_source(GLO30_TILE_PL, URL_GLO30_PL), (bll[0] - pad, bll[1] - pad, bll[2] + pad, bll[3] + pad),
                              RAW / "morasko_glo30_window.npz")
     from rasterio.transform import Affine
     n30 = int(round(2 * MORASKO_HALF / 30.0))
@@ -747,6 +770,9 @@ def main():
             res.setdefault("status", {})[p] = f"failed: {e!r}"
         save_results(res)
         save_profiles(prof)
+    failed = [p for p in parts if str(res.get("status", {}).get(p, "")).startswith("failed")]
+    if failed:
+        sys.exit("crater_profiles: part(s) %s failed, see the log lines above" % ", ".join(failed))
 
 
 if __name__ == "__main__":
