@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 40 rows, 5.3 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 43 rows, 5.8 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -70,7 +70,7 @@ data/
 | `validation/aw3d30_comparison.json` | terrain feature agreement across Copernicus, NASADEM and optical AW3D30 on ten reference tiles, 79.5 kB | `python validation/nasadem_vs_copdem.py --aw3d30-comparison (job J29)` | jaxa_aw3d30, data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet |
 | `validation/crater_profiles.json` | crater measurements: Earth lidar, 30 m DEM and the lunar DEM, 12.3 kB | `python lidar/crater_profiles.py --part all` | usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt |
 | `validation/effectiveness.json` | known analog tile recovery, negative controls, ablation, stability, 531.1 kB | `python validation/effectiveness.py all` | data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, copernicus_dem, esa_worldcover, pgda90_lola_20m |
-| `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 9.6 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
+| `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 10.1 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
 | `validation/icesat2.json` | ICESat-2 along-track slopes against grid slopes and the Moon, 16.9 kB | `python validation/icesat2_profiles.py (job J21)` | icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json |
 | `validation/nasadem_vs_copdem.json` | NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile, 14.2 kB | `python validation/nasadem_vs_copdem.py (job J17)` | data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json |
 | `validation/partner_checks.json` | ?, 606.4 kB | `UNKNOWN` |  |

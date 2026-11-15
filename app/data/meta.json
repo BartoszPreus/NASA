@@ -1,1 +1,1 @@
-{"commit":"3c9df07ff21408cc28d7708f8e96d99d3721dbc6","target":"base_regions","rank_window_km":15,"list_limit":50,"counts":{"tiles":2060,"sites_total":3175,"sites_flagged_total":521,"sites":300,"sites_flagged":100},"candidate_share_max":0.6789,"flagged_ranks":[2655,2754]}
+{"commit":"f6efd20e361de1d5f325f64bce2705871d056dee","target":"base_regions","rank_window_km":15,"list_limit":50,"counts":{"tiles":2060,"sites_total":3175,"sites_flagged_total":521,"sites":300,"sites_flagged":100},"candidate_share_max":0.6789,"flagged_ranks":[2655,2754]}

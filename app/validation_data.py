@@ -42,12 +42,12 @@ def validation_data(read_json):
                     masked_cells += value
 
     enrichment_keys = (
-        ("median_enrichment", "Median enrichment around known analogs", "×"),
+        ("median_enrichment", "Median enrichment around known lunar analogs (moon or both)", "×"),
         ("random.median_enrichment_median", "Median enrichment around matched random circles", "×"),
         ("random.median_enrichment_p05_p95.0", "Random enrichment, 5th percentile", "×"),
         ("random.median_enrichment_p05_p95.1", "Random enrichment, 95th percentile", "×"),
-        ("n_sites_tested", "Known analogs evaluated", ""),
-        ("sites_with_enrichment_above_1", "Known analogs above the scan-wide bare-cell rate", ""),
+        ("n_sites_tested", "Known lunar analogs evaluated (Mars-only excluded)", ""),
+        ("sites_with_enrichment_above_1", "Known lunar analogs above the scan-wide bare-cell rate", ""),
         ("random.n_repeats", "Matched random repeats", ""),
     )
     for k, label, unit in enrichment_keys:

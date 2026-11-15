@@ -157,10 +157,12 @@ def test_sample_mask_and_validation_reach_the_atlas(pipeline_run):
     assert items["n_sites_tested"]["value"] == validation["n_sites_tested"]
 
 
-@pytest.mark.xfail(strict=True, raises=AssertionError, reason="J20 (#1): enrichment still includes Mars-only input")
 def test_lunar_enrichment_excludes_mars_only_sites(pipeline_run):
     validation = read_json(pipeline_run / "data/validation/enrichment.json")
     assert "Mars-only control" not in {site["name"] for site in validation["sites"]}
+    assert {site["analog_for"] for site in validation["sites"]} <= {"moon", "both"}
+    # Kept for reference only, outside every headline number (#16).
+    assert "Mars-only control" in {site["name"] for site in validation["mars_only_excluded"]["sites"]}
 
 
 @pytest.mark.parametrize(("missing", "output", "args", "message"), [

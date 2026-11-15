@@ -1,9 +1,12 @@
 """Enrichment test: is lunar-like terrain more common around known analog sites than elsewhere in the scan?
 
-For every known analog site (data/reference/known_analogs.csv, operational sites excluded) with at least MIN_CELLS bare cells
+For every known analog site (data/reference/known_analogs.csv, operational sites excluded, analog_for moon or both:
+the project scope is the lunar south pole, issue #16) with at least MIN_CELLS bare cells
 inside its radius: the share of those bare cells that are lunar-like (p_all >= 0.10), divided by the same share
 over all scanned bare cells (the base rate). Baseline: the same statistic for circles of the same radii centred on
 random bare cells of the scan (N_PERM repeats).
+Mars-only sites (analog_for == mars) are not tested; their enrichment is still written, for reference only, under
+"mars_only_excluded" in the output and does not enter any headline number or the random baseline.
 
 Why this and not "best cell within the radius" (validation/effectiveness.py, part 1): with tens to thousands of
 cells per circle the maximum is almost always in the top few percent, for known sites and for random points alike,
@@ -90,20 +93,32 @@ def main(argv=None):
                          + ([col] if col != "p_all" else []))
     known = pd.read_csv(paths.KNOWN_ANALOGS)
     known = known[known["type"] != "operational"].reset_index(drop=True)
+    scope = known["analog_for"].astype(str).str.strip().str.lower()
+    if not scope.isin(["moon", "both", "mars"]).all():
+        raise SystemExit("known_analogs.csv: analog_for must be moon, both or mars; got %s" % sorted(set(scope)))
+    mars_only = known[scope == "mars"].reset_index(drop=True)
+    known = known[scope.isin(["moon", "both"])].reset_index(drop=True)
     bare = sc[(sc["bare"] >= 0.8) & (sc["ice"] < 0.05)]
     blat, blon = bare["lat"].to_numpy(float), bare["lon"].to_numpy(float)
     like = (bare[col] >= 0.10).to_numpy()
     base = float(like.mean())
     cc = CircleCounter(blat, blon, like)
 
-    rows = []
-    for _, k in known.iterrows():
-        share, n = cc.share(k["lat"], k["lon"], k["radius_km"])
-        if n >= MIN_CELLS:
-            rows.append({"name": k["name"], "type": k["type"], "analog_for": k["analog_for"],
-                         "radius_km": float(k["radius_km"]), "bare_cells": n, "share_lunar_like": share,
-                         "enrichment": share / base})
-    r = pd.DataFrame(rows).sort_values("enrichment", ascending=False).reset_index(drop=True)
+    def site_rows(table):
+        rows = []
+        for _, k in table.iterrows():
+            share, n = cc.share(k["lat"], k["lon"], k["radius_km"])
+            if n >= MIN_CELLS:
+                rows.append({"name": k["name"], "type": k["type"], "analog_for": k["analog_for"],
+                             "radius_km": float(k["radius_km"]), "bare_cells": n, "share_lunar_like": share,
+                             "enrichment": share / base})
+        cols = ["name", "type", "analog_for", "radius_km", "bare_cells", "share_lunar_like", "enrichment"]
+        return pd.DataFrame(rows, columns=cols).sort_values("enrichment", ascending=False).reset_index(drop=True)
+
+    r = site_rows(known)
+    if r.empty:
+        raise SystemExit("no lunar (moon/both) known analog site has %d bare cells in its radius" % MIN_CELLS)
+    mars_r = site_rows(mars_only)
 
     # Random circles: one centre per (repeat, tested site) on a random bare cell, all counted in one vectorised
     # query; circles with fewer than MIN_CELLS bare cells are redrawn (up to 20 draws in all, as before J18).
@@ -129,7 +144,8 @@ def main(argv=None):
     point = r[r["type"] != "region"]
     out = {"target": target, "lunar_like_column": col, "scored_target": scored_target,
            "n_scanned_tiles": int(sc["tile"].nunique()), "n_bare_cells": int(len(bare)), "base_rate": base,
-           "min_cells_in_radius": MIN_CELLS, "n_known_rows_read": int(len(known)), "n_sites_tested": int(len(r)),
+           "min_cells_in_radius": MIN_CELLS, "analog_for_tested": ["moon", "both"],
+           "n_known_rows_read": int(len(known)), "n_sites_tested": int(len(r)),
            "sites_with_enrichment_above_1": int((r["enrichment"] > 1).sum()),
            "median_enrichment": float(r["enrichment"].median()),
            "median_enrichment_point_sites_only": float(point["enrichment"].median()) if len(point) else None,
@@ -141,6 +157,12 @@ def main(argv=None):
                       "share_of_random_runs_with_median_at_least_ours": float((perm_median >= r["enrichment"].median()).mean())},
            "by_type_median": {t: float(g["enrichment"].median()) for t, g in r.groupby("type")},
            "sites": r.round(4).to_dict("records"),
+           "mars_only_excluded": {
+               "note": "Sites tagged analog_for == mars, outside the lunar scope (issue #16). Same statistic, reference "
+                       "only: not in any number above, not in the random baseline.",
+               "n_known_rows_read": int(len(mars_only)), "n_sites_with_min_cells": int(len(mars_r)),
+               "median_enrichment": float(mars_r["enrichment"].median()) if len(mars_r) else None,
+               "sites": mars_r.round(4).to_dict("records")},
            "caveats": ["The scanned tiles were chosen because they contain known analogs or looked promising; this is not a "
                        "random sample of the Earth.",
                        "Circles of different known rows overlap (for example Kilauea, Mauna Ulu and the Island of Hawaii row).",
