@@ -19,6 +19,8 @@ nothing in the app may read from it. It is used here only as a reference for wha
 Status marks in section 4: **EXISTS** (the current app does it), **PARTIAL** (it does part of it), **NEW** (it does not).
 **KEY** means that `app/build_data.py` must write a new key. Marks only describe the code at `0ba6399`.
 
+**Later outputs (review of issue #24, at `be02969`).** These exist now and the marks above do not cover them: the rank uncertainty of #18 (`data/sites/rank_uncertainty.csv`, `data/validation/rank_uncertainty.json`, `docs/figures/rank_uncertainty.png`; export key `rank_uncertainty` for ranks 1 to 100); the full-scan strict-mask ranking of #19 (`data/validation/landcover_sensitivity/ranking_bare_strict.csv` and its siblings; export `validation/landcover_sensitivity/`), with its J40 review (#26: `top30_strict_review.csv`, `novelty_check_strict.csv`, `docs/figures/top30_strict_sheet_1..3.png`); and the J39 export (#25), which wrote the KEYs of section 6.1. Section 5.1 lists the 297 catalogue paths at `0ba6399`; `data/catalog.csv` now has 367, and the 70 new paths (mostly the strict ranking, its images and the rank uncertainty) are not in the matrix.
+
 ---
 
 ## 1. Purpose, audience and wording rules
@@ -86,7 +88,7 @@ holds the screens below. Deep link: `#view=<screen id>&site=<site_id>&target=<ta
 | S15 | Radar look | RADARSAT-1 windows of Earth sites against Mini-RF; coverage; what radar cannot say | Evidence; S04 radar block |
 | S16 | Crater and lidar close-ups | Meteor Crater at 1 m and 30 m, a lunar crater at 20 m, Morasko counter-example, ICESat-2 profiles | Evidence; S09 links |
 | S17 | Poland vs Moon (planned, issue #14) | link to or embed of the 3D twin viewer | About or Explore, only when branch `t-pl2moon` is merged |
-| S18 | Sources and licences | the 45 sources by agency, challenge link number, status, licence; tools and libraries | Sources; every source link |
+| S18 | Sources and licences | the 46 sources by agency, challenge link number, status, licence; tools and libraries | Sources; every source link |
 | S19 | About and reproducibility | commit, run log, data catalogue, freeze, how to rebuild, team and SI note | About; footer |
 
 Screens S10 to S12 and S14 to S16 are added by this inventory: the backend holds data for them that no screen of the
@@ -170,7 +172,7 @@ collapsed on mobile. Missing data follow W-07.
 | S04.6 | Landing and mobility shares | site `shares.f_le5`, `f_le8`, `f_le15`; lunar `moon.json · regions[target].shares` (median only today; p10/p90 in `reference.json · regions.*.p10`, `p90`: NEW) | % of 30 m pixels at or below 5, 8, 15 deg | M | - | not a landing-safety assessment |
 | S04.7 | Score and its parts | `score` (median `p_all` of the site's cells), `score_amp`, `score_dep` (`sites.geojson`; `ranking.csv`), `target` (`base_regions`) | 0 to 1, 3 decimals | - | info -> S08 step 7 | the score is not a probability of being an analog |
 | S04.8 | Score by lunar target | `region_scores` (9 keys), `best_region` | meter 0 to 1 with the number; best match marked in text | M "not measured" | click a target -> changes the selected target | the order of the ranking does not change |
-| S04.9 | Rank certainty (planned, issue #18) | `data/sites/rank_uncertainty.csv` (not yet produced): `rank_p05`, `rank_median`, `rank_p95`, share of runs in the top 30; feature-group sensitivity | range bar of ranks | E until the file exists: hide the block, no placeholder numbers | - | - |
+| S04.9 | Rank certainty (issue #18) | `data/sites/rank_uncertainty.csv` (produced after `0ba6399`; export `sites.json · rank_uncertainty`, ranks 1 to 100): `rank_p05`, `rank_median`, `rank_p95`, share of runs in the top 30; feature-group sensitivity | range bar of ranks | E until the file exists: hide the block, no placeholder numbers | - | - |
 | S04.10 | Where the analogy breaks (never collapsed) | `breaks` (list of 7 to 9 sentences, `sites.geojson · breaks`; joined with "; " in `ranking.csv · breaks`); `novelty_check.csv · access`, `protection` where the site has a row (NEW KEY) | sentences | - | - | W-08 |
 | S04.11 | Surface conditions, Earth against Moon | NASA POWER `nasa_context.csv`: `ts_mean_c`, `ts_min_c`, `ts_max_c`, `ts_mean_k`, `precip_mm_per_year`, `ws10m_m_s`, `power_grid_note` (export carries only the first three: NEW KEYS for the rest); measured `partner_context.csv`: `jaxa_sgli_lst_*`, `nasa_modis_lst_*` (day mean, night mean, day max, night min, day-night difference and their month counts), `jaxa_amsr2_soil_moisture_pct`, `jaxa_amsr2_values`, `esa_permafrost_fraction_pct`, `esa_ground_temp_2m`; lunar `moon.json · regions[target].headline.temp_avg_k`, `temp_max_k` (pooled: `headline_range`) | K for satellite and lunar, °C for POWER and ground temperature, %, mm/year, m/s; months as "n months" | M: POWER "Not sampled" for ranks 151 to 300; partner "Not sampled" without a row, "Not measured" for a null in a row (soil moisture null in 14% of rows, permafrost and ground temperature null in 53%: outside the Arctic grid) | each source name links to S18; -> S14 | W-08; caveat line "Earth and lunar products cover different time periods and use different summaries." (exists) and the pixel-size caveat of `partner_context_summary.json · caveats` |
 | S04.12 | Literature record (NEW) | `novelty_check.csv` row by `site_id` (44 sites): `place`, `terrain`, `access`, `protection`, `verdict`, `evidence_urls`, `why_moonlike_or_artefact`, `searches_run` | text; URLs as links | E "No literature check for this site" (`novelty = unchecked`) | links open in a new tab | W-01, W-09, W-13 |
@@ -179,7 +181,7 @@ collapsed on mobile. Missing data follow W-07.
 | S04.15 | Dune-like relief explanation | `artefact_flag`, `artefact_share`, `artefact_reason` (`sites.geojson`; NEW KEYS) | share of cells, % | shown only for flagged sites | -> S08 step 8 | W-04 |
 | S04.16 | Radar look (NEW) | `radarsat1_index.csv` row by `site_id` (37 rows): `status`, `n_scenes`, `date`, `beam`, `product`, `incidence_deg`, `pass_direction`, `nominal_pixel_m`, `valid_share`, `cv_dn`, `power_share_200m_2km`, `image`, `rejected` | deg, m, shares | E "No RADARSAT-1 scene covers the site centre" (`no_scene_centre`) or "No scene had 90% usable pixels" (`no_usable_window`) | -> S15 | uncalibrated C-band DN, not comparable with Mini-RF values |
 | S04.17 | Moss-and-lichen check (top 100, NEW) | `data/validation/landcover_sensitivity/sites_top100.csv` row by `site_id`: `region`, `n_cells`, `bare_med`, `bare_strict_med`, `moss_lichen_med`, `strict_passes_median`, `strict_kept_cells`, `strict_largest_group`, `strict_passes_cells`, `modis_bare_med`, `modis_passes_median`, `modis_passes_cells`; e.g. rank 1: `bare_strict_med` 0.0312, `strict_passes_cells` False | shares as %; pass / fail as words "keeps a 4-cell core without moss and lichen" / "does not" | E for ranks above 100: "not checked"; MODIS columns empty for 87 of 100 sites (MODIS covers 56 S to 60 N only): "not covered" | -> S09 V14 | the new rank of a surviving site is not computed (`landcover_sensitivity.json · cannot_show`) |
-| S04.18 | Planned context | Sentinel-1 backscatter (issue #20, `data/sites/radar_context.csv`); full-scan strict-mask ranking (issue #19 full version) | - | hidden until the files exist | - | Sentinel-1 text: "C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio" (issue #20 Accept) |
+| S04.18 | Planned context | Sentinel-1 backscatter (issue #20, `data/sites/radar_context.csv`); full-scan strict-mask ranking (issue #19 full version; produced after `0ba6399`: `data/validation/landcover_sensitivity/ranking_bare_strict.csv`, not joined to the default sites by id) | - | Sentinel-1 hidden until its file exists | - | Sentinel-1 text: "C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio" (issue #20 Accept) |
 | S04.19 | Actions | - | - | - | "Compare side by side" -> S05; "Download site package" (F-40); "What is compared and what is not" -> S13 | - |
 
 ### S05 Side by side Earth / Moon (issue #22)
@@ -416,7 +418,7 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 - **F-42** Nearest known analog with distance and `analog_for`, and the nearest lunar analog when the nearest one is Mars-only, linking to S12. Data: `sites.json · nearest_known`, `nearest_known_km`, `nearest_known_for`, `nearest_lunar_known`, `nearest_lunar_known_km`; `known_analogs.csv · type`, `source_url`. PARTIAL (tag and lunar analog EXIST since `8edaad7`; link to S12 NEW), KEY `nearest_known_type`, `nearest_known_url`.
 - **F-43** Dune-like explanation for flagged sites: share of flagged cells and the reason sentence. Data: `sites.geojson · artefact_share`, `artefact_reason`. NEW, KEY `artefact_share`, `artefact_reason`.
 - **F-44** Radar block for the 37 sites of the RADARSAT-1 index, with the status sentence for the 28 without a window. Data: `radarsat1_index.csv`, `data/sites/radarsat1/*.png`. NEW, KEY `radar` and `img/` copies.
-- **F-45** Rank certainty block when `data/sites/rank_uncertainty.csv` exists; hidden otherwise. Data: issue #18 outputs. NEW (blocked by #18).
+- **F-45** Rank certainty block when `data/sites/rank_uncertainty.csv` exists; hidden otherwise. Data: issue #18 outputs. NEW (the file and the export key `rank_uncertainty` exist since #18 and #25).
 - **F-46** Moss-and-lichen check for ranks 1 to 100 ("keeps a 4-cell core without moss and lichen" or not, with `bare_strict_med`); "not checked" above rank 100; Sentinel-1 line only when its file exists. Data: `data/validation/landcover_sensitivity/sites_top100.csv`; issue #20 outputs. NEW, KEY `landcover_strict` per site (Sentinel-1 part blocked by #20).
 - **F-47** Every number in the card shows its file and key on hover. Data: as above. PARTIAL (validation items only).
 
@@ -434,7 +436,7 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 - **F-54** Coordinate provenance per region. Data: `reference.json · regions.*.coord_source`, `coord_status`, `notes`. NEW, KEY.
 - **F-55** Full terrain statistics (14 features with median, p10, p90, and `mean_dep_frac`). Data: `reference.json · regions.*.medians`, `p10`, `p90`, `mean_dep_frac`. PARTIAL (5 features), KEY.
 - **F-56** Full instrument table per region with units, citation, caveats. Data: `data/moon/instruments/*_regions.json`, `registry.json`. NEW, KEY `moon.json · regions.*.instruments`, `instrument_info` (as in the prototype `SCHEMA.md`).
-- **F-57** Gallery of the 80 per-region instrument maps with colour bars and credits. Data: `data/moon/instruments/{diviner,lamp,lola,lroc,minirf}/*.png`, `registry.json · products[].vmin`, `vmax`, `cmap`. NEW, KEY `moon.json · regions.*.maps` and copies in `img/` (size: the 80 PNGs must keep `app/data/` under 15 MB, `build_data.py · build`).
+- **F-57** Gallery of the 80 per-region instrument maps with colour bars and credits. Data: `data/moon/instruments/{diviner,lamp,lola,lroc,minirf}/*.png`, `registry.json · products[].vmin`, `vmax`, `cmap`. NEW, KEY `moon.json · regions.*.maps` and copies in `img/` (size: the 80 PNGs must keep `app/data/` under 25 MB, `build_data.py · MAX_BYTES`; the export is 23.8 MB at `be02969`, so little room is left).
 - **F-58** Diviner detail and figure. Data: `diviner_regions.json`, `diviner_pcp_regions.json`, `docs/figures/diviner_regions_temperature.png`. NEW.
 
 ### S07 Target comparison
@@ -916,8 +918,8 @@ the rest:
 |---|---|---|
 | #16 | done on `main` (`8edaad7`): `nearest_known_for`, `nearest_lunar_known(_km)`, badge caption; still open for the app: the matched row of the badge (F-29) | S04.2, S04.14, S12 (F-29, F-42, F-68) |
 | #17 | `known_analogs.csv · selected_for`, `effectiveness.json · recovery.by_selected_for` | S12 column, S09 V5 table |
-| #18 | `data/sites/rank_uncertainty.csv`, `data/validation/rank_uncertainty.json`, `docs/figures/rank_uncertainty.png`, scale sentence | S04.9, S09 V7, S08 |
-| #19 | shortened version done (top 100, counted in 5.1); the full-scan strict-mask ranking is not produced | S04.18, S09 V14 |
+| #18 | done after `0ba6399`: `data/sites/rank_uncertainty.csv`, `data/validation/rank_uncertainty.json`, `docs/figures/rank_uncertainty.png`, scale sentence | S04.9, S09 V7, S08 |
+| #19 | shortened version done (top 100, counted in 5.1); the full-scan strict-mask ranking was produced after `0ba6399` (`data/validation/landcover_sensitivity/ranking_bare_strict.csv`, `landcover_sensitivity.json · full_run`; reviewed in #26) | S04.18, S09 V14 |
 | #20 | `data/sites/radar_context.csv`, `radar_context_summary.json` | S04.17, S15 |
 | #21 | updated `novelty_check.csv`, `docs/sources/j35.md` | S10 |
 | #22 | side by side, breaks, site package | S05, S04.10, F-40 |
