@@ -21,7 +21,11 @@ and writes data/validation/nasadem_vs_copdem.json and docs/figures/nasadem_vs_co
 
     python validation/nasadem_vs_copdem.py              # everything
     python validation/nasadem_vs_copdem.py --local-only # parts that need no cloud output (five tiles, one-tile DEM)
-Libraries: numpy, pandas, scipy, matplotlib. Written with SI assistance (Claude Code). Licence: Apache-2.0.
+
+J29: --aw3d30-comparison compares the elevation features of all three models on ten shared tiles.
+JAXA AW3D30 v4.1: https://doi.org/10.57746/EO.01kkfx0ejw8r5ndc9bg5nt13ws.
+Libraries: numpy, pandas, scipy, matplotlib. Licence: Apache-2.0.
+Written with SI assistance (Claude Code and OpenAI Codex).
 """
 import argparse
 import glob
@@ -42,6 +46,9 @@ FIVE_TILES = ["N35W112", "N25E039", "N19W156", "N52E016", "N75W090"]
 FEATURES_ONE_TILE = ["s240", "s570", "r200", "r1600", "dep_frac"]
 KEYS = ["tile", "row", "col"]
 TOP_N = 50
+AW3D30_TILES = ("N35W112", "N25E039", "N19W156", "S25W070", "N15E013",
+                "N17E046", "N27E001", "N52E016", "N49E020", "N45E006")
+AW3D30_PAIRS = (("copdem", "nasadem"), ("copdem", "aw3d30"), ("nasadem", "aw3d30"))
 
 
 def _r(x, nd=4):
@@ -238,12 +245,118 @@ def figure(common, shares, out):
     plt.close(fig)
 
 
+def reference_cells(files, tiles=AW3D30_TILES):
+    """Read just the features and coordinates needed for the ten-tile comparison."""
+    cols = KEYS + ["lat", "lon", "valid"] + SCORED
+    return pd.concat([pd.read_parquet(p, columns=cols, filters=[("tile", "in", list(tiles))]) for p in files],
+                     ignore_index=True).drop_duplicates(KEYS)
+
+
+def aw3d30_comparison(esa, nasa):
+    from pipeline.cells import earth_cells_for_tile
+    from pipeline.io_earth import AW3D30_COLLECTION
+
+    optical = []
+    for tile in AW3D30_TILES:
+        cells = earth_cells_for_tile(tile, paths.RAW, dem="aw3d30", with_landcover=False)
+        if cells is None:
+            raise OSError(f"No AW3D30 tile for {tile}")
+        count = int(cells["valid"].sum())
+        print(f"{tile}: {count} valid AW3D30 cells", flush=True)
+        optical.append(cells)
+    frames = {"copdem": esa, "nasadem": nasa, "aw3d30": pd.concat(optical, ignore_index=True)}
+    valid = {}
+    for model, df in frames.items():
+        df = df.loc[df["valid"], KEYS + ["lat", "lon"] + SCORED]
+        valid[model] = df.rename(columns={k: f"{k}_{model}" for k in ["lat", "lon"] + SCORED})
+    common = valid["copdem"].merge(valid["nasadem"], on=KEYS, validate="1:1")
+    common = common.merge(valid["aw3d30"], on=KEYS, validate="1:1")
+    counts = common.groupby("tile").size()
+    if set(counts.index) != set(AW3D30_TILES):
+        raise ValueError(f"Missing common valid cells: {sorted(set(AW3D30_TILES) - set(counts.index))}")
+    diff = max(float(np.abs(common[f"{coord}_copdem"] - common[f"{coord}_{model}"]).max())
+               for coord in ("lat", "lon") for model in ("nasadem", "aw3d30"))
+    if diff > 5e-5:
+        raise ValueError(f"The model cell centres differ by up to {diff:g} degrees.")
+
+    def compare(df):
+        comparisons = {}
+        for a, b in AW3D30_PAIRS:
+            measures = {}
+            for feat in SCORED:
+                stat = feature_agreement(df[f"{feat}_{a}"], df[f"{feat}_{b}"])
+                measures[feat] = {
+                    "n": stat["n"], "pearson": stat.get("pearson"), "spearman": stat.get("spearman"),
+                    "median_ratio_second_over_first": stat.get("median_ratio_nasa_over_esa"),
+                    "median_difference_second_minus_first": stat.get("median_diff_nasa_minus_esa"),
+                    "robust_spread_difference": stat.get("robust_spread_diff"),
+                }
+            comparisons[f"{a}_vs_{b}"] = measures
+        return comparisons
+
+    return {
+        "job": "J29", "tiles": list(AW3D30_TILES), "common_valid_cells": len(common),
+        "max_cell_centre_difference_deg": diff,
+        "aw3d30_collection": AW3D30_COLLECTION + "/collection.json",
+        "aw3d30_mask": "original valid PRISM pixels (MSK == 0) only before bilinear resampling",
+        "sources": {"copdem": "committed Copernicus cell tables", "nasadem": "committed NASADEM cell tables",
+                    "aw3d30": "JAXA Earth API, AW3D30 4.1, April 2024"},
+        "pairs": compare(common),
+        "per_tile": {
+            tile: {"common_valid_cells": int(counts.loc[tile]),
+                   "valid_cells_by_model": {m: int(d["tile"].eq(tile).sum()) for m, d in valid.items()},
+                   "pairs": compare(group)}
+            for tile, group in common.groupby("tile")
+        },
+    }
+
+
+def aw3d30_figure(results, output):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(figsize=(10, 4.5), layout="constrained")
+    x = np.arange(len(SCORED))
+    colors = ("#124c67", "#00897e", "#ad6032")
+    labels = ("Copernicus / NASADEM", "Copernicus / AW3D30", "NASADEM / AW3D30")
+    for i, (values, label, color) in enumerate(zip(results["pairs"].values(), labels, colors)):
+        r = [values[f]["pearson"] for f in SCORED]
+        ax.bar(x + (i - 1) * 0.26, r, width=0.24, color=color, label=label)
+    ax.set(xticks=x, xticklabels=SCORED, ylim=(0, 1.08), ylabel="Pearson r",
+           title=f"Elevation model agreement on {results['common_valid_cells']:,} shared cells")
+    ax.grid(axis="y", alpha=0.22)
+    ax.legend(loc="lower left", ncols=3)
+    paths.ensure(os.path.dirname(os.path.abspath(output)))
+    fig.savefig(output, dpi=150)
+    plt.close(fig)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--local-only", action="store_true")
-    ap.add_argument("--out", default=paths.VALIDATION_NASADEM)
-    ap.add_argument("--figure", default=os.path.join(paths.FIGURES, "nasadem_vs_copdem.png"))
+    ap.add_argument("--out")
+    ap.add_argument("--figure")
+    ap.add_argument("--aw3d30-comparison", action="store_true", help="run J29 separately from the DEM policy")
+    ap.add_argument("--copdem-cells", nargs="+", help="optional prepared Copernicus parquet files for J29")
+    ap.add_argument("--nasadem-cells", nargs="+", help="optional prepared NASADEM parquet files for J29")
     a = ap.parse_args(argv)
+    if a.aw3d30_comparison:
+        out = a.out or os.path.join(paths.VALIDATION, "aw3d30_comparison.json")
+        figure_out = a.figure or os.path.join(paths.FIGURES, "aw3d30_comparison.png")
+        esa = reference_cells(a.copdem_cells or paths.earth_cell_tables())
+        nasa = reference_cells(a.nasadem_cells or sorted(glob.glob(os.path.join(paths.EARTH_CELLS_NASADEM, "*.parquet"))))
+        results = aw3d30_comparison(esa, nasa)
+        aw3d30_figure(results, figure_out)
+        paths.ensure(os.path.dirname(os.path.abspath(out)))
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump(results, f, indent=2, allow_nan=False)
+            f.write("\n")
+        print(f"J29: {len(results['tiles'])} tiles, {results['common_valid_cells']} common valid cells, wrote {out}")
+        return
+    a.out = a.out or paths.VALIDATION_NASADEM
+    a.figure = a.figure or os.path.join(paths.FIGURES, "nasadem_vs_copdem.png")
     res = {"generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
            "sources": {"esa": "Copernicus DEM GLO-30 + ESA WorldCover 2021 v200",
                        "nasa": "NASADEM_HGT v001 (OpenTopography mirror) + MODIS MCD12Q1 v061 IGBP 2021 via NASA GIBS"},

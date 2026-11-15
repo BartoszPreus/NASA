@@ -30,8 +30,9 @@ def earth_cells_for_tile(tile, raw_dir, with_landcover=True, download=True, dem=
 
     `valid` = at least 99% finite pixels and s240 > 0.02 deg (not sea). Land cover is NaN and lc_source is
     "none" where the land-cover map has no data (WorldCover: Antarctica, north of 82.75 N) or could not be read.
-    dem: "copdem" (Copernicus GLO-30, default) or "nasadem" (NASA NASADEM_HGT, 56 S - 60 N, on the same cell
-    grid). landcover: "worldcover" (ESA WorldCover 2021, default) or "modis" (MODIS IGBP of `modis_year` from
+    dem: "copdem" (Copernicus GLO-30, default), "nasadem" (NASA NASADEM_HGT, 56 S - 60 N), or "aw3d30"
+    (JAXA AW3D30 v4.1, optical pixels only). All three use the Copernicus cell grid.
+    landcover: "worldcover" (ESA WorldCover 2021, default) or "modis" (MODIS IGBP of `modis_year` from
     NASA GIBS; lc_source "modis_igbp_<year>"). With dem != "copdem" a last column dem_source is added; the
     defaults return exactly the contract table of EARTH_COLUMNS.
     """

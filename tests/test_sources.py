@@ -62,6 +62,24 @@ def test_grid_alignment_rejects_bad_shape():
         nasadem_to_copdem_grid(np.zeros((1201, 1201), np.float32), "N35W112")
 
 
+def test_aw3d30_stac_tile_edges():
+    assert io_earth.aw3d30_item_url("N35W112").endswith("/3/W112.00-W111.00/N35.00-N36.00.json")
+    assert io_earth.aw3d30_item_url("S01W001").endswith("/3/W001.00-E000.00/S01.00-N00.00.json")
+
+
+def test_aw3d30_excludes_void_fills(monkeypatch):
+    from rasterio.transform import from_bounds
+
+    bounds = (-112.0, 35.0, -111.0, 36.0)
+    transform = from_bounds(*bounds, 4, 3600)
+    monkeypatch.setattr(io_earth, "copdem_grid", lambda tile: (bounds, 4, 30.9))
+    values = np.tile([150, 200, 250, -9999], (3600, 1)).astype(np.int16)
+    mask = np.tile([0, 0x08, 0x30, 0], (3600, 1)).astype(np.uint8)
+    result, actual = io_earth.align_aw3d30(values, mask, transform, "EPSG:4326", "N35W112", -9999)
+    assert actual == transform and result.shape == values.shape
+    assert np.all(result[:, 0] == 150) and np.isnan(result[:, 1:]).all()
+
+
 def _rgba(classes):
     img = np.zeros(classes.shape + (4,), np.uint8)
     for c, rgb in landcover.IGBP_RGB.items():

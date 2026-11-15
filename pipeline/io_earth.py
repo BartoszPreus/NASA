@@ -1,4 +1,4 @@
-"""Earth elevation input: Copernicus DEM GLO-30 (default) or NASADEM tiles (1 x 1 degree, 1 arc-second, EPSG:4326).
+"""Earth elevation input: Copernicus DEM GLO-30 (default), NASADEM or ALOS AW3D30 tiles.
 
 Source: Copernicus DEM GLO-30 (European Union / ESA; derived from TanDEM-X data by DLR and Airbus).
 Public bucket, no account: https://registry.opendata.aws/copernicus-dem/  (https://copernicus-dem-30m.s3.amazonaws.com/)
@@ -15,15 +15,22 @@ integer corner (36 N, 112 W), so a tile shares its last row and column with its 
 slopes. A Copernicus tile starts at the same pixel centre with 3600 rows (3600 columns below 50 deg, 2400 between
 50 and 60 deg), so dropping the shared last row and column and resampling along x to the width that the
 Copernicus tile gets gives the same array shape, pixel size, bounds and cell grid.
-Written with SI assistance (Claude Code).
+ALOS AW3D30 v4.1 (J29) uses the JAXA Earth API and the native PRISM-only pixels.
+Sources: https://doi.org/10.57746/EO.01kkfx0ejw8r5ndc9bg5nt13ws and
+https://www.eorc.jaxa.jp/ALOS/en/dataset/aw3d30/data/aw3d30v4.1_product_e_1.0.pdf.
+Credit: ALOS World 3D - 30m (AW3D30) Global DSM (JAXA). This data was obtained using JAXA Earth API.
+Written with SI assistance (Claude Code and OpenAI Codex).
 """
+import json
 import math
 import os
 import re
 import shutil
+import tempfile
 import time
 import urllib.error
 import urllib.request
+from urllib.parse import urljoin
 
 import numpy as np
 import rasterio
@@ -35,7 +42,11 @@ COP_URL = "https://copernicus-dem-30m.s3.amazonaws.com/{0}/{0}.tif"
 NASADEM_URL = os.environ.get("NASADEM_URL",
                              "https://opentopography.s3.sdsc.edu/raster/NASADEM/NASADEM_be/{0}.tif")
 NASADEM_LAT = (-56, 60)      # NASADEM tiles have south-west corners from 56 S up to 59 N
-DEMS = ("copdem", "nasadem")
+AW3D30_COLLECTION = (
+    "https://s3.ap-northeast-1.wasabisys.com/je-pds/cog/v1/"
+    "JAXA.EORC_ALOS.PRISM_AW3D30.v4.1_global"
+)
+DEMS = ("copdem", "nasadem", "aw3d30")
 M_PER_DEG = 111320.0
 
 
@@ -73,6 +84,9 @@ def in_nasadem(tile):
 def tile_path(tile, raw_dir, dem="copdem"):
     if dem == "nasadem":
         return os.path.join(raw_dir, "nasadem", nasadem_file(tile) + ".tif")
+    if dem == "aw3d30":
+        tile_corner(tile)
+        return os.path.join(raw_dir, "aw3d30_v41_optical", tile + ".tif")
     if dem != "copdem":
         raise ValueError("dem must be one of %s, got %r" % (DEMS, dem))
     return os.path.join(raw_dir, "copdem30", tile_file(tile) + ".tif")
@@ -117,6 +131,8 @@ def fetch_tile(tile, raw_dir, timeout=180, retries=3, dem="copdem"):
         if not in_nasadem(tile):
             return None
         return _download(NASADEM_URL.format(nasadem_file(tile)), path, timeout, retries + 2)
+    if dem == "aw3d30":
+        return fetch_aw3d30(tile, path, timeout, retries)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     url, last = COP_URL.format(tile_file(tile)), None
     for attempt in range(retries):
@@ -175,6 +191,69 @@ def nasadem_to_copdem_grid(z, tile):
     return out.astype(np.float32), py, bounds
 
 
+def aw3d30_item_url(tile):
+    """The JAXA level-3 STAC index uses one-degree bands, named by both edges."""
+    lat, lon = tile_corner(tile)
+    west, east = ("{}{:06.2f}".format("E" if x >= 0 else "W", abs(x)) for x in (lon, lon + 1))
+    south, north = ("{}{:05.2f}".format("N" if y >= 0 else "S", abs(y)) for y in (lat, lat + 1))
+    return f"{AW3D30_COLLECTION}/2024-04/3/{west}-{east}/{south}-{north}.json"
+
+
+def align_aw3d30(z, mask, transform, crs, tile, nodata):
+    """Mask void fills and align optical elevations to the Copernicus output grid."""
+    from rasterio.transform import from_bounds
+    from rasterio.warp import Resampling, reproject
+
+    if z.shape != mask.shape:
+        raise ValueError(f"AW3D30 mask and elevation dimensions differ for {tile}")
+    bounds, width, _ = copdem_grid(tile)
+    target = np.full((3600, width), np.nan, dtype=np.float32)
+    # The v4.1 mask reserves zero for original valid PRISM pixels.
+    valid = (mask == 0) & (z != nodata) & np.isfinite(z)
+    transform_out = from_bounds(*bounds, width, target.shape[0])
+    reproject(np.where(valid, z, np.nan).astype(np.float32), target,
+              src_transform=transform, src_crs=crs, src_nodata=np.nan,
+              dst_transform=transform_out, dst_crs="EPSG:4326", dst_nodata=np.nan,
+              resampling=Resampling.bilinear)
+    return target, transform_out
+
+
+def fetch_aw3d30(tile, path, timeout, retries):
+    """Fetch DSM and MSK assets and cache the optical-only aligned tile."""
+    item_url = aw3d30_item_url(tile)
+    cache = os.path.dirname(path)
+    os.makedirs(cache, exist_ok=True)
+    # Concurrent requests must never share partial downloads or GeoTIFF writers.
+    with tempfile.TemporaryDirectory(dir=cache, prefix=f"{tile}-") as work:
+        item_path = os.path.join(work, "item.json")
+        if _download(item_url, item_path, timeout, retries) is None:
+            return None
+        with open(item_path, encoding="utf-8") as f:
+            assets = json.load(f)["assets"]
+        inputs = {}
+        for key in ("DSM", "MSK"):
+            local = os.path.join(work, key + ".tif")
+            if _download(urljoin(item_url, assets[key]["href"]), local, timeout, retries) is None:
+                raise OSError(f"Missing AW3D30 {key} asset for {tile}")
+            inputs[key] = local
+        with rasterio.open(inputs["DSM"]) as dsm, rasterio.open(inputs["MSK"]) as msk:
+            if dsm.transform != msk.transform or dsm.crs != msk.crs:
+                raise ValueError(f"AW3D30 mask and DSM have different grids for {tile}")
+            nodata = assets["DSM"]["je:rasters"]["dn"]["nodata"]
+            z, transform = align_aw3d30(dsm.read(1), msk.read(1), dsm.transform, dsm.crs, tile, nodata)
+        aligned = os.path.join(work, "aligned.tif")
+        with rasterio.open(aligned, "w", driver="GTiff", height=z.shape[0], width=z.shape[1],
+                           count=1, dtype="float32", crs="EPSG:4326", transform=transform,
+                           nodata=np.nan, compress="deflate") as out:
+            out.write(z, 1)
+        try:
+            os.replace(aligned, path)
+        except PermissionError:
+            if not os.path.isfile(path):
+                raise
+    return path
+
+
 def load_earth_tile(tile, raw_dir, download=True, dem="copdem"):
     """Read a tile and resample it along x so that pixels are square.
 
@@ -182,6 +261,7 @@ def load_earth_tile(tile, raw_dir, download=True, dem="copdem"):
     bounds = (left, bottom, right, top) in degrees. Returns None if the tile does not exist.
     dem="nasadem" reads the NASADEM tile and puts it on exactly the grid of the Copernicus tile of the same name
     (same shape, pixel size and bounds), so the cells of both sources share (tile, row, col).
+    dem="aw3d30" uses the same output grid and masks pixels supplied by gap-fill datasets.
     """
     if dem == "nasadem":
         if not in_nasadem(tile):
@@ -194,6 +274,13 @@ def load_earth_tile(tile, raw_dir, download=True, dem="copdem"):
             if ds.nodata is not None:
                 z[z == ds.nodata] = np.nan
         return nasadem_to_copdem_grid(z, tile)
+    if dem == "aw3d30":
+        path = fetch_tile(tile, raw_dir, dem=dem) if download else tile_path(tile, raw_dir, dem)
+        if path is None or not os.path.exists(path):
+            return None
+        bounds, _, py = copdem_grid(tile)
+        with rasterio.open(path) as ds:
+            return ds.read(1), py, bounds
     if dem != "copdem":
         raise ValueError("dem must be one of %s, got %r" % (DEMS, dem))
     path = fetch_tile(tile, raw_dir) if download else tile_path(tile, raw_dir)
