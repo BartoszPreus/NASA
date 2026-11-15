@@ -20,7 +20,9 @@ tiles with fewer than 8 columns (`--window-rule clip`, default; `--window-rule l
 ranking, kept as `data/validation/window_rule/ranking_legacy_window.csv`). Rank 1 is now N69E093-01 (Putorana,
 81.48 km2); the southern Peary Land sites at old ranks 1, 3, 4 are 14, 16, 20. The top-30 set, its regions and
 the literature counts 2 / 10 / 18 are unchanged; the strict ranking is unchanged; rank stability numbers changed
-(no slopes 11, no roughness 5, no depressions 20 of 30; `data/validation/rank_uncertainty.json`).
+(no slopes 11, no roughness 5, no depressions 20 of 30; `data/validation/rank_uncertainty.json`). Third freeze
+run on a fresh clone of `ed63c48`: every command exit 0, one stale file (`context_comparison.json`) fixed after
+it (`docs/FREEZE.md`, "Third run").
 
 **State of the result** (story order: measured -> default -> strict -> validation -> literature -> no discovery;
 every number with file and key: `docs/pitch/NUMBERS.md`, all recomputed from their data files on #4 at 08:10).

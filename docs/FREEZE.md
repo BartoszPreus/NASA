@@ -1,6 +1,6 @@
 # J23 — Clean-clone reproducibility and freeze
 
-**Second run: PASS at `c7adfc1` (08:15–08:28, section "Second run" below).**
+**Third run: PASS at `ed63c48` (11:26–11:46, section "Third run" below; one stale file fixed). Second run: PASS at `c7adfc1` (08:15–08:28).**
 
 **PASS for the freeze run — commit `7b58f919329946b4713447ce415fa90be35e9730` (Sun 15 Nov 2026, 06:20–06:31
 Europe/Warsaw).** Every command exits 0 in a fresh clone. The files that change afterwards are run metadata only
@@ -45,6 +45,31 @@ raster services, and `partner_context` failed raster reads in a fresh Windows en
 certificate chain, see point 3 below). Their committed CSVs feed steps 10 and 12, which reproduce exactly.
 
 **Changes after the second run (independent review, 15 Nov ~09:00):** 43d8ee1 (NOVELTY.md / j35.md text, no verdict changed), 3de2d53 (`pipeline/catalog.py` licence text of `worldview_gibs` and `nasa_power`, README source rows; `pipeline.run catalog` rerun), c385491 (`app/build_data.py`: markdown links in the METHOD.md sections exported as plain text, so `method_sections.json` changes besides `meta.json`). `python -m pytest tests -q`: 81 passed; `python app/build_data.py` exit 0, 24.82 MB; no ranking, validation or site value changed.
+
+**Changes after the second run (J43, issue #30, 15 Nov ~11:30):** 3edf885 changes the default ranking (ranking window clipped to the tile on narrow polar tiles; old rule `--window-rule legacy`), with every downstream stage rerun; 0cb2a63, c6e55c2, ed63c48 are documentation fixes (ICESat-2 box, `pipeline/tiles.py` docstring, `app/data/SCHEMA.md` counts). Checked by the third run below.
+
+## Third run (after J43)
+
+**PASS with one stale file found and fixed — commit `ed63c48da678a04d223ac6fed157837df2e561d8` (Sun 15 Nov 2026, 11:26–11:46 Europe/Warsaw).** Fresh `git clone` of `main` from GitHub into a new empty folder under the system temporary folder, new virtual environment with Python 3.12.10, `pip install -r requirements.txt` (exit 0, 133 s). Commands one at a time in the foreground; the command table of the second run plus the new `window-rule` stage. Run by Claude Code (opus worker) on Wiktor's machine; issue #8 and #30.
+
+| # | Command | Exit | Seconds | `git status --short` afterwards (cumulative) |
+|---|---|---|---|---|
+| 1 | `python -m pytest tests -q` | 0 | 45 | clean; 88 passed |
+| 2 | `python -m pipeline.run sites validate-enrichment catalog` | 0 | 77 | `data/run_log.csv`, `data/catalog.csv`, `data/README.md` (run-log row); `ranking.csv`, `sites.geojson` identical |
+| 3 | `python -m pipeline.run validate-effectiveness` | 0 | 32 | no new file |
+| 4 | `python -m pipeline.run validate-dem` | 0 | 32 | + `nasadem_vs_copdem.json` (`generated`, `carried_from_previous_run`, as before) |
+| 5 | `python -m pipeline.run rank-uncertainty` | 0 | 210 | no new file |
+| 6 | `python -m validation.landcover_strict_cells --workers 8` | 0 | 77 | no new file |
+| 7 | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity` | 0 | 84 | no new file |
+| 8 | `python -m validation.landcover_strict_ranking` | 0 | 4 | no new file |
+| 9 | `python validation/rank_uncertainty.py --bare-col bare_strict` | 0 | 182 | no new file |
+| 10 | `python -m validation.strict_context` | 0 | 4 | **+ `context_comparison.json`**: its `default.stability` block still held the rank stability before J43 (written before the default rank-uncertainty rerun had finished); fixed in the commit that adds this section |
+| 11 | `python -m pipeline.run window-rule` | 0 | 272 | no new file (`window_rule.json` and the three variant rankings identical) |
+| 12 | `python -m pipeline.run catalog` | 0 | 3 | run-log row only |
+| 13 | `python app/build_data.py` | 0 | 7 | + `app/data/meta.json`, `run_log.json`, `catalog.json`, `validation/nasadem_vs_copdem.json`, and from step 10 `strict_ranking.json`, `validation/landcover_sensitivity/context_comparison.json`; 24.83 MB |
+| 14 | `python -m pytest tests -q` | 0 | 35 | unchanged; 88 passed |
+
+**Not rerun, as in the second run:** the network stages (`context`, `partner-context`, the network parts of `strict-context`). For J43 NASA POWER was fetched once for the one new top-150 site (S25W071-01); the top-60 set (images, partner data) and the top-30 set (review, literature) did not change.
 
 ## Reproduction (first run)
 

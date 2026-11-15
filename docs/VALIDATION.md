@@ -123,7 +123,7 @@ The ranking key `best_window_km2` is the similarity-weighted area of the best wi
 | Strict ranking | no key and no rank changed | `masks.bare_strict.sites_changing_key` = 0, `overlap` 10 / 30 / 100 |
 | Alternative not chosen: 15 x 15 km from the actual cell width | same keys on all narrow tiles, plus 6 sites on wide tiles where 15 / 2.00 km rounds to 7 columns | `masks.default_physical_alternative.sites_changing_key_elsewhere` |
 
-The three southern Peary Land sites at ranks 1, 3 and 4 held those ranks only because of the fallback. The set of the default top 30 does not change (so its region split, Putorana 16, southern Peary Land 5, northern Ungava 2, northern Baffin 2, Polar Urals 1, Chukotka 1, Hazen Plateau 1, Atacama / Puna 1, Mauna Loa 1, and the literature counts 2 / 10 / 18 stay); only the order inside it does.
+The three southern Peary Land sites at ranks 1, 3 and 4 held those ranks only because of the fallback. What the clipped window still does not correct: on a 7-column tile the window holds 56 cells instead of 64, because sites end at the tile edge. Scaled up by 64 / 56 the best Peary Land key would be 53.6 km² (N82W026-01, 46.90 x 8 / 7), between ranks 8 and 9, still far below rank 1 (81.48); this is a rough scaling computed for this note, not a ranking. The set of the default top 30 does not change (so its region split, Putorana 16, southern Peary Land 5, northern Ungava 2, northern Baffin 2, Polar Urals 1, Chukotka 1, Hazen Plateau 1, Atacama / Puna 1, Mauna Loa 1, and the literature counts 2 / 10 / 18 stay); only the order inside it does.
 
 ## Limits
 
