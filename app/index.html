@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore measured terrain similarities and differences between Earth and the lunar south pole.">
+  <title>Zodiak · Earth–Moon Terrain Atlas</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#explore">Skip to the explorer</a>
+  <header class="masthead">
+    <div class="frame masthead-inner">
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">◐</span> Zodiak</a>
+      <nav aria-label="Main navigation">
+        <a href="#explore">Explore</a>
+        <a href="#lunar">Lunar targets</a>
+        <a href="#evidence">Method &amp; sources</a>
+      </nav>
+    </div>
+  </header>
+  <main class="frame" id="top">
+    <section class="intro" aria-labelledby="title">
+      <div>
+        <p class="eyebrow">Earth observation / Lunar south pole</p>
+        <h1 id="title">Earth–Moon Terrain Atlas</h1>
+        <p>Explore where terrain on Earth resembles candidate lunar base regions, and where the comparison breaks down.</p>
+      </div>
+      <dl class="stats" id="stats" aria-label="Scan summary"></dl>
+    </section>
+    <p id="load-status" class="notice" role="status">Loading the terrain data…</p>
+    <noscript><p class="notice">JavaScript is required to load the terrain map and comparisons.</p></noscript>
+    <div id="atlas" hidden>
+      <section id="explore" aria-labelledby="explore-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Earth survey</p>
+            <h2 id="explore-title">Candidate terrain</h2>
+          </div>
+          <div class="filters" aria-label="Ranking filters">
+            <label><input type="checkbox" id="hide-known"> Hide known analog sites</label>
+            <label><input type="checkbox" id="show-flagged"> Show dune-like terrain</label>
+          </div>
+        </div>
+        <div class="explorer">
+          <section class="map-panel" aria-label="Earth survey map">
+            <div class="map-toolbar">
+              <p id="map-count" aria-live="polite"></p>
+              <button type="button" id="reset-map">World view</button>
+            </div>
+            <div id="map" aria-label="Map of surveyed tiles and Earth candidate patches"></div>
+            <div class="legend" aria-label="Map legend">
+              <div class="scale-wrap"><strong>Candidate share of bare cells</strong><span class="scale"></span><div><span>0%</span><span id="scale-max"></span></div></div>
+              <span><i class="key grey"></i>No bare ground</span>
+              <span><i class="key dot"></i>Candidate patch</span>
+              <span id="flag-key" hidden><i class="key flagged"></i>Dune-like terrain</span>
+            </div>
+          </section>
+          <section class="ranking" aria-labelledby="ranking-title">
+            <div class="ranking-head">
+              <h3 id="ranking-title">Ranked patches</h3>
+              <label class="search-label" for="search">Search by country, place or site ID</label>
+              <input type="search" id="search" placeholder="e.g. Greenland">
+              <p id="ranking-key"></p>
+            </div>
+            <div class="ranking-scroll" id="ranking-list"></div>
+            <p id="ranking-status" class="ranking-status" aria-live="polite"></p>
+          </section>
+        </div>
+        <p class="caption">Moss and lichen count as bare land cover. Some Arctic patches are tundra.</p>
+      </section>
+      <section id="comparison" aria-labelledby="comparison-title">
+        <div class="section-head comparison-head">
+          <div>
+            <p class="eyebrow">Site comparison</p>
+            <h2 id="comparison-title">Earth patch and lunar terrain</h2>
+          </div>
+          <label for="target">Lunar comparison target <select id="target"></select></label>
+        </div>
+        <p class="caption">The ranking uses the pooled target. Choosing a region updates the comparisons and retains the ranking order.</p>
+        <article id="site-card"></article>
+      </section>
+      <section id="lunar" aria-labelledby="lunar-title">
+        <div class="section-head">
+          <div><p class="eyebrow">Lunar Reconnaissance Orbiter</p><h2 id="lunar-title">Lunar target</h2></div>
+          <a href="#comparison">Choose a comparison target ↑</a>
+        </div>
+        <div id="lunar-panel" class="panel"></div>
+      </section>
+      <section id="evidence" aria-labelledby="evidence-title">
+        <div class="section-head">
+          <div><p class="eyebrow">Data and validation</p><h2 id="evidence-title">Method &amp; sources</h2></div>
+        </div>
+        <div class="evidence-grid">
+          <section class="panel"><h3>Method</h3><ol id="method"></ol></section>
+          <section class="panel"><h3>What the validation showed</h3><ul id="evidence-summary"></ul><div id="validation"></div></section>
+        </div>
+        <details class="panel sources" id="criteria">
+          <summary>Comparison criteria</summary>
+          <div id="criteria-content"></div>
+        </details>
+        <section class="panel sources"><h3>Sources</h3><div id="sources"></div></section>
+      </section>
+    </div>
+  </main>
+  <footer class="frame">
+    <span>Zodiak · Built with SI assistance (Codex).</span>
+    <span>NASA LRO, POWER, GIBS and NASADEM · ESA Copernicus, WorldCover and CCI · JAXA G-Portal</span>
+  </footer>
+</body>
+</html>
