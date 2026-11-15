@@ -47,9 +47,10 @@ replaces total area because total area rewarded sheer size: with it, sand seas h
 ## What the validation says
 
 - The estimator reproduces NASA's lunar slope map (step 4).
-- Around the catalogued sites, median enrichment was 0.91, versus 0.36 for random circles (5th to 95th percentile:
-  0.13 to 0.73). Seven of 500 random repeats reached the observed median. The typical known site had less
-  lunar-like ground than the scan-wide bare-cell baseline. At one-degree tile scale, the corrected recovery
+- Around the 22 catalogued lunar analogs (tagged lunar or both; Mars-only entries are not tested), median
+  enrichment was 1.02, versus 0.39 for random circles (5th to 95th percentile: 0.12 to 0.91). Fourteen of 500
+  random repeats reached the observed median. The typical known lunar site had about the scan-wide bare-cell
+  share of lunar-like ground. At one-degree tile scale, the corrected recovery
   AUC of 0.531 was consistent with chance. [Validation](VALIDATION.md)
 - Laser profiles of ICESat-2 over eight sites give 0.43 to 1.16 times the grid slope at 240 m (median 0.87);
   the three lowest are lava fields, and the laser samples a 20 km box, not the site outline.

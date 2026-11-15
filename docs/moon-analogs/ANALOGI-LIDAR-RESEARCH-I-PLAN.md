@@ -1,3 +1,5 @@
+> **Historical document (Sat 14 Nov 2026, in Polish).** Early research and plan, kept as a record. It describes both the Moon and the Mars direction; the decision taken later (risk table below, "MVP tylko Księżyc", and issue #16) is: Zodiak searches Earth for terrain analogs of candidate base regions at the lunar south pole (`base_regions`), and Mars is a separate research direction. For the current method read `docs/METHOD.md`.
+
 # Ścieżka „Księżyc”: analogi Księżyca/Marsa na Ziemi z LiDAR-em (research + plan)
 Wyzwanie: **Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars**
 https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/

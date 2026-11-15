@@ -4,6 +4,8 @@ Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 01:30, by 
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
+**Scope.** Zodiak searches Earth for terrain analogs of candidate base regions at the lunar south pole: the ranking reference is `base_regions`, the seven lunar south-pole candidate regions pooled (`pipeline/score.py`, `data/moon/reference.json`). Mars is a separate research direction, outside the ranking and its validation; the official contest title names both. (Decision of issue #16.)
+
 ## 0. START HERE (state at 01:30, Sun 15 Nov)
 
 **New rule since 01:30: "Before you report DONE"** (`AGENTS.md` for Codex and other agents, the same text in
@@ -85,11 +87,11 @@ site card and cite it · J30 Poland against the Moon (in progress) · J27 radar 
 J28, J29 optional · J23 fresh-clone check and freeze, Sun 08:30 (a fresh clone has no Natural Earth file).
 
 **How to talk about the result** (details in section 9): the method finds terrain of a lunar shape; it is not a
-detector of the sites people chose. Known analogs lie in more lunar-like ground than random places (median
-enrichment 0.91 against 0.36) but below the average bare cell (0.91 is under 1). The top of the ranking is
+detector of the sites people chose. Known lunar analogs lie in more lunar-like ground than random places (median
+enrichment 1.02 against 0.39, 22 sites tagged lunar or both) and at about the average bare cell (1.02). The top of the ranking is
 Arctic plateau terrain whose "bare ground" is partly tundra. The coldest site is still about 94 K warmer than
-the warmest lunar region. Nothing is called a discovery, and "mentioned in analog literature" is not verified
-(issue 2). The dune-field flag is a terrain rule, not a confirmed sand detector (J26).
+the warmest lunar region. Nothing is called a discovery; "mentioned" means the region is named as a Mars analog in general terms
+(`docs/NOVELTY.md`, issue 2). The dune-field flag is a terrain rule, not a confirmed sand detector (J26).
 
 **Rules.** No `Claude-Session:` line or any session link in a commit; no keys, tokens or private e-mail
 addresses in the repo (Wiktor, 14 Nov; history was rewritten at about 19:45, so a clone made earlier must be
@@ -213,9 +215,10 @@ Selection funnel behind `tiles_scanned.csv`: 26,450 GLO-30 tiles -> 18,836 with 
 ## 9. What the validation says, and how to talk about it (read before writing the pitch)
 
 **Full scan, final method.** See `docs/VALIDATION.md` and `data/validation/enrichment.json` for the corrected checks.
-- **Known analogs against random places**: 16 of 37 tested entries lie above the bare-cell base rate. Median
-  enrichment was 0.91 for the known sites and 0.36 for matched random circles (5th to 95th percentile: 0.13 to
-  0.73). Seven of 500 random repeats reached the observed median. An older run on 78 hand-picked tiles gave 1.80.
+- **Known lunar analogs against random places** (issue #16: only entries tagged lunar or both): 11 of 22 tested
+  entries lie above the bare-cell base rate. Median enrichment was 1.02 for the known sites and 0.39 for matched
+  random circles (5th to 95th percentile: 0.12 to 0.91). Fourteen of 500 random repeats reached the observed
+  median. Before #16 the test also counted Mars-only entries: 16 of 37, 0.91 against 0.36. An older run on 78 hand-picked tiles gave 1.80.
 - **Tile-scale recovery**: AUC 0.531 (90% interval 0.396–0.668), consistent with chance on 14 eligible known tiles.
 - **The earlier J18 run compared two lunar targets**: 0.91 (15 of 35) for the seven candidate regions pooled and
   0.97 (16 of 35) for the 160 km polar window. The pooled target is a choice of definition. See `docs/sources/j18.md`.

@@ -1,5 +1,7 @@
 # Zodiak - NASA Space Apps 2026 (Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars)
 
+**Scope.** Zodiak searches Earth for terrain analogs of candidate base regions at the lunar south pole: the ranking reference is `base_regions`, the seven lunar south-pole candidate regions pooled (`pipeline/score.py`, `data/moon/reference.json`). Mars is a separate research direction, outside the ranking and its validation; the official contest title names both.
+
 ## Coordination: GitHub issues (Axis is no longer used)
 Since Sat 14 Nov 2026, 23:20 the team does not use Axis. Do not call the `axis` MCP server: no claims, no file locks, no notes there. Jobs live as GitHub issues of this repository.
 

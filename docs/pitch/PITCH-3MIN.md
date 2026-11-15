@@ -8,7 +8,7 @@ We start with NASA's LOLA elevation data around seven candidate base regions. We
 
 We scored 1,758,778 valid cells across 2,060 tiles with stored data. That gives us 3,175 candidate terrain patches. The map turns those numbers into a regional shortlist. Here is an established example, Mauna Loa, alongside a lunar relief map. We can compare the terrain while looking at NASA imagery and context on conditions that differ, such as temperature.
 
-We checked a plane-fit slope estimator against NASA's published map. The median absolute difference on the native grid was 0.042 degrees. None of the four control tiles produced a candidate after masking. A different Earth elevation model changed which cells qualified. Around known analogs, the median enrichment was 0.91 times the bare-cell baseline, compared with 0.36 around matched random circles. At the scale of one-degree tiles, the score did not separate known analog sites from the rest of the scanned land.
+We checked a plane-fit slope estimator against NASA's published map. The median absolute difference on the native grid was 0.042 degrees. None of the four control tiles produced a candidate after masking. A different Earth elevation model changed which cells qualified. Around known lunar analogs, the median enrichment was 1.02 times the bare-cell baseline, compared with 0.39 around matched random circles. At the scale of one-degree tiles, the score did not separate known analog sites from the rest of the scanned land.
 
 The same surface shape can come from volcanoes, glaciers, rivers or impacts. It can look right on a map and still have different rock, soil, temperature and lighting. A literature check identified the shortlisted places. Whether they appear in analog literature remains unverified.
 

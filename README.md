@@ -2,6 +2,8 @@
 
 Zodiak maps Earth terrain that resembles candidate lunar south-pole base regions. It ranks contiguous patches by local terrain similarity, identifies documented analogs, and exposes the evidence behind the score. Surface conditions and imagery show where each analogy breaks. A mission team could use the results to shortlist field sites for rover mobility or landing terrain rehearsals.
 
+**Scope.** Zodiak searches Earth for terrain analogs of candidate base regions at the lunar south pole: the ranking reference is `base_regions`, the seven lunar south-pole candidate regions pooled (`pipeline/score.py`, `data/moon/reference.json`). Mars is a separate research direction, outside the ranking and its validation; the official contest title names both.
+
 ![World map of ranked Earth terrain candidates from the committed ranking. Established examples in Hawaii and the Atacama are labelled.](docs/pitch/ranking-map.png)
 
 **1,758,778 valid cells** in **2,060 scanned tiles** with stored data yielded **3,175 candidate terrain patches**. The map shows the published ranking rather than the entire candidate catalogue. See [site ranking](data/sites/ranking.csv), [validation](docs/VALIDATION.md), and [number sources](docs/pitch/NUMBERS.md).
@@ -107,7 +109,7 @@ The pipeline uses [Python](https://www.python.org/), [NumPy](https://numpy.org/)
 | Published NASA LOLA slope map | Median absolute error **0.042°** on the native DEM and **0.064°** after resampling for the plane-fit check. The ranking uses two-point slopes. |
 | PDS and PGDA elevation grids | Median offset **+0.191 m**, RMS difference **1.709 m** between grids derived from LOLA. |
 | Earth elevation sensitivity | Spearman **0.637** across **618** common tiles, with **21 of the top 50** shared. The comparison did not satisfy the rule for replacing Copernicus with NASADEM. |
-| Known-site enrichment | Median **0.91×** the bare-cell baseline around known sites versus **0.36×** around matched random circles. Known-site circles beat the random circles while their median remains below the scan-wide bare-cell rate. |
+| Known-site enrichment | Over the **22** known lunar analogs (tagged lunar or both; Mars-only entries excluded), median **1.02×** the bare-cell baseline versus **0.39×** around matched random circles (5–95%: 0.12–0.91); 14 of 500 random repeats reached the observed median. The typical known lunar analog's circle sits at about the scan-wide bare-cell rate. |
 | Negative controls | No candidates survived the land-cover mask in the four control tiles. |
 | ICESat-2 | Across eight sites, laser slopes at **240 m** were **0.43–1.16×** their grid counterparts, median **0.87×**. Track and grid footprints differ. |
 
