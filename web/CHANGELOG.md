@@ -2,6 +2,12 @@
 
 Issues #29 and #32. Newest first. Written with SI assistance (Claude Code, OpenAI Codex).
 
+## 2026-11-15, frontend CI and repeatable deployment (#35)
+
+- Added GitHub Actions for locked dependency installation, mission and packaging tests, TypeScript checking, a production build and validation of all copied public assets and terrain-grid sizes. Successful builds are available as seven-day artifacts.
+- Added root Vercel build configuration with the same checks and Node.js 24; CLI uploads include the tracked data behind the frontend's public symlinks. Each checked build includes `version.json` with its source commit.
+- Prepared publication of the latest merged visual updates. Native Vercel/GitHub linking was rejected by the provider; deployment remains via CLI, with CI running independently on GitHub.
+
 ## 2026-11-15, globe clustering, 2D map, site profile, dithered backgrounds
 
 - Explore: points that overlap on screen merge into one plain dot without a number; clicking it opens a menu beside the dot listing the places, each selectable. Zoomed in until Earth fills the view, the globe hands over to a 2D Leaflet map with Sentinel-2 cloudless 2020 tiles (EOX, CC BY 4.0), the same points and menu, the patch outline and the heat layer reprojected per tile; zooming out or "Back to globe" returns. Leaflet loads lazily (separate chunk).

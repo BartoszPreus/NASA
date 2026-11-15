@@ -1,0 +1,14 @@
+# Upload only frontend source and the tracked exports its public symlinks use.
+/*
+!vercel.json
+!web
+!app
+app/*
+!app/data
+!app/assets
+app/assets/*
+!app/assets/land.geojson
+web/node_modules
+web/dist
+web/.vercel
+web/.env*

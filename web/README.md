@@ -4,11 +4,11 @@ A second front end for the Earth–Moon terrain atlas, written in TypeScript and
 
 ## Run
 
-Node.js 20 or later.
+Node.js 24 (the CI and Vercel runtime).
 
 ```console
 cd web
-npm install
+npm ci
 npm run dev        # http://127.0.0.1:5173/
 npm run build      # type check and production build into web/dist (data copied in)
 npm run preview
@@ -20,15 +20,21 @@ The build uses relative paths and hash routes (`#/explore?site=N82W026-01&target
 
 Live app: https://zodiak-atlas.vercel.app/ (Vercel project `zodiak-atlas`, workspace `put-hack`).
 
-The production deployment is a static build from the committed repository. Deploy only `web/dist`, not the source tree; Vite copies the linked atlas export and static assets into it. Current publishing is via CLI, not an automatic Git integration:
+The production deployment builds the committed source from the **repository root**, so the public symlinks can resolve the tracked `app/data` export and land outlines. Root `vercel.json` installs the locked frontend dependencies, runs tests, type-checks and builds, then checks every packaged public asset and terrain grid. `.vercelignore` limits CLI uploads to the frontend and its tracked inputs. Only `web/dist` is published.
 
 ```console
-npm run build --prefix web
-node --test web/tests/discovery.test.mjs
-npx vercel deploy web/dist --project zodiak-atlas --scope put-hack --prod --yes
+npm ci --prefix web
+npm run ci --prefix web
+npx vercel deploy . --project zodiak-atlas --scope put-hack --prod --yes --build-env RELEASE_COMMIT="$(git rev-parse HEAD)"
 ```
 
 The custom hash routes need no server rewrites. Live satellite imagery and terrain tiles require their upstream services; locally packaged data and textures are served by Vercel.
+
+### Continuous integration
+
+`.github/workflows/web-ci.yml` runs on pushes and pull requests to `main`, and manually through GitHub Actions. It uses Node.js 24, `npm ci`, mission-state and packaging regression tests, TypeScript checking, the Vite build and packaged-asset validation. The successful build is saved as a `zodiak-web-<commit>` artifact for seven days. `version.json` in the output identifies the exact build commit and validated asset/grid counts. The existing Python pipeline workflow remains separate.
+
+Publishing currently uses the authenticated Vercel CLI. Native Git deployment is **not connected**: on 15 Nov 2026 Vercel rejected the connection to `BartoszPreus/NASA` because repository access could not be established. A Vercel/GitHub owner must grant that integration access before automatic deployments can be enabled. CI itself needs no Vercel token or repository secrets.
 
 ## Pages
 
@@ -41,6 +47,8 @@ The custom hash routes need no server rewrites. Live satellite imagery and terra
 - **Sources**: the 46 data sources with licences, and the software credits.
 
 ## Credits
+
+- Build automation: GitHub Actions [checkout](https://github.com/actions/checkout), [setup-node](https://github.com/actions/setup-node), and [upload-artifact](https://github.com/actions/upload-artifact) (MIT); [Vercel CLI](https://github.com/vercel/vercel) (Apache-2.0) and [project configuration documentation](https://vercel.com/docs/project-configuration).
 
 - Data: see `data/sources.csv` and the Sources page.
 - React and React DOM (MIT), Vite (MIT), TypeScript (Apache-2.0), three.js (MIT), React Three Fiber (MIT).

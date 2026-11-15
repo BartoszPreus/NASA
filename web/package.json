@@ -9,7 +9,10 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "check:build": "node scripts/check-build.mjs",
+    "ci": "npm test && npm run build && npm run check:build"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
