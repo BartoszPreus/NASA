@@ -24,3 +24,9 @@ validate-effectiveness,python.exe validation/effectiveness.py all,2026-11-15 01:
 catalog,python.exe -m pipeline.catalog,2026-11-15 01:12:20,1.4,0,533c2ee,data/raw/run_logs/catalog_20261115_011220.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 01:26:59,1.2,0,7118bb2,data/raw/run_logs/catalog_20261115_012659.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 01:27:26,1.2,0,7118bb2,data/raw/run_logs/catalog_20261115_012726.log
+partner-context,python.exe -m pipeline.partner_context,2026-11-15 02:18:38,159.7,0,d1d554f,data/raw/run_logs/partner-context_20261115_021838.log
+sites,python.exe -m pipeline.sites,2026-11-15 02:21:18,73.4,0,d1d554f,data/raw/run_logs/sites_20261115_022118.log
+catalog,python.exe -m pipeline.catalog,2026-11-15 02:22:31,1.0,0,d1d554f,data/raw/run_logs/catalog_20261115_022231.log
+partner-context,python.exe -m pipeline.partner_context,2026-11-15 02:25:40,14.0,0,d1d554f,data/raw/run_logs/partner-context_20261115_022540.log
+sites,python.exe -m pipeline.sites,2026-11-15 02:25:54,32.4,0,d1d554f,data/raw/run_logs/sites_20261115_022554.log
+catalog,python.exe -m pipeline.catalog,2026-11-15 02:26:26,1.0,0,d1d554f,data/raw/run_logs/catalog_20261115_022626.log
