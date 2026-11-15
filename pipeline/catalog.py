@@ -376,6 +376,14 @@ FILE_MAP = [
     ("data/validation/effectiveness.json", "python validation/effectiveness.py all",
      "data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, copernicus_dem, "
      "esa_worldcover, pgda90_lola_20m", "known analog tile recovery, negative controls, ablation, stability"),
+    ("data/validation/rank_uncertainty.json", "python validation/rank_uncertainty.py (job J32)",
+     "data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, "
+     "data/moon/reference.json, data/sites/ranking.csv", "rank intervals of the top sites: lunar reference "
+     "bootstrap, NASADEM variant, one feature group left out; the scale the similarity refers to"),
+    ("data/sites/rank_uncertainty.csv", "python validation/rank_uncertainty.py (job J32)",
+     "data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, "
+     "data/moon/reference.json, data/sites/ranking.csv", "per top-100 site: bootstrap rank p05 / median / p95, "
+     "share of runs in the top 30, rank in the NASADEM and leave-one-feature-group-out variants"),
     ("data/validation/enrichment.json", "python validation/enrichment.py (after python -m pipeline.sites)",
      "data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv",
      "enrichment of lunar-like terrain around known analog sites"),

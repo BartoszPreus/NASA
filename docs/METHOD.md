@@ -19,6 +19,16 @@ Written with SI assistance (Claude Code).
 | 9 | **Where each analogy breaks.** Per site: climate, a satellite image, measured day and night surface temperature, soil moisture, permafrost. Per lunar region: temperature and depth to stable ice, radar, neutron counts, illumination. None of this enters the score. | NASA POWER (NASA), https://power.larc.nasa.gov/ ; NASA Worldview / GIBS (NASA), https://worldview.earthdata.nasa.gov/ ; LRO Diviner, Mini-RF, LEND, LAMP, LROC in the Planetary Data System (NASA), https://pds-geosciences.wustl.edu/missions/lro/diviner.htm ; MODIS MOD11C1 (NASA); GCOM-C SGLI and GCOM-W AMSR2, JAXA G-Portal products (JAXA), https://gportal.jaxa.jp/ ; ESA CCI Permafrost from the ESA Open Science Catalog (ESA), https://opensciencedata.esa.int/ |
 | 10 | **Validation and review.** Known analog sites against random circles; negative controls; laser profiles; lidar close-ups of craters; a person-readable review of the top 30; a literature check of the top sites. | 75 known analog sites with a source each (`data/reference/known_analogs.csv`); ICESat-2 ATL06 (NASA) through SlideRule, found with NASA Earthdata, https://search.earthdata.nasa.gov/ ; USGS 3DEP lidar (USGS); GUGiK terrain model (Poland) |
 
+**The scale of the similarity (step 3).** Similarity refers to the shape of the terrain inside cells of about
+2 km: slopes over 240 m and 570 m baselines, roughness over 200 m to 1.6 km windows, and the share and depth of
+closed depressions deeper than 3 m (`SLOPE_BASELINES_M`, `ROUGH_WINDOWS_M`, `DEP_MIN_DEPTH_M` in
+`pipeline/features.py`). Features smaller than about 100 m, including boulders, small craters and the slopes a
+rover or astronaut meets, are not measured, so a high rank says nothing about trafficability at the scale of
+metres. The rank depends on the feature groups together: leaving roughness out keeps 8 of the top 30 sites,
+leaving slopes out 13, leaving depressions out 21; resampling the lunar reference cells moves the top 10 by at
+most 3 places (`data/validation/rank_uncertainty.json`, `variants.*.top30_kept`,
+`bootstrap.top10_interval_width_max`; job J32).
+
 ## Two decisions and how they were made
 
 **Which elevation model feeds the ranking.** The rule was written before the numbers existed

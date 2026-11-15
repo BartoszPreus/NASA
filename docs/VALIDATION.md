@@ -61,3 +61,18 @@ Files below are under [`data/validation/`](../data/validation/). Data and licens
 | Enrichment / laser | `enrichment.json` · `n_sites_tested`, `sites_with_enrichment_above_1`, `median_enrichment`, `random.median_enrichment_median`, `random.median_enrichment_p05_p95`, `random.share_of_random_runs_with_median_at_least_ours`, `mars_only_excluded` (reference only); `icesat2.json` · `sites.*.ratios.laser240_over_grid240` (range and median) |
 | Controls, recovery and stability | `effectiveness.json` · `controls`, `recovery`, `stability.named_regions_spearman`, `stability.legacy_grid`, `scan.land_cover_limit` |
 | Moss and lichen sensitivity (J33) | `landcover_sensitivity.json` · `n_tiles_read`, `cells`, `cells_bare_mismatch`, `top30.{pass_strict_median,pass_strict_cells,median_bare_minus_bare_strict}`, `top100.{...,n_sites_with_modis,pass_modis_median}`, `per_region.<region>.{top30,top100}`; per site `landcover_sensitivity/sites_top100.csv` (N82W031-01: `n_cells`, `strict_kept_cells`, `strict_largest_group`) |
+
+## Rank uncertainty per site (J32)
+
+How far the rank of each of the top 100 sites moves when its inputs change (`validation/rank_uncertainty.py`, `python -m pipeline.run rank-uncertainty`). Per-site values: [`data/sites/rank_uncertainty.csv`](../data/sites/rank_uncertainty.csv); summary: `data/validation/rank_uncertainty.json`; figure: [top 30 with their intervals](figures/rank_uncertainty.png). A site's rank in a variant is the rank of the variant's site that holds most of its cells; a site with no candidate cell left gets the last rank plus one.
+
+| Variant (what changes) | Published top 10 still in top 10 | Published top 30 still in top 30 | Key in `rank_uncertainty.json` |
+|---|---|---|---|
+| Lunar reference bootstrap: the 1,575 lunar cells resampled 200 times, seed 20261115 | 5-95% rank interval at most **3** places wide (median **2.5**) | **29** of 30 in the top 30 in at least half of the runs, **25** in at least 90%; median run keeps **28** | `bootstrap.top10_interval_width_max`, `bootstrap.top10_interval_width_median`, `bootstrap.top30_sites_in_top30_in_at_least_half_of_runs`, `bootstrap.top30_sites_in_top30_in_at_least_90pct_of_runs`, `bootstrap.top30_kept_per_run_median` |
+| Control: reference rebuilt from all lunar cells, no resampling | **10** | **29** | `variants.control.top10_kept`, `variants.control.top30_kept` |
+| NASADEM + MODIS where NASADEM exists (56 S-60 N) | **9** | **28**; only **2** of the top 30 lie in NASADEM tiles, and neither stays (rank 8, Chile, has no candidate cell; Mauna Loa goes from 24 to 57) | `variants.nasadem.top10_kept`, `variants.nasadem.top30_kept`, `variants.nasadem.top30_in_nasadem_tiles`, `variants.nasadem.top30_kept_of_nasadem_tiles` |
+| Slopes left out (s240, s570) | **3** | **13** | `variants.no_slopes.top10_kept`, `variants.no_slopes.top30_kept` |
+| Roughness left out (r200-r1600) | **3** | **8** | `variants.no_roughness.top10_kept`, `variants.no_roughness.top30_kept` |
+| Depressions left out (dep_frac, dep_depth) | **6** | **21** | `variants.no_depressions.top10_kept`, `variants.no_depressions.top30_kept` |
+
+The rank is robust to the size of the lunar sample: the bootstrap moves the top 10 by a few places. It is not robust to which features are used: without roughness only 8 of the top 30 stay, so the ranking is a statement about the eight features together, not about any one of them. The NASADEM row tests almost nothing at the top, because 28 of the top 30 sites lie north of 60 N where only Copernicus exists. The grid-shift variant was not repeated per site: it needs the elevation tiles, which are not in git; the historical pilot result is in `effectiveness.json` `stability.legacy_grid`.

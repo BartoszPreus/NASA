@@ -1,0 +1,367 @@
+{
+  "job": "J32 rank uncertainty",
+  "script": "validation/rank_uncertainty.py",
+  "configuration": {
+    "target": "base_regions",
+    "dem_policy": "copdem",
+    "cells": "22 file(s): known.parquet, pilot.parquet, scan_s00of20.parquet, scan_s01of20.parquet, scan_s02of20.parquet, scan_s03of20.parquet, scan_s04of20.parquet, scan_s05of20.parquet, scan_s06of20.parquet, scan_s07of20.parquet, scan_s08of20.parquet, scan_s09of20.parquet, scan_s10of20.parquet, scan_s11of20.parquet, scan_s12of20.parquet, scan_s13of20.parquet, scan_s14of20.parquet, scan_s15of20.parquet, scan_s16of20.parquet, scan_s17of20.parquet, scan_s18of20.parquet, scan_s19of20.parquet; dem policy copdem",
+    "n_bare_cells": 1213569,
+    "n_lunar_cells": 1575,
+    "n_lunar_cells_finite": 1575,
+    "n_bootstrap": 200,
+    "seed": 20261115,
+    "top": 100,
+    "ranking_key": "best_window_km2",
+    "absent_rank_rule": "a site with no candidate cell in a run gets rank n_sites_of_run + 1",
+    "match_rule": "rank of the run's site holding most of the published site's cells, ties to the better rank",
+    "not_done": "grid shift per site: needs the elevation tiles (data/raw/, not in git); the historical pilot result stays in effectiveness.json stability.legacy_grid"
+  },
+  "n_sites_published": 3175,
+  "bootstrap": {
+    "n_sites_p05_p50_p95": [
+      2379.25,
+      3051.5,
+      3729.3999999999996
+    ],
+    "top10": [
+      {
+        "rank": 1,
+        "site_id": "N82W026-01",
+        "rank_p05": 1.0,
+        "rank_median": 1.0,
+        "rank_p95": 2.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 2,
+        "site_id": "N69E093-01",
+        "rank_p05": 1.0,
+        "rank_median": 2.0,
+        "rank_p95": 3.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 3,
+        "site_id": "N82W028-01",
+        "rank_p05": 3.0,
+        "rank_median": 3.0,
+        "rank_p95": 4.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 4,
+        "site_id": "N82W027-01",
+        "rank_p05": 1.0,
+        "rank_median": 4.0,
+        "rank_p95": 4.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 5,
+        "site_id": "N68E093-01",
+        "rank_p05": 5.0,
+        "rank_median": 5.0,
+        "rank_p95": 6.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 6,
+        "site_id": "N68E095-01",
+        "rank_p05": 5.0,
+        "rank_median": 6.0,
+        "rank_p95": 7.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 7,
+        "site_id": "N69E093-02",
+        "rank_p05": 6.0,
+        "rank_median": 7.0,
+        "rank_p95": 9.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 8,
+        "site_id": "S21W070-01",
+        "rank_p05": 7.0,
+        "rank_median": 8.0,
+        "rank_p95": 10.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 9,
+        "site_id": "N68E094-01",
+        "rank_p05": 8.0,
+        "rank_median": 10.0,
+        "rank_p95": 11.0,
+        "top30_share": 1.0
+      },
+      {
+        "rank": 10,
+        "site_id": "N68E093-02",
+        "rank_p05": 9.0,
+        "rank_median": 10.0,
+        "rank_p95": 12.0,
+        "top30_share": 1.0
+      }
+    ],
+    "top10_interval_width_median": 2.5,
+    "top10_interval_width_max": 3.0,
+    "top30_interval_width_median": 4.0,
+    "top100_interval_width_median": 16.0,
+    "top30_sites_in_top30_in_at_least_half_of_runs": 29,
+    "top30_sites_in_top30_in_at_least_90pct_of_runs": 25,
+    "top30_kept_per_run_median": 28.0,
+    "top30_kept_per_run_p05_p95": [
+      26.0,
+      29.0
+    ]
+  },
+  "variants": {
+    "control": {
+      "n_sites": 3113,
+      "top30_kept": 29,
+      "top30_kept_sites": [
+        "N82W026-01",
+        "N69E093-01",
+        "N82W028-01",
+        "N82W027-01",
+        "N68E093-01",
+        "N68E095-01",
+        "N69E093-02",
+        "S21W070-01",
+        "N68E094-01",
+        "N68E093-02",
+        "N82W031-01",
+        "N65W172-01",
+        "N68E094-02",
+        "N62W074-01",
+        "N68E094-03",
+        "N69E092-01",
+        "N82W029-01",
+        "N81W072-01",
+        "N69E092-02",
+        "N68E093-03",
+        "N69E094-01",
+        "N71W078-01",
+        "N69E096-01",
+        "N19W156-01",
+        "N69E093-03",
+        "N68E093-04",
+        "N67E093-01",
+        "N71W077-01",
+        "N61W074-01"
+      ],
+      "top30_absent": 0,
+      "top10_kept": 10,
+      "top100_median_abs_rank_change": 0.5,
+      "rank_of_published_top10": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    "no_slopes": {
+      "n_sites": 9812,
+      "top30_kept": 13,
+      "top30_kept_sites": [
+        "N82W026-01",
+        "N69E093-01",
+        "N82W028-01",
+        "N82W027-01",
+        "N68E093-01",
+        "N69E093-02",
+        "N82W031-01",
+        "N62W074-01",
+        "N69E092-01",
+        "N82W029-01",
+        "N69E092-02",
+        "N71W077-01",
+        "N61W074-01"
+      ],
+      "top30_absent": 0,
+      "top10_kept": 3,
+      "top100_median_abs_rank_change": 41.5,
+      "rank_of_published_top10": [
+        1,
+        6,
+        3,
+        14,
+        18,
+        88,
+        30,
+        49,
+        43,
+        42
+      ],
+      "features_used": [
+        "r200",
+        "r400",
+        "r800",
+        "r1600",
+        "dep_frac",
+        "dep_depth"
+      ]
+    },
+    "no_roughness": {
+      "n_sites": 12279,
+      "top30_kept": 8,
+      "top30_kept_sites": [
+        "N82W026-01",
+        "N82W028-01",
+        "N82W027-01",
+        "N82W031-01",
+        "N69E092-01",
+        "N82W029-01",
+        "N69E092-02",
+        "N19W156-01"
+      ],
+      "top30_absent": 0,
+      "top10_kept": 3,
+      "top100_median_abs_rank_change": 166.0,
+      "rank_of_published_top10": [
+        8,
+        51,
+        3,
+        9,
+        167,
+        104,
+        210,
+        3333,
+        224,
+        153
+      ],
+      "features_used": [
+        "s240",
+        "s570",
+        "dep_frac",
+        "dep_depth"
+      ]
+    },
+    "no_depressions": {
+      "n_sites": 6399,
+      "top30_kept": 21,
+      "top30_kept_sites": [
+        "N82W026-01",
+        "N69E093-01",
+        "N82W028-01",
+        "N82W027-01",
+        "N68E093-01",
+        "N68E095-01",
+        "N69E093-02",
+        "N68E094-01",
+        "N68E093-02",
+        "N82W031-01",
+        "N65W172-01",
+        "N68E094-02",
+        "N62W074-01",
+        "N68E094-03",
+        "N69E092-01",
+        "N81W072-01",
+        "N69E092-02",
+        "N68E093-03",
+        "N71W078-01",
+        "N71W077-01",
+        "N61W074-01"
+      ],
+      "top30_absent": 0,
+      "top10_kept": 6,
+      "top100_median_abs_rank_change": 34.5,
+      "rank_of_published_top10": [
+        1,
+        5,
+        3,
+        2,
+        7,
+        9,
+        26,
+        59,
+        13,
+        18
+      ],
+      "features_used": [
+        "s240",
+        "s570",
+        "r200",
+        "r400",
+        "r800",
+        "r1600"
+      ]
+    },
+    "nasadem": {
+      "n_sites": 1806,
+      "top30_kept": 28,
+      "top30_kept_sites": [
+        "N82W026-01",
+        "N69E093-01",
+        "N82W028-01",
+        "N82W027-01",
+        "N68E093-01",
+        "N68E095-01",
+        "N69E093-02",
+        "N68E094-01",
+        "N68E093-02",
+        "N82W031-01",
+        "N65W172-01",
+        "N68E094-02",
+        "N62W074-01",
+        "N68E094-03",
+        "N69E092-01",
+        "N82W029-01",
+        "N81W072-01",
+        "N69E092-02",
+        "N68E093-03",
+        "N69E094-01",
+        "N71W078-01",
+        "N69E096-01",
+        "N69E093-03",
+        "N68E093-04",
+        "N67E066-01",
+        "N67E093-01",
+        "N71W077-01",
+        "N61W074-01"
+      ],
+      "top30_absent": 1,
+      "top10_kept": 9,
+      "top100_median_abs_rank_change": 4.0,
+      "rank_of_published_top10": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        1807,
+        8,
+        9
+      ],
+      "top30_in_nasadem_tiles": 2,
+      "top30_kept_of_nasadem_tiles": 0,
+      "top100_in_nasadem_tiles": 13,
+      "cells": "22 file(s): known.parquet, pilot.parquet, scan_s00of20.parquet, scan_s01of20.parquet, scan_s02of20.parquet, scan_s03of20.parquet, scan_s04of20.parquet, scan_s05of20.parquet, scan_s06of20.parquet, scan_s07of20.parquet, scan_s08of20.parquet, scan_s09of20.parquet, scan_s10of20.parquet, scan_s11of20.parquet, scan_s12of20.parquet, scan_s13of20.parquet, scan_s14of20.parquet, scan_s15of20.parquet, scan_s16of20.parquet, scan_s17of20.parquet, scan_s18of20.parquet, scan_s19of20.parquet; 10 NASADEM file(s), 618 tiles taken from them; dem policy nasa-first"
+    }
+  },
+  "scale": {
+    "slope_baselines_m": [
+      240,
+      570
+    ],
+    "roughness_windows_m": [
+      200,
+      400,
+      800,
+      1600
+    ],
+    "cell_m_median": 1979.0,
+    "statement": "Similarity refers to the shape of the terrain inside cells of about 2 km: slopes over 240 m and 570 m baselines, roughness over 200 m to 1.6 km windows, and the share and depth of closed depressions deeper than 3 m. Features smaller than about 100 m, including boulders, small craters and the slopes a rover or astronaut meets, are not measured."
+  },
+  "seconds": 226.8
+}

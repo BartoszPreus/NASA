@@ -21,6 +21,8 @@ Zodiak maps Earth terrain that resembles candidate lunar south-pole base regions
 9. Attach imagery, climate and surface conditions for context alongside the lunar instrument products.
 10. Compare with control tiles, known analogs, independent laser profiles and lidar. Review the leading regions against imagery and literature.
 
+Similarity refers to terrain shape between about 200 m and 1.6 km inside 2 km cells; features smaller than about 100 m, including boulders and the slopes a rover or astronaut meets, are not measured ([rank uncertainty per site](data/sites/rank_uncertainty.csv)).
+
 [Full method and decision rules](docs/METHOD.md) · [Literature review and human checks](docs/NOVELTY.md)
 
 ## Run from the repository root
