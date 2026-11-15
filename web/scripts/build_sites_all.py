@@ -77,8 +77,8 @@ def build(run: str, geojson: Path, ranking: Path) -> tuple[int, int]:
 
     doc = {
         "run": run,
-        "source": str(geojson.relative_to(ROOT)),
-        "ranking": str(ranking.relative_to(ROOT)),
+        "source": geojson.relative_to(ROOT).as_posix(),
+        "ranking": ranking.relative_to(ROOT).as_posix(),
         "n": len(records),
         "n_flagged": sum(r["dune_like"] for r in records),
         "breaks": breaks,
