@@ -27,6 +27,7 @@ EXPORT_INPUTS = (
     "data/sites/nasa_context_summary.json", "data/sites/partner_context_summary.json",
     "data/sites/target_comparison.csv", "data/sites/target_comparison_top_tiles.csv",
     "data/run_log.csv", "data/catalog.csv", "data/moon/regions.geojson", "data/moon/instruments/registry.json",
+    "data/sites/radar_context.csv", "data/sites/radar_context_summary.json",   # J34 (issue #20), radar.json
 )
 EXPORT_PATTERNS = (
     "data/validation/*.json", "data/moon/instruments/*/*.png", "docs/figures/*.png",

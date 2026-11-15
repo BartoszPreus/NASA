@@ -46,6 +46,8 @@ certificate chain, see point 3 below). Their committed CSVs feed steps 10 and 12
 
 **Changes after the second run (independent review, 15 Nov ~09:00):** 43d8ee1 (NOVELTY.md / j35.md text, no verdict changed), 3de2d53 (`pipeline/catalog.py` licence text of `worldview_gibs` and `nasa_power`, README source rows; `pipeline.run catalog` rerun), c385491 (`app/build_data.py`: markdown links in the METHOD.md sections exported as plain text, so `method_sections.json` changes besides `meta.json`). `python -m pytest tests -q`: 81 passed; `python app/build_data.py` exit 0, 24.82 MB; no ranking, validation or site value changed.
 
+**J34 Sentinel-1 context after the second run (issue #20, 15 Nov ~09:10):** 9d0a1c9 (new `pipeline/radar_context.py`, stage `radar-context`, `data/sites/radar_context.csv` and `_summary.json`, source rows `ebd_s1_seasonal` and `pc_sentinel1_rtc`, `docs/sources/j34.md`, VALIDATION and NUMBERS rows) and the commit that adds this line (`app/build_data.py` gains the additive `radar.json · sentinel1` key, `SCHEMA.md` rows, the two new inputs in `tests/test_pipeline_integration.py`). `python -m pipeline.run radar-context catalog` exit 0. `python app/build_data.py` exit 0 at 24.86 MB. `python -m pytest tests -q`: 87 passed. No existing column, ranking, score or validation value changed.
+
 ## Reproduction (first run)
 
 New `git clone` of `main` into an empty folder outside the working checkout (under the system temporary

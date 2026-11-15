@@ -26,7 +26,7 @@
 | `validation/*.json` | the validation files | `data/validation/` |
 | `known_analogs.json` | 77 known analog sites | `data/reference/known_analogs.csv` |
 | `novelty.json` | 44 literature-check rows | `data/sites/novelty_check.csv` |
-| `radar.json` | 37 RADARSAT-1 rows | `data/sites/radarsat1_index.csv`, `data/sites/radarsat1/*.png` |
+| `radar.json` | 37 RADARSAT-1 rows; `sentinel1`: 88 Sentinel-1 rows (J34) | `data/sites/radarsat1_index.csv`, `data/sites/radarsat1/*.png`, `data/sites/radar_context.csv`, `data/sites/radar_context_summary.json` |
 | `target_comparison.json` | 9 targets, 225 top tiles | `data/sites/target_comparison*.csv` |
 | `surface.json` | surface summaries, partner checks, cold-and-dry shortlist | `data/sites/*_summary.json`, `partner_checks.json` |
 | `method.json`, `method_sections.json` | ten steps; Two decisions, What the validation says, Limits | `docs/METHOD.md` |
@@ -512,6 +512,28 @@ All 37 rows of `data/sites/radarsat1_index.csv`; quicklooks copied to `img/radar
 | `rows.[].image` | string or null | file name in `img/` | radarsat1_index.csv · image | `"radarsat1_N82W026-01.png"` |  |
 | `rows.[].image_file` | string or null |  | radarsat1_index.csv · image | `"data/sites/radarsat1/N82W026-01.png"` | repository path |
 | `rows.[].rejected` | string or null |  | radarsat1_index.csv · rejected | `"RS1_X0591913_F1_20081229_094823_HH_SGF.tif: Only 80.5% usable pixe..."` |  |
+| `sentinel1.caveat` | string |  | radar_context_summary.json · caveat | `"Sentinel-1 C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio. ..."` | J34 (#20); show it wherever the values are shown |
+| `sentinel1.credit` | string |  | radar_context_summary.json · credit | `"Global Seasonal Sentinel-1 ... CC BY 4.0. Contains modified Copernicus Sentinel data."` |  |
+| `sentinel1.data_period` | string |  | radar_context_summary.json · data_period | `"1 Dec 2019 - 30 Nov 2020 (seasonal means)"` |  |
+| `sentinel1.method` | string |  | radar_context_summary.json · method | `"median gamma0 in dB inside the site polygon ..."` |  |
+| `sentinel1.n` | integer | rows | radar_context.csv | `88` | one row per site and group |
+| `sentinel1.n_with_value` | object | sites | radar_context_summary.json · groups.*.n_with_value | `{"default_top30": 11, "strict_top30": 26, "known": 28, ...}` |  |
+| `sentinel1.comparison_vv_vh.default_top30_arctic.median_cross_pol_db` | number | dB | radar_context_summary.json · comparison_vv_vh | `-18.2` | VV+VH only |
+| `sentinel1.comparison_vv_vh.strict_top30_non_arctic.p_cross_pol_db` | number |  | radar_context_summary.json · comparison_vv_vh | `0.00069` | two-sided Mann-Whitney U, indicative |
+| `sentinel1.source_row.licence_or_citation` | string |  | data/sources.csv · ebd_s1_seasonal | `"CC BY 4.0, 'Contains modified Copernicus Sentinel data.' ..."` |  |
+| `sentinel1.rows.[].site_id` | string |  | radar_context.csv · site_id | `"N65W172-01"` |  |
+| `sentinel1.rows.[].group` | string | default_top30, strict_top30, known | radar_context.csv · group | `"default_top30"` |  |
+| `sentinel1.rows.[].rank` | integer or null |  | radar_context.csv · rank | `12` | rank in the group's ranking; null for known sites outside the default ranking |
+| `sentinel1.rows.[].arctic` | boolean |  | radar_context.csv · arctic | `true` | abs(lat) >= 60 |
+| `sentinel1.rows.[].season` | string |  | radar_context.csv · season | `"JJA 2020"` | DJF 2019-20 south of the equator |
+| `sentinel1.rows.[].pol_pair` | string or null | VV+VH, HH+HV | radar_context.csv · pol_pair | `"VV+VH"` | do not compare across pairs |
+| `sentinel1.rows.[].co_pol_db` | number or null | dB | radar_context.csv · co_pol_db | `-7.6` | median gamma0 |
+| `sentinel1.rows.[].cross_pol_db` | number or null | dB | radar_context.csv · cross_pol_db | `-16.62` | median gamma0 |
+| `sentinel1.rows.[].cross_co_ratio_db` | number or null | dB | radar_context.csv · cross_co_ratio_db | `-8.87` | median of per-pixel ratio |
+| `sentinel1.rows.[].valid_share` | number or null | fraction | radar_context.csv · valid_share | `1.0` | share of polygon pixels used |
+| `sentinel1.rows.[].local_incidence_median_deg` | number or null | degrees | radar_context.csv · local_incidence_median_deg | `38.0` | over all relative orbits |
+| `sentinel1.rows.[].status` | string | ok, no_data, no_season, error | radar_context.csv · status | `"ok"` |  |
+| `sentinel1.rows.[].reason` | string or null |  | radar_context.csv · reason | `"no JJA 2020 (summer) backscatter pair ..."` | why a value is empty |
 
 ### Target comparison (`target_comparison.json`)
 

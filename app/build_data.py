@@ -989,7 +989,25 @@ def radar_data(rows, sources):
             "caveat": "Uncalibrated C-band HH digital numbers; not comparable with Mini-RF values. 'date' is "
                       "parsed from the file name; use ceos_acquisition_time for timing (docs/sources/j27.md).",
             "source_rows": {"csa_radarsat1": rs1, "csa_rcm": rcm},
-            "rows": rows}
+            "rows": rows, "sentinel1": sentinel1_data(sources)}
+
+
+S1_NUMERIC = ("lat", "lon", "co_pol_db", "cross_pol_db", "cross_co_ratio_db", "valid_share", "layover_shadow_share",
+              "local_incidence_median_deg")
+S1_INT = ("rank", "n_pixels", "n_orbits")
+
+
+def sentinel1_data(sources):
+    """J34 (issue #20): Sentinel-1 seasonal backscatter per site, additive to radar.json."""
+    summary = read_json("data/sites/radar_context_summary.json")
+    rows = typed_rows(read_csv("data/sites/radar_context.csv"), S1_NUMERIC, S1_INT, booleans=("arctic",))
+    src = next((row for row in sources if row["source_id"] == "ebd_s1_seasonal"), None)
+    return {"source_file": "data/sites/radar_context.csv", "summary_file": "data/sites/radar_context_summary.json",
+            "n": len(rows), "caveat": summary["caveat"], "credit": summary["credit"],
+            "data_period": summary["data_period"], "method": summary["method"],
+            "comparison_vv_vh": summary["comparison_vv_vh"],
+            "n_with_value": {g: b["n_with_value"] for g, b in summary["groups"].items()},
+            "source_row": src, "rows": rows}
 
 
 def run_log_data():
