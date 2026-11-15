@@ -590,7 +590,7 @@
  "failures": {},
  "caveats": [
   "ATL06 heights are 40 m segment fits posted every 20 m, not single laser spots as in Rosenburg et al. 2011; the 60 m slope is smoothed over 40 m windows and uses 60 m instead of 57 m.",
-  "The laser samples a 20 x 20 km box around the site centre; the grid slopes in the ranking are medians over the site polygon. Footprints differ.",
+  "The laser samples a 10 x 10 km box around the site centre; the grid slopes in the ranking are medians over the site polygon. Footprints differ.",
   "Grid slopes pool both grid directions; laser slopes are along the ground-track azimuth (near north-south at these latitudes), so anisotropic terrain can bias the ratio either way.",
   "ATL06 is a land-ice product; its surface finding over rough or vegetated land can drop segments, and no ground/canopy separation is applied (the sites are bare ground per ESA WorldCover).",
   "PGDA 70 at 16 px/deg south of 85 S is a coarse cylindrical grid; cells are weighted by cos(latitude).",

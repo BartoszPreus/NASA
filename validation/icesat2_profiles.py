@@ -23,7 +23,7 @@ Method notes (deviations from Rosenburg et al. 2011):
 - Tracks are separated per (reference ground track, cycle, spot); strong beams only
   (spots 1, 3, 5), segments with atl06_quality_summary == 0 only.
 - Medians are pooled over all tracks of a site (Rosenburg compute medians per map
-  cell; we compute one median per ~20 x 20 km site box).
+  cell; we compute one median per 10 x 10 km site box, HALF_KM = 5).
 - The ATL03-based on-demand fit (`atl03x` + `fit`, 20 m segments) was tried first; on
   the public cluster it returned "Failed to send data ... invalid dataframe" alerts and
   did not finish within ~10 min per site, so the standard ATL06 product is used.
@@ -421,7 +421,7 @@ def main():
         "caveats": [
             "ATL06 heights are 40 m segment fits posted every 20 m, not single laser spots as in Rosenburg et al. "
             "2011; the 60 m slope is smoothed over 40 m windows and uses 60 m instead of 57 m.",
-            "The laser samples a 20 x 20 km box around the site centre; the grid slopes in the ranking are "
+            "The laser samples a 10 x 10 km box around the site centre; the grid slopes in the ranking are "
             "medians over the site polygon. Footprints differ.",
             "Grid slopes pool both grid directions; laser slopes are along the ground-track azimuth (near "
             "north-south at these latitudes), so anisotropic terrain can bias the ratio either way.",

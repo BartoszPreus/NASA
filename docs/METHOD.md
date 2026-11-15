@@ -64,7 +64,8 @@ replaces total area because total area rewarded sheer size: with it, sand seas h
   share of lunar-like ground. At one-degree tile scale, the corrected recovery
   AUC of 0.531 was consistent with chance. [Validation](VALIDATION.md)
 - Laser profiles of ICESat-2 over eight sites give 0.43 to 1.16 times the grid slope at 240 m (median 0.87);
-  the three lowest are lava fields, and the laser samples a 20 km box, not the site outline.
+  the three lowest are lava fields, and the laser samples a 10 x 10 km box around the site centre (`HALF_KM` = 5 in
+  `validation/icesat2_profiles.py`; `data/validation/icesat2.json`, `request.aoi`), not the site outline.
 - The dune-field flag removes the sand seas from the top 50 and also flags part of Devon Island, a real analog.
 - A second elevation model (NASADEM, NASA) gives the same slopes and a different set of candidate cells: three
   quarters of its candidates are also candidates with Copernicus, but only 7% of the Copernicus candidates
