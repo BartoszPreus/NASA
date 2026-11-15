@@ -65,7 +65,7 @@ Elevation, slope and roughness are the site medians of `data/sites/ranking.csv`;
 ## 4. Conclusions
 
 1. **Nothing may be called a discovery.** Of the 28 unknown sites of the top 30, 24 are "not found in the analog catalogues and searches listed here" and 4 lie in regions that an opened page names as Mars analogs in general terms.
-2. **The top of the ranking is four Arctic regions and two known analog regions.** Putorana Plateau basalt tablelands (16 sites) and southern Peary Land polar desert (5 sites) dominate. Their slope and roughness statistics at 240 m to 1.6 km fall inside the range of the lunar south-pole candidate regions; their ground is partly tundra, and their coldest monthly night mean (235 K or more) is at least 94 K above the warmest lunar region (141 K).
+2. **The top of the ranking is seven Arctic regions and two known analog regions.** Putorana Plateau basalt tablelands (16 sites) and southern Peary Land polar desert (5 sites) dominate. Their slope and roughness statistics at 240 m to 1.6 km fall inside the range of the lunar south-pole candidate regions; their ground is partly tundra, and their coldest monthly night mean (235 K or more) is at least 94 K above the warmest lunar region (141 K).
 3. **Four sites have not been seen.** Ranks 14 and 30 (hazy) and 22 and 29 (cloudy) have no clear satellite image; their closed-depression share is 0.0, so no lakes or hollows are claimed for them.
 
 ## 5. Five sites a person must check
