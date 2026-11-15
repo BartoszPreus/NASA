@@ -8,11 +8,11 @@
  ],
  "table": [
   [
-   "Kafel (bez maski pokrycia terenu)",
-   "Tylko amplituda",
-   "+ koherencja gradientu",
-   "+ zamknięte zagłębienia",
-   "Wszystkie cechy"
+   "Tile (no land-cover mask)",
+   "Amplitude only",
+   "+ gradient coherence",
+   "+ closed depressions",
+   "All features"
   ],
   [
    "* Devon Island",
@@ -22,7 +22,7 @@
    "21%"
   ],
   [
-   "* Hawaje, Mauna Kea",
+   "* Hawaii, Mauna Kea",
    "31%",
    "30%",
    "24%",
@@ -43,14 +43,14 @@
    "15%"
   ],
   [
-   "* Antarktyda, Dry Valleys",
+   "* Antarctica, Dry Valleys",
    "16%",
    "14%",
    "13%",
    "13%"
   ],
   [
-   "Kunlun (płn. Tybet)",
+   "Kunlun (northern Tibet)",
    "24%",
    "23%",
    "8%",
@@ -78,21 +78,21 @@
    "1%"
   ],
   [
-   "Tatry/Podhale (kontrola)",
+   "Tatras/Podhale (control)",
    "8%",
    "8%",
    "3%",
    "3%"
   ],
   [
-   "Alpy (kontrola)",
+   "Alps (control)",
    "0%",
    "0%",
    "0%",
    "0%"
   ],
   [
-   "Wielkopolska (kontrola)",
+   "Wielkopolska (control)",
    "1%",
    "2%",
    "1%",
@@ -100,12 +100,12 @@
   ]
  ],
  "bullets": [
-  "<b>Zamknięte zagłębienia działają.</b> Na Księżycu zajmują średnio 1,8% powierzchni komórki, a 29% komórek ma ich ponad 1%. W kaflach Ziemi średnia wynosi zwykle 0,01–0,4%. Po dodaniu tej cechy pocięte kanionami płaskowyże Sahary (Tassili, Hoggar) spadają z 12–15% do 0–1%.",
-  "<b>Tassili n'Ajjer był fałszywym trafieniem.</b> W skanie pilotażowym wyglądał na najlepszego nowego kandydata; ma księżycową stromość, ale nie ma zagłębień.",
-  "<b>Tereny wulkaniczne i polarne zostają</b>: Mauna Kea, Lanzarote, Ellesmere i Dry Valleys tracą niewiele.",
-  "<b>Koherencja gradientu (anizotropia) nic nie wnosi</b>: wyniki z nią i bez niej różnią się o 0–3 punkty procentowe. Przegląd literatury zakładał, że pomoże; pomiar tego nie potwierdził.",
-  "<b>Nowy wzorzec jest ostrzejszy od pilotażowego</b>: przy bazach od 200 m i oknie 160 km wokół bieguna Alpy mają 0%, a Tatry 8% już dla samej amplitudy (w pilotażu 34% i 36%).",
-  "<b>Kontrola krzyżowa:</b> mediana nachylenia Księżyca z naszego kodu na siatce (5,11° przy 240 m; 4,96° przy 570 m) jest bliska wartościom z mapy PGDA 70 (4,89° przy 225 m; 4,67° przy 560 m), choć obszary nie są identyczne.",
-  "<b>Zastrzeżenia:</b> udział zagłębień ma rozkład z wieloma zerami, więc odległość Mahalanobisa jest dla niego przybliżeniem; próg głębokości 3 m i okno 2 km wybrano arbitralnie; dla Lanzarote, Teneryfy i Mauna Kea liczba komórek gołego gruntu jest mała (12–96); Wielkopolska i pustynia Lut mają ponad 2% zagłębień z innych przyczyn (oczka polodowcowe, formy pustynne)."
+  "<b>Closed depressions work.</b> On the Moon they cover on average 1.8% of the cell area, and 29% of cells have more than 1%. In the Earth tiles the mean is usually 0.01–0.4%. After adding this feature the canyon-cut plateaus of the Sahara (Tassili, Hoggar) drop from 12–15% to 0–1%.",
+  "<b>Tassili n'Ajjer was a false hit.</b> In the pilot scan it looked like the best new candidate; it has lunar steepness but no depressions.",
+  "<b>Volcanic and polar terrain remain</b>: Mauna Kea, Lanzarote, Ellesmere and the Dry Valleys lose little.",
+  "<b>Gradient coherence (anisotropy) adds nothing</b>: results with and without it differ by 0–3 percentage points. The literature review assumed it would help; the measurement did not confirm this.",
+  "<b>The new reference is sharper than the pilot one</b>: with baselines from 200 m and a 160 km window around the pole the Alps have 0% and the Tatras 8% already for amplitude alone (34% and 36% in the pilot).",
+  "<b>Cross-check:</b> the lunar median slope from our code on the grid (5.11° at 240 m; 4.96° at 570 m) is close to the values of the PGDA 70 map (4.89° at 225 m; 4.67° at 560 m), although the areas are not identical.",
+  "<b>Caveats:</b> the depression share has a distribution with many zeros, so the Mahalanobis distance is an approximation for it; the 3 m depth threshold and the 2 km window were chosen arbitrarily; for Lanzarote, Tenerife and Mauna Kea the number of bare-ground cells is small (12–96); Wielkopolska and the Lut desert have more than 2% depressions for other reasons (kettle ponds, desert landforms)."
  ]
 }
