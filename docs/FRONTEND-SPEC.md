@@ -252,7 +252,7 @@ numbers (each with `file · key` on hover, as `validation.json · items[].file`,
 | V11 Crater close-ups | `crater_profiles.json` (details in S16) | `docs/figures/crater_profile_overlay.png`, `docs/figures/morasko_1m_vs_30m.png` | - |
 | V12 Partner surface checks | `partner_checks.json · comparisons.dune_flag.*`, `comparisons.known_analog.*` (per latitude band: `group_a`, `group_b`, `rank_biserial`, `ci90`, `verdict`; `pooled_within_latitude`), `sample.sites` (978), `method` | `docs/figures/partner_checks.png` | the flag is not confirmed as dry sand (W-04) |
 | V13 What did not hold up | `docs/HANDOFF.md` section 9 "Does not hold up" | `docs/figures/eff_hidden_known.png` (first hidden-known test, "uninformative", replaced by enrichment) | - |
-| V14 Moss and lichen counted as bare (J33, top 100 only) | `landcover_sensitivity.json · groups`, `n_tiles_read` (67), `cells` (5,431), `cells_bare_mismatch` (0), `top30.pass_strict_cells` (8 of 30), `top30.pass_strict_median` (3), `top100.pass_strict_cells` (30 of 100), `top100.median_bare_minus_bare_strict` (0.93), `per_region.<region>.{top30,top100}` (10 regions), `cannot_show`; table `docs/VALIDATION.md` J33 section | none | no Putorana, Polar Urals or Chukotka site keeps a core; which sites would replace them is not measured (`cannot_show`) |
+| V14 Moss and lichen counted as bare (J33, top 100 only) | `landcover_sensitivity.json · groups`, `n_tiles_read` (66), `cells` (5,428), `cells_bare_mismatch` (0), `top30.pass_strict_cells` (8 of 30), `top30.pass_strict_median` (3), `top100.pass_strict_cells` (30 of 100), `top100.median_bare_minus_bare_strict` (0.94), `per_region.<region>.{top30,top100}` (10 regions), `cannot_show`; table `docs/VALIDATION.md` J33 section | none | no Putorana, Polar Urals or Chukotka site keeps a core; which sites would replace them is not measured (`cannot_show`) |
 
 ### S10 Literature check
 
@@ -542,7 +542,7 @@ are listed in 5.7 and are not counted.
 | `data/validation/icesat2.json` | 1 | S09 V10; S16 | yes |
 | `data/validation/landcover_sensitivity.json` | 1 | S09 V14; S02 tundra caption | yes |
 | `data/validation/landcover_sensitivity/sites_top100.csv` | 1 | S04.17 | yes |
-| `data/validation/landcover_sensitivity/cells_top100.parquet` | 1 | not shown: 5,431 single cells behind the site table | not shown |
+| `data/validation/landcover_sensitivity/cells_top100.parquet` | 1 | not shown: 5,428 single cells behind the site table | not shown |
 | `data/validation/nasadem_vs_copdem.json` | 1 | S09 V8 | yes |
 | `data/validation/partner_checks.json` | 1 | S09 V12; S14 | yes |
 | `data/validation/pds_lola.json` | 1 | S09 V2 | yes |

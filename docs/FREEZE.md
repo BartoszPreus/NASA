@@ -71,6 +71,8 @@ certificate chain, see point 3 below). Their committed CSVs feed steps 10 and 12
 
 **Not rerun, as in the second run:** the network stages (`context`, `partner-context`, the network parts of `strict-context`). For J43 NASA POWER was fetched once for the one new top-150 site (S25W071-01); the top-60 set (images, partner data) and the top-30 set (review, literature) did not change.
 
+**After the third run (J43 last gap, #30):** `python -m validation.landcover_sensitivity --top 100` rerun for the current top 100 (5.2 MB of WorldCover reads, 30 s), then `python -m validation.landcover_strict_ranking` to restore its `full_run` block (identical): N68E096-03 got its moss-and-lichen row and N82W066-01 left; the other 99 rows are identical except `rank`; changed keys `n_tiles_read` 67 -> 66, `cells` 5,431 -> 5,428, `top100.median_bare_minus_bare_strict` 0.93 -> 0.94, Putorana 37 -> 38 and Hazen 10 -> 9 top-100 sites; pass counts unchanged.
+
 ## Reproduction (first run)
 
 New `git clone` of `main` into an empty folder outside the working checkout (under the system temporary

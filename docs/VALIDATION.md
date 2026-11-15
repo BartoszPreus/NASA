@@ -83,27 +83,27 @@ The three default top-30 sites that keep their place are the Atacama site S21W07
 
 What the numbers say: the strict leaders are high, dry, mid-latitude deserts (Atacama/Puna, western Tibet, southern Peru). By day they are about 35 K warmer than the Arctic default leaders and at night about 8 K warmer; their coldest month is 20 K warmer. They are not closer to lunar temperatures: the night-time gap to the Diviner mean stays about 150 K in both (the strict sites also match warmer lunar regions more often, so the gap grows by only 3 K). They are drier in precipitation (132 against 643 mm a year) but not in measured soil moisture (both about 4.5%). Fewer have permafrost data (12 of 30 lie inside the ESA grid, all at 100%). The strict ranking is somewhat less stable to the lunar sample (top-10 intervals up to 15 places, from S27W069-01 at rank 6) and about as dependent on the feature set (12 to 20 of the top 30 kept when one group is left out, against 8 to 21). Caveats: MODIS and AMSR2 pixels (5.6 km, about 11 km) and the POWER cell (about 50 km, its elevation 1.8 km below to 1.2 km above the strict sites) describe the surroundings; temperatures are clear-sky skin temperatures, not the 2 cm subsurface temperature Diviner gives. The `breaks` sentence of the strict ranking now uses these values (`pipeline/sites.py`, the `bare_strict` variant reads `partner_context.csv` and `partner_context_strict.csv`): ranks 1 to 60 all carry it; ids and order of `ranking_bare_strict.csv` are unchanged. Per-site files: `landcover_sensitivity/{nasa_context_strict,partner_context_strict,rank_uncertainty_strict}.csv`; sources: `docs/sources/j42.md`.
 
-**Shortened run (top 100 sites only).** The default mask counts WorldCover classes 60 "bare / sparse vegetation" and 100 "moss and lichen" as bare. For the **top 100 sites** of the default ranking we re-read WorldCover on the scan's own grid for the **67** tiles that hold them and kept class 60 only (`bare_strict`). The recomputed default `bare` equals the stored one in all **5,431** site cells (`cells_bare_mismatch` = **0**). A site "stays (cells)" if at least 4 connected cells still have `bare_strict >= 0.8` (the site rule); "stays (median)" if its median cell does.
+**Shortened run (top 100 sites only).** The default mask counts WorldCover classes 60 "bare / sparse vegetation" and 100 "moss and lichen" as bare. For the **top 100 sites** of the default ranking we re-read WorldCover on the scan's own grid for the **66** tiles that hold them and kept class 60 only (`bare_strict`). The recomputed default `bare` equals the stored one in all **5,428** site cells (`cells_bare_mismatch` = **0**). A site "stays (cells)" if at least 4 connected cells still have `bare_strict >= 0.8` (the site rule); "stays (median)" if its median cell does.
 
 | Region (sites in default top 30 / top 100) | Top 30 stays: median / cells | Top 100 stays: median / cells | Median bare − bare_strict, top 100 |
 |---|---|---|---|
-| Putorana Plateau (16 / 37) | 0 / 0 | 0 / 0 | 0.98 |
+| Putorana Plateau (16 / 38) | 0 / 0 | 0 / 0 | 0.99 |
 | southern Peary Land (5 / 7) | 0 / 2 | 0 / 4 | 0.41 |
 | northern Ungava (2 / 3) | 0 / 1 | 0 / 1 | 0.70 |
 | northern Baffin Island (2 / 4) | 0 / 2 | 0 / 3 | 0.45 |
-| Hazen Plateau / northern Ellesmere (1 / 10) | 1 / 1 | 4 / 5 | 0.35 |
+| Hazen Plateau / northern Ellesmere (1 / 9) | 1 / 1 | 4 / 5 | 0.28 |
 | Polar Urals (1 / 1) | 0 / 0 | 0 / 0 | 1.00 |
 | Chukotka (1 / 3) | 0 / 0 | 0 / 0 | 0.95 |
 | Atacama / Puna (1 / 7) | 1 / 1 | 7 / 7 | 0.00 |
 | Mauna Loa (1 / 1) | 1 / 1 | 1 / 1 | 0.00 |
 | others (0 / 27) | – | 6 / 9 | 0.91 |
-| **All** | **3 / 8 of 30** | **18 / 30 of 100** | top 30: **0.98**, top 100: **0.93** |
+| **All** | **3 / 8 of 30** | **18 / 30 of 100** | top 30: **0.98**, top 100: **0.94** |
 
 **No Putorana, Polar Urals or Chukotka site survives**: their "bare ground" is almost entirely moss and lichen. Of the 28 Arctic sites in the top 30, 6 keep a 4-cell core by the cell rule (2 Peary Land, 2 Baffin, 1 Ungava, 1 Hazen Plateau) and only the Hazen Plateau site N81W072-01 passes by the median rule. The MODIS Barren mask (J17) covers 56° S–60° N only, so it tests none of the Arctic sites; on the **13** top-100 sites it covers (Atacama/Puna, Mauna Loa, Tibet/Ladakh, Mongolian Altai) it agrees with `bare_strict` on every site: 12 pass, the Mongolian site N47E090-01 fails both.
 
 What the shortened run alone cannot show (the full run above answers it): which sites outside the default top 100 move up into the top 30 under the strict mask, and the new rank of a surviving site (survivors shrink, e.g. N82W031-01 from 47 to 6 cells).
 
-The shortened run and its table above were made on the top 100 before J43 (next section); J43 changed one member of the default top 100 (N82W066-01 out, N68E096-03 in), and the shortened run was not repeated. The full run (`full_run` of `landcover_sensitivity.json`) was rerun after J43.
+The shortened run and its table above were rerun on the top 100 after J43 (issue #30): N68E096-03 (Putorana, new at rank 100) replaced N82W066-01 (Hazen Plateau / northern Ellesmere); the pass counts are unchanged.
 
 ## Ranking key on narrow polar tiles (J43)
 
