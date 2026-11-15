@@ -42,8 +42,9 @@ COP_DEM = ("Copernicus DEM licence, free use with attribution: 'produced using C
 SOURCES = [
     # --- the eleven resource links of the challenge page (docs/moon-analogs/ANALOGI-KSIEZYC-MARS-LINKI.md)
     S("earthdata_search", "NASA", "NASA Earthdata Search (portal)", 1, "https://search.earthdata.nasa.gov/",
-      "NASA Earth Science Data and Information Policy (open data)", "yes (for downloads)", "being added",
-      "validation/icesat2_profiles.py (ICESat-2 via SlideRule, no login)", "data/raw/icesat2/"),
+      "NASA Earth Science Data and Information Policy (open data)", "yes (for downloads)", "used",
+      "validation/icesat2_profiles.py (ICESat-2 ATL06 from the NASA Earthdata / NSIDC archive, read through "
+      "SlideRule without login; the portal itself is not queried by code)", "data/raw/icesat2/"),
     S("worldview_gibs", "NASA", "NASA Worldview Snapshots / GIBS true-colour imagery (MODIS Terra, VIIRS SNPP)", 2,
       "https://wvs.earthdata.nasa.gov/ ; https://worldview.earthdata.nasa.gov/",
       "GIBS acknowledgement requested: 'We acknowledge the use of imagery provided by services from NASA's Global "

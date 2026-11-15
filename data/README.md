@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 45 rows, 6.0 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 47 rows, 6.3 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -97,7 +97,7 @@ data/
 Status: used | being added | needs login, not downloaded | looked at, not used. Link no. = number of the resource link on the challenge page (1-11). Licences and citations: `sources.csv` and `docs/sources/`.
 
 **NASA**
-- `earthdata_search` (link 1): NASA Earthdata Search (portal). *being added*. https://search.earthdata.nasa.gov/
+- `earthdata_search` (link 1): NASA Earthdata Search (portal). *used*. https://search.earthdata.nasa.gov/
 - `worldview_gibs` (link 2): NASA Worldview Snapshots / GIBS true-colour imagery (MODIS Terra, VIIRS SNPP). *used*. https://wvs.earthdata.nasa.gov/
 - `hls_gibs` (link 2): Harmonized Landsat Sentinel-2 (HLS) v2.0 true colour, layers HLS_S30_Nadir_BRDF_Adjusted_Reflectance and HLS_L30_Nadir_BRDF_Adjusted_Reflectance, 30 m, read through the Worldview Snapshots API (job J40). *used*. https://wvs.earthdata.nasa.gov/
 - `pds` (link 3): NASA Planetary Data System (archive; the PDS products are the rows pds_lola_gdr, diviner_prp, diviner_pcp, minirf, lend, lamp, lroc). *used*. https://pds.nasa.gov/
