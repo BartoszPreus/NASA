@@ -1,0 +1,189 @@
+/* Compare page. Every rule is scoped under .cmp. */
+.cmp { padding: calc(var(--nav-h) + 0px) 0 120px; min-height: 100vh; }
+.cmp .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.cmp .dot.earth { background: var(--earth); }
+.cmp .dot.moon { background: var(--moon); }
+.cmp .earth-c { color: var(--earth); }
+.cmp .moon-c { color: var(--moon); }
+.cmp .fine { font-size: 11.5px; color: var(--dim); line-height: 1.5; }
+.cmp .link { font-size: 12.5px; color: var(--chrome); border-bottom: 1px solid var(--line-2); justify-self: start; text-align: left; }
+.cmp .link:hover { color: var(--text); }
+.cmp .msg { display: grid; place-items: center; min-height: 160px; font-size: 13px; }
+
+/* ------------------------------------------------ pair bar */
+.cmp-bar {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 28px;
+  background: rgba(5, 6, 8, 0.82);
+  backdrop-filter: var(--blur);
+  border-bottom: 1px solid var(--line);
+}
+.cmp .pairsel { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; }
+.cmp .step { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; color: var(--void); background: var(--text); flex: none; }
+.cmp .conj { font-size: 13px; }
+.cmp .dd-site { width: 330px; }
+.cmp .dd-region { width: 300px; }
+.cmp .dd-site .dd-pop, .cmp .dd-region .dd-pop { min-width: 360px; max-height: 420px; }
+.cmp-quick { display: flex; align-items: center; gap: 8px; padding: 12px 28px; overflow-x: auto; scrollbar-width: none; }
+.cmp-quick .label { margin-right: 6px; white-space: nowrap; }
+.cmp .chip { max-width: 320px; overflow: hidden; text-overflow: ellipsis; flex: none; white-space: nowrap; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--line); font-size: 12.5px; color: var(--chrome); transition: all 0.2s; }
+.cmp .chip:hover { color: var(--text); border-color: var(--line-2); }
+.cmp .chip.on { color: var(--flare); border-color: rgba(242, 200, 121, 0.4); background: var(--flare-soft); }
+
+/* ------------------------------------------------ hero: same-scale view + score panel */
+.cmp-hero { display: grid; grid-template-columns: 1fr 360px; gap: 18px; padding: 6px 28px 0; scroll-margin-top: calc(var(--nav-h) + 70px); }
+.cmp-view { min-width: 0; display: grid; gap: 12px; align-content: start; }
+.cmp .ss.side { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cmp .frame { position: relative; aspect-ratio: 1; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #08090c; display: grid; place-items: center; }
+.cmp .ss.swipe { position: relative; aspect-ratio: 1; width: min(100%, 72vh); margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); cursor: ew-resize; touch-action: none; user-select: none; }
+.cmp .ss.swipe .frame { position: absolute; inset: 0; border: 0; border-radius: 0; aspect-ratio: auto; }
+.cmp .pic { aspect-ratio: 1; display: block; }
+.cmp .pic canvas, .cmp img.pic { width: 100%; height: 100%; display: block; object-fit: cover; }
+.cmp .pic.none { display: grid; place-items: center; color: var(--dim); font-size: 13px; }
+.cmp .frame.moon .pic canvas, .cmp .frame.moon img.pic { filter: grayscale(1) contrast(1.04); }
+.cmp .ftag { position: absolute; top: 12px; left: 12px; padding: 5px 11px; border-radius: 999px; background: rgba(5, 6, 8, 0.7); backdrop-filter: blur(10px); border: 1px solid var(--line); font-size: 12px; color: var(--text); white-space: nowrap; max-width: calc(100% - 24px); overflow: hidden; text-overflow: ellipsis; }
+.cmp .ss.swipe .ftag.l { left: 12px; z-index: 3; }
+.cmp .ss.swipe .ftag.r { left: auto; right: 12px; z-index: 3; }
+.cmp .divider { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--text); z-index: 4; }
+.cmp .divider span { position: absolute; top: 50%; left: 50%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; background: var(--text); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5); }
+.cmp .divider span::before, .cmp .divider span::after { content: ""; position: absolute; top: 12px; border: 5px solid transparent; }
+.cmp .divider span::before { left: 4px; border-right-color: var(--void); }
+.cmp .divider span::after { right: 4px; border-left-color: var(--void); }
+.cmp .sbar { position: absolute; left: 14px; bottom: 14px; height: 4px; border: 1.5px solid var(--text); border-top: 0; z-index: 3; filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, 0.9)); }
+.cmp .sbar i { position: absolute; bottom: 6px; left: 0; font-size: 10px; font-style: normal; color: var(--text); white-space: nowrap; text-shadow: 0 1px 3px #000; }
+.cmp-view-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; flex-wrap: wrap; }
+
+.cmp-score {
+  align-self: start;
+  position: sticky;
+  top: calc(var(--nav-h) + 76px);
+  display: grid;
+  gap: 0;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: var(--blur);
+  overflow: hidden;
+}
+.cmp-score > div { padding: 18px 20px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.cmp-score > div:last-child { border-bottom: 0; }
+.cmp .sc-num { font-size: 46px; font-weight: 400; letter-spacing: -0.04em; line-height: 1; }
+.cmp .fr { display: grid; gap: 5px; }
+.cmp .fr-top { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--chrome); }
+.cmp .fr-top .mono { font-size: 11px; white-space: nowrap; }
+.cmp .fr-track { position: relative; height: 12px; }
+.cmp .fr-track::before { content: ""; position: absolute; left: 0; right: 0; top: 5.5px; height: 1px; background: var(--line-2); }
+.cmp .fr-track .band { position: absolute; top: 2px; height: 8px; border-radius: 4px; background: rgba(201, 197, 188, 0.2); border: 1px solid rgba(201, 197, 188, 0.45); }
+.cmp .fr-track .med { position: absolute; top: 0; width: 1px; height: 12px; background: var(--moon); }
+.cmp .fr-track .val { position: absolute; top: 1px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--earth); box-shadow: 0 0 0 3px rgba(5, 6, 8, 0.9); }
+.cmp .fr-track .val.out { background: var(--void); border: 1.5px solid var(--earth); }
+.cmp .fr-legend { display: flex; gap: 14px; font-size: 10.5px; color: var(--dim); }
+.cmp .band-k { display: inline-block; width: 16px; height: 7px; border-radius: 3px; background: rgba(201, 197, 188, 0.2); border: 1px solid rgba(201, 197, 188, 0.45); margin-right: 6px; vertical-align: -1px; }
+.cmp .sc-breaks ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.cmp .sc-breaks li, .cmp .limits li { position: relative; padding-left: 16px; font-size: 12.5px; color: var(--chrome); line-height: 1.5; }
+.cmp .sc-breaks li::before, .cmp .limits li::before { content: ""; position: absolute; left: 0; top: 0.65em; width: 7px; height: 1px; background: var(--weak); }
+
+/* ------------------------------------------------ sections */
+.cmp-sec { padding: 96px 28px 0; max-width: 1320px; margin: 0 auto; scroll-margin-top: calc(var(--nav-h) + 60px); }
+.cmp .sec-head { display: grid; gap: 12px; max-width: 760px; margin-bottom: 28px; }
+.cmp .sec-head h2 { font-size: clamp(30px, 3.6vw, 48px); line-height: 1.08; letter-spacing: -0.03em; }
+.cmp .sec-head p { font-size: 15px; line-height: 1.6; }
+
+.cmp .stage { position: relative; border-radius: 18px; border: 1px solid var(--line); background: #07080a; overflow: hidden; }
+.cmp .stage.full { border-radius: 0; display: flex; flex-direction: column; }
+.cmp .stage .canvas { height: min(62vh, 620px); position: relative; }
+.cmp .stage.full .canvas { flex: 1; height: auto; }
+.cmp .stage-tags { position: absolute; z-index: 2; top: 18px; left: 20px; right: 20px; display: flex; justify-content: space-between; pointer-events: none; gap: 16px; }
+.cmp .stage-tags > div { display: grid; gap: 4px; font-size: 14px; }
+.cmp .stage-tags .r { text-align: right; justify-items: end; }
+.cmp .stage-tags b { font-weight: 500; }
+.cmp .stage-tags .mono { font-size: 10.5px; }
+.cmp .stage-ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; border-top: 1px solid var(--line); background: rgba(255, 255, 255, 0.02); }
+.cmp .stage-ctl .btn.on { border-color: rgba(242, 200, 121, 0.5); color: var(--flare); }
+.cmp .az { display: flex; align-items: center; gap: 10px; min-width: 210px; }
+.cmp .az .mono { font-size: 10.5px; white-space: nowrap; width: 112px; }
+.cmp .az .slider { width: 110px; }
+.cmp .stage-ctl .hint { font-size: 10.5px; margin-left: auto; }
+.cmp .stage-note { padding: 0 16px 12px; font-size: 10.5px; }
+
+.cmp .cards { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; margin-top: 14px; align-items: start; }
+.cmp .ccard { border-radius: 16px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.022); padding: 20px 22px; display: grid; gap: 14px; align-content: start; }
+.cmp .ccard-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.cmp .ccard-h h3 { font-size: 17px; }
+.cmp .ccard-h .mono { font-size: 10.5px; }
+.cmp .chart { margin: 0; }
+.cmp .chart .plot { position: relative; padding-left: 64px; }
+.cmp .chart svg { width: 100%; height: 220px; display: block; overflow: visible; }
+.cmp .chart .axis { stroke: var(--line-2); stroke-dasharray: 2 4; }
+.cmp .chart path.earth { fill: none; stroke: var(--earth); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.cmp .chart path.moon { fill: none; stroke: var(--moon); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.cmp .chart path.fill-earth { fill: rgba(143, 180, 234, 0.1); }
+.cmp .chart path.fill-moon { fill: rgba(201, 197, 188, 0.07); }
+.cmp .axis-l { position: absolute; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; justify-content: space-between; font-size: 10px; color: var(--dim); pointer-events: none; }
+.cmp .axis-b { padding-left: 64px; display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin-top: 6px; }
+.cmp .legend { display: flex; gap: 18px; font-size: 11px; color: var(--chrome); }
+.cmp .ln { display: inline-block; width: 16px; height: 2px; margin-right: 7px; vertical-align: 3px; }
+.cmp .ln.earth { background: var(--earth); }
+.cmp .ln.moon { background: var(--moon); }
+.cmp .bars-row { height: 150px; display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; align-items: end; }
+.cmp .pair { height: 100%; display: flex; align-items: flex-end; gap: 3px; }
+.cmp .pair i { flex: 1; border-radius: 3px 3px 0 0; min-height: 1px; transition: height 0.6s var(--ease); }
+.cmp .pair i.earth { background: var(--earth); opacity: 0.85; }
+.cmp .pair i.moon { background: var(--moon); opacity: 0.85; }
+.cmp .bars-ax { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; font-size: 10px; color: var(--dim); text-align: center; margin-top: 6px; }
+.cmp .st { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.cmp .st th { font-weight: 400; font-size: 11px; text-align: right; padding: 0 0 6px; }
+.cmp .st td { padding: 8px 0; border-top: 1px solid var(--line); color: var(--chrome); }
+.cmp .st td.mono { text-align: right; color: var(--text); font-size: 12px; padding-left: 14px; white-space: nowrap; }
+.cmp .st tr.pipe td { color: var(--dim); }
+.cmp .note { margin-top: 12px; }
+
+.cmp .surf { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 1040px; }
+.cmp .surf figure { margin: 0; display: grid; gap: 10px; }
+.cmp .sframe { position: relative; aspect-ratio: 1; border-radius: 16px; border: 1px solid var(--line); background: #08090c; overflow: hidden; display: grid; place-items: center; }
+.cmp .sframe .ftag { top: 12px; left: 12px; }
+.cmp .surf figure:last-child .pic canvas { filter: grayscale(1); }
+.cmp .surf figcaption { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+.cmp .surf figcaption b { font-weight: 500; }
+.cmp .surf figcaption .mono { font-size: 10.5px; }
+
+.cmp .limits { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 36px; max-width: 980px; }
+.cmp .limits li { font-size: 14px; }
+
+/* ------------------------------------------------ section pills */
+.cmp .pills { position: fixed; z-index: 950; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; gap: 2px; padding: 4px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(10, 11, 14, 0.82); backdrop-filter: var(--blur); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); }
+.cmp .pills button { padding: 7px 14px; border-radius: 999px; font-size: 12.5px; color: var(--chrome); white-space: nowrap; transition: color 0.2s, background 0.2s; }
+.cmp .pills button .mono { font-size: 10px; color: var(--dim); margin-right: 3px; }
+.cmp .pills button:hover { color: var(--text); }
+.cmp .pills button.on { background: var(--text); color: var(--void); }
+.cmp .pills button.on .mono { color: rgba(5, 6, 8, 0.55); }
+
+@media (max-width: 1100px) {
+  .cmp-hero { grid-template-columns: 1fr; }
+  .cmp-score { position: static; }
+  .cmp .cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .cmp-bar { flex-direction: column; align-items: stretch; padding: 10px 16px; position: static; }
+  .cmp .pairsel { display: grid; grid-template-columns: 24px 1fr; gap: 8px 10px; }
+  .cmp .conj { grid-column: 2; font-size: 12px; }
+  .cmp .dd-site, .cmp .dd-region { width: 100%; }
+  .cmp .dd-site .dd-pop, .cmp .dd-region .dd-pop { min-width: 0; width: 100%; }
+  .cmp-quick { padding: 10px 16px; }
+  .cmp-hero, .cmp-sec { padding-left: 16px; padding-right: 16px; }
+  .cmp-sec { padding-top: 72px; }
+  .cmp .ss.side, .cmp .surf { grid-template-columns: 1fr; }
+  .cmp .stage .canvas { height: 380px; }
+  .cmp .stage-tags { top: 12px; left: 12px; right: 12px; }
+  .cmp .stage-tags .mono { display: none; }
+  .cmp .stage-ctl .hint { display: none; }
+  .cmp .limits { grid-template-columns: 1fr; }
+  .cmp .pills { bottom: 12px; max-width: calc(100% - 24px); overflow-x: auto; }
+  .cmp .pills button { padding: 7px 10px; font-size: 12px; }
+}
