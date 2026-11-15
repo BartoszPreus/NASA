@@ -1,66 +1,66 @@
-# Audyt źródeł danych: co ze strony wyzwania faktycznie wykorzystujemy
-Stan: sob 14.11.2026, ok. 23:15 (pierwsza wersja z ok. 19:00; tabela w sekcji 2 ma stan końcowy). Lista 11 linków ze strony wyzwania: `ANALOGI-KSIEZYC-MARS-LINKI.md`. Analizę zrobił Wiktor z Claude Code (SI).
+# Audit of the data sources: what from the challenge page we actually use
+State: Sat 14 Nov 2026, about 23:15 (first version from about 19:00; the table in section 2 shows the final state). The list of the 11 links of the challenge page: `ANALOGI-KSIEZYC-MARS-LINKI.md`. The analysis was done by Wiktor with Claude Code (SI). (Translated from Polish on 15 Nov 2026; historical. The current source register is `data/sources.csv`.)
 
-## Odpowiedź wprost
-**Nie wykorzystywaliśmy wszystkich źródeł NASA.** Do godz. 18:45 projekt używał jednego zbioru NASA (wysokości z lasera LOLA misji LRO) i pobierał go **nie z adresów podanych na stronie wyzwania**, tylko z serwisu NASA Goddard (PGDA). Po stronie Ziemi używaliśmy wyłącznie danych ESA. Od 18:45 trwają zadania J12–J14, które dokładają cztery źródła NASA bez logowania. Dwa kolejne wymagają konta Earthdata i to jest zadanie dla człowieka albo co-worka (sekcja 4).
+## Straight answer
+**We did not use all NASA sources.** Until 18:45 the project used one NASA dataset (laser altimetry heights from LOLA on LRO) and downloaded it **not from the addresses given on the challenge page**, but from the NASA Goddard service (PGDA). On the Earth side we used only ESA data. Since 18:45 jobs J12-J14 have been running, which add four NASA sources that need no login. Two more need an Earthdata account, and that is a job for a person or a co-worker (section 4).
 
-**Stan na 23:15.** Strona wyzwania sprawdzona ponownie o 22:20: nadal 11 tych samych zasobów. W projekcie używanych jest 8 z 11 linków: wszystkie pięć linków NASA (1–5), Copernicus (9), ESA Open Science Catalog (10) i JAXA G-Portal (11). Nieużywane zostają trzy linki kanadyjskie (6, 7, 8): zastosowanie jest opisane w zadaniach J27 i J28 (`docs/TASKS-PARTNER-DATA.md`). Konto Earthdata nie było potrzebne: NASADEM i temperatura powierzchni z MODIS są dostępne bez logowania z publicznych kopii. Po stronie Ziemi ranking nadal liczy się z danych ESA (Copernicus DEM, WorldCover); dane NASA (NASADEM, MODIS) są policzone dla 619 kafli i czekają na porównanie J17b, po którym reguła w kodzie sama wybierze model wysokości (`docs/METHOD.md`). Rejestr wszystkich źródeł: `data/sources.csv`.
+**State at 23:15.** The challenge page was checked again at 22:20: still the same 11 resources. 8 of the 11 links are used in the project: all five NASA links (1-5), Copernicus (9), ESA Open Science Catalog (10) and JAXA G-Portal (11). The three Canadian links (6, 7, 8) remain unused: their use is described in jobs J27 and J28 (`docs/TASKS-PARTNER-DATA.md`). No Earthdata account was needed: NASADEM and the MODIS surface temperature are available without login from public copies. On the Earth side the ranking is still computed from ESA data (Copernicus DEM, WorldCover); the NASA data (NASADEM, MODIS) are computed for 619 tiles and wait for the J17b comparison, after which a rule in the code chooses the elevation model by itself (`docs/METHOD.md`). Register of all sources: `data/sources.csv`.
 
-## 1. Skąd faktycznie pochodzą dane użyte do tej pory
-| Dane | Skąd pobrane | Czy to adres ze strony wyzwania? |
+## 1. Where the data used so far actually come from
+| Data | Downloaded from | Is it an address from the challenge page? |
 |---|---|---|
-| Model wysokości bieguna Księżyca, LOLA 20 m (`LDEM_80S_20MPP_ADJ.TIF`) | https://pgda.gsfc.nasa.gov/products/90 (NASA Goddard, archiwum zespołu LOLA) | **Nie.** To dane tego samego instrumentu (LOLA, LRO), który strona wymienia przy linku nr 4, ale w nowszym opracowaniu z innego serwera NASA |
-| Mapy nachyleń Księżyca 57/225/560 m (PGDA 70) | http://imbrium.mit.edu/EXTRAS/FRACTAL/IMG/ (serwer zespołu LOLA na MIT, linkowany z PGDA) | **Nie** |
-| Model wysokości Ziemi Copernicus DEM GLO-30 | https://copernicus-dem-30m.s3.amazonaws.com/ (kopia w AWS Open Data) | **Częściowo.** Ten sam produkt jest w Copernicus Data Space (link nr 9, ESA), my pobieramy go z kopii w AWS |
-| Pokrycie terenu ESA WorldCover 2021 | https://esa-worldcover.s3.eu-central-1.amazonaws.com/ | **Nie** (ESA, spoza listy) |
-| Lidar lotniczy USGS 3DEP 1 m (Meteor Crater) | https://prd-tnm.s3.amazonaws.com/ | Nie (USGS) |
-| Model terenu GUGiK 1 m (Morasko) | https://mapy.geoportal.gov.pl/ | Nie (Polska) |
+| Lunar south-pole elevation model, LOLA 20 m (`LDEM_80S_20MPP_ADJ.TIF`) | https://pgda.gsfc.nasa.gov/products/90 (NASA Goddard, archive of the LOLA team) | **No.** It is data of the same instrument (LOLA, LRO) that the page names at link no. 4, but in a newer product from another NASA server |
+| Lunar slope maps 57/225/560 m (PGDA 70) | http://imbrium.mit.edu/EXTRAS/FRACTAL/IMG/ (server of the LOLA team at MIT, linked from PGDA) | **No** |
+| Earth elevation model Copernicus DEM GLO-30 | https://copernicus-dem-30m.s3.amazonaws.com/ (copy in AWS Open Data) | **Partly.** The same product is in the Copernicus Data Space (link no. 9, ESA); we download it from the AWS copy |
+| ESA WorldCover 2021 land cover | https://esa-worldcover.s3.eu-central-1.amazonaws.com/ | **No** (ESA, not on the list) |
+| USGS 3DEP 1 m airborne lidar (Meteor Crater) | https://prd-tnm.s3.amazonaws.com/ | No (USGS) |
+| GUGiK 1 m terrain model (Morasko) | https://mapy.geoportal.gov.pl/ | No (Poland) |
 
-## 2. Każdy z 11 linków ze strony wyzwania: stan
-| Nr | Zasób ze strony | Stan do 18:45 | Stan końcowy (14.11, 23:15) | Wymaga konta? |
+## 2. Each of the 11 links of the challenge page: state
+| No. | Resource on the page | State until 18:45 | Final state (14 Nov, 23:15) | Account needed? |
 |---|---|---|---|---|
-| 1 | NASA Earthdata Search | nieużywany | **Używany.** Profile lasera ICESat-2 dla 8 miejsc (J21, `data/validation/icesat2.json`); NASADEM dla 619 kafli (`data/earth/cells_nasadem/`, J17); temperatura powierzchni MODIS MOD11C1 dla miejsc z rankingu (J24, `data/sites/partner_context.csv`) | nie (SlideRule, kopia OpenTopography, kopia w katalogu JAXA) |
-| 2 | NASA Worldview | tylko podkład mapy w prototypie aplikacji | **Używany.** Zdjęcie MODIS/VIIRS każdego miejsca z góry rankingu (`data/sites/images/`, etap `context`), przegląd top 30 na tych zdjęciach (J19); pokrycie terenu MODIS przez GIBS jako maska w wariancie NASA (J17) | nie |
-| 3 | NASA Planetary Data System (PDS) | nieużywany bezpośrednio | **Używany.** Siatka LOLA z archiwum PDS porównana z modelem, którego używamy (`data/validation/pds_lola.json`); LAMP z PDS dla regionów (J15) | nie |
-| 4 | LRO w PDS Geosciences (LROC, LOLA, Diviner, LEND, Mini-RF) | tylko LOLA, z innego serwera | **Używany.** LOLA (kontrola), Mini-RF, LEND, LROC, oświetlenie i cień dla 8 regionów (`data/moon/instruments/`, J13 i J15). To opis regionów, nie składnik oceny | nie |
-| 5 | LRO Diviner | nieużywany | **Używany.** Dwa produkty polarne Divinera: temperatura średnia i maksymalna, głębokość stabilnego lodu dla 8 regionów; zestawione ze zmierzoną temperaturą miejsc na Ziemi (J13, J15, J24) | nie |
-| 6 | CSA RADARSAT Constellation (RCM) | nieużywany | nieużywany; zastosowanie: polarymetria kompaktowa jak w Mini-RF (zadanie J28, potrzebna osoba z kontem EODMS) | **tak** (EODMS) |
-| 7 | CSA RADARSAT-1 | nieużywany | nieużywany; publiczne pliki sprawdzone, zastosowanie: radarowy podgląd miejsc obok Mini-RF (zadanie J27) | nie (publiczny zasobnik AWS) |
-| 8 | CSA: samouczek SAR w Pythonie | nieużywany | nieużywany; przepis na czytanie plików RADARSAT w zadaniu J27 | nie |
-| 9 | ESA Copernicus Data Space | ten sam produkt (Copernicus DEM), z kopii w AWS | **Używany, w rdzeniu.** Copernicus DEM GLO-30 z kopii w AWS: cały skan Ziemi (2 101 kafli) | portal: tak; kopia AWS: nie |
-| 10 | ESA Open Science Catalog | nieużywany | **Używany.** Produkt `esa-cci-permafrost` z katalogu: udział zmarzliny i temperatura gruntu dla miejsc z rankingu (J24) | nie |
-| 11 | JAXA G-Portal | nieużywany | **Używany.** Produkty G-Portal czytane bez logowania przez JAXA Earth API: temperatura powierzchni dzień/noc (GCOM-C SGLI) i wilgotność gleby (AMSR2) dla miejsc z rankingu (J24) | portal: tak; JAXA Earth API: nie |
+| 1 | NASA Earthdata Search | unused | **Used.** ICESat-2 laser profiles for 8 sites (J21, `data/validation/icesat2.json`); NASADEM for 619 tiles (`data/earth/cells_nasadem/`, J17); MODIS MOD11C1 surface temperature for ranked sites (J24, `data/sites/partner_context.csv`) | no (SlideRule, OpenTopography copy, copy in the JAXA catalogue) |
+| 2 | NASA Worldview | only the base map in the app prototype | **Used.** MODIS/VIIRS image of every site at the top of the ranking (`data/sites/images/`, stage `context`), review of the top 30 on these images (J19); MODIS land cover through GIBS as the mask of the NASA variant (J17) | no |
+| 3 | NASA Planetary Data System (PDS) | not used directly | **Used.** LOLA grid from the PDS archive compared with the model we use (`data/validation/pds_lola.json`); LAMP from PDS for the regions (J15) | no |
+| 4 | LRO in PDS Geosciences (LROC, LOLA, Diviner, LEND, Mini-RF) | only LOLA, from another server | **Used.** LOLA (check), Mini-RF, LEND, LROC, illumination and shadow for 8 regions (`data/moon/instruments/`, J13 and J15). This describes the regions; it is not part of the score | no |
+| 5 | LRO Diviner | unused | **Used.** Two polar Diviner products: mean and maximum temperature, depth to stable ice for 8 regions; set against the measured temperature of the Earth sites (J13, J15, J24) | no |
+| 6 | CSA RADARSAT Constellation (RCM) | unused | unused; use: compact polarimetry as in Mini-RF (job J28, needs a person with an EODMS account) | **yes** (EODMS) |
+| 7 | CSA RADARSAT-1 | unused | unused; public files checked, use: radar preview of the sites next to Mini-RF (job J27) | no (public AWS bucket) |
+| 8 | CSA: SAR tutorial in Python | unused | unused; recipe for reading RADARSAT files in job J27 | no |
+| 9 | ESA Copernicus Data Space | the same product (Copernicus DEM), from the AWS copy | **Used, at the core.** Copernicus DEM GLO-30 from the AWS copy: the whole Earth scan (2,101 tiles) | portal: yes; AWS copy: no |
+| 10 | ESA Open Science Catalog | unused | **Used.** Product `esa-cci-permafrost` from the catalogue: permafrost share and ground temperature for ranked sites (J24) | no |
+| 11 | JAXA G-Portal | unused | **Used.** G-Portal products read without login through the JAXA Earth API: day/night surface temperature (GCOM-C SGLI) and soil moisture (AMSR2) for ranked sites (J24) | portal: yes; JAXA Earth API: no |
 
-Poza listą, ale z NASA: **NASA POWER** (temperatura powierzchni i opad dla każdego miejsca, J12; dane z reanalizy MERRA-2), bez logowania.
+Not on the list, but from NASA: **NASA POWER** (surface temperature and precipitation for every site, J12; data from the MERRA-2 reanalysis), without login.
 
-## 3. Czego świadomie nie używamy i dlaczego
-- **Mapy kamienistości i bezwładności cieplnej Divinera**: kończą się na ok. ±60–70° szerokości, bieguna nie obejmują (`KRYTERIA-DEEP-RESEARCH.md`).
-- **Mini-RF (radar), LEND (neutrony)**: Ziemia nie ma odpowiednika tej samej wielkości w zasięgu globalnym, więc można je tylko opisać, nie porównać.
-- **LROC (zdjęcia)**: przydatne do ręcznego sprawdzenia krateru z J10 i jako ilustracja regionów Księżyca; do samej metody niepotrzebne. Dobre zadanie dla człowieka: zrzut z https://quickmap.lroc.im-ldi.com/ dla 87,68°S, 306,40°E.
-- **RADARSAT (CSA), JAXA G-Portal, ESA Open Science Catalog**: nie mamy dla nich zastosowania w metodzie opartej na kształcie terenu. Uczciwiej napisać to w zgłoszeniu, niż dodawać je na siłę.
+## 3. What we deliberately do not use and why
+- **Diviner rock abundance and thermal inertia maps**: they end at about ±60-70° latitude and do not cover the pole (`KRYTERIA-DEEP-RESEARCH.md`).
+- **Mini-RF (radar), LEND (neutrons)**: Earth has no counterpart of the same quantity with global coverage, so they can only be described, not compared.
+- **LROC (images)**: useful for a manual check of the crater from J10 and as an illustration of the lunar regions; not needed for the method itself. A good job for a person: a screenshot from https://quickmap.lroc.im-ldi.com/ for 87.68°S, 306.40°E.
+- **RADARSAT (CSA), JAXA G-Portal, ESA Open Science Catalog**: we have no use for them in a method based on terrain shape. It is more honest to write that in the submission than to add them by force. (Written at 19:00; superseded by the table in section 2, where links 10 and 11 are used.)
 
-## 4. Co wymaga konta Earthdata (zadanie dla człowieka lub co-worka)
-Konto jest darmowe: https://urs.earthdata.nasa.gov/. Nazwy kolekcji poniżej podaję tak, jak je pamiętam; **trzeba je potwierdzić w wyszukiwarce Earthdata** przed pobraniem.
+## 4. What needs an Earthdata account (job for a person or a co-worker)
+The account is free: https://urs.earthdata.nasa.gov/. I give the collection names below as I remember them; **they must be confirmed in Earthdata Search** before downloading. (In the end no account was needed; see section 2.)
 
-**A. NASADEM (model wysokości NASA, 1 sekunda łuku, 56°S–60°N)**. Cel: przeliczyć te same cechy terenu na modelu NASA i sprawdzić, czy ranking zgadza się z Copernicus. To wstawia dane NASA o Ziemi do rdzenia metody.
-- Szukać w https://search.earthdata.nasa.gov/ : „NASADEM Merged DEM Global 1 arc second” (krótka nazwa `NASADEM_HGT`, wersja 001).
-- 61 kafli (pliki typu `NASADEM_HGT_n35w112.zip`, po ok. 10–25 MB, razem ok. 1 GB):
+**A. NASADEM (NASA elevation model, 1 arc second, 56°S-60°N)**. Goal: recompute the same terrain features on the NASA model and check whether the ranking agrees with Copernicus. This puts NASA Earth data into the core of the method.
+- Search https://search.earthdata.nasa.gov/ for "NASADEM Merged DEM Global 1 arc second" (short name `NASADEM_HGT`, version 001).
+- 61 tiles (files like `NASADEM_HGT_n35w112.zip`, about 10-25 MB each, about 1 GB in all):
   `n13e040 n14e040 n15e044 n19e018 n19e076 n19w156 n23e005 n23e057 n24w081 n25e008 n25e039 n26e033 n27e001 n28e033 n28w014 n28w017 n29w014 n30e058 n31w107 n31w108 n32w111 n33e004 n33e065 n34e077 n35w112 n36e088 n36w117 n37e014 n37e094 n37w007 n38e073 n38e091 n38w111 n39w004 n43e005 n43w114 n44e100 n44w111 n45e000 n45e006 n45w110 n46e011 n46w082 n48e010 n49e020 n49w058 n50w122 n52e016 n53e016 n55w064 n56w075 s17w053 s21e025 s22e014 s22e055 s22w068 s23w069 s25w070 s28e027 s48w071 s50e069`
-- Zapisać (bez rozpakowywania) do: `<folder repozytorium>\data\raw\cowork\nasadem\`
-- Jeśli czasu mało, wystarczy pierwszych 15 z listy pilotażowej: `n19w156 n25e039 n35w112 n36e088 n36w117 n38w111 n43w114 n44e100 n30e058 n23e005 n25e008 n27e001 n49e020 n52e016 s23w069`.
+- Save (without unpacking) to: `<repository folder>\data\raw\cowork\nasadem\`
+- If time is short, the first 15 of the pilot list are enough: `n19w156 n25e039 n35w112 n36e088 n36w117 n38w111 n43w114 n44e100 n30e058 n23e005 n25e008 n27e001 n49e020 n52e016 s23w069`.
 
-**B. MODIS LST (temperatura powierzchni lądu z satelity)**. Cel: zmierzona temperatura miejsc na Ziemi obok temperatur Divinera dla Księżyca (blok „tu analogia się łamie”). Uwaga techniczna: nasze środowisko **nie czyta formatu HDF4**, w którym jest ten produkt.
-- Najprostsza droga: NASA AppEEARS (https://appeears.earthdatacloud.nasa.gov/, to samo logowanie), „Point Sample”: wgrać `data/sites/ranking.csv` (kolumny `site_id, lat, lon`; pierwsze 100 wierszy), produkt MOD11A2 (LST dzień i noc), okres 2025-01-01 do 2025-12-31, wynik w CSV.
-- Zapisać do: `<folder repozytorium>\data\raw\cowork\modis_lst\`
-- Jeśli się nie uda, zostajemy przy NASA POWER (J12), który daje to samo w grubszej siatce.
+**B. MODIS LST (land surface temperature from satellite)**. Goal: measured temperature of the Earth sites next to the Diviner temperatures for the Moon (the "where the analogy breaks down" block). Technical note: our environment **cannot read the HDF4 format** of this product.
+- The simplest route: NASA AppEEARS (https://appeears.earthdatacloud.nasa.gov/, same login), "Point Sample": upload `data/sites/ranking.csv` (columns `site_id, lat, lon`; first 100 rows), product MOD11A2 (LST day and night), period 2025-01-01 to 2025-12-31, output as CSV.
+- Save to: `<repository folder>\data\raw\cowork\modis_lst\`
+- If that fails, we stay with NASA POWER (J12), which gives the same on a coarser grid.
 
-**C. Opcjonalnie: granule ICESat-2 ATL08** dla miejsc z J14, gdyby serwis SlideRule nie zadziałał. Na razie nie pobierać.
+**C. Optional: ICESat-2 ATL08 granules** for the sites of J14, in case the SlideRule service does not work. Do not download for now.
 
-Folder `data/raw/` jest poza gitem, więc dużych plików nie trzeba się bać. Po pobraniu wystarczy napisać w sesji Claude Code: „dane z co-worka są w data/raw/cowork”.
+The `data/raw/` folder is outside git, so large files are not a problem. After downloading, it is enough to write in the Claude Code session: "the co-worker's data are in data/raw/cowork".
 
-## 5. Gotowy prompt dla co-worka (do wklejenia)
-> Zaloguj się w przeglądarce do NASA Earthdata (https://urs.earthdata.nasa.gov/; jeśli nie ma konta, zatrzymaj się i poproś mnie o założenie). W https://search.earthdata.nasa.gov/ znajdź kolekcję „NASADEM Merged DEM Global 1 arc second” (NASADEM_HGT v001) i pobierz pliki ZIP dla kafli z listy poniżej. Zapisz je bez rozpakowywania do `<folder repozytorium>\data\raw\cowork\nasadem\`. Na koniec zapisz tam plik `MANIFEST.txt`: nazwa każdego pliku, rozmiar, adres, z którego został pobrany, data pobrania. Niczego nie zmieniaj w innych folderach. Jeśli kolekcja ma inną nazwę albo któregoś kafla nie ma, zapisz to w `MANIFEST.txt` zamiast zgadywać. Lista kafli: [wkleić listę z sekcji 4A].
-> Potem, jeśli zostanie czas: w https://appeears.earthdatacloud.nasa.gov/ zrób „Point Sample” dla pierwszych 100 wierszy pliku `<folder repozytorium>\data\sites\ranking.csv` (ID = `site_id`, szerokość = `lat`, długość = `lon`), produkt MOD11A2 wersja 061, warstwy LST_Day_1km i LST_Night_1km, daty 2025-01-01 do 2025-12-31, format CSV. Wynik zapisz do `<folder repozytorium>\data\raw\cowork\modis_lst\` razem z plikiem opisu zamówienia.
+## 5. Ready prompt for the co-worker (to paste)
+> Log in to NASA Earthdata in the browser (https://urs.earthdata.nasa.gov/; if there is no account, stop and ask me to create one). In https://search.earthdata.nasa.gov/ find the collection "NASADEM Merged DEM Global 1 arc second" (NASADEM_HGT v001) and download the ZIP files for the tiles in the list below. Save them without unpacking to `<repository folder>\data\raw\cowork\nasadem\`. At the end save a file `MANIFEST.txt` there: name of each file, size, address it was downloaded from, download date. Do not change anything in other folders. If the collection has a different name or a tile is missing, write that in `MANIFEST.txt` instead of guessing. Tile list: [paste the list from section 4A].
+> Then, if there is time left: in https://appeears.earthdatacloud.nasa.gov/ make a "Point Sample" for the first 100 rows of the file `<repository folder>\data\sites\ranking.csv` (ID = `site_id`, latitude = `lat`, longitude = `lon`), product MOD11A2 version 061, layers LST_Day_1km and LST_Night_1km, dates 2025-01-01 to 2025-12-31, CSV format. Save the result to `<repository folder>\data\raw\cowork\modis_lst\` together with the order description file.
 
-## 6. Jak to opisać w zgłoszeniu (pole „NASA Data”)
-Po zakończeniu J12–J14 będzie można uczciwie napisać: LRO LOLA (model wysokości bieguna z PGDA oraz siatka z PDS), LRO Diviner (produkt polarny z PDS), ICESat-2 (profile lasera, Earthdata), MODIS (zdjęcia przez Worldview) i NASA POWER. Do tego czasu: tylko LOLA. Każde źródło z adresem i cytowaniem trafia do `docs/sources/`.
+## 6. How to describe it in the submission ("NASA Data" field)
+After J12-J14 are done we can write honestly: LRO LOLA (south-pole elevation model from PGDA and the grid from PDS), LRO Diviner (polar product from PDS), ICESat-2 (laser profiles, Earthdata), MODIS (images through Worldview) and NASA POWER. Until then: only LOLA. Every source with its address and citation goes into `docs/sources/`.

@@ -1,73 +1,73 @@
-# Wyzwanie „analogi Księżyca i Marsa”: pełna treść + które kryteria wybrać
-Strona: https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/
-Odczyt: sob 14.11.2026, ok. 16:45 (zakładki **Details** i **Resources**). Analizę zrobił Wiktor z Claude Code (SI).
-Część 1 to analiza i rekomendacja, część 2 to oryginalny tekst NASA po angielsku, bez zmian.
+# The "Moon and Mars analogs" challenge: full text + which criteria to choose
+Page: https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/
+Read: Sat 14 Nov 2026, about 16:45 (tabs **Details** and **Resources**). The analysis was done by Wiktor with Claude Code (SI). (Part 1 translated from Polish on 15 Nov 2026; historical.)
+Part 1 is the analysis and recommendation, part 2 is the original NASA text in English, unchanged.
 
-**Tagi wyzwania:** poziom Advanced / Intermediate / Beginner-Youth · tematy: Earth Science, Planets & Moons, Software, Space Exploration.
+**Challenge tags:** level Advanced / Intermediate / Beginner-Youth · topics: Earth Science, Planets & Moons, Software, Space Exploration.
 
 ---
-## Część 1. Analiza: co wybrać z listy
+## Part 1. Analysis: what to choose from the list
 
-### Wniosek w trzech zdaniach
-1. Wyzwanie wymienia **8 wymiarów analogii** i **12 „potential considerations”**, ale wprost pisze, że są nieobowiązkowe („You may (but are not required to)”) i że analog „does not need to match the Moon or Mars in every way”.
-2. Wybieramy **jeden wymiar wiodący (teren) i dwa wspierające (goły grunt, temperatura/oświetlenie)**, a wszystko spinamy zastosowaniem: testy lądowania i mobilności.
-3. Pozostałe wymiary świadomie pomijamy i mówimy to wprost w karcie miejsca („tego nie mierzymy”), bo NASA premiuje pokazanie, gdzie analogia się łamie.
+### Conclusion in three sentences
+1. The challenge lists **8 dimensions of analogy** and **12 "potential considerations"**, but says explicitly that they are optional ("You may (but are not required to)") and that an analog "does not need to match the Moon or Mars in every way".
+2. We choose **one leading dimension (terrain) and two supporting ones (bare ground, temperature/illumination)**, and tie everything together with an application: landing and mobility tests.
+3. We deliberately skip the other dimensions and say so explicitly on the site card ("we do not measure this"), because NASA rewards showing where the analogy breaks down.
 
-### 8 wymiarów analogii: decyzja dla każdego
-Kolumna „Decyzja” to rekomendacja, nie wymóg NASA.
+### The 8 dimensions of analogy: a decision for each
+The "Decision" column is a recommendation, not a NASA requirement.
 
-| # | Wymiar (z treści wyzwania) | Decyzja | Uzasadnienie |
+| # | Dimension (from the challenge text) | Decision | Reason |
 |---|---|---|---|
-| 2 | Teren: wysokość, nachylenie, chropowatość, kratery | **WIODĄCY** | Już działa: odcisk nachyleń 57/225/560 m, skan 38 kafli (`docs/PODSUMOWANIE-KIERUNKOW.md`). Dane LOLA są wymienione w zasobach wyzwania. |
-| 8 | Warunki lądowania, mobilności, nawigacji, robotyki, budowy | **RAMA (use case)** | Nie wymaga nowych danych. Nachylenie i chropowatość to wprost parametry bezpieczeństwa lądowania i przejezdności. Odpowiada na „Connect your analog to exploration”. |
-| 1 | Geologia, mineralogia, materiały powierzchni | **WSPIERAJĄCY, wersja minimalna** | Mamy filtr gołego gruntu (ESA WorldCover). Mineralogii nie robimy. Opcjonalnie rock abundance z Divinera, jeśli starczy czasu. |
-| 3 | Temperatura, oświetlenie, ekstrema | **WSPIERAJĄCY** | Diviner jest osobną pozycją w zasobach wyzwania, a opis mówi, że jego produkty polarne „could be compared with extreme cold (...) terrestrial environments”. Plan: MODIS LST wobec Diviner + szerokość geograficzna jako przybliżenie niskiego Słońca. **Jeszcze niesprawdzone na danych.** |
-| 4 | Woda, lód, wieczna zmarzlina, zasoby | pomijamy | Jedno zdanie w karcie miejsca. Lodowce trzeba najwyżej odfiltrować, bo zawyżają wynik terenowy. |
-| 5 | Pył, wiatr, erozja, procesy atmosferyczne | pomijamy | Dotyczy głównie Marsa. Nasz cel to biegun południowy Księżyca. |
-| 6 | Biologia, ekstremofile, biosygnatury | pomijamy | Brak danych globalnych i kompetencji w zespole. |
-| 7 | Jaskinie, tuby lawowe, podziemia | pomijamy | Nie widać ich w DEM 30 m. |
+| 2 | Terrain: elevation, slope, roughness, craters | **LEADING** | Already works: slope fingerprint 57/225/560 m, scan of 38 tiles (`docs/PODSUMOWANIE-KIERUNKOW.md`). LOLA data are named in the challenge resources. |
+| 8 | Conditions for landing, mobility, navigation, robotics, construction | **FRAME (use case)** | Needs no new data. Slope and roughness are directly parameters of landing safety and trafficability. Answers "Connect your analog to exploration". |
+| 1 | Geology, mineralogy, surface materials | **SUPPORTING, minimal version** | We have a bare-ground filter (ESA WorldCover). We do not do mineralogy. Optionally rock abundance from Diviner, if time allows. |
+| 3 | Temperature, illumination, extremes | **SUPPORTING** | Diviner is a separate item in the challenge resources, and the description says its polar products "could be compared with extreme cold (...) terrestrial environments". Plan: MODIS LST against Diviner + latitude as a proxy for the low Sun. **Not yet checked on data.** |
+| 4 | Water, ice, permafrost, resources | skip | One sentence on the site card. Glaciers should at most be filtered out, because they inflate the terrain score. |
+| 5 | Dust, wind, erosion, atmospheric processes | skip | Mainly about Mars. Our target is the lunar south pole. |
+| 6 | Biology, extremophiles, biosignatures | skip | No global data and no expertise in the team. |
+| 7 | Caves, lava tubes, subsurface | skip | Not visible in a 30 m DEM. |
 
-**Dlaczego trzy, a nie osiem:** własny skan pokazał, że sam teren nie wystarcza (Tatry 36%, Alpy 34% komórek „księżycowych”, dopiero filtr gołego gruntu je usuwa), więc jeden wymiar to za mało. Każdy kolejny wymiar to nowe źródło danych i nowa walidacja, a do deadline'u (ndz 15.11, 13:30) zostało mało czasu. Trzy wymiary dają uczciwe „wielowymiarowe podobieństwo” i mieszczą się w czasie.
+**Why three and not eight:** our own scan showed that terrain alone is not enough (Tatras 36%, Alps 34% "lunar" cells; only the bare-ground filter removes them), so one dimension is too few. Every further dimension is a new data source and a new validation, and little time is left until the deadline (Sun 15 Nov, 13:30). Three dimensions give an honest "multidimensional similarity" and fit in the time.
 
-### 12 „potential considerations”: co mamy, co dorobić
-| Consideration | Status | Co zrobić |
+### The 12 "potential considerations": what we have, what to add
+| Consideration | Status | What to do |
 |---|---|---|
-| Think beyond visual similarity | ✅ nasza główna teza | Mówić wprost: mierzymy kształt terenu, nie wygląd zdjęcia. |
-| Consider different dimensions of analogy | 🔶 częściowo | 3 wymiary jak w tabeli wyżej. |
-| An analog does not have to match everything | ✅ pasuje do metody | Wynik pokazywać **osobno dla każdego wymiaru**, nie jedną liczbą. |
-| Think about processes as well as places | ❌ pomijamy | Jedno zdanie: dlaczego tereny polarne i wulkaniczne mają stosunek 560/57 bliski księżycowemu (hipoteza, nie wynik). |
-| Look beyond well-known analog sites | 🔶 kandydaci są, nowość niesprawdzona | **Filtr nowości**: lista znanych analogów + ręczne sprawdzenie top 5 w literaturze. Strona wymienia jako znane: Antarktydę, Atakamę, Islandię, Hawaje, a w streszczeniu także Haughton Crater i Death Valley. |
-| Explore the whole Earth, including below its surface | 🔶 pilotaż 38 kafli | Większy skan regionów gołego gruntu. Podziemia pomijamy. |
-| Use multiple datasets when useful | ✅ | LOLA (PGDA) + Copernicus DEM + WorldCover, dojdzie Diviner + MODIS LST. |
-| Consider scale | ✅ | Komórki ok. 2 km. Pokazać, że wynik zależy od okna (Meteor Crater przy 2 km i 4 km). |
-| Connect your analog to exploration | 🔶 tylko w planie | Use case: gdzie przećwiczyć lądowanie i jazdę łazika w terenie o chropowatości jak przy biegunie Księżyca. |
-| Be creative with your approach | ✅ | Metryka podobieństwa + ranking + mapa. Wyzwanie wymienia „similarity-ranking system” wprost. |
-| Remember Earth's limits as an analog | 🔶 do dopisania | Stała sekcja w karcie miejsca: grawitacja, próżnia, promieniowanie, regolit, roślinność, rozdzielczość 30 m. |
-| Surprise us | 🔶 zależy od filtra nowości | Nieoczywisty kandydat (np. Tassili n'Ajjer, Kunlun) + Morasko jako kontrprzykład. |
+| Think beyond visual similarity | ✅ our main thesis | Say it explicitly: we measure the shape of the terrain, not the look of an image. |
+| Consider different dimensions of analogy | 🔶 partly | 3 dimensions as in the table above. |
+| An analog does not have to match everything | ✅ fits the method | Show the result **separately for each dimension**, not as one number. |
+| Think about processes as well as places | ❌ skip | One sentence: why polar and volcanic terrain have a 560/57 ratio close to the lunar one (hypothesis, not a result). |
+| Look beyond well-known analog sites | 🔶 candidates exist, novelty unchecked | **Novelty filter**: list of known analogs + manual check of the top 5 in the literature. The page names as known: Antarctica, Atacama, Iceland, Hawaii, and in the summary also Haughton Crater and Death Valley. |
+| Explore the whole Earth, including below its surface | 🔶 pilot of 38 tiles | A larger scan of bare-ground regions. We skip the subsurface. |
+| Use multiple datasets when useful | ✅ | LOLA (PGDA) + Copernicus DEM + WorldCover; Diviner + MODIS LST will be added. |
+| Consider scale | ✅ | Cells of about 2 km. Show that the result depends on the window (Meteor Crater at 2 km and 4 km). |
+| Connect your analog to exploration | 🔶 only in the plan | Use case: where to practise landing and rover driving on terrain with roughness like near the lunar pole. |
+| Be creative with your approach | ✅ | Similarity metric + ranking + map. The challenge names a "similarity-ranking system" explicitly. |
+| Remember Earth's limits as an analog | 🔶 to be added | A fixed section on the site card: gravity, vacuum, radiation, regolith, vegetation, 30 m resolution. |
+| Surprise us | 🔶 depends on the novelty filter | A non-obvious candidate (e.g. Tassili n'Ajjer, Kunlun) + Morasko as a counterexample. |
 
-### Kolejność pracy (od najważniejszego)
-1. **Filtr nowości dla top 5.** Bez niego odpada „Look beyond well-known sites” i „Surprise us”, czyli to, co wyróżnia projekt.
-2. **Karta miejsca**: wynik per wymiar + „gdzie analogia się łamie”. To pokrywa cztery considerations naraz przy małym koszcie.
-3. **Temperatura (Diviner + MODIS LST).** Najpierw 30 minut sprawdzenia, czy dane dają się pobrać i porównać. Jeśli nie, zostajemy przy dwóch wymiarach i mówimy o tym otwarcie.
-4. **Większy skan + mapa.**
-5. **Pitch** równolegle od początku (kryterium Presentation).
+### Order of work (most important first)
+1. **Novelty filter for the top 5.** Without it "Look beyond well-known sites" and "Surprise us" fall away, i.e. what sets the project apart.
+2. **Site card**: result per dimension + "where the analogy breaks down". This covers four considerations at once at low cost.
+3. **Temperature (Diviner + MODIS LST).** First 30 minutes to check whether the data can be downloaded and compared. If not, we stay with two dimensions and say so openly.
+4. **Larger scan + map.**
+5. **Pitch** in parallel from the start (Presentation criterion).
 
-### Jak to się ma do 5 kryteriów jury
-| Kryterium jury | Co je podnosi w tym wyborze |
+### How this relates to the 5 jury criteria
+| Jury criterion | What raises it in this choice |
 |---|---|
-| Relevance | Dane NASA w rdzeniu: LOLA i Diviner są na liście zasobów wyzwania. |
-| Creativity | Metryka z kształtu terenu zamiast tekstury zdjęć, systematyczny skan zamiast ręcznej listy. |
-| Validity | Znane analogi wychodzą wysoko, kontrole nisko; jawne ograniczenia metody. To nasze najsłabsze kryterium, więc ograniczeń nie ukrywamy. |
-| Impact | Use case testów lądowników i łazików. |
-| Presentation | Jedna historia: „gdzie na Ziemi przećwiczyć lądowanie przy biegunie Księżyca” + Morasko. |
+| Relevance | NASA data at the core: LOLA and Diviner are on the challenge resource list. |
+| Creativity | A metric from terrain shape instead of image texture, a systematic scan instead of a hand-made list. |
+| Validity | Known analogs come out high, controls low; explicit limits of the method. This is our weakest criterion, so we do not hide the limits. |
+| Impact | Use case of lander and rover tests. |
+| Presentation | One story: "where on Earth to practise landing near the lunar pole" + Morasko. |
 
-### Czego ta analiza nie rozstrzyga
-- Wybór wymiarów zakłada ścieżkę LiDAR/DEM opisaną w `ANALOGI-LIDAR-RESEARCH-I-PLAN.md`. Przy innym pomyśle na projekt tabela wyglądałaby inaczej.
-- Wykonalność wymiaru temperatury jest niesprawdzona (Diviner nie był jeszcze pobierany).
-- Strona zapowiada, że zasoby mogły być uzupełniane przed startem hackathonu. Stan zasobów na 14.11: 11 linków, te same co w `ANALOGI-KSIEZYC-MARS-LINKI.md`.
+### What this analysis does not settle
+- The choice of dimensions assumes the LiDAR/DEM track described in `ANALOGI-LIDAR-RESEARCH-I-PLAN.md`. With a different project idea the table would look different.
+- The feasibility of the temperature dimension is unchecked (Diviner has not been downloaded yet).
+- The page says that resources may have been added before the start of the hackathon. State of the resources on 14 Nov: 11 links, the same as in `ANALOGI-KSIEZYC-MARS-LINKI.md`.
 
 ---
-## Część 2. Oryginalna treść wyzwania (EN, bez zmian)
+## Part 2. Original challenge text (EN, unchanged)
 
 ### Summary
 Selecting future landing sites and lunar base locations depends on many factors, including topography, geology, environment, and available resources, to name a few. Places on Earth that have analogous characteristics to the Moon or Mars – the Atacama Desert, Haughton Crater, Death Valley – allow mission teams to test equipment and methods before they fly; however, such terrestrial analog sites are not entirely well characterized. Your challenge is to use open Earth, Moon, and Mars data from NASA and other space agencies to identify and characterize new terrestrial analogs for future bases or landing sites, drawing on deserts, polar regions, volcanic and arid terrains, caves, and other environments that share conditions with the lunar or Martian surface, then present your findings as a map, visualization, or other tool.
@@ -136,4 +136,4 @@ Be creative in how you search for, analyze, and communicate your analog. You cou
 **JAXA (Japan Aerospace Exploration Agency)**
 - [JAXA G-Portal](https://gportal.jaxa.jp/gpr/index/index): Provides Earth-observation products from JAXA missions, searchable by variables such as precipitation, snow, vegetation, etc.
 
-*Uwaga redakcyjna: z linków usunięto parametr śledzący `utm_source`, reszta adresów jest jak na stronie.*
+*Editorial note: the tracking parameter `utm_source` was removed from the links; the rest of the addresses are as on the page.*
