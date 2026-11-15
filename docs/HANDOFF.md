@@ -1,119 +1,59 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 01:30, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 06:35, by the opus worker of the conductor session (Claude Code) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
 **Scope.** Zodiak searches Earth for terrain analogs of candidate base regions at the lunar south pole: the ranking reference is `base_regions`, the seven lunar south-pole candidate regions pooled (`pipeline/score.py`, `data/moon/reference.json`). Mars is a separate research direction, outside the ranking and its validation; the official contest title names both. (Decision of issue #16.)
 
-## 0. START HERE (state at 01:30, Sun 15 Nov)
+## 0. START HERE (state at 06:35, Sun 15 Nov)
 
-**Read first (05:30, J33 full run, issue #19): the top of the default ranking is mostly moss-and-lichen tundra.**
-The default mask counts WorldCover class 100 "moss and lichen" as bare. With class 60 "bare / sparse vegetation"
-only, 3 of the default top 30 (16 of the top 100) have a strict site within 3 km; Putorana Plateau sites fall
-from 228 to 1, all sites from 3,175 to 1,561, candidate cells from 63,618 to 35,875. The strict top 30 is
-Atacama and Puna 13, western Tibetan Plateau 8, southern Peru and Arica 4, Hazen Plateau and northern Ellesmere
-3, Mauna Loa 1 (`data/validation/landcover_sensitivity.json`, key `full_run`; ranking
-`data/validation/landcover_sensitivity/ranking_bare_strict.csv`). Conductor's decision: the default mask does
-not change before the freeze; both rankings are presented, the strict one as the conservative reading (team
-decision request on issue #11). Never call the Putorana tops "bare rock".
+Updated by the opus worker of the conductor session (Claude Code) on Wiktor's machine. Board: pinned issue #13.
+**Team decisions are collected in one comment on #11, "Decisions for the team on Sunday morning"** (headline
+ranking; accept #19; four proposed known-analog rows; ranks 13 and 28 and the six Ngari rows; hosting and demo
+link; Polish files and private material before going public; app data budget).
 
-**New rule since 01:30: "Before you report DONE"** (`AGENTS.md` for Codex and other agents, the same text in
-`CLAUDE.md`): five checks an agent does on its own result before the result comment, and a defect found in
-another file may be fixed in a separate commit if it is a few lines. Reason: every defect found in review this
-night had passed the Accept checks of its job.
+**State of the result** (story order and wording: section 9; every number with file and key:
+`docs/pitch/NUMBERS.md`).
+- Method: terrain shape between about 200 m and 1.6 km in 2 km cells, the same code on LOLA (seven south-pole
+  base regions pooled, `base_regions`) and on Copernicus; 1,758,778 valid cells in 2,060 tiles; 3,175 sites.
+- Default ranking `data/sites/ranking.csv`: top 30 mostly Arctic moss-and-lichen tundra (16 Putorana sites),
+  because the default mask counts WorldCover class 100 as bare. Unchanged before the freeze (conductor's decision).
+- Strict ranking `data/validation/landcover_sensitivity/ranking_bare_strict.csv` (class 60 only, J33 #19):
+  3 of the default top 30 remain; Atacama/Puna 13, western Tibet incl. Ladakh 8, southern Peru/Arica 4, Hazen
+  Plateau 3, Mauna Loa 1, other 1. Shown as the conservative reading. Its `novelty` column is now written by
+  `pipeline/sites.py` from `novelty_check_strict.csv` (J40 #26): top 30 9 established, 15 mentioned, 6 not found.
+- Validation: tile AUC 0.531 (chance); enrichment 1.02 vs 0.39 on 22 lunar analogs, borderline (2.8% of random
+  runs); ranks stable to the lunar sample, sensitive to the feature set (J32 #18).
+- `breaks` now uses the 12-month NASA MODIS night mean unless JAXA SGLI has all 12 months (rank 1: 144 K warmer
+  at night, before 157 K from 7 months).
 
-**Since 23:20 (three agents worked on `main`; reviews are comments on the issues):**
-- **J29 delivered** (issue 10, open, waits for review): a third elevation model from JAXA (AW3D30) against
-  Copernicus and NASADEM (`docs/sources/j29.md`).
-- **J10 follow-up** (commit 9289260): the crater close-up no longer reads from `scratch/` and exits non-zero
-  when a part fails; the overlay figure says that the lunar crater (20 m pixels) is to be compared with Meteor
-  Crater at 30 m, not at 1 m.
-- **J26 done** (issue 6, closed): temperature and soil moisture of 978 sites do not confirm that the dune-field
-  flag marks dry sand (`docs/sources/j26.md`). The flag stays a terrain rule; say so.
-- **J11 drafts are on `main`** (issue 4, open): `README.md`, `docs/pitch/` (seven slides, pitch, Q&A, portal
-  fields, `NUMBERS.md`). They wait for the two items below, for the demo link and for a person.
-- **J22 delivered, not closed** (issue 2): 30 rows in `data/sites/novelty_check.csv`, `docs/NOVELTY.md` rewritten.
-  The J20 rerun restored countries to all 200 ranking rows. The review findings of J22 are corrected (merged from
-  branch `claude/issue-2-j22-fixes`): verdicts rest only on opened pages (top 30: 24 unreported, 4 mentioned as
-  regional Mars analogs, 2 established), the mare and hollow wording is gone from `docs/NOVELTY.md`, and the
-  Pingualuit and El'gygytgyn rows of `known_analogs.csv` cite opened pages and are `analog_for = mars`.
-- **J20 correction ready for review** (issue 1): the same eligibility rule applies to both groups and the corrected
-  tile-recovery AUC is 0.531 (90% interval 0.396–0.668, 14 known tiles), consistent with chance; it was
-  0.550 with 15 tiles before Pingualuit became a Mars-only analog in the J22 correction. The ranking and both validations
-  were rebuilt with the updated `known_analogs.csv` and the Natural Earth country outlines. See `docs/VALIDATION.md`.
-- **J30 in progress** (issue 14, branch `t-pl2moon`, not merged): Polish lidar areas against lunar sites at 1 to
-  2 m with a 3D viewer; scope extension agreed with the team owner.
-- **J7 web app: data layer built, page not yet, nothing in git** (issue 3). `app/build_data.py` writes `app/data/`
-  (300 sites, 2,060 tiles, 9 lunar targets, validation, sources, method, 76 images; keys in
-  `app/data/SCHEMA.md`) and `app/criteria.json` lists 38 comparison criteria with their status. The page still
-  reads the pilot files, which no longer exist. The plan in order of importance, with the latest time of each
-  step, is `docs/TASKS.md` section 5, J7: A1 commit `app/` (02:00), A2 map and ranking (04:00), A3 site card
-  (05:30), A4 lunar target, A5 method and sources, A6 wording (07:30), then the criteria table if time is left;
-  final build and screenshots 09:15; code freeze 09:30; hosting is a person's decision.
-- Not started: J25 (its card block is step A3 of J7; registry and citations remain), J27. The repository is
-  still private.
+**Since 01:30** (all on `main`): #16 and #18 closed; J33 full run (#19), J38 front-end spec (#24), J39 app data
+export (#25), J40 review of the strict top 30 (#26) delivered and open for review; texts refreshed (#4,
+349a359); defects fixed (8341591, 6319944, 0f483e6, 997eb75, f098a5b): VALIDATION J33 paragraph, METHOD 77
+known analogs, strict novelty fill, 12-month temperature in `breaks`, six LRO/PGDA sources marked used,
+`partner_checks.json` producer, app data rebuilt (23.81 MB).
 
-Everything below describes the state at 23:20 and still holds, except where this list says otherwise.
+**Freeze (#8): PASS at 7b58f91** (fresh clone, Python 3.12.10, every command of `docs/FREEZE.md` exits 0; only
+run metadata changes: run log, commit hash in `app/data/meta.json`, `generated` of `nasadem_vs_copdem.json`).
+Three reproducibility defects of the first run were fixed (1dfa9a5, 315b44b, 7b58f91). No tag; repository
+still private. After the freeze: only text fixes and the demo link, with a person's approval.
 
-**The method is complete end to end and the final ranking is in the repo.** Read `docs/METHOD.md` (ten steps,
-the data source of each, the two decisions, the limits): it is the text the README and the pitch quote.
+**Open issues:** #4 texts (a person approves), #11 people (#8 freeze closed after the PASS), #12 backlog, #14 J30 (branch
+`t-pl2moon`), #17 J31, #19 J33 (accept), #20 J34 (drop first), #21 J35, #22 J36 app, #24 J38 (review),
+#25 J39 (review), #26 J40 (review, decisions in #11).
 
-**What is in the repo now.**
-- **Ranking of the full scan** (2,101 tiles, 1.76 million cells): `data/sites/ranking.csv` (200 sites),
-  `sites.geojson` (3,175 sites, 521 with the dune-field flag), target `base_regions`, ranking key
-  `best_window_km2`. Computed by J18 on one machine and reproduced by J19 on another: same sites, same order,
-  same numbers.
-- **Review of the top 30**: `data/sites/top30_review.csv`, images `docs/figures/top30_sheet_1..3.png`. 26 not
-  artefacts, 4 unsure (haze or cloud on every image), no sand sea, lake bed, salt flat or glacier. **The top 30
-  is a handful of places:** 16 sites on the Putorana Plateau (Siberia), 5 in southern Peary Land (north
-  Greenland), 5 in Arctic Canada, then the Polar Urals, Chukotka, Atacama (rank 8) and Mauna Loa (rank 24).
-  Present regions, not ranks. The verdicts come from an SI model; a person has not looked yet.
-- **Which elevation model feeds the ranking is a rule in code** (`pipeline.score.dem_policy_from_rule`): NASADEM
-  where it exists if the comparison of J17b passes (Spearman of the per-tile candidate share at least 0.90 and
-  at least 35 of the top 50 tiles shared), else Copernicus. **The comparison is done (J17b, 23:20): 0.637 and 21
-  of 50, so the rule returns Copernicus and the ranking stands.** NASADEM (619 tiles in
-  `data/earth/cells_nasadem/`) is the cross-check: same slopes, different closed depressions, and therefore a
-  different list of candidate cells (33,911 against 2,996; `docs/sources/j17.md`, last section).
-- **Context for the new ranking**: NASA POWER for the top 150 sites, a NASA Worldview image for the top 60
-  (`data/sites/nasa_context.csv`, `data/sites/images/`); measured surface temperature (JAXA, NASA MODIS), soil
-  moisture (JAXA) and permafrost (ESA) for 118 sites (`data/sites/partner_context.csv`, job J24).
-- **Challenge resources**: 8 of the 11 links are used (`data/sources.csv`): all five NASA links, Copernicus, the
-  ESA Open Science Catalog, JAXA G-Portal. The three Canadian links are not; jobs J27 and J28.
-- **One entry point**: `python -m pipeline.run --list`. Tests: `python -m pytest tests -q`, 33 pass.
-  New dependency since 22:50: `numcodecs` (`pip install -r requirements.txt`).
+**People still owe** (issue #11): the seven decisions; switch the team's challenge on the Space Apps website;
+read and approve `README.md` and `docs/pitch/`; the demo link (`DEMO LINK PLACEHOLDER`); look at the strict
+contact sheets `docs/figures/top30_strict_sheet_1..3.png` and the sites of `docs/NOVELTY.md` section 5; before
+the repository becomes public, deal with the Polish files in `docs/moon-analogs/` and the private material in
+`docs/hackathon/` (a private e-mail address of the Local Lead and a summary of Wiktor's mailbox). Making the
+repository public and any `submission` tag are a person's steps.
 
-**If the comparison of the two elevation models is ever rerun** (`python -m pipeline.run validate-dem`): the
-`sites` stage reads its outcome by itself. Should the first line of a new `data/raw/run_logs/sites_*.log` say
-`dem policy: nasa-first`, the ranking has changed and `python -m pipeline.review` has to be redone.
-
-**What is left** (every job is a GitHub issue with its full spec; the board is the pinned issue 13; the same
-specs are in `docs/TASKS.md` section 5 and `docs/TASKS-PARTNER-DATA.md`):
-J20 review of the correction ·
-J22 fixes: verify or withdraw the `mentioned` verdicts, correct the wording, then a person opens the evidence ·
-J7 web app (`app/` is Wiktor's prototype, still uncommitted on his machine) ·
-J11 final texts after J20 and J22, demo link, a person approves · J25 show the measured surface data in the
-site card and cite it · J30 Poland against the Moon (in progress) · J27 radar look with CSA RADARSAT-1 ·
-J28, J29 optional · J23 fresh-clone check and freeze, Sun 08:30 (a fresh clone has no Natural Earth file).
-
-**How to talk about the result** (details in section 9): the method finds terrain of a lunar shape; it is not a
-detector of the sites people chose. Known lunar analogs lie in more lunar-like ground than random places (median
-enrichment 1.02 against 0.39, 22 sites tagged lunar or both) and at about the average bare cell (1.02). The top of the ranking is
-Arctic plateau terrain whose "bare ground" is partly tundra. The coldest site is still about 94 K warmer than
-the warmest lunar region. Nothing is called a discovery; "mentioned" means the region is named as a Mars analog in general terms
-(`docs/NOVELTY.md`, issue 2). The dune-field flag is a terrain rule, not a confirmed sand detector (J26).
-
-**Rules.** No `Claude-Session:` line or any session link in a commit; no keys, tokens or private e-mail
-addresses in the repo (Wiktor, 14 Nov; history was rewritten at about 19:45, so a clone made earlier must be
-replaced by a fresh one). Every analysis through code in the repo; heavy stages on the cloud runner
-(`python -m pipeline.cloud ...`, private repo `witczakw/moon-scan-runner`). **Jobs are GitHub issues; Axis is
-not used since 23:20 on 14 Nov** (`CLAUDE.md`): take an issue before you start, comment the result, close it. Wiktor presents; he wants a film of the app later: do not prepare it until he asks.
-
-**People still owe.** Bartosz: switch the team's challenge on the Space Apps website; make the repository public
-before submission, after deciding what to do with `docs/hackathon/` (it holds a private e-mail address of the
-Local Lead and a summary of Wiktor's mailbox). Someone: look at the three contact sheets and at the five sites
-of `docs/NOVELTY.md` section 5; read and approve the drafts in `README.md` and `docs/pitch/`; put the demo link
-into `docs/pitch/SUBMISSION-FIELDS.md`. The full list is issue 11. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 306.40 E) is fresh.
+**Rules.** No `Claude-Session:` line or any session link in a commit; no keys, tokens or private e-mail addresses
+in the repo, commit messages or issues. Jobs are GitHub issues; Axis is not used (`CLAUDE.md`). Before DONE: the
+five checks of `CLAUDE.md` / `AGENTS.md`. Wiktor presents; he wants a film of the app later: do not prepare it
+until he asks. Older state of this section: the git history of this file (`git log -p docs/HANDOFF.md`).
 
 ## 1. Where things stand
 
