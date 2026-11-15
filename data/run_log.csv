@@ -36,3 +36,7 @@ sites,python.exe -m pipeline.sites,2026-11-15 02:25:54,32.4,0,d1d554f,data/raw/r
 catalog,python.exe -m pipeline.catalog,2026-11-15 02:26:26,1.0,0,d1d554f,data/raw/run_logs/catalog_20261115_022626.log
 partner-context,python.exe -m pipeline.partner_context,2026-11-15 03:56:56,6.0,0,1060f0b,data/raw/run_logs/partner-context_20261115_035656.log
 partner-context,python.exe -m pipeline.partner_context,2026-11-15 04:05:14,161.3,0,dbdc33f,data/raw/run_logs/partner-context_20261115_040514.log
+sites,python.exe -m pipeline.sites,2026-11-15 04:19:45,32.3,0,3c9df07,data/raw/run_logs/sites_20261115_041945.log
+validate-enrichment,python.exe validation/enrichment.py,2026-11-15 04:20:17,2.7,0,3c9df07,data/raw/run_logs/validate-enrichment_20261115_042017.log
+validate-effectiveness,python.exe validation/effectiveness.py all,2026-11-15 04:20:20,11.0,0,3c9df07,data/raw/run_logs/validate-effectiveness_20261115_042020.log
+catalog,python.exe -m pipeline.catalog,2026-11-15 04:20:31,0.9,0,3c9df07,data/raw/run_logs/catalog_20261115_042031.log
