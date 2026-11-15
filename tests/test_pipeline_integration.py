@@ -101,6 +101,9 @@ def pipeline_run(tmp_path_factory):
         csv.writer(stream).writerow(header)
     copy_input(repo, "data/sample/earth_cells_sample.parquet", "data/earth/cells/ci-sample.parquet")
     copy_input(repo, FIXTURE.relative_to(ROOT) / "known_analogs.csv", "data/reference/known_analogs.csv")
+    copy_input(repo, FIXTURE.relative_to(ROOT) / "known_analogs_selected_for.csv",
+               "data/reference/known_analogs_selected_for.csv")  # J31, issue #17
+    copy_input(repo, "data/validation/landcover_sensitivity/cells_bare_strict.parquet")
     for name in CONTEXT_TABLES:
         table = Path("data/sites") / name
         with (ROOT / table).open(encoding="utf-8", newline="") as stream:
@@ -187,6 +190,17 @@ def test_lunar_enrichment_excludes_mars_only_sites(pipeline_run):
     assert {site["analog_for"] for site in validation["sites"]} <= {"moon", "both"}
     # Kept for reference only, outside every headline number (#16).
     assert "Mars-only control" in {site["name"] for site in validation["mars_only_excluded"]["sites"]}
+
+
+def test_enrichment_reports_the_terrain_chosen_subset(pipeline_run):
+    """J31 (issue #17): the subset selected_for = terrain is reported next to the headline, which it does not change."""
+    validation = read_json(pipeline_run / "data/validation/enrichment.json")
+    terrain = validation["by_selected_for"]["terrain"]
+    headline = {site["name"] for site in validation["sites"]}
+    assert {site["name"] for site in terrain["sites"]} == {"Moon control"} & headline
+    assert terrain["n_rows_read"] == 1 and terrain["too_few_to_test"] is True
+    assert validation["by_selected_for"]["unknown"]["n_rows_read"] == 0  # the Mars-only row is not in the lunar test
+    assert "strict_mask" in validation and validation["n_sites_tested"] == len(validation["sites"])
 
 
 def test_sample_export_has_the_schema_keys(pipeline_run):

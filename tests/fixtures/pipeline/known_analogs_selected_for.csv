@@ -1,0 +1,3 @@
+name,lat,lon,analog_for,type,selected_for,terrain_also_named,evidence_url,opened,quoted_sentence,note
+Moon control,75.45,-89.8,moon,polar,terrain,yes,,no,,synthetic
+Mars-only control,75.55,-89.3,mars,polar,unknown,no,,no,,synthetic

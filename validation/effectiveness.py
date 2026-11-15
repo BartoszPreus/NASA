@@ -10,7 +10,9 @@ Data and licenses: see data/sources.csv and docs/sources/j6.md.
 Copernicus GLO-30: https://registry.opendata.aws/copernicus-dem/
 ESA WorldCover: https://esa-worldcover.org/
 NASA LOLA: https://pgda.gsfc.nasa.gov/products/90
-Known analogs: citations per row in data/reference/known_analogs.csv.
+Known analogs: citations per row in data/reference/known_analogs.csv; why each was chosen (J31, issue #17):
+data/reference/known_analogs_selected_for.csv, sources in docs/sources/j31.md. Recovery also reports
+`by_selected_for` and `strict_mask` (J31 additions written with SI assistance, Claude Code).
 Libraries: https://numpy.org/, https://pandas.pydata.org/, https://scipy.org/,
 https://matplotlib.org/. ROC tie handling follows the Mann–Whitney rank statistic:
 https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mannwhitneyu.html
@@ -37,6 +39,11 @@ BOOTSTRAP_SEED = 20261114
 MIN_BARE = 100
 JOB = "J20 full-scan validation"
 OUT = Path(paths.VALIDATION_EFFECTIVENESS)
+# J31 (issue #17): why each known analog was chosen, and the strict land-cover tile table of J33 (issue #19).
+SELECTED_FOR = Path(paths.REFERENCE) / "known_analogs_selected_for.csv"
+STRICT_TILE_SUMMARY = Path(paths.VALIDATION) / "landcover_sensitivity" / "tile_summary_bare_strict.csv"
+GROUPS = ("terrain", "material", "environment", "other", "unknown")
+MIN_GROUP_TILES = 8
 
 
 def configuration():
@@ -179,7 +186,97 @@ def recovery(config):
         all_candidates=recovery_metrics((positive["n_candidate"] / positive["n_bare"]).to_numpy(),
                                         (background["n_candidate"] / background["n_bare"]).to_numpy()),
     )
+    # J31 (issue #17): the same test per reason the analog was chosen for. Additional keys only.
+    points = with_selected_for(known.loc[~is_region])
+    results["by_selected_for"] = by_selected_for(summary, points, background.index, candidate_shares)
+    results["strict_mask"] = strict_mask_recovery(config, points, regions, candidate_shares)
     return results
+
+
+def with_selected_for(known, path=None):
+    """Join data/reference/known_analogs_selected_for.csv (J31) to known rows by name, lat and lon."""
+    table = pd.read_csv(path or SELECTED_FOR)
+    if not set(table["selected_for"]) <= set(GROUPS):
+        raise ValueError(f"selected_for must be one of {GROUPS}; got {sorted(set(table['selected_for']))}")
+
+    def key(frame):
+        return (frame["name"].astype(str).str.strip() + "|" + frame["lat"].astype(float).round(4).astype(str)
+                + "|" + frame["lon"].astype(float).round(4).astype(str))
+
+    reason = dict(zip(key(table), table["selected_for"]))
+    broad = dict(zip(key(table), table["terrain_also_named"].astype(str).str.strip().str.lower().eq("yes")))
+    keys = key(known)
+    missing = sorted(known.loc[~keys.isin(reason.keys()), "name"])
+    if missing:
+        raise ValueError(f"known_analogs_selected_for.csv has no row for: {missing}")
+    return known.assign(selected_for=keys.map(reason).to_numpy(), terrain_also_named=keys.map(broad).to_numpy())
+
+
+def group_masks(points):
+    """Row masks per selected_for group, plus terrain_broad (terrain, or terrain named next to another reason)."""
+    masks = {group: points["selected_for"].eq(group) for group in GROUPS}
+    masks["terrain_broad"] = points["selected_for"].eq("terrain") | points["terrain_also_named"]
+    return masks
+
+
+def by_selected_for(summary, points, background_tiles, share):
+    """Recovery per group: a tile is positive for a group if any of its known rows has that reason. The background
+    is the pooled background (every known lunar tile and the catalogued regions stay out of it)."""
+    eligible = summary["n_bare"].ge(MIN_BARE)
+    background = share(summary.loc[background_tiles]).to_numpy()
+    sorted_background = np.sort(background)
+    tiles = pd.Series([tile_id(row.lat, row.lon) for row in points.itertuples()], index=points.index)
+    out = {"min_tiles_for_auc": MIN_GROUP_TILES,
+           "rule": "positive = scanned tiles with n_bare >= min_bare holding a known moon/both point row of the group; "
+                   "background as in the pooled test; a tile with rows of several groups counts in each of them",
+           "source": "data/reference/known_analogs_selected_for.csv"}
+    for group, mask in group_masks(points).items():
+        group_tiles = sorted(set(tiles[mask]))
+        scored = [t for t in group_tiles if t in summary.index and eligible.get(t, False)]
+        values = share(summary.loc[scored]).to_numpy() if scored else np.array([])
+        percentiles = midranks(values, sorted_background) * 100 if scored else np.array([])
+        entry = {
+            "n_rows": int(mask.sum()),
+            "n_tiles": len(group_tiles),
+            "n_eligible_tiles": len(scored),
+            "tiles_outside_scan": [t for t in group_tiles if t not in summary.index],
+            "tiles_below_min_bare": [t for t in group_tiles if t in summary.index and not eligible[t]],
+            "tiles": {t: {"percentile": float(p), "rows": sorted(points.loc[mask & tiles.eq(t), "name"])}
+                      for t, p in zip(scored, percentiles)},
+            "median_percentile": float(np.median(percentiles)) if scored else None,
+        }
+        if len(scored) >= MIN_GROUP_TILES:
+            metrics = recovery_metrics(values, background)
+            entry.update(too_few_to_test=False, auc=metrics["auc"], auc_ci90=metrics["auc_ci90"],
+                         bootstrap_samples=N_BOOTSTRAP, bootstrap_seed=BOOTSTRAP_SEED)
+        else:
+            entry.update(too_few_to_test=True, auc=None, auc_ci90=None)
+        out[group] = entry
+    return out
+
+
+def strict_mask_recovery(config, points, regions, share):
+    """The pooled and per-group recovery on the strict land-cover tile table (J33: WorldCover class 60 only)."""
+    path = Path(STRICT_TILE_SUMMARY)
+    if not path.exists():
+        raise FileNotFoundError(f"{path} is missing: run validation/landcover_strict_ranking.py (J33).")
+    summary = pd.read_csv(path).set_index("tile")
+    if set(summary["target"]) != {config["target"]}:
+        raise ValueError("The strict tile summary does not match the current target.")
+    tiles = {tile_id(row.lat, row.lon) for row in points.itertuples()}
+    eligible = summary["n_bare"].ge(MIN_BARE)
+    is_known = summary.index.isin(tiles)
+    positive = summary.loc[is_known & eligible]
+    background = summary.loc[~is_known & eligible]
+    distance = sites.haversine_km(background["lat"].to_numpy()[:, None], background["lon"].to_numpy()[:, None],
+                                  regions["lat"].to_numpy(), regions["lon"].to_numpy())
+    background = background.loc[~(distance <= regions["radius_km"].to_numpy()).any(axis=1)]
+    pooled = recovery_metrics(share(positive).to_numpy(), share(background).to_numpy())
+    pooled.pop("roc")
+    return {"source": "data/validation/landcover_sensitivity/tile_summary_bare_strict.csv",
+            "bare_definition": "WorldCover class 60 only (J33, issue #19)",
+            "pooled": pooled,
+            "by_selected_for": by_selected_for(summary, points, background.index, share)}
 
 
 def legacy_grid(previous):
@@ -307,6 +404,14 @@ def main(argv=None):
         print(f"Recovery: {res['n_positive_tiles']} positive and {res['n_background_tiles']} background tiles; "
               f"AUC {res['auc']:.3f} (90% CI {lo:.3f} to {hi:.3f}); "
               f"median positive percentile {res['median_positive_percentile']:.1f}.", flush=True)
+        for label, groups in (("default mask", res["by_selected_for"]),
+                              ("strict mask", res["strict_mask"]["by_selected_for"])):
+            for group in (*GROUPS, "terrain_broad"):
+                g = groups[group]
+                auc = "too few to test" if g["too_few_to_test"] else \
+                    f"AUC {g['auc']:.3f} (90% CI {g['auc_ci90'][0]:.3f} to {g['auc_ci90'][1]:.3f})"
+                print(f"  {label} | {group}: {g['n_eligible_tiles']} eligible tiles; {auc}; "
+                      f"percentiles {[round(t['percentile'], 1) for t in g['tiles'].values()]}", flush=True)
     if "stability" in selected:
         results["stability"] = stability(scored, target, previous)
         print(f"Stability (Spearman): {results['stability']['named_regions_spearman']}", flush=True)

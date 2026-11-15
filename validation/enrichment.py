@@ -12,8 +12,15 @@ Why this and not "best cell within the radius" (validation/effectiveness.py, par
 cells per circle the maximum is almost always in the top few percent, for known sites and for random points alike,
 so that statistic cannot separate them. A share does not saturate.
 
+J31 (issue #17) adds, without changing the keys above: "by_selected_for" (the same statistic for the sites of each
+reason the analog was chosen for: terrain, material, environment, other, unknown, plus terrain_broad = terrain or
+terrain named next to another reason; data/reference/known_analogs_selected_for.csv, sources docs/sources/j31.md;
+groups under MIN_GROUP_SITES sites are flagged too few to test) and "strict_mask" (the test with bare = WorldCover
+class 60 only, cells_bare_strict.parquet of J33, issue #19).
+
 Inputs : data/raw/earth_scored_full.parquet (written by `python -m pipeline.sites`, job J4),
-         data/reference/known_analogs.csv (jobs J8, J9)
+         data/reference/known_analogs.csv (jobs J8, J9), data/reference/known_analogs_selected_for.csv (J31),
+         data/validation/landcover_sensitivity/cells_bare_strict.parquet (J33)
 Outputs: data/validation/enrichment.json, docs/figures/eff_enrichment.png
 Run    : .venv/Scripts/python validation/enrichment.py [--target <region>] [--out <json>] [--figure <png>|none]
          --target: lunar region whose p defines "lunar-like" (default: the target pipeline.sites scored against,
@@ -39,6 +46,11 @@ from pipeline import paths  # noqa: E402
 
 MIN_CELLS, N_PERM, SEED = 20, 500, 11
 EARTH_R_KM = 6371.0
+# J31 (issue #17): why each known analog was chosen; strict land-cover cells of J33 (issue #19).
+SELECTED_FOR = os.path.join(paths.REFERENCE, "known_analogs_selected_for.csv")
+STRICT_CELLS = os.path.join(paths.VALIDATION, "landcover_sensitivity", "cells_bare_strict.parquet")
+GROUPS = ("terrain", "material", "environment", "other", "unknown")
+MIN_GROUP_SITES = 8
 
 
 def unit_xyz(lat, lon):
@@ -70,6 +82,111 @@ class CircleCounter:
         return (float(k[0] / n[0]) if n[0] else np.nan), int(n[0])
 
 
+def selected_for_table(known, path=None):
+    """selected_for and terrain_also_named per known row, joined by name, lat and lon (J31, issue #17).
+    Indexed by name; every lunar row read must have a row, otherwise this is an error."""
+    table = pd.read_csv(path or SELECTED_FOR)
+    if not set(table["selected_for"]) <= set(GROUPS):
+        raise SystemExit("known_analogs_selected_for.csv: selected_for must be one of %s" % (GROUPS,))
+
+    def key(frame):
+        return (frame["name"].astype(str).str.strip() + "|" + frame["lat"].astype(float).round(4).astype(str)
+                + "|" + frame["lon"].astype(float).round(4).astype(str))
+
+    table = table.assign(key=key(table)).drop_duplicates("key").set_index("key")
+    keys = key(known)
+    missing = sorted(known.loc[~keys.isin(table.index), "name"])
+    if missing:
+        raise SystemExit("known_analogs_selected_for.csv has no row for: %s" % missing)
+    picked = table.loc[keys.to_numpy()]
+    return pd.DataFrame({"selected_for": picked["selected_for"].to_numpy(),
+                         "terrain_broad": picked["selected_for"].eq("terrain").to_numpy()
+                         | picked["terrain_also_named"].astype(str).str.strip().str.lower().eq("yes").to_numpy()},
+                        index=known["name"].to_numpy())
+
+
+def random_baseline(cc, blat, blon, base, radii_km):
+    """N_PERM random circles per site radius, centred on random bare cells (seed SEED): enrichment per circle."""
+    rng = np.random.default_rng(SEED)
+    radii = np.broadcast_to(np.asarray(radii_km, float), (N_PERM, len(radii_km)))
+    enr = np.full(radii.shape, np.nan)
+    todo = np.ones(radii.shape, bool)
+    for _try in range(20):
+        if not todo.any():
+            break
+        i = rng.integers(len(blat), size=int(todo.sum()))
+        n, k = cc.counts(blat[i], blon[i], radii[todo])
+        okk = n >= MIN_CELLS
+        vals = np.full(len(n), np.nan)
+        vals[okk] = k[okk] / n[okk] / base
+        sub = enr[todo]
+        sub[okk] = vals[okk]
+        enr[todo] = sub
+        todo[todo] = ~okk
+    return enr
+
+
+def group_summary(r, enr, selected):
+    """Median enrichment per selected_for group (and terrain_broad) against the same random circles, restricted to
+    the columns (site radii) of that group. Groups below MIN_GROUP_SITES are flagged too few to test."""
+    out = {"min_sites_for_test": MIN_GROUP_SITES, "source": "data/reference/known_analogs_selected_for.csv",
+           "rule": "sites of the headline test (moon/both, not operational, >= min_cells_in_radius bare cells) whose "
+                   "row has the group; random baseline = the headline random circles of those sites only"}
+    groups = {g: selected["selected_for"].eq(g) for g in GROUPS}
+    groups["terrain_broad"] = selected["terrain_broad"]
+    for g, mask in groups.items():
+        names = set(selected.index[mask])
+        cols = r["name"].isin(names).to_numpy()
+        sub = r.loc[cols]
+        entry = {"n_rows_read": int(mask.sum()), "n_sites_tested": int(len(sub)),
+                 "too_few_to_test": bool(len(sub) < MIN_GROUP_SITES),
+                 "sites": sub[["name", "enrichment"]].round(4).to_dict("records")}
+        if len(sub):
+            med = float(sub["enrichment"].median())
+            perm = np.nanmedian(enr[:, cols], axis=1)
+            entry.update(median_enrichment=med,
+                         random_median_enrichment_median=float(np.median(perm)),
+                         random_median_enrichment_p05_p95=[float(np.quantile(perm, 0.05)), float(np.quantile(perm, 0.95))],
+                         share_of_random_runs_with_median_at_least_ours=float((perm >= med).mean()))
+        else:
+            entry.update(median_enrichment=None)
+        out[g] = entry
+    return out
+
+
+def strict_mask(sc, col, known, selected):
+    """The same test with bare = WorldCover class 60 only (J33 cells_bare_strict.parquet joined by tile, row, col)."""
+    if not os.path.exists(STRICT_CELLS):
+        raise SystemExit("%s is missing: run validation/landcover_strict_cells.py (J33)" % STRICT_CELLS)
+    strict = pd.read_parquet(STRICT_CELLS, columns=["tile", "row", "col", "bare_strict"])
+    cells = sc.merge(strict, on=["tile", "row", "col"], how="left", validate="one_to_one")
+    bare = cells[(cells["bare_strict"] >= 0.8) & (cells["ice"] < 0.05)]
+    blat, blon = bare["lat"].to_numpy(float), bare["lon"].to_numpy(float)
+    like = (bare[col] >= 0.10).to_numpy()
+    base = float(like.mean())
+    cc = CircleCounter(blat, blon, like)
+    rows = []
+    for _, k in known.iterrows():
+        share, n = cc.share(k["lat"], k["lon"], k["radius_km"])
+        if n >= MIN_CELLS:
+            rows.append({"name": k["name"], "radius_km": float(k["radius_km"]), "bare_cells": n,
+                         "enrichment": share / base})
+    r = pd.DataFrame(rows, columns=["name", "radius_km", "bare_cells", "enrichment"])
+    out = {"source": "data/validation/landcover_sensitivity/cells_bare_strict.parquet",
+           "bare_definition": "bare_strict >= 0.8 (WorldCover class 60 only, J33 issue #19) and ice < 0.05",
+           "n_bare_cells": int(len(bare)), "base_rate": base, "n_sites_tested": int(len(r))}
+    if r.empty:
+        return {**out, "median_enrichment": None}
+    enr = random_baseline(cc, blat, blon, base, r["radius_km"].to_numpy(float))
+    perm = np.nanmedian(enr, axis=1)
+    med = float(r["enrichment"].median())
+    out.update(median_enrichment=med, random_median_enrichment_median=float(np.median(perm)),
+               random_median_enrichment_p05_p95=[float(np.quantile(perm, 0.05)), float(np.quantile(perm, 0.95))],
+               share_of_random_runs_with_median_at_least_ours=float((perm >= med).mean()),
+               by_selected_for=group_summary(r, enr, selected))
+    return out
+
+
 def target_of(path):
     import pyarrow.parquet as pq
     md = pq.read_schema(path).metadata or {}
@@ -89,7 +206,7 @@ def main(argv=None):
     scored_target = target_of(full)
     target = a.target or scored_target
     col = "p_all" if target == scored_target else "p_all_" + target
-    sc = pd.read_parquet(full, columns=["tile", "lat", "lon", "bare", "ice", "p_all"]
+    sc = pd.read_parquet(full, columns=["tile", "row", "col", "lat", "lon", "bare", "ice", "p_all"]
                          + ([col] if col != "p_all" else []))
     known = pd.read_csv(paths.KNOWN_ANALOGS)
     known = known[known["type"] != "operational"].reset_index(drop=True)
@@ -115,6 +232,7 @@ def main(argv=None):
         cols = ["name", "type", "analog_for", "radius_km", "bare_cells", "share_lunar_like", "enrichment"]
         return pd.DataFrame(rows, columns=cols).sort_values("enrichment", ascending=False).reset_index(drop=True)
 
+    selected = selected_for_table(known)
     r = site_rows(known)
     if r.empty:
         raise SystemExit("no lunar (moon/both) known analog site has %d bare cells in its radius" % MIN_CELLS)
@@ -156,6 +274,8 @@ def main(argv=None):
                       "above_1_p05_p95": [float(np.quantile(perm_above, 0.05)), float(np.quantile(perm_above, 0.95))],
                       "share_of_random_runs_with_median_at_least_ours": float((perm_median >= r["enrichment"].median()).mean())},
            "by_type_median": {t: float(g["enrichment"].median()) for t, g in r.groupby("type")},
+           "by_selected_for": group_summary(r, enr, selected),
+           "strict_mask": strict_mask(sc, col, known, selected),
            "sites": r.round(4).to_dict("records"),
            "mars_only_excluded": {
                "note": "Sites tagged analog_for == mars, outside the lunar scope (issue #16). Same statistic, reference "

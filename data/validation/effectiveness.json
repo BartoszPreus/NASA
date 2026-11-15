@@ -21372,6 +21372,485 @@
           1.0
         ]
       }
+    },
+    "by_selected_for": {
+      "min_tiles_for_auc": 8,
+      "rule": "positive = scanned tiles with n_bare >= min_bare holding a known moon/both point row of the group; background as in the pooled test; a tile with rows of several groups counts in each of them",
+      "source": "data/reference/known_analogs_selected_for.csv",
+      "terrain": {
+        "n_rows": 4,
+        "n_tiles": 2,
+        "n_eligible_tiles": 2,
+        "tiles_outside_scan": [],
+        "tiles_below_min_bare": [],
+        "tiles": {
+          "N35W112": {
+            "percentile": 21.97952218430034,
+            "rows": [
+              "Black Point Lava Flow (Desert RATS)",
+              "Cinder Lake Crater Field (Apollo training)",
+              "SP Crater (Desert RATS)"
+            ]
+          },
+          "N75W088": {
+            "percentile": 96.10921501706484,
+            "rows": [
+              "Devon Island (Haughton-Mars Project region)"
+            ]
+          }
+        },
+        "median_percentile": 59.04436860068259,
+        "too_few_to_test": true,
+        "auc": null,
+        "auc_ci90": null
+      },
+      "material": {
+        "n_rows": 20,
+        "n_tiles": 18,
+        "n_eligible_tiles": 9,
+        "tiles_outside_scan": [],
+        "tiles_below_min_bare": [
+          "N19E076",
+          "N28W017",
+          "N45E000",
+          "N46W082",
+          "N48E010",
+          "N55W064",
+          "N56W075",
+          "S17W053",
+          "S28E027"
+        ],
+        "tiles": {
+          "N19W156": {
+            "percentile": 97.91808873720137,
+            "rows": [
+              "Kilauea Volcano (BASALT caldera region)"
+            ]
+          },
+          "N28W014": {
+            "percentile": 80.88737201365188,
+            "rows": [
+              "Timanfaya Lanzarote (ESA PANGAEA)"
+            ]
+          },
+          "N31W107": {
+            "percentile": 9.62457337883959,
+            "rows": [
+              "Kilbourne Hole"
+            ]
+          },
+          "N33E004": {
+            "percentile": 9.62457337883959,
+            "rows": [
+              "Talemzane impact structure"
+            ]
+          },
+          "N35W112": {
+            "percentile": 21.97952218430034,
+            "rows": [
+              "Meteor Crater (Barringer)"
+            ]
+          },
+          "N43W114": {
+            "percentile": 36.382252559726965,
+            "rows": [
+              "Craters of the Moon (BASALT and Apollo training)"
+            ]
+          },
+          "N45W110": {
+            "percentile": 49.658703071672356,
+            "rows": [
+              "Stillwater igneous complex (anorthosite)"
+            ]
+          },
+          "N65W017": {
+            "percentile": 51.877133105802045,
+            "rows": [
+              "Askja (Apollo training)"
+            ]
+          },
+          "N75W090": {
+            "percentile": 56.45051194539249,
+            "rows": [
+              "Haughton impact structure (Haughton-Mars Project)"
+            ]
+          }
+        },
+        "median_percentile": 49.658703071672356,
+        "too_few_to_test": false,
+        "auc": 0.4604474781949185,
+        "auc_ci90": [
+          0.31228479332574893,
+          0.6135532802427
+        ],
+        "bootstrap_samples": 2000,
+        "bootstrap_seed": 20261114
+      },
+      "environment": {
+        "n_rows": 3,
+        "n_tiles": 3,
+        "n_eligible_tiles": 2,
+        "tiles_outside_scan": [],
+        "tiles_below_min_bare": [
+          "S78E162"
+        ],
+        "tiles": {
+          "N78E016": {
+            "percentile": 69.5221843003413,
+            "rows": [
+              "Svalbard (AMASE region)"
+            ]
+          },
+          "S25W070": {
+            "percentile": 80.40955631399316,
+            "rows": [
+              "Atacama Desert hyper-arid core"
+            ]
+          }
+        },
+        "median_percentile": 74.96587030716722,
+        "too_few_to_test": true,
+        "auc": null,
+        "auc_ci90": null
+      },
+      "other": {
+        "n_rows": 2,
+        "n_tiles": 2,
+        "n_eligible_tiles": 1,
+        "tiles_outside_scan": [],
+        "tiles_below_min_bare": [
+          "N37W007"
+        ],
+        "tiles": {
+          "N64W021": {
+            "percentile": 72.76450511945393,
+            "rows": [
+              "CHILL-ICE lava tube (Iceland)"
+            ]
+          }
+        },
+        "median_percentile": 72.76450511945393,
+        "too_few_to_test": true,
+        "auc": null,
+        "auc_ci90": null
+      },
+      "unknown": {
+        "n_rows": 7,
+        "n_tiles": 7,
+        "n_eligible_tiles": 3,
+        "tiles_outside_scan": [],
+        "tiles_below_min_bare": [
+          "N29W014",
+          "N37E014",
+          "N49W058",
+          "N68E013"
+        ],
+        "tiles": {
+          "N19W156": {
+            "percentile": 97.91808873720137,
+            "rows": [
+              "Mauna Kea (PISCES ISRU field tests)"
+            ]
+          },
+          "N31W108": {
+            "percentile": 9.62457337883959,
+            "rows": [
+              "Potrillo volcanic field"
+            ]
+          },
+          "N35W112": {
+            "percentile": 21.97952218430034,
+            "rows": [
+              "Sunset Crater"
+            ]
+          }
+        },
+        "median_percentile": 21.97952218430034,
+        "too_few_to_test": true,
+        "auc": null,
+        "auc_ci90": null
+      },
+      "terrain_broad": {
+        "n_rows": 9,
+        "n_tiles": 7,
+        "n_eligible_tiles": 6,
+        "tiles_outside_scan": [],
+        "tiles_below_min_bare": [
+          "N37W007"
+        ],
+        "tiles": {
+          "N19W156": {
+            "percentile": 97.91808873720137,
+            "rows": [
+              "Kilauea Volcano (BASALT caldera region)"
+            ]
+          },
+          "N35W112": {
+            "percentile": 21.97952218430034,
+            "rows": [
+              "Black Point Lava Flow (Desert RATS)",
+              "Cinder Lake Crater Field (Apollo training)",
+              "SP Crater (Desert RATS)"
+            ]
+          },
+          "N75W088": {
+            "percentile": 96.10921501706484,
+            "rows": [
+              "Devon Island (Haughton-Mars Project region)"
+            ]
+          },
+          "N75W090": {
+            "percentile": 56.45051194539249,
+            "rows": [
+              "Haughton impact structure (Haughton-Mars Project)"
+            ]
+          },
+          "N78E016": {
+            "percentile": 69.5221843003413,
+            "rows": [
+              "Svalbard (AMASE region)"
+            ]
+          },
+          "S25W070": {
+            "percentile": 80.40955631399316,
+            "rows": [
+              "Atacama Desert hyper-arid core"
+            ]
+          }
+        },
+        "median_percentile": 74.96587030716722,
+        "too_few_to_test": true,
+        "auc": null,
+        "auc_ci90": null
+      }
+    },
+    "strict_mask": {
+      "source": "data/validation/landcover_sensitivity/tile_summary_bare_strict.csv",
+      "bare_definition": "WorldCover class 60 only (J33, issue #19)",
+      "pooled": {
+        "auc": 0.5404238618524333,
+        "auc_ci90": [
+          0.3644152276295133,
+          0.726322605965463
+        ],
+        "bootstrap_samples": 2000,
+        "bootstrap_seed": 20261114,
+        "median_positive_percentile": 58.712715855572995,
+        "n_positive_tiles": 10,
+        "n_background_tiles": 637
+      },
+      "by_selected_for": {
+        "min_tiles_for_auc": 8,
+        "rule": "positive = scanned tiles with n_bare >= min_bare holding a known moon/both point row of the group; background as in the pooled test; a tile with rows of several groups counts in each of them",
+        "source": "data/reference/known_analogs_selected_for.csv",
+        "terrain": {
+          "n_rows": 4,
+          "n_tiles": 2,
+          "n_eligible_tiles": 1,
+          "tiles_outside_scan": [],
+          "tiles_below_min_bare": [
+            "N75W088"
+          ],
+          "tiles": {
+            "N35W112": {
+              "percentile": 27.94348508634223,
+              "rows": [
+                "Black Point Lava Flow (Desert RATS)",
+                "Cinder Lake Crater Field (Apollo training)",
+                "SP Crater (Desert RATS)"
+              ]
+            }
+          },
+          "median_percentile": 27.94348508634223,
+          "too_few_to_test": true,
+          "auc": null,
+          "auc_ci90": null
+        },
+        "material": {
+          "n_rows": 20,
+          "n_tiles": 18,
+          "n_eligible_tiles": 7,
+          "tiles_outside_scan": [],
+          "tiles_below_min_bare": [
+            "N19E076",
+            "N28W017",
+            "N45E000",
+            "N45W110",
+            "N46W082",
+            "N48E010",
+            "N55W064",
+            "N56W075",
+            "N75W090",
+            "S17W053",
+            "S28E027"
+          ],
+          "tiles": {
+            "N19W156": {
+              "percentile": 99.21507064364206,
+              "rows": [
+                "Kilauea Volcano (BASALT caldera region)"
+              ]
+            },
+            "N28W014": {
+              "percentile": 91.67974882260597,
+              "rows": [
+                "Timanfaya Lanzarote (ESA PANGAEA)"
+              ]
+            },
+            "N31W107": {
+              "percentile": 11.067503924646783,
+              "rows": [
+                "Kilbourne Hole"
+              ]
+            },
+            "N33E004": {
+              "percentile": 11.067503924646783,
+              "rows": [
+                "Talemzane impact structure"
+              ]
+            },
+            "N35W112": {
+              "percentile": 27.94348508634223,
+              "rows": [
+                "Meteor Crater (Barringer)"
+              ]
+            },
+            "N43W114": {
+              "percentile": 50.078492935635786,
+              "rows": [
+                "Craters of the Moon (BASALT and Apollo training)"
+              ]
+            },
+            "N65W017": {
+              "percentile": 67.3469387755102,
+              "rows": [
+                "Askja (Apollo training)"
+              ]
+            }
+          },
+          "median_percentile": 50.078492935635786,
+          "too_few_to_test": true,
+          "auc": null,
+          "auc_ci90": null
+        },
+        "environment": {
+          "n_rows": 3,
+          "n_tiles": 3,
+          "n_eligible_tiles": 1,
+          "tiles_outside_scan": [],
+          "tiles_below_min_bare": [
+            "N78E016",
+            "S78E162"
+          ],
+          "tiles": {
+            "S25W070": {
+              "percentile": 91.3657770800628,
+              "rows": [
+                "Atacama Desert hyper-arid core"
+              ]
+            }
+          },
+          "median_percentile": 91.3657770800628,
+          "too_few_to_test": true,
+          "auc": null,
+          "auc_ci90": null
+        },
+        "other": {
+          "n_rows": 2,
+          "n_tiles": 2,
+          "n_eligible_tiles": 1,
+          "tiles_outside_scan": [],
+          "tiles_below_min_bare": [
+            "N37W007"
+          ],
+          "tiles": {
+            "N64W021": {
+              "percentile": 79.59183673469387,
+              "rows": [
+                "CHILL-ICE lava tube (Iceland)"
+              ]
+            }
+          },
+          "median_percentile": 79.59183673469387,
+          "too_few_to_test": true,
+          "auc": null,
+          "auc_ci90": null
+        },
+        "unknown": {
+          "n_rows": 7,
+          "n_tiles": 7,
+          "n_eligible_tiles": 3,
+          "tiles_outside_scan": [],
+          "tiles_below_min_bare": [
+            "N29W014",
+            "N37E014",
+            "N49W058",
+            "N68E013"
+          ],
+          "tiles": {
+            "N19W156": {
+              "percentile": 99.21507064364206,
+              "rows": [
+                "Mauna Kea (PISCES ISRU field tests)"
+              ]
+            },
+            "N31W108": {
+              "percentile": 11.067503924646783,
+              "rows": [
+                "Potrillo volcanic field"
+              ]
+            },
+            "N35W112": {
+              "percentile": 27.94348508634223,
+              "rows": [
+                "Sunset Crater"
+              ]
+            }
+          },
+          "median_percentile": 27.94348508634223,
+          "too_few_to_test": true,
+          "auc": null,
+          "auc_ci90": null
+        },
+        "terrain_broad": {
+          "n_rows": 9,
+          "n_tiles": 7,
+          "n_eligible_tiles": 3,
+          "tiles_outside_scan": [],
+          "tiles_below_min_bare": [
+            "N37W007",
+            "N75W088",
+            "N75W090",
+            "N78E016"
+          ],
+          "tiles": {
+            "N19W156": {
+              "percentile": 99.21507064364206,
+              "rows": [
+                "Kilauea Volcano (BASALT caldera region)"
+              ]
+            },
+            "N35W112": {
+              "percentile": 27.94348508634223,
+              "rows": [
+                "Black Point Lava Flow (Desert RATS)",
+                "Cinder Lake Crater Field (Apollo training)",
+                "SP Crater (Desert RATS)"
+              ]
+            },
+            "S25W070": {
+              "percentile": 91.3657770800628,
+              "rows": [
+                "Atacama Desert hyper-arid core"
+              ]
+            }
+          },
+          "median_percentile": 91.3657770800628,
+          "too_few_to_test": true,
+          "auc": null,
+          "auc_ci90": null
+        }
+      }
     }
   }
 }

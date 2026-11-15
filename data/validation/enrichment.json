@@ -38,6 +38,414 @@
   "region": 1.1571787586462805,
   "volcanic": 0.6595941318235823
  },
+ "by_selected_for": {
+  "min_sites_for_test": 8,
+  "source": "data/reference/known_analogs_selected_for.csv",
+  "rule": "sites of the headline test (moon/both, not operational, >= min_cells_in_radius bare cells) whose row has the group; random baseline = the headline random circles of those sites only",
+  "terrain": {
+   "n_rows_read": 4,
+   "n_sites_tested": 2,
+   "too_few_to_test": true,
+   "sites": [
+    {
+     "name": "Devon Island (Haughton-Mars Project region)",
+     "enrichment": 2.3016
+    },
+    {
+     "name": "Black Point Lava Flow (Desert RATS)",
+     "enrichment": 0.0
+    }
+   ],
+   "median_enrichment": 1.1507841521734838,
+   "random_median_enrichment_median": 0.5764632428509202,
+   "random_median_enrichment_p05_p95": [
+    0.010131441114854261,
+    3.2364069446868946
+   ],
+   "share_of_random_runs_with_median_at_least_ours": 0.288
+  },
+  "material": {
+   "n_rows_read": 20,
+   "n_sites_tested": 7,
+   "too_few_to_test": true,
+   "sites": [
+    {
+     "name": "Kilauea Volcano (BASALT caldera region)",
+     "enrichment": 6.6608
+    },
+    {
+     "name": "Haughton impact structure (Haughton-Mars Project)",
+     "enrichment": 1.643
+    },
+    {
+     "name": "Askja (Apollo training)",
+     "enrichment": 0.9874
+    },
+    {
+     "name": "Timanfaya Lanzarote (ESA PANGAEA)",
+     "enrichment": 0.7137
+    },
+    {
+     "name": "Stillwater igneous complex (anorthosite)",
+     "enrichment": 0.6055
+    },
+    {
+     "name": "Talemzane impact structure",
+     "enrichment": 0.0
+    },
+    {
+     "name": "Craters of the Moon (BASALT and Apollo training)",
+     "enrichment": 0.0
+    }
+   ],
+   "median_enrichment": 0.7136592245960071,
+   "random_median_enrichment_median": 0.2242075466565116,
+   "random_median_enrichment_p05_p95": [
+    0.0,
+    1.3699636291878516
+   ],
+   "share_of_random_runs_with_median_at_least_ours": 0.162
+  },
+  "environment": {
+   "n_rows_read": 8,
+   "n_sites_tested": 7,
+   "too_few_to_test": true,
+   "sites": [
+    {
+     "name": "Atacama Desert hyper-arid core",
+     "enrichment": 2.5612
+    },
+    {
+     "name": "Atacama Desert region 4 of 5 (Taltal - Chanaral)",
+     "enrichment": 2.291
+    },
+    {
+     "name": "Atacama Desert region 3 of 5 (Antofagasta incl. Salar de Atacama and El Tatio)",
+     "enrichment": 1.4146
+    },
+    {
+     "name": "Atacama Desert region 2 of 5 (Tarapaca - Loa)",
+     "enrichment": 1.0682
+    },
+    {
+     "name": "Svalbard (AMASE region)",
+     "enrichment": 0.9052
+    },
+    {
+     "name": "Atacama Desert region 1 of 5 (Arica - Tarapaca coast and pampa)",
+     "enrichment": 0.6709
+    },
+    {
+     "name": "Atacama Desert region 5 of 5 (Copiapo - Vallenar)",
+     "enrichment": 0.5368
+    }
+   ],
+   "median_enrichment": 1.068235396839845,
+   "random_median_enrichment_median": 0.5344624599382526,
+   "random_median_enrichment_p05_p95": [
+    0.09932657031018728,
+    1.6611923738668015
+   ],
+   "share_of_random_runs_with_median_at_least_ours": 0.186
+  },
+  "other": {
+   "n_rows_read": 3,
+   "n_sites_tested": 2,
+   "too_few_to_test": true,
+   "sites": [
+    {
+     "name": "Svalbard archipelago (whole; AMASE field areas)",
+     "enrichment": 1.2461
+    },
+    {
+     "name": "CHILL-ICE lava tube (Iceland)",
+     "enrichment": 0.9083
+    }
+   ],
+   "median_enrichment": 1.0772078395147262,
+   "random_median_enrichment_median": 0.6000803629791538,
+   "random_median_enrichment_p05_p95": [
+    0.014789882133941399,
+    2.680101623244083
+   ],
+   "share_of_random_runs_with_median_at_least_ours": 0.264
+  },
+  "unknown": {
+   "n_rows_read": 9,
+   "n_sites_tested": 4,
+   "too_few_to_test": true,
+   "sites": [
+    {
+     "name": "Island of Hawaii (whole island; region named in the challenge)",
+     "enrichment": 7.0176
+    },
+    {
+     "name": "Mauna Kea (PISCES ISRU field tests)",
+     "enrichment": 2.3635
+    },
+    {
+     "name": "Iceland (whole island; region named in the challenge)",
+     "enrichment": 1.0587
+    },
+    {
+     "name": "Potrillo volcanic field",
+     "enrichment": 0.0
+    }
+   ],
+   "median_enrichment": 1.7111056498241415,
+   "random_median_enrichment_median": 0.5507600093513614,
+   "random_median_enrichment_p05_p95": [
+    0.07195962224262652,
+    1.8785952194058058
+   ],
+   "share_of_random_runs_with_median_at_least_ours": 0.066
+  },
+  "terrain_broad": {
+   "n_rows_read": 9,
+   "n_sites_tested": 6,
+   "too_few_to_test": true,
+   "sites": [
+    {
+     "name": "Kilauea Volcano (BASALT caldera region)",
+     "enrichment": 6.6608
+    },
+    {
+     "name": "Atacama Desert hyper-arid core",
+     "enrichment": 2.5612
+    },
+    {
+     "name": "Devon Island (Haughton-Mars Project region)",
+     "enrichment": 2.3016
+    },
+    {
+     "name": "Haughton impact structure (Haughton-Mars Project)",
+     "enrichment": 1.643
+    },
+    {
+     "name": "Svalbard (AMASE region)",
+     "enrichment": 0.9052
+    },
+    {
+     "name": "Black Point Lava Flow (Desert RATS)",
+     "enrichment": 0.0
+    }
+   ],
+   "median_enrichment": 1.9722852151528876,
+   "random_median_enrichment_median": 0.44349622055477744,
+   "random_median_enrichment_p05_p95": [
+    0.05174124677809698,
+    1.4259086083738597
+   ],
+   "share_of_random_runs_with_median_at_least_ours": 0.014
+  }
+ },
+ "strict_mask": {
+  "source": "data/validation/landcover_sensitivity/cells_bare_strict.parquet",
+  "bare_definition": "bare_strict >= 0.8 (WorldCover class 60 only, J33 issue #19) and ice < 0.05",
+  "n_bare_cells": 913527,
+  "base_rate": 0.039708733294144566,
+  "n_sites_tested": 20,
+  "median_enrichment": 1.0414796429734627,
+  "random_median_enrichment_median": 0.32244813699951824,
+  "random_median_enrichment_p05_p95": [
+   0.08311217554024657,
+   0.7857207563904627
+  ],
+  "share_of_random_runs_with_median_at_least_ours": 0.022,
+  "by_selected_for": {
+   "min_sites_for_test": 8,
+   "source": "data/reference/known_analogs_selected_for.csv",
+   "rule": "sites of the headline test (moon/both, not operational, >= min_cells_in_radius bare cells) whose row has the group; random baseline = the headline random circles of those sites only",
+   "terrain": {
+    "n_rows_read": 4,
+    "n_sites_tested": 2,
+    "too_few_to_test": true,
+    "sites": [
+     {
+      "name": "Black Point Lava Flow (Desert RATS)",
+      "enrichment": 0.0
+     },
+     {
+      "name": "Devon Island (Haughton-Mars Project region)",
+      "enrichment": 3.0574
+     }
+    ],
+    "median_enrichment": 1.5287033950365836,
+    "random_median_enrichment_median": 0.46652996253913226,
+    "random_median_enrichment_p05_p95": [
+     0.0,
+     3.1949901667151295
+    ],
+    "share_of_random_runs_with_median_at_least_ours": 0.2
+   },
+   "material": {
+    "n_rows_read": 20,
+    "n_sites_tested": 6,
+    "too_few_to_test": true,
+    "sites": [
+     {
+      "name": "Haughton impact structure (Haughton-Mars Project)",
+      "enrichment": 0.3271
+     },
+     {
+      "name": "Talemzane impact structure",
+      "enrichment": 0.0
+     },
+     {
+      "name": "Kilauea Volcano (BASALT caldera region)",
+      "enrichment": 8.3945
+     },
+     {
+      "name": "Craters of the Moon (BASALT and Apollo training)",
+      "enrichment": 0.0
+     },
+     {
+      "name": "Timanfaya Lanzarote (ESA PANGAEA)",
+      "enrichment": 0.8994
+     },
+     {
+      "name": "Askja (Apollo training)",
+      "enrichment": 1.1836
+     }
+    ],
+    "median_enrichment": 0.6132315823390944,
+    "random_median_enrichment_median": 0.23117578814697437,
+    "random_median_enrichment_p05_p95": [
+     0.0,
+     1.3413822016858659
+    ],
+    "share_of_random_runs_with_median_at_least_ours": 0.228
+   },
+   "environment": {
+    "n_rows_read": 8,
+    "n_sites_tested": 7,
+    "too_few_to_test": true,
+    "sites": [
+     {
+      "name": "Svalbard (AMASE region)",
+      "enrichment": 0.4922
+     },
+     {
+      "name": "Atacama Desert hyper-arid core",
+      "enrichment": 3.2278
+     },
+     {
+      "name": "Atacama Desert region 1 of 5 (Arica - Tarapaca coast and pampa)",
+      "enrichment": 0.8456
+     },
+     {
+      "name": "Atacama Desert region 2 of 5 (Tarapaca - Loa)",
+      "enrichment": 1.3463
+     },
+     {
+      "name": "Atacama Desert region 3 of 5 (Antofagasta incl. Salar de Atacama and El Tatio)",
+      "enrichment": 1.7828
+     },
+     {
+      "name": "Atacama Desert region 4 of 5 (Taltal - Chanaral)",
+      "enrichment": 2.8873
+     },
+     {
+      "name": "Atacama Desert region 5 of 5 (Copiapo - Vallenar)",
+      "enrichment": 0.6765
+     }
+    ],
+    "median_enrichment": 1.3462695287452988,
+    "random_median_enrichment_median": 0.4341156175087963,
+    "random_median_enrichment_p05_p95": [
+     0.06895223955801899,
+     1.498908201107386
+    ],
+    "share_of_random_runs_with_median_at_least_ours": 0.076
+   },
+   "other": {
+    "n_rows_read": 3,
+    "n_sites_tested": 1,
+    "too_few_to_test": true,
+    "sites": [
+     {
+      "name": "Svalbard archipelago (whole; AMASE field areas)",
+      "enrichment": 1.5789
+     }
+    ],
+    "median_enrichment": 1.5788951085512313,
+    "random_median_enrichment_median": 0.5161500487002151,
+    "random_median_enrichment_p05_p95": [
+     0.020599480668395318,
+     3.0896667739230548
+    ],
+    "share_of_random_runs_with_median_at_least_ours": 0.25
+   },
+   "unknown": {
+    "n_rows_read": 9,
+    "n_sites_tested": 4,
+    "too_few_to_test": true,
+    "sites": [
+     {
+      "name": "Potrillo volcanic field",
+      "enrichment": 0.0
+     },
+     {
+      "name": "Mauna Kea (PISCES ISRU field tests)",
+      "enrichment": 2.9787
+     },
+     {
+      "name": "Island of Hawaii (whole island; region named in the challenge)",
+      "enrichment": 8.8442
+     },
+     {
+      "name": "Iceland (whole island; region named in the challenge)",
+      "enrichment": 0.8604
+     }
+    ],
+    "median_enrichment": 1.9195153189839795,
+    "random_median_enrichment_median": 0.39952475426528594,
+    "random_median_enrichment_p05_p95": [
+     0.034198148819839874,
+     1.820559279681336
+    ],
+    "share_of_random_runs_with_median_at_least_ours": 0.048
+   },
+   "terrain_broad": {
+    "n_rows_read": 9,
+    "n_sites_tested": 6,
+    "too_few_to_test": true,
+    "sites": [
+     {
+      "name": "Haughton impact structure (Haughton-Mars Project)",
+      "enrichment": 0.3271
+     },
+     {
+      "name": "Svalbard (AMASE region)",
+      "enrichment": 0.4922
+     },
+     {
+      "name": "Atacama Desert hyper-arid core",
+      "enrichment": 3.2278
+     },
+     {
+      "name": "Kilauea Volcano (BASALT caldera region)",
+      "enrichment": 8.3945
+     },
+     {
+      "name": "Black Point Lava Flow (Desert RATS)",
+      "enrichment": 0.0
+     },
+     {
+      "name": "Devon Island (Haughton-Mars Project region)",
+      "enrichment": 3.0574
+     }
+    ],
+    "median_enrichment": 1.774795026776572,
+    "random_median_enrichment_median": 0.35358704655773754,
+    "random_median_enrichment_p05_p95": [
+     0.019855014659076707,
+     1.3862292137283625
+    ],
+    "share_of_random_runs_with_median_at_least_ours": 0.02
+   }
+  }
+ },
  "sites": [
   {
    "name": "Island of Hawaii (whole island; region named in the challenge)",

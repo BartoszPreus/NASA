@@ -281,6 +281,10 @@ FILE_MAP = [
     ("data/reference/known_analogs.csv", "hand-curated by jobs J8 and J9 (agent web research, no script)",
      "analog_literature, wikipedia, osm", "known Moon and Mars analog sites: name, lat, lon, radius_km, type, "
      "source_url, verified"),
+    ("data/reference/known_analogs_selected_for.csv", "hand-curated by job J31 (agent reading of the opened source "
+     "pages, no script; issue #17)", "analog_literature, wikipedia, data/reference/known_analogs.csv",
+     "why each non-operational known analog was chosen (terrain, material, environment, other, unknown), the opened "
+     "page and the quoted sentence; joined to known_analogs.csv by name, lat, lon (sources: docs/sources/j31.md)"),
     ("data/reference/pilot_tiles.csv", "python -m pipeline.tiles --pilot", "analysis/pilot_scan.py (SITES)",
      "the 37 pilot tiles with label, known flag and negative controls"),
     ("data/reference/radarsat1_footprints.parquet", "python -m pipeline.radarsat1 index (job J27)",
@@ -391,8 +395,10 @@ FILE_MAP = [
      "pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes", "our slope/roughness estimator against the NASA "
      "product"),
     ("data/validation/effectiveness.json", "python validation/effectiveness.py all",
-     "data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, copernicus_dem, "
-     "esa_worldcover, pgda90_lola_20m", "known analog tile recovery, negative controls, ablation, stability"),
+     "data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, "
+     "data/reference/known_analogs_selected_for.csv, data/validation/landcover_sensitivity/tile_summary_bare_strict.csv, "
+     "copernicus_dem, esa_worldcover, pgda90_lola_20m", "known analog tile recovery (also per selected_for group and "
+     "on the strict land-cover mask, J31), negative controls, ablation, stability"),
     ("data/validation/rank_uncertainty.json", "python validation/rank_uncertainty.py (job J32)",
      "data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, "
      "data/moon/reference.json, data/sites/ranking.csv", "rank intervals of the top sites: lunar reference "
@@ -402,8 +408,10 @@ FILE_MAP = [
      "data/moon/reference.json, data/sites/ranking.csv", "per top-100 site: bootstrap rank p05 / median / p95, "
      "share of runs in the top 30, rank in the NASADEM and leave-one-feature-group-out variants"),
     ("data/validation/enrichment.json", "python validation/enrichment.py (after python -m pipeline.sites)",
-     "data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv",
-     "enrichment of lunar-like terrain around known analog sites"),
+     "data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv, "
+     "data/reference/known_analogs_selected_for.csv, data/validation/landcover_sensitivity/cells_bare_strict.parquet",
+     "enrichment of lunar-like terrain around known analog sites (also per selected_for group and on the strict "
+     "land-cover mask, J31)"),
     ("data/validation/nasadem_vs_copdem.json", "python validation/nasadem_vs_copdem.py (job J17)",
      "data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json",
      "NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile"),

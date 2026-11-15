@@ -74,6 +74,10 @@ replaces total area because total area rewarded sheer size: with it, sand seas h
 - In short: the score is consistent with chance at tile scale (AUC 0.531) and borderline at site scale (2.8% of
   random runs reach the known sites' median, `random.share_of_random_runs_with_median_at_least_ours`). It is a
   screen for terrain shape, not a detector of analogs.
+- Only 4 of the 44 lunar known analogs were chosen for their terrain (J31, `data/reference/known_analogs_selected_for.csv`):
+  2 eligible tiles and 2 tested circles, too few to test (`effectiveness.json` `recovery.by_selected_for.terrain`,
+  `enrichment.json` `by_selected_for.terrain`). The method may therefore claim that the terrain statistics of the
+  listed sites fall inside the lunar range, not that it finds analog terrain.
 
 ## Limits
 
