@@ -176,8 +176,12 @@ export interface Source {
 export interface Atlas {
   meta: Meta;
   moon: Moon;
+  /** every unflagged patch of the default run (3,175 minus the dune-like ones), rank order */
   sites: Site[];
+  /** dune-like patches of the default run */
   flagged: Site[];
+  /** every unflagged patch of the strict-mask run */
   strict: Site[];
+  strictFlagged: Site[];
   strictNote: string;
 }

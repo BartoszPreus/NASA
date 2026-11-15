@@ -1,8 +1,11 @@
-// A lit Moon built with CSS: a lunar hillshade (LRO LOLA) as texture, low-angle sunlight from the
-// upper left and a soft terminator. The texture is the real polar hillshade from app/data/img.
-export function MoonSphere({ texture }: { texture: string | null }) {
+import type { ReactNode } from "react";
+
+// The hero Moon. The 3D Moon (children) is drawn over a CSS stand-in lit the same way, which stays
+// visible while three.js loads and is the fallback without WebGL. The stand-in texture is the real
+// LOLA polar hillshade from app/data/img.
+export function MoonSphere({ texture, ready, children }: { texture: string | null; ready?: boolean; children?: ReactNode }) {
   return (
-    <div className="l-moon" aria-hidden>
+    <div className={`l-moon ${ready ? "ready" : ""}`} aria-hidden>
       <svg className="l-orbit" viewBox="0 0 1000 1000">
         <g transform="rotate(-18 500 500)">
           <ellipse cx="500" cy="500" rx="495" ry="150" />
@@ -15,6 +18,7 @@ export function MoonSphere({ texture }: { texture: string | null }) {
         {texture && <div className="l-moon-tex" style={{ backgroundImage: `url(${texture})` }} />}
         <div className="l-moon-light" />
       </div>
+      {children}
     </div>
   );
 }

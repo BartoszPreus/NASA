@@ -89,7 +89,7 @@ export function MethodPage() {
     <div className="pg">
       <Reveal className="pg-head">
         <h1 className="pg-title">
-          Ten steps, <span className="serif">checked in the open.</span>
+          Ten steps, checked in the open.
         </h1>
       </Reveal>
 
@@ -126,7 +126,7 @@ export function MethodPage() {
       </ol>
 
       <h2 className="pg-h2">
-        Decisions <span className="serif">and limits.</span>
+        Decisions and limits.
       </h2>
       <div className="secs">
         {[...sections.filter((s) => !s.is_list), ...sections.filter((s) => s.is_list)].map((s, i) => (
@@ -152,7 +152,7 @@ export function MethodPage() {
       </div>
 
       <h2 className="pg-h2" id="validation">
-        What the validation <span className="serif">does and does not show.</span>
+        What the validation does and does not show.
       </h2>
       <Reveal className="verdict">
         <div title="data/validation/effectiveness.json · recovery.auc, recovery.auc_ci90">

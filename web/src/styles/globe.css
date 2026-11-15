@@ -1,0 +1,131 @@
+/* 3D globes: canvas plus an HTML marker layer projected from the globe every frame. */
+.eg { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--void); touch-action: none; }
+.eg canvas { display: block; outline: none; cursor: grab; }
+.eg canvas:active { cursor: grabbing; }
+.eg-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; contain: layout paint; }
+
+.eg-m { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform, opacity; transition: opacity 0.25s linear; }
+.eg-hit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+  animation: eg-pop 0.42s var(--ease) both;
+  transition: transform 0.25s var(--ease), background 0.2s, border-color 0.2s, box-shadow 0.25s;
+}
+@keyframes eg-pop { from { opacity: 0; transform: translate(-50%, -50%) scale(0.55); } }
+
+/* single point */
+.eg-m.pt .eg-hit { width: 16px; height: 16px; }
+.eg-m.pt .eg-hit::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(236, 234, 229, 0.55);
+  box-shadow: 0 0 0 1.5px rgba(5, 6, 8, 0.75);
+  transition: transform 0.25s var(--ease), background 0.2s;
+}
+.eg-m.pt.lit .eg-hit::before { width: 8px; height: 8px; background: var(--flare); }
+.eg-m.pt.hot .eg-hit::before { transform: scale(1.6); background: #fff; }
+
+.eg-m.ghost .eg-hit { pointer-events: none; animation: none; }
+
+/* plain cluster: count in a glass disc */
+.eg-m.cl:not(.pin) .eg-hit {
+  background: rgba(10, 11, 14, 0.72);
+  border: 1px solid rgba(236, 234, 229, 0.32);
+  backdrop-filter: blur(6px);
+  color: var(--chrome);
+}
+.eg-m.cl.lit:not(.pin) .eg-hit { border-color: rgba(242, 200, 121, 0.75); color: var(--flare); box-shadow: 0 0 0 4px rgba(242, 200, 121, 0.1); }
+.eg-m.cl.hot:not(.pin) .eg-hit { transform: translate(-50%, -50%) scale(1.12); color: var(--text); }
+.eg-count { font-size: 11px; font-weight: 500; line-height: 1; }
+
+/* numbered pin for the top results */
+.eg-m.pin .eg-hit {
+  width: 26px;
+  height: 26px;
+  background: #0d0e12;
+  border: 1.5px solid rgba(236, 234, 229, 0.85);
+  color: var(--text);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+}
+.eg-m.pin.lit .eg-hit { border-color: var(--flare); }
+.eg-m.pin.hot .eg-hit { transform: translate(-50%, -50%) scale(1.15); background: #16171c; }
+.eg-num { font-size: 11.5px; font-weight: 600; line-height: 1; }
+.eg-badge {
+  position: absolute;
+  top: -7px;
+  right: -12px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  line-height: 1.4;
+  background: var(--flare);
+  color: var(--void);
+}
+
+/* selected */
+.eg-m.sel.pt .eg-hit::before { width: 10px; height: 10px; background: #fff; box-shadow: 0 0 0 2px var(--flare); }
+.eg-m.sel.pin .eg-hit { background: var(--flare); color: var(--void); border-color: #fff; }
+.eg-pulse {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--flare);
+  pointer-events: none;
+  animation: eg-pulse 2.4s var(--ease) infinite;
+}
+@keyframes eg-pulse { 0% { transform: scale(0.8); opacity: 0.95; } 100% { transform: scale(3.4); opacity: 0; } }
+
+/* tooltip */
+.eg-tip {
+  position: absolute;
+  left: 0;
+  bottom: 18px;
+  transform: translate(-50%, 4px);
+  display: grid;
+  gap: 1px;
+  min-width: max-content;
+  max-width: 260px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  border: 1px solid var(--line-2);
+  background: rgba(12, 13, 17, 0.88);
+  backdrop-filter: blur(10px);
+  font-size: 12.5px;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s, transform 0.25s var(--ease);
+  z-index: 2;
+}
+.eg-tip b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+.eg-tip span { font-size: 11px; color: var(--dim); }
+.eg-m.sel { z-index: 4; }
+.eg-m.hot { z-index: 5; }
+.eg-m.hot .eg-tip { opacity: 1; transform: translate(-50%, 0); }
+.eg-m.pin .eg-tip, .eg-m.cl .eg-tip { bottom: 24px; }
+
+.eg-fallback { display: grid; place-items: center; }
+.eg-still { width: min(80%, 80vh); aspect-ratio: 1; border-radius: 50%; background-size: 200% 100%; background-position: 30% 50%; box-shadow: inset -40px -10px 80px rgba(0, 0, 0, 0.85); }
+
+/* Moon */
+.mg { position: relative; width: 100%; height: 100%; }
+.mg canvas { display: block; }
+.mg-fallback { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 70% 26%, #cfc9be 0%, #8d887f 20%, #45433f 42%, #18181b 62%, #08080a 80%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .eg-hit, .eg-pulse { animation: none; }
+}

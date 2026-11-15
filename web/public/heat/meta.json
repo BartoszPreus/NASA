@@ -1,0 +1,48 @@
+{
+ "width": 4096,
+ "height": 2048,
+ "valid_cells_drawn": 1758778,
+ "scored_cells_in_mask": 207728,
+ "source": [
+  "data/earth/cells/*.parquet",
+  "data/sites/scored_compact.parquet"
+ ],
+ "targets": {
+  "base_regions": {
+   "file": "heat/base_regions.png",
+   "column": "p_all"
+  },
+  "polar_160km": {
+   "file": "heat/polar_160km.png",
+   "column": "p_all_polar_160km"
+  },
+  "connecting_ridge": {
+   "file": "heat/connecting_ridge.png",
+   "column": "p_all_connecting_ridge"
+  },
+  "peak_near_shackleton": {
+   "file": "heat/peak_near_shackleton.png",
+   "column": "p_all_peak_near_shackleton"
+  },
+  "nobile_rim_2": {
+   "file": "heat/nobile_rim_2.png",
+   "column": "p_all_nobile_rim_2"
+  },
+  "malapert_massif": {
+   "file": "heat/malapert_massif.png",
+   "column": "p_all_malapert_massif"
+  },
+  "mons_mouton": {
+   "file": "heat/mons_mouton.png",
+   "column": "p_all_mons_mouton"
+  },
+  "de_gerlache": {
+   "file": "heat/de_gerlache.png",
+   "column": "p_all_de_gerlache"
+  },
+  "haworth": {
+   "file": "heat/haworth.png",
+   "column": "p_all_haworth"
+  }
+ }
+}

@@ -19,6 +19,60 @@ export function json<T>(file: string): Promise<T> {
   return p as Promise<T>;
 }
 
+// Compact records of every patch (web/scripts/build_sites_all.py): sites/default.json, sites/strict.json.
+interface Compact extends Omit<Site, "breaks" | "polygon"> {
+  b: number[];
+}
+interface AllSites {
+  breaks: string[];
+  sites: Compact[];
+}
+const ROOT = "./";
+
+function fromCompact(c: Compact, breaks: string[]): Site {
+  const { b, ...rest } = c;
+  return {
+    ...rest,
+    breaks: b.map((i) => breaks[i]),
+    polygon: null,
+    novelty_record: null,
+    image: null,
+    power: null,
+    partner: null,
+    review: null,
+    known_match: null,
+  } as Site;
+}
+
+// The rich records of app/data (top 300 + 100, strict top 100) replace the compact ones with the same id.
+function merge(all: AllSites, rich: Site[]): Site[] {
+  const byId = new Map(rich.map((s) => [s.site_id, s]));
+  return all.sites.map((c) => {
+    const r = byId.get(c.site_id);
+    return r && r.rank === c.rank ? r : fromCompact(c, all.breaks);
+  });
+}
+
+const polyCache = new Map<string, Promise<Record<string, [number, number][][][]>>>();
+export function loadPolygons(run: "default" | "strict") {
+  let p = polyCache.get(run);
+  if (!p) {
+    p = fetch(`${ROOT}sites/${run}_polygons.json`).then((r) => {
+      if (!r.ok) throw new Error(`sites/${run}_polygons.json: HTTP ${r.status}`);
+      return r.json();
+    });
+    p.catch(() => polyCache.delete(run));
+    polyCache.set(run, p);
+  }
+  return p;
+}
+
+const all = (run: string) =>
+  fetch(`${ROOT}sites/${run}.json`).then((r) => {
+    if (!r.ok) throw new Error(`sites/${run}.json: HTTP ${r.status}`);
+    return r.json() as Promise<AllSites>;
+  });
+
 let atlasPromise: Promise<Atlas> | null = null;
 
 export function loadAtlas(): Promise<Atlas> {
@@ -29,14 +83,21 @@ export function loadAtlas(): Promise<Atlas> {
       json<Site[]>("sites.json"),
       json<Site[]>("sites_flagged.json"),
       json<{ sites: Site[]; note: string }>("strict_ranking.json"),
-    ]).then(([meta, moon, sites, flagged, strict]) => ({
-      meta,
-      moon,
-      sites,
-      flagged,
-      strict: strict.sites,
-      strictNote: strict.note,
-    }));
+      all("default"),
+      all("strict"),
+    ]).then(([meta, moon, sites, flagged, strict, allD, allS]) => {
+      const d = merge(allD, [...sites, ...flagged]);
+      const st = merge(allS, strict.sites);
+      return {
+        meta,
+        moon,
+        sites: d.filter((s) => !s.dune_like),
+        flagged: d.filter((s) => s.dune_like),
+        strict: st.filter((s) => !s.dune_like),
+        strictFlagged: st.filter((s) => s.dune_like),
+        strictNote: strict.note,
+      };
+    });
     atlasPromise.catch(() => (atlasPromise = null));
   }
   return atlasPromise;

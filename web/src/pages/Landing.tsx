@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { img, json, type Load } from "../lib/data";
 import { int, num } from "../lib/format";
-import { href } from "../lib/router";
+import { go, href } from "../lib/router";
 import type { Atlas } from "../lib/types";
 import { Arrow, Failed, Reveal } from "../components/kit";
 import { Starfield } from "../components/landing/Starfield";
 import { MoonSphere } from "../components/landing/MoonSphere";
-import { CountryBars, Funnel, ScaleRuler, WorldDots } from "../components/landing/Graphics";
+import { CountryBars, Funnel, ScaleRuler } from "../components/landing/Graphics";
+import type { GlobePoint } from "../components/three/EarthGlobe";
+
+// three.js loads after the text has painted
+const MoonGlobe = lazy(() => import("../components/three/MoonGlobe"));
+const EarthGlobe = lazy(() => import("../components/three/EarthGlobe"));
 import "../styles/landing.css";
 
 type VItem = { file: string; key: string; value: number | null };
@@ -40,10 +45,24 @@ function useVerdict() {
 export function Landing({ atlas }: { atlas: Load<Atlas> }) {
   const a = atlas.data;
   const v = useVerdict();
+  const [moonReady, setMoonReady] = useState(false);
   const scan = a?.meta.scan;
   const pooled = a?.moon.regions.base_regions;
   const texture = a?.moon.regions.polar_160km?.hillshade ?? null;
   const win = a?.meta.rank_window_km ?? 15;
+  const globePoints = useMemo<GlobePoint[]>(
+    () =>
+      [...(a?.sites ?? []), ...(a?.flagged ?? [])].map((s) => ({
+        id: s.site_id,
+        lat: s.lat,
+        lon: s.lon,
+        kind: s.rank <= 30 ? "match" : "listed",
+        rank: s.rank,
+        label: `${String(s.rank).padStart(2, "0")}  ${s.place?.split(/[,;(]/)[0].trim() || s.country || s.site_id}`,
+        sub: s.country ?? undefined,
+      })),
+    [a],
+  );
 
   const counters = [
     { label: "Tiles planned", value: scan?.n_planned_tiles ?? 2101 },
@@ -56,17 +75,20 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
     { label: "Valid cells", value: scan?.n_valid ?? 1758778 },
     { label: "Bare ground", value: scan?.n_bare ?? 1213569 },
     { label: "Candidate patches", value: a?.meta.counts.sites_total ?? 3175 },
-    { label: "Ranked in the atlas", value: a?.meta.counts.sites ?? 300 },
   ];
 
   return (
     <div className="landing">
       <section className="l-hero">
         <Starfield />
-        <MoonSphere texture={texture ? img(texture) : null} />
+        <MoonSphere texture={texture ? img(texture) : null} ready={moonReady}>
+          <Suspense fallback={null}>
+            <MoonGlobe className="l-moon-3d" rpm={0.5} light={[1, 0.45, 0.2]} tilt={0.42} onReady={() => setMoonReady(true)} />
+          </Suspense>
+        </MoonSphere>
         <div className="l-hero-inner">
           <h1 className="l-h1">
-            The shape of the lunar south pole, <span className="serif flare">measured on Earth.</span>
+            The shape of the lunar south pole, measured on Earth.
           </h1>
           <div className="l-cta">
             <a className="btn primary" href={href("explore")}>
@@ -99,7 +121,7 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
       <section className="l-sec">
         <Reveal className="l-text">
           <h2 className="l-h2">
-            Terrain shape, <span className="serif">nothing else.</span>
+            Terrain shape, nothing else.
           </h2>
           <p>
             Slope and roughness statistics at 240 m to 1.6 km, and the share of closed depressions, are compared with the lunar south-pole candidate regions. Features smaller than about 100 m are not resolved.
@@ -113,7 +135,7 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
       <section className="l-sec" id="how">
         <Reveal className="l-text">
           <h2 className="l-h2">
-            One code, <span className="serif">two worlds.</span>
+            One code, two worlds.
           </h2>
           <p>The same feature code runs on the lunar and the Earth elevation models. Earth cells whose statistics fall inside the lunar distribution are joined into patches.</p>
         </Reveal>
@@ -151,21 +173,29 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
       <section className="l-sec">
         <Reveal className="l-text">
           <h2 className="l-h2">
-            Regions, <span className="serif">not a single patch.</span>
+            Regions, not a single patch.
           </h2>
           <p>
             Exact top patches move with the grid, so read the map as regions. Moss and lichen count as bare ground in the default mask; the explorer also holds a strict ranking on bare ground only.
           </p>
         </Reveal>
         <Reveal className="l-world-wrap glass" delay={120}>
-          <div className="l-world-map">{a ? <WorldDots sites={a.sites} /> : <div className="l-skel" />}</div>
+          <div className="l-world-map l-globe">
+            {a ? (
+              <Suspense fallback={<div className="l-skel" />}>
+                <EarthGlobe points={globePoints} selectedId={null} hoverId={null} onSelect={(id) => go("explore", { site: id })} wheelZoom={false} />
+              </Suspense>
+            ) : (
+              <div className="l-skel" />
+            )}
+          </div>
           <div className="l-world-side">
             <div className="l-legend">
               <span>
                 <i className="l-key top" /> Top 30
               </span>
               <span>
-                <i className="l-key" /> Ranks 31 to {a?.sites.length ?? 300}
+                <i className="l-key" /> Other candidate patches, {int((a?.meta.counts.sites_total ?? 3175) - 30)}
               </span>
             </div>
             {a && <CountryBars sites={a.sites} />}
@@ -176,7 +206,7 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
       <section className="l-sec">
         <Reveal className="l-text">
           <h2 className="l-h2">
-            What it <span className="serif">does not claim.</span>
+            What it does not claim.
           </h2>
           <p>A screening tool with its evidence on display, including the checks that did not pass.</p>
         </Reveal>
@@ -207,7 +237,7 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
       <section className="l-end">
         <Reveal>
           <h2 className="l-h2">
-            Terrain that fits <span className="serif flare">at least one criterion.</span>
+            Terrain that fits at least one criterion.
           </h2>
           <a className="btn primary" href={href("explore")}>
             Open the explorer <Arrow />

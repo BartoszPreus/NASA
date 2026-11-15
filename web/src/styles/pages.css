@@ -4,10 +4,8 @@
 .pg .reveal.in { opacity: 1; transform: none; }
 .pg-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
 .pg-title { font-size: clamp(40px, 6vw, 76px); line-height: 1; letter-spacing: -0.035em; font-weight: 450; }
-.pg-title .serif { color: var(--flare); }
 .pg-lead { max-width: 640px; color: var(--chrome); font-size: 16.5px; line-height: 1.6; margin-top: 22px; }
 .pg-h2 { font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; letter-spacing: -0.03em; margin: 96px 0 28px; font-weight: 450; }
-.pg-h2 .serif { color: var(--flare); }
 .pg-h3 { font-size: 17px; letter-spacing: -0.01em; font-weight: 500; }
 .pg .glass { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
 .pg a.ext { color: var(--text); border-bottom: 1px solid var(--line-2); transition: border-color 0.2s, color 0.2s; }

@@ -75,6 +75,11 @@
   box-shadow: inset 10px -6px 24px rgba(242, 200, 121, 0.06), inset -2px 2px 1px rgba(242, 220, 176, 0.18);
 }
 
+.l-moon-3d { position: absolute; inset: 0; z-index: 1; opacity: 0; transition: opacity 1.4s var(--ease); }
+.l-moon.ready .l-moon-3d { opacity: 1; }
+.l-moon-body { transition: opacity 1.2s var(--ease); }
+.l-moon.ready .l-moon-body { opacity: 0; }
+
 .l-hero-inner { position: relative; max-width: var(--maxw); width: 100%; margin: 0 auto; padding-bottom: clamp(48px, 9vh, 96px); }
 .l-h1 {
   font-size: clamp(46px, 7vw, 112px);
@@ -84,7 +89,6 @@
   max-width: 11.5ch;
   text-wrap: balance;
 }
-.l-h1 .serif { letter-spacing: -0.02em; font-size: 1.04em; }
 .l-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(28px, 4vh, 44px); }
 .l-cta .btn:not(.primary) { background: rgba(5, 6, 8, 0.35); backdrop-filter: blur(10px); }
 
@@ -121,7 +125,6 @@
   font-weight: 500;
   text-wrap: balance;
 }
-.l-h2 .serif { color: var(--chrome); }
 .l-text p { margin-top: 22px; max-width: 42ch; color: var(--chrome); font-size: 16px; line-height: 1.65; }
 .l-figure { padding: clamp(16px, 2.4vw, 32px); }
 
@@ -175,11 +178,8 @@
 /* world */
 .l-world-wrap { grid-column: 2; padding: clamp(16px, 2vw, 24px); display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .l-world-map { position: relative; }
-.l-world { width: 100%; height: auto; display: block; }
-.l-world-grat { stroke: rgba(255, 255, 255, 0.04); stroke-dasharray: 2 5; }
-.l-world-land { fill: rgba(255, 255, 255, 0.045); stroke: rgba(255, 255, 255, 0.13); stroke-width: 0.5; }
-.l-world-dot { fill: rgba(236, 234, 229, 0.55); }
-.l-world-top { fill: var(--flare); stroke: var(--void); stroke-width: 0.8; }
+.l-globe { height: clamp(340px, 42vw, 520px); border-radius: 14px; overflow: hidden; margin: -4px; }
+.l-globe .l-skel { height: 100%; }
 .l-skel { aspect-ratio: 1000 / 394; border-radius: 10px; background: rgba(255, 255, 255, 0.03); }
 .l-world-side { display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: start; border-top: 1px solid var(--line); padding-top: 20px; }
 .l-legend { display: grid; gap: 10px; font-size: 13px; color: var(--chrome); }
@@ -209,7 +209,6 @@
   text-align: center;
 }
 .l-end .l-h2 { max-width: 16ch; margin: 0 auto 36px; font-size: clamp(34px, 5vw, 72px); }
-.l-end .l-h2 .serif { color: var(--flare); }
 
 /* ---------------------------------------------------------------- responsive */
 @media (max-width: 1080px) {

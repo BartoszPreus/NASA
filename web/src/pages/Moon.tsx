@@ -70,7 +70,7 @@ export function MoonPage({ atlas }: { atlas: Load<Atlas> }) {
     <div className="pg">
       <Reveal className="pg-head">
         <h1 className="pg-title">
-          Nine lunar targets, <span className="serif">one pole.</span>
+          Nine lunar targets, one pole.
         </h1>
         <div style={{ width: "min(340px, 100%)" }}>
           <Dropdown
@@ -185,7 +185,7 @@ export function MoonPage({ atlas }: { atlas: Load<Atlas> }) {
       {r.maps && (
         <>
           <h2 className="pg-h2">
-            {shortName(r)}, <span className="serif">through ten instruments.</span>
+            {shortName(r)}, through ten instruments.
           </h2>
           <Reveal className="gallery">
             {MAP_ORDER.filter((k) => r.maps?.[k]).map((k) => {

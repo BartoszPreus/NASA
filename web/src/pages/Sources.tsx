@@ -13,12 +13,14 @@ const CREDITS: { name: string; lic: string; url: string }[] = [
   { name: "React", lic: "MIT", url: "https://react.dev/" },
   { name: "Vite", lic: "MIT", url: "https://vite.dev/" },
   { name: "TypeScript", lic: "Apache-2.0", url: "https://www.typescriptlang.org/" },
-  { name: "Leaflet", lic: "BSD-2-Clause", url: "https://leafletjs.com/" },
+  { name: "three.js", lic: "MIT", url: "https://threejs.org/" },
+  { name: "React Three Fiber", lic: "MIT", url: "https://github.com/pmndrs/react-three-fiber" },
   { name: "Geist and Geist Mono, Vercel", lic: "SIL OFL 1.1", url: "https://vercel.com/font" },
-  { name: "Instrument Serif", lic: "SIL OFL 1.1", url: "https://github.com/Instrument/instrument-serif" },
   { name: "Fontsource packaging", lic: "MIT", url: "https://fontsource.org/" },
   { name: "Natural Earth land outlines", lic: "Public domain", url: "https://www.naturalearthdata.com/" },
-  { name: "Interface inspired by ShadowAstra Atlas", lic: "MIT · no code or assets copied", url: "https://github.com/ABRUBAB/ShadowAstra_Atlas" },
+  { name: "ShadowAstra Atlas: interface design, globe textures and adapted globe and terrain code", lic: "MIT, (c) 2026 Team ShadowAstra", url: "https://github.com/ABRUBAB/ShadowAstra_Atlas" },
+  { name: "Globe textures: NASA Blue Marble, Black Marble (GIBS), LRO LROC WAC mosaic (Solar System Treks)", lic: "NASA imagery, no copyright", url: "https://gibs.earthdata.nasa.gov/" },
+  { name: "Compare elevation grids: Copernicus DEM GLO-30 (ESA, AWS open data) and LOLA LDEM_80S_20MPP_ADJ (NASA PGDA 90)", lic: "Copernicus DEM licence; NASA open data", url: "https://registry.opendata.aws/copernicus-dem/" },
 ];
 
 type Status = "all" | "used" | "not";
@@ -56,7 +58,7 @@ export function SourcesPage() {
     <div className="pg">
       <Reveal className="pg-head">
         <h1 className="pg-title">
-          {all.length} sources, <span className="serif">each with its licence.</span>
+          {all.length} sources, each with its licence.
         </h1>
       </Reveal>
 
@@ -116,7 +118,7 @@ export function SourcesPage() {
       ))}
 
       <h2 className="pg-h2">
-        Software <span className="serif">and design.</span>
+        Software and design.
       </h2>
       <Reveal className="credits">
         {CREDITS.map((c) => (

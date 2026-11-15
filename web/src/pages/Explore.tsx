@@ -1,28 +1,35 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import type { Load } from "../lib/data";
+import { loadPolygons, type Load } from "../lib/data";
 import type { Atlas, Site } from "../lib/types";
 import { replaceParams } from "../lib/router";
 import { criteriaFor, evaluate, type Dataset, type Mode, type Thresholds } from "../lib/criteria";
-import { Failed, Loading } from "../components/kit";
+import { Failed, Loading, Switch } from "../components/kit";
 import { Filters, type Extra } from "../components/explore/Filters";
 import { SiteList, type Sort } from "../components/explore/SiteList";
-import { MapView } from "../components/explore/MapView";
 import { SiteCard } from "../components/explore/SiteCard";
+import { EarthGlobe, type GlobePoint } from "../components/three/EarthGlobe";
+import { siteName } from "../lib/format";
 import "../styles/explore.css";
 
-// URL: #/explore?set=strict&target=haworth&c=score:10,cold:20&m=all&site=N82W026-01
-function readCrit(p: URLSearchParams): Thresholds {
+// URL: #/explore?set=strict&target=haworth&c=score:10,cold:15&m=all&site=N82W026-01
+// No `c` = every criterion active at its default threshold (the default view); `c=none` = no criterion.
+function readCrit(p: URLSearchParams, all: string[]): Thresholds {
+  const raw = p.get("c");
+  if (raw == null) return Object.fromEntries(all.map((id) => [id, NaN]));
   const out: Thresholds = {};
-  for (const part of (p.get("c") ?? "").split(",")) {
+  if (raw === "none") return out;
+  for (const part of raw.split(",")) {
     const [id, t] = part.split(":");
     if (id) out[id] = Number(t) || NaN;
   }
   return out;
 }
-const writeCrit = (a: Thresholds) =>
-  Object.entries(a)
-    .map(([k, v]) => (Number.isFinite(v) ? `${k}:${v}` : k))
-    .join(",") || null;
+function writeCrit(a: Thresholds, all: string[]): string | null {
+  const ids = Object.keys(a);
+  if (!ids.length) return "none";
+  if (ids.length === all.length && all.every((id) => id in a && !Number.isFinite(a[id]))) return null;
+  return ids.map((k) => (Number.isFinite(a[k]) ? `${k}:${a[k]}` : k)).join(",");
+}
 
 export function Explore({ atlas, params }: { atlas: Load<Atlas>; params: URLSearchParams }) {
   if (atlas.error) return <Failed error={atlas.error} retry={atlas.retry} />;
@@ -30,20 +37,34 @@ export function Explore({ atlas, params }: { atlas: Load<Atlas>; params: URLSear
   return <ExploreInner atlas={atlas.data} params={params} />;
 }
 
+const TOP_PINS = 10;
+const LIT = 100;
+
 function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams }) {
   const [dataset, setDataset] = useState<Dataset>(params.get("set") === "strict" ? "strict" : "default");
   const [target, setTarget] = useState(() => {
     const t = params.get("target");
     return t && atlas.moon.regions[t] ? t : atlas.moon.default_target;
   });
-  const [active, setActive] = useState<Thresholds>(() => readCrit(params));
+  const crits = useMemo(() => criteriaFor(dataset), [dataset]);
+  const allIds = useMemo(() => crits.map((c) => c.id), [crits]);
+  const [active, setActive] = useState<Thresholds>(() => readCrit(params, criteriaFor(params.get("set") === "strict" ? "strict" : "default").map((c) => c.id)));
   const [mode, setMode] = useState<Mode>(params.get("m") === "all" ? "all" : "any");
   const [extra, setExtra] = useState<Extra>({ novelty: "all", hideKnown: false, onlyImage: false, dune: false });
   const [q, setQ] = useState("");
-  const [sort, setSort] = useState<Sort>("rank");
+  const [sort, setSort] = useState<Sort>(() => (params.get("sort") as Sort) || "target");
+  const [flip, setFlip] = useState(params.get("dir") === "asc");
   const [selId, setSelId] = useState<string | null>(params.get("site"));
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [heatOn, setHeatOn] = useState(true);
+  const [wide, setWide] = useState(() => innerWidth > 900);
+
+  useEffect(() => {
+    const f = () => setWide(innerWidth > 900);
+    addEventListener("resize", f);
+    return () => removeEventListener("resize", f);
+  }, []);
 
   // a site link from elsewhere (hash change) selects the site
   const linked = params.get("site");
@@ -51,23 +72,37 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
     if (linked) setSelId(linked);
   }, [linked]);
 
-  const crits = useMemo(() => criteriaFor(dataset), [dataset]);
   const activeCrits = useMemo(() => crits.filter((c) => c.id in active), [crits, active]);
 
   useEffect(() => {
     replaceParams({
       set: dataset === "strict" ? "strict" : null,
       target: target === atlas.moon.default_target ? null : target,
-      c: writeCrit(Object.fromEntries(Object.entries(active).filter(([k]) => crits.some((c) => c.id === k)))),
+      c: writeCrit(Object.fromEntries(Object.entries(active).filter(([k]) => allIds.includes(k))), allIds),
       m: mode === "all" ? "all" : null,
+      sort: sort === "target" ? null : sort,
+      dir: flip ? "asc" : null,
       site: selId,
     });
-  }, [dataset, target, active, mode, selId, crits, atlas.moon.default_target]);
+  }, [dataset, target, active, mode, selId, allIds, sort, flip, atlas.moon.default_target]);
 
   const pool: Site[] = useMemo(() => {
-    if (dataset === "strict") return atlas.strict;
+    if (dataset === "strict") return extra.dune ? [...atlas.strict, ...atlas.strictFlagged] : atlas.strict;
     return extra.dune ? [...atlas.sites, ...atlas.flagged] : atlas.sites;
   }, [dataset, extra.dune, atlas]);
+
+  // outlines of all patches arrive after the first render (sites/<run>_polygons.json)
+  const [polys, setPolys] = useState<Record<string, [number, number][][][]> | null>(null);
+  useEffect(() => {
+    let dead = false;
+    setPolys(null);
+    loadPolygons(dataset)
+      .then((p) => !dead && setPolys(p))
+      .catch(() => {});
+    return () => {
+      dead = true;
+    };
+  }, [dataset]);
 
   const thresholds = useMemo(() => {
     const t: Thresholds = {};
@@ -93,87 +128,161 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
       ? base.filter((s) => (mode === "any" ? activeCrits.some((c) => ev(s)[c.id]?.pass) : activeCrits.every((c) => ev(s)[c.id]?.pass)))
       : base;
     const met = (s: Site) => activeCrits.filter((c) => ev(s)[c.id]?.pass).length;
-    const best = (s: Site) => Math.max(0, ...activeCrits.map((c) => ev(s)[c.id]?.score ?? 0));
-    const sorted = [...m];
-    if (sort === "met") sorted.sort((a, b) => met(b) - met(a) || a.rank - b.rank);
-    else if (sort === "best") sorted.sort((a, b) => best(b) - best(a) || a.rank - b.rank);
-    else if (sort === "target") sorted.sort((a, b) => (b.region_scores[target] ?? -1) - (a.region_scores[target] ?? -1) || a.rank - b.rank);
+    const overall = (s: Site) => s.region_scores[target] ?? -1;
+    const strongest = (s: Site) => Math.max(0, ...activeCrits.map((c) => ev(s)[c.id]?.score ?? 0));
+    // every key puts the best patch first; `flip` reverses it, ties keep the ranking order
+    let key: (s: Site) => number;
+    if (sort === "best") key = (s) => met(s) * 10 + overall(s);
+    else if (sort === "strongest") key = strongest;
+    else if (sort === "target") key = overall;
+    else if (sort.startsWith("c:")) {
+      const id = sort.slice(2);
+      key = (s) => ev(s)[id]?.score ?? -1;
+    } else key = (s) => -s.rank;
+    const sorted = [...m].sort((a, b) => {
+      const ka = key(a);
+      const kb = key(b);
+      if (ka < 0 !== kb < 0) return ka < 0 ? 1 : -1; // not sampled always last
+      return (flip ? ka - kb : kb - ka) || a.rank - b.rank;
+    });
     return { listed: base, matched: sorted };
-  }, [pool, extra, dq, evals, activeCrits, mode, sort, target]);
+  }, [pool, extra, dq, evals, activeCrits, mode, sort, flip, target]);
 
-  const listedIds = useMemo(() => new Set(listed.map((s) => s.site_id)), [listed]);
+  // the globe lights the first LIT results of the list; everything else that is listed stays faint
+  const points: GlobePoint[] = useMemo(() => {
+    const mset = new Set(matched.slice(0, LIT).map((s) => s.site_id));
+    const order = new Map(matched.slice(0, TOP_PINS).map((s, i) => [s.site_id, i + 1]));
+    return listed.map((s) => ({
+      id: s.site_id,
+      lat: s.lat,
+      lon: s.lon,
+      kind: mset.has(s.site_id) ? "match" : "listed",
+      rank: s.rank,
+      label: siteName(s),
+      sub: `${s.country ?? ""} · rank ${s.rank}`,
+      top: order.has(s.site_id),
+      order: order.get(s.site_id),
+    }));
+  }, [listed, matched]);
+
   const all = useMemo(() => new Map([...atlas.sites, ...atlas.flagged].map((s) => [s.site_id, s])), [atlas]);
-  const strictMap = useMemo(() => new Map(atlas.strict.map((s) => [s.site_id, s])), [atlas]);
-  const selected = selId ? ((dataset === "strict" ? strictMap.get(selId) : all.get(selId)) ?? null) : null;
+  const strictMap = useMemo(() => new Map([...atlas.strict, ...atlas.strictFlagged].map((s) => [s.site_id, s])), [atlas]);
+  const sel0 = selId ? ((dataset === "strict" ? strictMap.get(selId) : all.get(selId)) ?? null) : null;
+  const selected = sel0 && !sel0.polygon && polys?.[sel0.site_id] ? { ...sel0, polygon: polys[sel0.site_id] } : sel0;
 
   const switchDataset = (d: Dataset) => {
+    const ids = criteriaFor(d).map((c) => c.id);
+    const next: Thresholds = {};
+    for (const [k, v] of Object.entries(active)) if (ids.includes(k)) next[k] = v;
+    // keep "every criterion" when it was every criterion
+    if (Object.keys(active).length === allIds.length) for (const id of ids) if (!(id in next)) next[id] = NaN;
+    setActive(next);
     setDataset(d);
     setSelId(null);
   };
 
   return (
     <div className={`ex ${panelOpen ? "" : "panel-closed"} ${selected ? "has-card" : ""}`}>
-      <aside className="ex-panel" aria-label="Filters and candidate patches">
-        <Filters
-          atlas={atlas}
-          dataset={dataset}
-          setDataset={switchDataset}
-          target={target}
-          setTarget={setTarget}
-          crits={crits}
-          active={active}
-          setActive={setActive}
-          thresholds={thresholds}
-          stats={stats}
-          mode={mode}
-          setMode={setMode}
-          extra={extra}
-          setExtra={setExtra}
-          q={q}
-          setQ={setQ}
-        />
-        <SiteList
-          sites={matched}
-          nListed={listed.length}
-          crits={crits}
-          active={activeCrits}
-          evals={evals}
-          target={target}
-          selId={selId}
-          onSelect={setSelId}
-          onHover={setHoverId}
-          sort={sort}
-          setSort={setSort}
-          mode={mode}
-        />
-      </aside>
-      <section className="ex-map" aria-label="Map of the candidate patches">
-        <MapView
-          pool={pool}
-          matched={matched}
-          listedIds={listedIds}
-          hasCriteria={activeCrits.length > 0}
-          selected={selected}
+      <section className="ex-globe" aria-label="Globe with the candidate patches">
+        <EarthGlobe
+          points={points}
+          selectedId={selId}
           hoverId={hoverId}
           onSelect={setSelId}
-          panelOpen={panelOpen}
-          togglePanel={() => setPanelOpen((o) => !o)}
+          onHover={setHoverId}
+          outline={selected?.polygon ?? null}
+          offsetX={wide && panelOpen ? 210 : 0}
+          heat={heatOn ? `./heat/${target}.png` : null}
         />
-        {selected && (
-          <SiteCard
-            key={selected.site_id + dataset}
-            site={selected}
+        <div className="globe-legend">
+          <label className="heat-tg">
+            <Switch on={heatOn} onChange={setHeatOn} label="Similarity of every scanned 2 km cell" />
+            All scanned cells
+          </label>
+          {heatOn && (
+            <span className="heat-scale" title="Similarity p of the 2 km cells to the selected lunar target (data/sites/scored_compact.parquet); faint veil = scanned, below 0.05">
+              <span className="mono">0.05</span>
+              <i />
+              <span className="mono">0.6+</span>
+            </span>
+          )}
+          <span>
+            <i className="lit" />
+            First {Math.min(LIT, matched.length)} results
+          </span>
+          <span>
+            <i className="off" />
+            Other patches
+          </span>
+          <span>
+            <i className="pin">1</i>
+            First {TOP_PINS} results
+          </span>
+        </div>
+      </section>
+
+      <aside className="ex-panel" aria-label="Filters and candidate patches">
+        <button className="ex-panel-toggle icon-btn" onClick={() => setPanelOpen((o) => !o)} aria-label={panelOpen ? "Hide the panel" : "Show the panel"}>
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden>
+            <rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" strokeWidth="1.2" />
+            <path d="M6 2.5v11" stroke="currentColor" strokeWidth="1.2" />
+          </svg>
+        </button>
+        <div className="ex-panel-scroll">
+          <Filters
             atlas={atlas}
             dataset={dataset}
+            setDataset={switchDataset}
             target={target}
             setTarget={setTarget}
             crits={crits}
-            evals={evals.get(selected.site_id) ?? null}
-            activeIds={activeCrits.map((c) => c.id)}
-            onClose={() => setSelId(null)}
+            active={active}
+            setActive={setActive}
+            thresholds={thresholds}
+            stats={stats}
+            mode={mode}
+            setMode={setMode}
+            extra={extra}
+            setExtra={setExtra}
+            q={q}
+            setQ={setQ}
           />
-        )}
-      </section>
+          <SiteList
+            sites={matched}
+            nListed={listed.length}
+            crits={crits}
+            active={activeCrits}
+            evals={evals}
+            target={target}
+            selId={selId}
+            onSelect={setSelId}
+            onHover={setHoverId}
+            sort={sort}
+            flip={flip}
+            setFlip={setFlip}
+            setSort={setSort}
+            mode={mode}
+            pins={TOP_PINS}
+            polys={polys}
+            run={dataset}
+          />
+        </div>
+      </aside>
+
+      {selected && (
+        <SiteCard
+          key={selected.site_id + dataset}
+          site={selected}
+          atlas={atlas}
+          dataset={dataset}
+          target={target}
+          setTarget={setTarget}
+          crits={crits}
+          evals={evals.get(selected.site_id) ?? null}
+          activeIds={activeCrits.map((c) => c.id)}
+          onClose={() => setSelId(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { Atlas, Novelty } from "../../lib/types";
 import type { Criterion, Dataset, Mode, Stats, Thresholds } from "../../lib/criteria";
 import { Chevron, Dropdown, SearchIcon, Segmented, Slider, Switch, type Option } from "../kit";
@@ -80,7 +80,7 @@ function CritRow({ c, on, t, st, nPass, toggle, setT }: { c: Criterion; on: bool
       <Histogram c={c} st={st} t={t} />
       {on && (
         <div className="crit-ctl">
-          <span className="mono">{c.kind === "pct" ? `Top ${t}%` : `${t} of 5 or more`}</span>
+          <span className="mono">{c.kind === "pct" ? `Top ${t}%` : `At least ${t}`}</span>
           {c.kind === "pct" ? (
             <Slider value={t} min={1} max={50} onChange={setT} label={`${c.label}: share of the best patches`} />
           ) : (
@@ -93,8 +93,24 @@ function CritRow({ c, on, t, st, nPass, toggle, setT }: { c: Criterion; on: bool
   );
 }
 
+// Collapsible section with an animated height.
+function Accordion({ title, count, open, onToggle, children }: { title: string; count: string; open: boolean; onToggle: () => void; children: ReactNode }) {
+  return (
+    <div className={`acc ${open ? "open" : ""}`}>
+      <button className="acc-head" onClick={onToggle} aria-expanded={open}>
+        <span className="acc-t">{title}</span>
+        <span className="acc-n mono">{count}</span>
+        <Chevron />
+      </button>
+      <div className="acc-body">
+        <div className="acc-inner">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 export function Filters(p: Props) {
-  const [open, setOpen] = useState(true);
+  const [openG, setOpenG] = useState<string | null>(null);
   const targets: Option<string>[] = Object.values(p.atlas.moon.regions).map((r) => ({
     value: r.id,
     label: r.display_name,
@@ -123,8 +139,8 @@ export function Filters(p: Props) {
           value={p.dataset}
           onChange={p.setDataset}
           options={[
-            { value: "default", label: "Default mask · 300" },
-            { value: "strict", label: "Bare ground only · 100" },
+            { value: "default", label: `Default mask · ${int(p.atlas.sites.length)}` },
+            { value: "strict", label: `Bare ground only · ${int(p.atlas.strict.length)}` },
           ]}
         />
         <div className="flt-row">
@@ -138,73 +154,76 @@ export function Filters(p: Props) {
       </div>
 
       <section className="crits">
-        <button className="crits-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+        <div className="crits-head">
           <span>Criteria</span>
-          <span className="mono dim">{nActive ? `${nActive} active` : "none active"}</span>
-          <Chevron />
-        </button>
-        {open && (
-          <>
-            <div className="crits-mode">
-              <Segmented
-                full
-                label="How criteria combine"
-                value={p.mode}
-                onChange={p.setMode}
-                options={[
-                  { value: "any", label: "Strong in at least one" },
-                  { value: "all", label: "Strong in all" },
-                ]}
-              />
-              {nActive > 0 && (
-                <button className="link" onClick={() => p.setActive({})}>
-                  Clear
-                </button>
-              )}
-            </div>
-            {groups.map((g) => (
-              <div key={g} className="crit-group">
-                <div className="label">{g}</div>
-                <ul>
-                  {p.crits
-                    .filter((c) => c.group === g)
-                    .map((c) => (
-                      <CritRow
-                        key={c.id}
-                        c={c}
-                        on={c.id in p.active}
-                        t={p.thresholds[c.id]}
-                        st={p.stats[c.id]}
-                        nPass={passCount(c)}
-                        toggle={() => toggle(c.id)}
-                        setT={(v) => p.setActive({ ...p.active, [c.id]: v })}
-                      />
-                    ))}
-                </ul>
-              </div>
-            ))}
-            <div className="crit-group">
-              <div className="label">Context</div>
-              <div className="flt-row">
-                <Dropdown label="Literature verdict" value={p.extra.novelty} options={NOVELTY_OPTS} onChange={(v) => p.setExtra({ ...p.extra, novelty: v })} />
-              </div>
-              <label className="opt">
-                <Switch on={p.extra.hideKnown} onChange={(v) => p.setExtra({ ...p.extra, hideKnown: v })} label="Hide known analog sites" />
-                Hide known analog sites
-              </label>
-              <label className="opt">
-                <Switch on={p.extra.onlyImage} onChange={(v) => p.setExtra({ ...p.extra, onlyImage: v })} label="Only patches with a satellite image" />
-                Only patches with a satellite image
-              </label>
-              {p.dataset === "default" && (
-                <label className="opt">
-                  <Switch on={p.extra.dune} onChange={(v) => p.setExtra({ ...p.extra, dune: v })} label="Show dune-like relief (terrain rule)" />
-                  Show dune-like relief (terrain rule), {p.atlas.meta.counts.sites_flagged} of {int(p.atlas.meta.counts.sites_flagged_total)}
-                </label>
-              )}
-            </div>
-          </>
-        )}
+          <span className="mono dim">
+            {nActive} of {p.crits.length} active
+          </span>
+          {nActive < p.crits.length ? (
+            <button className="link" onClick={() => p.setActive(Object.fromEntries(p.crits.map((c) => [c.id, p.active[c.id] ?? NaN])))}>
+              All
+            </button>
+          ) : null}
+          {nActive > 0 && (
+            <button className="link" onClick={() => p.setActive({})}>
+              None
+            </button>
+          )}
+        </div>
+        <Segmented
+          full
+          label="How criteria combine"
+          value={p.mode}
+          onChange={p.setMode}
+          options={[
+            { value: "any", label: "Strong in at least one" },
+            { value: "all", label: "Strong in all" },
+          ]}
+        />
+        {groups.map((g) => {
+          const list = p.crits.filter((c) => c.group === g);
+          const on = list.filter((c) => c.id in p.active).length;
+          return (
+            <Accordion key={g} title={g} count={`${on} of ${list.length}`} open={openG === g} onToggle={() => setOpenG(openG === g ? null : g)}>
+              <ul>
+                {list.map((c) => (
+                  <CritRow
+                    key={c.id}
+                    c={c}
+                    on={c.id in p.active}
+                    t={p.thresholds[c.id]}
+                    st={p.stats[c.id]}
+                    nPass={passCount(c)}
+                    toggle={() => toggle(c.id)}
+                    setT={(v) => p.setActive({ ...p.active, [c.id]: v })}
+                  />
+                ))}
+              </ul>
+            </Accordion>
+          );
+        })}
+        <Accordion
+          title="Context"
+          count={`${[p.extra.novelty !== "all", p.extra.hideKnown, p.extra.onlyImage, p.extra.dune].filter(Boolean).length} set`}
+          open={openG === "Context"}
+          onToggle={() => setOpenG(openG === "Context" ? null : "Context")}
+        >
+          <div className="flt-row">
+            <Dropdown label="Literature verdict" value={p.extra.novelty} options={NOVELTY_OPTS} onChange={(v) => p.setExtra({ ...p.extra, novelty: v })} />
+          </div>
+          <label className="opt">
+            <Switch on={p.extra.hideKnown} onChange={(v) => p.setExtra({ ...p.extra, hideKnown: v })} label="Hide known analog sites" />
+            Hide known analog sites
+          </label>
+          <label className="opt">
+            <Switch on={p.extra.onlyImage} onChange={(v) => p.setExtra({ ...p.extra, onlyImage: v })} label="Only patches with a satellite image" />
+            Only patches with a satellite image
+          </label>
+          <label className="opt">
+            <Switch on={p.extra.dune} onChange={(v) => p.setExtra({ ...p.extra, dune: v })} label="Include dune-like relief (terrain rule)" />
+            Include dune-like relief (terrain rule), {int(p.dataset === "strict" ? p.atlas.strictFlagged.length : p.atlas.flagged.length)}
+          </label>
+        </Accordion>
       </section>
     </div>
   );

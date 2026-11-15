@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { int } from "../../lib/format";
 import type { Site } from "../../lib/types";
 
@@ -100,62 +100,7 @@ export function Funnel({ steps }: { steps: { label: string; value: number }[] })
   );
 }
 
-/* ---------------------------------------------------------------- world map (equirectangular) */
-type Ring = [number, number][];
-type Geom = { type: "Polygon"; coordinates: Ring[] } | { type: "MultiPolygon"; coordinates: Ring[][] };
-const LAT_TOP = 84;
-const LAT_BOT = -58;
-const W = 1000;
-const H = (W * (LAT_TOP - LAT_BOT)) / 360;
-const px = (lon: number) => ((lon + 180) / 360) * W;
-const py = (lat: number) => ((LAT_TOP - lat) / 360) * W;
-
-let landPromise: Promise<string> | null = null;
-function landPath(): Promise<string> {
-  if (!landPromise) {
-    landPromise = fetch("./land.geojson")
-      .then((r) => {
-        if (!r.ok) throw new Error(`land.geojson: HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((g: { features: { geometry: Geom }[] }) => {
-        const ring = (r: Ring) => r.map(([lon, lat], i) => `${i ? "L" : "M"}${px(lon).toFixed(1)} ${py(Math.max(LAT_BOT - 2, Math.min(LAT_TOP + 2, lat))).toFixed(1)}`).join("") + "Z";
-        return g.features
-          .map((f) => (f.geometry.type === "Polygon" ? f.geometry.coordinates.map(ring).join("") : f.geometry.coordinates.map((p) => p.map(ring).join("")).join("")))
-          .join("");
-      });
-    landPromise.catch(() => (landPromise = null));
-  }
-  return landPromise;
-}
-
-export function WorldDots({ sites }: { sites: Site[] }) {
-  const [land, setLand] = useState<string | null>(null);
-  useEffect(() => {
-    let dead = false;
-    landPath()
-      .then((d) => !dead && setLand(d))
-      .catch(() => !dead && setLand(""));
-    return () => {
-      dead = true;
-    };
-  }, []);
-  const ordered = useMemo(() => [...sites].sort((a, b) => b.rank - a.rank), [sites]);
-  return (
-    <svg className="l-world" viewBox={`0 0 ${W} ${H.toFixed(0)}`} role="img" aria-label={`World map with the ${sites.length} ranked candidate patches; the top 30 are highlighted.`}>
-      {[60, 30, 0, -30].map((lat) => (
-        <line key={lat} x1="0" x2={W} y1={py(lat)} y2={py(lat)} className="l-world-grat" />
-      ))}
-      {land && <path d={land} className="l-world-land" />}
-      {ordered.map((s) => (
-        <circle key={s.site_id} cx={px(s.lon)} cy={py(s.lat)} r={s.rank <= 30 ? 3.4 : 1.9} className={s.rank <= 30 ? "l-world-top" : "l-world-dot"}>
-          <title>{`#${s.rank} · ${s.country ?? s.site_id}`}</title>
-        </circle>
-      ))}
-    </svg>
-  );
-}
-
+/* ---------------------------------------------------------------- top 30 by country */
 export function CountryBars({ sites, top = 30 }: { sites: Site[]; top?: number }) {
   const rows = useMemo(() => {
     const m = new Map<string, number>();

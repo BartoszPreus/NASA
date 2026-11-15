@@ -3,6 +3,7 @@ import type { Atlas, FeatureKey, MoonRegion, Site } from "../../lib/types";
 import type { Criterion, Dataset, Eval } from "../../lib/criteria";
 import { FEATURES } from "../../lib/criteria";
 import { img } from "../../lib/data";
+import { href } from "../../lib/router";
 import { ANALOG_FOR, NOVELTY_LABEL, REVIEW_LABEL, coord, int, num, pct, siteName } from "../../lib/format";
 import { Close, Dropdown, Segmented, type Option } from "../kit";
 
@@ -156,6 +157,9 @@ export function SiteCard(p: {
           <span className="dim mono">{strictNote ? "Bare-ground ranking" : "Default ranking"}</span>
         </div>
         <div className="card-actions">
+          <a className="btn sm" href={href("compare", { site: s.site_id, set: p.dataset === "strict" ? "strict" : null, target: moon.regions[p.target]?.hillshade ? p.target : s.best_region })}>
+            Compare in 3D
+          </a>
           <button className="btn sm" onClick={copy}>
             {copied ? "Link copied" : "Copy link"}
           </button>
