@@ -200,11 +200,13 @@ function init(L, data) {
   status.hidden = true;
   const {map, markers, selected} = createMap(L, land, tiles, meta.candidate_share_max);
 
-  // Map layers with toggles (F-15, F-16).
+  // Map layers with toggles (F-15, F-16); `layers=moon,mars,both,controls` in the link turns them on.
+  const requestedLayers = new Set((params.get('layers') || '').split(','));
   const known = knownLayers(L, data.known);
   for (const [tag, layer] of Object.entries(known)) {
     const box = byId(`layer-${tag}`);
     box.disabled = !data.known;
+    box.checked = Boolean(data.known) && requestedLayers.has(tag);
     const sync = () => box.checked ? layer.addTo(map) : layer.remove();
     box.addEventListener('change', sync);
     sync();
@@ -214,7 +216,10 @@ function init(L, data) {
   const controls = controlLayer(L, data.controls);
   const controlBox = byId('layer-controls');
   controlBox.disabled = !data.controls;
-  controlBox.addEventListener('change', () => controlBox.checked ? controls.addTo(map) : controls.remove());
+  const syncControls = () => controlBox.checked ? controls.addTo(map) : controls.remove();
+  controlBox.checked = Boolean(data.controls) && requestedLayers.has('controls');
+  controlBox.addEventListener('change', syncControls);
+  syncControls();
   if (data.controls) byId('count-controls').textContent = ` (${number(data.controls.n, 0)})`;
   if (data.known?.scope_note) byId('known-scope').textContent = data.known.scope_note;
 
