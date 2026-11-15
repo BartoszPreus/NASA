@@ -154,7 +154,7 @@ function SunChart({ s, region }: { s: Site; region: MoonRegion | undefined }) {
 const CTX_ROWS: { key: string; label: string; fmt: (v: number | string) => string }[] = [
   { key: "albedo", label: "Surface albedo", fmt: (v) => `${num(v as number, 2)}  (Moon ${MOON_ALBEDO})` },
   { key: "ndvi_max", label: "Vegetation, highest NDVI", fmt: (v) => num(v as number, 2) },
-  { key: "aridity", label: "Aridity index", fmt: (v) => num(v as number, 3) },
+  { key: "aridity", label: "Aridity index (misleading in cold deserts)", fmt: (v) => num(v as number, 3) },
   { key: "precip_mm", label: "Precipitation", fmt: (v) => `${num(v as number, 0)} mm/yr` },
   { key: "lith_name", label: "Rock", fmt: (v) => String(v) },
   { key: "lith_class", label: "Rock class", fmt: (v) => String(v) },

@@ -2,6 +2,12 @@
 
 Issue #29, branch `t-web-react`. Newest first. Written with SI assistance (Claude Code).
 
+## 2026-11-15, climate, vegetation and brightness context data
+
+- `public/sites/context_climate_<run>.json` for all 4,736 patches, every field filled (`scripts/build_context_climate.py`): albedo (MODIS MCD43 white-sky, 2023, snow months excluded), NDVI highest and mean month (MOD13C2, 2023), precipitation, temperature and aridity index (NASA POWER 2001-2025). NASA NEO no longer serves files, so the MODIS products are read through NASA GIBS and decoded with GIBS colour maps; POWER cells were fetched in parallel.
+- "Dry climate" now ranks by annual precipitation: the aridity index calls cold polar deserts humid (PET near zero), so it is shown in the site card with that note only.
+- Caveats: pixels about 5 km (GIBS) and 50 km (POWER), larger than many patches; albedo near 0.02 at coastal patches is probably water.
+
 ## 2026-11-15, geology and ground context data
 
 - `public/sites/context_geology_<run>.json` for all 4,736 patches (`scripts/build_context_geology.py`, notes in `scripts/README_context.md`): rock type and lunar-likeness score (Macrostrat), nearest impact structure (211 structures, Wikipedia list based on the Earth Impact Database plus Wikidata; the PASSC site is offline), nearest Holocene volcano (Smithsonian GVP), topsoil sand/silt/clay/coarse fragments (SoilGrids 2.0), permafrost fraction (ESA CCI). Coverage: rock, craters, volcanoes 100%; soil 99%; permafrost 69% default / 40% strict (the ESA product does not cover Greenland or the Southern Hemisphere). Ground ice is not measured (the NSIDC map needs a login).
