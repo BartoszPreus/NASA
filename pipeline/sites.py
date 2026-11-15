@@ -10,9 +10,9 @@ least MIN_CELLS cells. Properties follow docs/TASKS.md, section 3 ("sites.geojso
   nearest_known, nearest_known_km, is_known   from data/reference/known_analogs.csv (job J8, rows of type "operational"
                ignored); great-circle distance (haversine, R = 6371.0088 km) from the site centroid;
                is_known = centroid inside the radius_km of any entry (default 50 km)
-  country      offline point-in-polygon on Natural Earth 1:50m admin-0 countries (public domain),
-               https://www.naturalearthdata.com/ , file from
-               https://github.com/nvkelso/natural-earth-vector/blob/master/geojson/ne_50m_admin_0_countries.geojson
+  country      point-in-polygon on Natural Earth 1:50m admin-0 countries (public domain),
+               https://www.naturalearthdata.com/about/terms-of-use/ ; downloads v5.1.2 on first use from
+               https://github.com/nvkelso/natural-earth-vector/tree/v5.1.2/geojson
                (nearest country within 0.25 deg for points on a coast that the 1:50m outline misses)
   novelty      "unchecked" (job J9 fills it)
   breaks       fixed list plus data-driven items: vegetation, midsummer noon sun elevation
@@ -24,13 +24,17 @@ Geometry: the dissolved outline (shapely.ops.unary_union) of the cell squares; c
 cell-centre spacing in lat and lon of the tile.
 
 Libraries: numpy, pandas, scipy, shapely (https://shapely.readthedocs.io, BSD-3-Clause).
-Written with SI assistance (Claude Code). Licence: Apache-2.0.
+Written with SI assistance (Claude Code and Codex). Licence: Apache-2.0.
 """
 import argparse
 import csv
+import hashlib
 import json
 import math
 import os
+from pathlib import Path
+from tempfile import NamedTemporaryFile
+from urllib.request import urlopen
 
 import numpy as np
 import pandas as pd
@@ -53,6 +57,9 @@ EARTH_R_KM = 6371.0088
 DEFAULT_RADIUS_KM = 50.0
 KNOWN_CSV = paths.KNOWN_ANALOGS
 NE_GEOJSON = paths.NATURALEARTH_COUNTRIES
+NE_URL = ("https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/"
+          "geojson/ne_50m_admin_0_countries.geojson")
+NE_SHA256 = "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb"
 MEDIAN_COLS = ["bare", "ice", "elev_med", "s240", "s570", "r200", "r1600", "dep_frac", "f_le5", "f_le8", "f_le15"]
 FIXED_BREAKS = ["Gravity is 1 g here, 1/6 g on the Moon",
                 "Atmosphere and weather; the Moon has a vacuum",
@@ -90,25 +97,44 @@ def load_known(path=KNOWN_CSV):
     return k.reset_index(drop=True)
 
 
+def country_outlines(path):
+    """Get the pinned Natural Earth bytes and cache only a verified copy."""
+    try:
+        cached = path.read_bytes()
+        if hashlib.sha256(cached).hexdigest() == NE_SHA256:
+            return cached
+    except FileNotFoundError:
+        pass
+    try:
+        with urlopen(NE_URL, timeout=30) as response:
+            data = response.read()
+    except OSError as exc:
+        raise RuntimeError("Cannot download Natural Earth country outlines from %s" % NE_URL) from exc
+    if hashlib.sha256(data).hexdigest() != NE_SHA256:
+        raise RuntimeError("Natural Earth country outlines have an unexpected SHA-256")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with NamedTemporaryFile(dir=path.parent, delete=False) as out:
+        temp = Path(out.name)
+    try:
+        temp.write_bytes(data)
+        temp.replace(path)
+    finally:
+        temp.unlink(missing_ok=True)
+    return data
+
+
 class CountryLookup:
-    def __init__(self, path=NE_GEOJSON):
-        self.ok = False
-        try:
-            from shapely.geometry import Point, shape
-            from shapely.strtree import STRtree
-        except ImportError:
-            return
-        if not os.path.exists(path):
-            return
-        with open(path, encoding="utf-8") as f:
-            feats = json.load(f)["features"]
+    def __init__(self, path=None):
+        from shapely.geometry import Point, shape
+        from shapely.strtree import STRtree
+
+        data = country_outlines(Path(NE_GEOJSON)) if path is None else Path(path).read_bytes()
+        feats = json.loads(data)["features"]
         self.geoms = [shape(f["geometry"]) for f in feats]
         self.names = [f["properties"].get("ADMIN") or f["properties"].get("NAME") for f in feats]
-        self.tree, self.Point, self.ok = STRtree(self.geoms), Point, True
+        self.tree, self.Point = STRtree(self.geoms), Point
 
     def __call__(self, lat, lon, max_deg=0.25):
-        if not self.ok:
-            return None
         pt = self.Point(float(lon), float(lat))
         for i in self.tree.query(pt, predicate="intersects"):
             return self.names[int(i)]
@@ -447,6 +473,7 @@ def main(argv=None):
                     help="elevation model per tile: copdem, or nasa-first (NASADEM where its cells exist). Default: "
                          "the outcome of the rule in pipeline.score.dem_policy_from_rule (job J19)")
     a = ap.parse_args(argv)
+    countries = CountryLookup() if a.compare_targets is None else None
     rule_policy, rule = dem_policy_from_rule(target=a.target)
     dem_policy = a.dem_policy or rule_policy
     print("dem policy: %s (%s; rule: %s; Spearman %s, top-50 overlap %s)" % (
@@ -483,7 +510,7 @@ def main(argv=None):
     known = load_known(a.known)
     print("known analogs: %s" % ("%d entries (operational excluded)" % len(known) if known is not None
                                  else "file missing, novelty fields null"))
-    add_context(sites, known, CountryLookup(), load_novelty())
+    add_context(sites, known, countries, load_novelty())
     scored["site_id"] = site_of_row
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",
             "bare", "veg", "ice", "artefact_flag", "dem_source"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]

@@ -116,5 +116,8 @@ def ensure(*dirs):
 
 
 def rel(path):
-    """Path relative to the repository root, with forward slashes (for manifests and docs)."""
-    return os.path.relpath(path, ROOT).replace("\\", "/")
+    """Path relative to the repository root, or absolute when on another Windows drive."""
+    try:
+        return os.path.relpath(path, ROOT).replace("\\", "/")
+    except ValueError:
+        return os.path.abspath(path).replace("\\", "/")
