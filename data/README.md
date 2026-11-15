@@ -72,10 +72,13 @@ data/
 | `validation/effectiveness.json` | known analog tile recovery, negative controls, ablation, stability, 531.1 kB | `python validation/effectiveness.py all` | data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, copernicus_dem, esa_worldcover, pgda90_lola_20m |
 | `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 10.1 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
 | `validation/icesat2.json` | ICESat-2 along-track slopes against grid slopes and the Moon, 16.9 kB | `python validation/icesat2_profiles.py (job J21)` | icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json |
+| `validation/landcover_sensitivity.json` | moss and lichen sensitivity: top-100 sites under bare = WorldCover class 60 only and under MODIS Barren, 8.1 kB | `python -m validation.landcover_sensitivity (job J33, shortened)` | data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
 | `validation/nasadem_vs_copdem.json` | NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile, 14.2 kB | `python validation/nasadem_vs_copdem.py (job J17)` | data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json |
 | `validation/partner_checks.json` | ?, 606.4 kB | `UNKNOWN` |  |
 | `validation/pds_lola.json` | PDS LOLA gridded DEM against the PGDA DEM, 5.9 kB | `python validation/pds_products.py --part lola` | pds_lola_gdr, pgda90_lola_20m |
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
+| `validation/landcover_sensitivity/cells_top*.parquet` | one row per cell of a top site: stored bare, recomputed bare, bare_strict, MODIS Barren | `python -m validation.landcover_sensitivity (job J33)` | data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
+| `validation/landcover_sensitivity/sites_top*.csv` | one row per top site: median bare, bare_strict (class 60 only), MODIS Barren, pass or fail under each | `python -m validation.landcover_sensitivity (job J33)` | data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
 
 Files without a known producer (add them to `FILE_MAP` in `pipeline/catalog.py`): `data/validation/partner_checks.json`
 

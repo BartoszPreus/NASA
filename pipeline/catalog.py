@@ -207,8 +207,9 @@ SOURCES = [
       "https://esa-worldcover.org ; https://registry.opendata.aws/esa-worldcover-vito/",
       "CC BY 4.0 (UNVERIFIED in docs/sources/j1.md, j3.md); citation Zanaga et al. (2022), "
       "doi:10.5281/zenodo.7254221 (UNVERIFIED)", "no", "used",
-      "pipeline/landcover.py, pipeline/earth_scan.py, pipeline/tiles.py, validation/effectiveness.py",
-      "data/raw/tiles_cache/, data/raw/validation/"),
+      "pipeline/landcover.py, pipeline/earth_scan.py, pipeline/tiles.py, validation/effectiveness.py, "
+      "validation/landcover_sensitivity.py (job J33)",
+      "data/raw/tiles_cache/, data/raw/validation/, data/raw/worldcover/"),
     S("usgs_3dep", "USGS", "USGS 3DEP 1 m lidar DEM, tile USGS_1M_12_x49y388_AZ_NorthEast_D23 (Meteor Crater)", "",
       "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/AZ_NorthEast_D23/TIFF/"
       "USGS_1M_12_x49y388_AZ_NorthEast_D23.tif", "US Government work, public domain ('free of charge and without "
@@ -381,6 +382,15 @@ FILE_MAP = [
     ("data/validation/nasadem_vs_copdem.json", "python validation/nasadem_vs_copdem.py (job J17)",
      "data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json",
      "NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile"),
+    ("data/validation/landcover_sensitivity.json", "python -m validation.landcover_sensitivity (job J33, shortened)",
+     "data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover",
+     "moss and lichen sensitivity: top-100 sites under bare = WorldCover class 60 only and under MODIS Barren"),
+    ("data/validation/landcover_sensitivity/sites_top*.csv", "python -m validation.landcover_sensitivity (job J33)",
+     "data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover",
+     "one row per top site: median bare, bare_strict (class 60 only), MODIS Barren, pass or fail under each"),
+    ("data/validation/landcover_sensitivity/cells_top*.parquet", "python -m validation.landcover_sensitivity (job J33)",
+     "data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover",
+     "one row per cell of a top site: stored bare, recomputed bare, bare_strict, MODIS Barren"),
     ("data/validation/aw3d30_comparison.json", "python validation/nasadem_vs_copdem.py --aw3d30-comparison (job J29)",
      "jaxa_aw3d30, data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet",
      "terrain feature agreement across Copernicus, NASADEM and optical AW3D30 on ten reference tiles"),

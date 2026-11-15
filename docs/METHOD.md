@@ -70,3 +70,5 @@ the top-30 sites have a depression share of zero in the median cell, so that is 
 coldest monthly night mean among the 60 top sites is 235 K; the lunar regions
 have annual means of 51 to 141 K. Exact top sites move with the grid (6 of 10 survive a half-cell shift on the
 78-tile test); regions are stable. Nothing here is called a discovery: the literature check decides that.
+
+Mask choice (J33, shortened run on the top 100 only): with WorldCover class 100 "moss and lichen" not counted as bare, 8 of the top 30 sites keep a 4-cell core (none of the 16 Putorana sites) and 30 of the top 100 (`data/validation/landcover_sensitivity.json`, `top30.pass_strict_cells`, `top100.pass_strict_cells`); which sites would replace them is not measured ([VALIDATION.md](VALIDATION.md)).

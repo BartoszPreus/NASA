@@ -33,7 +33,10 @@ from rasterio.windows import from_bounds
 
 WC_URL = ("https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/"
           "ESA_WorldCover_10m_2021_v200_{0}_Map.tif")
-GROUPS = {"bare": (60, 100), "veg": (10, 20, 30, 40, 90, 95), "ice": (70,), "water": (80, 0), "built": (50,)}
+GROUPS = {"bare": (60, 100), "veg": (10, 20, 30, 40, 90, 95), "ice": (70,), "water": (80, 0), "built": (50,),
+          # J33 sensitivity group: class 60 "bare / sparse vegetation" only, without 100 "moss and lichen".
+          # Not used by the default mask (score.BARE_MIN applies to "bare"); cells.LC_COLS does not include it.
+          "bare_strict": (60,)}
 GDAL_ENV = dict(GDAL_HTTP_TIMEOUT="30", GDAL_HTTP_MAX_RETRY="3", GDAL_HTTP_RETRY_DELAY="2",
                 GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR")
 LANDCOVERS = ("worldcover", "modis")
@@ -80,7 +83,7 @@ def landcover_fractions(bounds, R, C, k=8, retries=3, landcover="worldcover", ye
 
     bounds = (left, bottom, right, top) in degrees covered by an R x C cell grid (use cell_grid()["covered"]).
     Each cell is sampled with k x k nearest-neighbour picks from the map. Returns a dict of float32
-    arrays (R, C) with keys bare, veg, ice, water, built, or None when the map has no tile there or the
+    arrays (R, C) with keys bare, veg, ice, water, built (and bare_strict, J33, WorldCover only), or None when the map has no tile there or the
     read keeps failing. landcover="modis" reads the MODIS IGBP layer of `year` from NASA GIBS instead
     (modis_fractions); `raw_dir` then caches the decoded class grid.
     """
@@ -88,6 +91,31 @@ def landcover_fractions(bounds, R, C, k=8, retries=3, landcover="worldcover", ye
         return modis_fractions(bounds, R, C, k=k, retries=retries, year=year, raw_dir=raw_dir)
     if landcover != "worldcover":
         raise ValueError("landcover must be one of %s, got %r" % (LANDCOVERS, landcover))
+    a = worldcover_classes(bounds, R, C, k=k, retries=retries, raw_dir=raw_dir)
+    if a is None:
+        return None
+    return worldcover_group_fractions(a, R, C, k)
+
+
+def worldcover_group_fractions(classes, R, C, k):
+    """(R*k, C*k) WorldCover class grid -> dict of (R, C) float32 group fractions (GROUPS)."""
+    a = classes.reshape(R, k, C, k).transpose(0, 2, 1, 3).reshape(R, C, -1)
+    return {g: np.isin(a, codes).mean(axis=2).astype(np.float32) for g, codes in GROUPS.items()}
+
+
+def _worldcover_cache(raw_dir, bounds, R, C, k):
+    if not raw_dir:
+        return None
+    key = "%.5f_%.5f_%.5f_%.5f_%dx%d_k%d.npy" % (tuple(bounds) + (R, C, k))
+    return os.path.join(raw_dir, "worldcover", key)
+
+
+def worldcover_classes(bounds, R, C, k=8, retries=3, raw_dir=None):
+    """WorldCover class grid (R*k, C*k) uint8 for `bounds`, nearest-neighbour picks; None when the read keeps
+    failing. With `raw_dir` the grid is cached as .npy under <raw_dir>/worldcover/ (job J33)."""
+    cache = _worldcover_cache(raw_dir, bounds, R, C, k)
+    if cache and os.path.exists(cache):
+        return np.load(cache)
     left, bottom, right, top = bounds
     name = worldcover_tile((bottom + top) / 2, (left + right) / 2)
     a = None
@@ -99,10 +127,10 @@ def landcover_fractions(bounds, R, C, k=8, retries=3, landcover="worldcover", ye
             break
         except Exception:
             time.sleep(1 + 2 * attempt)
-    if a is None:
-        return None
-    a = a.reshape(R, k, C, k).transpose(0, 2, 1, 3).reshape(R, C, -1)
-    return {g: np.isin(a, codes).mean(axis=2).astype(np.float32) for g, codes in GROUPS.items()}
+    if a is not None and cache:
+        os.makedirs(os.path.dirname(cache), exist_ok=True)
+        np.save(cache, a)
+    return a
 
 
 # ----------------------------------------------------------------------------------------------- MODIS / GIBS
