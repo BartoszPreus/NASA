@@ -1,11 +1,50 @@
 # J23 — Clean-clone reproducibility and freeze
 
+**Second run: PASS at `c7adfc1` (08:15–08:28, section "Second run" below).**
+
 **PASS for the freeze run — commit `7b58f919329946b4713447ce415fa90be35e9730` (Sun 15 Nov 2026, 06:20–06:31
 Europe/Warsaw).** Every command exits 0 in a fresh clone. The files that change afterwards are run metadata only
 (listed below). No `submission` tag was created and the repository is still private: both are a person's steps
 (issue #11). Run by Claude Code (opus worker) on Wiktor's machine; issue #8.
 
-## Reproduction
+## Second run (after the morning jobs)
+
+**PASS for the second run — commit `c7adfc1cdde32cd168ca6c8f0107328cbfa2127d` (Sun 15 Nov 2026, 08:15–08:28
+Europe/Warsaw).** Run after J31 (#17), J35 (#21), J36 (#22), J41 (#27), J42 (#28) and the morning fixes landed.
+Fresh `git clone` of `main` into a new empty folder under the system temporary folder, new virtual environment
+with Python 3.12.10, `pip install -r requirements.txt` (exit 0, 108 s; NumPy 2.5.4, pandas 3.1.1, PyArrow 26.0.1,
+SciPy 1.18.1, Rasterio 1.5.2, Shapely 2.2.0). Commands one at a time in the foreground; exit code, wall seconds
+and `git status --short` recorded after each. Run by Claude Code (opus worker) on Wiktor's machine; issue #8.
+
+| # | Command | Exit | Seconds | `git status --short` afterwards (cumulative) |
+|---|---|---|---|---|
+| 1 | `python -m pytest tests -q` | 0 | 43 | clean; 81 passed |
+| 2 | `python -m pipeline.run sites validate-enrichment catalog` | 0 | 73 | `data/run_log.csv`, `data/catalog.csv`, `data/README.md` (run-log row) |
+| 3 | `python -m pipeline.run validate-effectiveness` (J31 keys `by_selected_for`) | 0 | 20 | no new file (`effectiveness.json` and figures identical) |
+| 4 | `python -m pipeline.run validate-dem` | 0 | 24 | + `data/validation/nasadem_vs_copdem.json`: `generated` and `carried_from_previous_run`, as in the first run |
+| 5 | `python -m pipeline.run rank-uncertainty` | 0 | 190 | no new file |
+| 6 | `python -m validation.landcover_strict_cells --workers 8` | 0 | 67 | no new file (2,057 tiles, 0 failed, 0 mismatches) |
+| 7 | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity` | 0 | 49 | no new file |
+| 8 | `python -m validation.landcover_strict_ranking` | 0 | 2 | no new file |
+| 9 | `python validation/rank_uncertainty.py --bare-col bare_strict` (local part of `strict-context`) | 0 | 116 | no new file |
+| 10 | `python -m validation.strict_context` (local part of `strict-context`) | 0 | 2 | no new file (`context_comparison.json` identical) |
+| 11 | `python -m pipeline.run catalog` | 0 | 2 | run-log row only |
+| 12 | `python app/build_data.py` | 0 | 5 | + `app/data/meta.json` (commit hash), `app/data/run_log.json`, `app/data/catalog.json`, `app/data/validation/nasadem_vs_copdem.json`; 24.82 MB |
+| 13 | `python -m pytest tests -q` | 0 | 25 | unchanged; 81 passed |
+
+**Differences after the run, all expected run metadata:** `data/run_log.csv` (+7 rows) and its row in
+`data/catalog.csv` / `data/README.md`; `generated` and `carried_from_previous_run` in `nasadem_vs_copdem.json`
+(and its size in the catalogue); the commit hash in `app/data/meta.json` (the committed value is always the
+commit before the one that contains it); `app/data/run_log.json` and `catalog.json`. No ranking, validation,
+strict-context or app data value changed. Nothing unexpected; nothing had to be fixed.
+
+**Not rerun, committed outputs are the result of record:** the network parts of `strict-context`
+(`pipeline.nasa_context` NASA POWER for the strict top 100 and `pipeline.partner_context` for the strict top
+60) and the default `context` / `partner-context` stages: they download from NASA POWER, GIBS and partner
+raster services, and `partner_context` failed raster reads in a fresh Windows environment before (TLS
+certificate chain, see point 3 below). Their committed CSVs feed steps 10 and 12, which reproduce exactly.
+
+## Reproduction (first run)
 
 New `git clone` of `main` into an empty folder outside the working checkout (under the system temporary
 folder), new virtual environment with **Python 3.12.10** (`py -3.12 -m venv .venv`), `pip install -r
