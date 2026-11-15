@@ -35,8 +35,11 @@ VERDICTS = ("yes", "no", "unsure")
 PER_SHEET, PER_ROW, TILE, LABEL = 10, 5, 400, 46
 
 
-def contact_sheets(top, out_dir=paths.FIGURES):
+def contact_sheets(top, out_dir=paths.FIGURES, img_dir=None, prefix="top30_sheet"):
+    """img_dir and prefix default to the default ranking (data/sites/images, top30_sheet_<n>.png); J40 passes
+    the strict-mask folder and prefix."""
     from PIL import Image, ImageDraw
+    img_dir = img_dir or paths.SITE_IMAGES
     written, missing = [], []
     for k in range(0, len(top), PER_SHEET):
         part = top.iloc[k:k + PER_SHEET]
@@ -45,7 +48,7 @@ def contact_sheets(top, out_dir=paths.FIGURES):
         draw = ImageDraw.Draw(sheet)
         for i, s in enumerate(part.itertuples()):
             x, y = (i % PER_ROW) * TILE, (i // PER_ROW) * (TILE + LABEL)
-            p = os.path.join(paths.SITE_IMAGES, s.site_id + ".jpg")
+            p = os.path.join(img_dir, s.site_id + ".jpg")
             if os.path.exists(p):
                 sheet.paste(Image.open(p).convert("RGB").resize((TILE, TILE)), (x, y + LABEL))
             else:
@@ -55,7 +58,7 @@ def contact_sheets(top, out_dir=paths.FIGURES):
             draw.text((x + 6, y + 4), "#%d  %s" % (s.rank, s.site_id), fill="black")
             draw.text((x + 6, y + 24), "%.3f, %.3f   %s" % (s.lat, s.lon, s.country if isinstance(s.country, str) else ""),
                       fill="black")
-        out = os.path.join(out_dir, "top30_sheet_%d.png" % (k // PER_SHEET + 1))
+        out = os.path.join(out_dir, "%s_%d.png" % (prefix, k // PER_SHEET + 1))
         paths.ensure(out_dir)
         sheet.save(out)
         written.append(out)

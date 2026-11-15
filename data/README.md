@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 43 rows, 5.8 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 44 rows, 5.9 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -81,10 +81,16 @@ data/
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
 | `validation/landcover_sensitivity/cells_bare_strict.parquet` | bare_strict (WorldCover class 60 only, without 100 moss and lichen) for every scanned cell, key tile/row/col, 1758778 rows, 1.6 MB | `python -m validation.landcover_strict_cells (job J33, full run)` | data/earth/cells/*.parquet, esa_worldcover |
 | `validation/landcover_sensitivity/cells_top*.parquet` | one row per cell of a top site: stored bare, recomputed bare, bare_strict, MODIS Barren | `python -m validation.landcover_sensitivity (job J33)` | data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
+| `validation/landcover_sensitivity/novelty_check_strict.csv` | literature verdict for the strict top-30 sites outside a known analog radius (columns of data/sites/novelty_check.csv), 21 rows, 27.8 kB | `hand-curated by job J40 (SI-model literature and map search, no script)` | osm, analog_literature, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
 | `validation/landcover_sensitivity/ranking_bare_strict.csv` | VARIANT ranking (top 200) under the strict mask: same columns as data/sites/ranking.csv; bare_share = bare_strict, 200 rows, 164.4 kB | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)` | data/earth/cells/*.parquet, data/validation/landcover_sensitivity/cells_bare_strict.parquet, data/moon/reference.json, data/reference/known_analogs.csv, natural_earth |
 | `validation/landcover_sensitivity/sites_bare_strict.geojson` | VARIANT: every site under the strict mask (properties as data/sites/sites.geojson), 1561 rows, 5.4 MB | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)` | as ranking_bare_strict.csv |
 | `validation/landcover_sensitivity/sites_top*.csv` | one row per top site: median bare, bare_strict (class 60 only), MODIS Barren, pass or fail under each | `python -m validation.landcover_sensitivity (job J33)` | data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
 | `validation/landcover_sensitivity/tile_summary_bare_strict.csv` | VARIANT: per-tile counts under the strict mask (as data/earth/tiles/tile_summary.csv), 2060 rows, 159.4 kB | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)` | as ranking_bare_strict.csv |
+| `validation/landcover_sensitivity/top30_strict_review.csv` | what each strict top-30 site is and whether it looks like an artefact (columns of data/sites/top30_review.csv), 30 rows, 11.5 kB | `python -m pipeline.review_strict; the verdict columns are filled in by a reviewer (job J40: an SI model)` | data/validation/landcover_sensitivity/ranking_bare_strict.csv, data/validation/landcover_sensitivity/images/, worldview_gibs, hls_gibs |
+| `validation/landcover_sensitivity/images/*.jpg` | MODIS or VIIRS true-colour image around one strict top-30 site (NASA imagery, unmodified; as data/sites/images) | `python -m pipeline.review_strict (job J40)` | worldview_gibs |
+| `validation/landcover_sensitivity/images/index.csv` | bbox, date, layer and cloud share of the MODIS/VIIRS image of every strict top-30 site, 30 rows, 6.0 kB | `python -m pipeline.review_strict (job J40)` | worldview_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
+| `validation/landcover_sensitivity/images/hls/*.jpg` | HLS 30 m true-colour image, about 26 km square, around one strict top-30 site (NASA imagery, re-encoded only) | `python -m pipeline.review_strict --zoom (job J40)` | hls_gibs |
+| `validation/landcover_sensitivity/images/hls/index.csv` | bbox, date, layer and cloud share of the 30 m HLS image of every strict top-30 site, 30 rows, 6.1 kB | `python -m pipeline.review_strict --zoom (job J40)` | hls_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
 
 Files without a known producer (add them to `FILE_MAP` in `pipeline/catalog.py`): `data/validation/partner_checks.json`
 
@@ -95,6 +101,7 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 **NASA**
 - `earthdata_search` (link 1): NASA Earthdata Search (portal). *being added*. https://search.earthdata.nasa.gov/
 - `worldview_gibs` (link 2): NASA Worldview Snapshots / GIBS true-colour imagery (MODIS Terra, VIIRS SNPP). *used*. https://wvs.earthdata.nasa.gov/
+- `hls_gibs` (link 2): Harmonized Landsat Sentinel-2 (HLS) v2.0 true colour, layers HLS_S30_Nadir_BRDF_Adjusted_Reflectance and HLS_L30_Nadir_BRDF_Adjusted_Reflectance, 30 m, read through the Worldview Snapshots API (job J40). *used*. https://wvs.earthdata.nasa.gov/
 - `pds` (link 3): NASA Planetary Data System (archive; the PDS products are the rows pds_lola_gdr, diviner_prp, diviner_pcp, minirf, lend, lamp, lroc). *used*. https://pds.nasa.gov/
 - `pds_lola_gdr` (link 4): LRO LOLA polar gridded DEM LDEM_80S_80M.IMG (LRO-L-LOLA-4-GDR-V1.0). *used*. https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_80s_80m.img
 - `minirf` (link 4): LRO Mini-RF south-pole SAR mosaics (CPR, S1). *being added*. https://pds-geosciences.wustl.edu/lro/lro-l-mrflro-4-cdr-v1/lromrf_0005/data/sar/mosaics/
@@ -168,15 +175,16 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 3. `python -m pipeline.moon_reference`: lunar reference, cells, footprints, hillshades
 4. `python -m pipeline.sites`: scores, sites, ranking, tile summary, data/raw/earth_scored_full.parquet
 5. `python -m pipeline.nasa_context --top 150 --images 60`: NASA POWER and Worldview per site (cached)
-6. `python validation/pds_products.py --part all`: Diviner per region, PDS LOLA check
-7. `python -m pipeline.lunar_products --fetch all / --extract all`: other LRO instruments (job J15)
-8. `python validation/t1_reproduce.py`: reproduction of the NASA slope product
-9. `python validation/enrichment.py`: enrichment test (needs data/raw/earth_scored_full.parquet)
-10. `python validation/effectiveness.py all`: effectiveness tests (slow; caches in data/raw/validation/)
-11. `python lidar/crater_profiles.py --part all`: crater close-up
-12. `python validation/icesat2_profiles.py`: ICESat-2 check (job J14)
-13. `python -m pipeline.fixtures --raw-dir data/raw`: fixtures in data/sample/
-14. `python -m pipeline.catalog`: this catalogue
+6. `python -m pipeline.review_strict --zoom`: Worldview MODIS and HLS 30 m images and contact sheets of the strict-mask top 30 (job J40, cached)
+7. `python validation/pds_products.py --part all`: Diviner per region, PDS LOLA check
+8. `python -m pipeline.lunar_products --fetch all / --extract all`: other LRO instruments (job J15)
+9. `python validation/t1_reproduce.py`: reproduction of the NASA slope product
+10. `python validation/enrichment.py`: enrichment test (needs data/raw/earth_scored_full.parquet)
+11. `python validation/effectiveness.py all`: effectiveness tests (slow; caches in data/raw/validation/)
+12. `python lidar/crater_profiles.py --part all`: crater close-up
+13. `python validation/icesat2_profiles.py`: ICESat-2 check (job J14)
+14. `python -m pipeline.fixtures --raw-dir data/raw`: fixtures in data/sample/
+15. `python -m pipeline.catalog`: this catalogue
 
 Tests: `python -m pytest tests -q`.
 

@@ -50,6 +50,13 @@ SOURCES = [
       "Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).' "
       "Worldview-specific citation UNVERIFIED (page returned HTTP 403)", "no", "used", "pipeline/nasa_context.py",
       "data/raw/nasa_context/wvs/"),
+    S("hls_gibs", "NASA", "Harmonized Landsat Sentinel-2 (HLS) v2.0 true colour, layers "
+      "HLS_S30_Nadir_BRDF_Adjusted_Reflectance and HLS_L30_Nadir_BRDF_Adjusted_Reflectance, 30 m, read through the "
+      "Worldview Snapshots API (job J40)", 2,
+      "https://wvs.earthdata.nasa.gov/ ; https://www.earthdata.nasa.gov/data/catalog/lpcloud-hlss30-2.0",
+      "GIBS acknowledgement as for worldview_gibs; HLS product citation and DOI UNVERIFIED (Earthdata page returned "
+      "HTTP 403 on 15 Nov 2026); NASA Earth Science Data and Information Policy (open data)", "no", "used",
+      "pipeline/review_strict.py", "data/raw/nasa_context/wvs/"),
     S("pds", "NASA", "NASA Planetary Data System (archive; the PDS products are the rows pds_lola_gdr, "
       "diviner_prp, diviner_pcp, minirf, lend, lamp, lroc)", 3, "https://pds.nasa.gov/",
       "NASA PDS, public, no use restrictions", "no", "used", "validation/pds_products.py, pipeline/lunar_products.py",
@@ -413,6 +420,24 @@ FILE_MAP = [
     ("data/validation/landcover_sensitivity/tile_summary_bare_strict.csv",
      "python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)",
      "as ranking_bare_strict.csv", "VARIANT: per-tile counts under the strict mask (as data/earth/tiles/tile_summary.csv)"),
+    ("data/validation/landcover_sensitivity/images/hls/index.csv",
+     "python -m pipeline.review_strict --zoom (job J40)", "hls_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+     "bbox, date, layer and cloud share of the 30 m HLS image of every strict top-30 site"),
+    ("data/validation/landcover_sensitivity/images/hls/*.jpg", "python -m pipeline.review_strict --zoom (job J40)",
+     "hls_gibs", "HLS 30 m true-colour image, about 26 km square, around one strict top-30 site (NASA imagery, re-encoded only)"),
+    ("data/validation/landcover_sensitivity/images/index.csv", "python -m pipeline.review_strict (job J40)",
+     "worldview_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+     "bbox, date, layer and cloud share of the MODIS/VIIRS image of every strict top-30 site"),
+    ("data/validation/landcover_sensitivity/images/*.jpg", "python -m pipeline.review_strict (job J40)", "worldview_gibs",
+     "MODIS or VIIRS true-colour image around one strict top-30 site (NASA imagery, unmodified; as data/sites/images)"),
+    ("data/validation/landcover_sensitivity/top30_strict_review.csv",
+     "python -m pipeline.review_strict; the verdict columns are filled in by a reviewer (job J40: an SI model)",
+     "data/validation/landcover_sensitivity/ranking_bare_strict.csv, data/validation/landcover_sensitivity/images/, worldview_gibs, hls_gibs",
+     "what each strict top-30 site is and whether it looks like an artefact (columns of data/sites/top30_review.csv)"),
+    ("data/validation/landcover_sensitivity/novelty_check_strict.csv",
+     "hand-curated by job J40 (SI-model literature and map search, no script)",
+     "osm, analog_literature, data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+     "literature verdict for the strict top-30 sites outside a known analog radius (columns of data/sites/novelty_check.csv)"),
     ("data/validation/aw3d30_comparison.json", "python validation/nasadem_vs_copdem.py --aw3d30-comparison (job J29)",
      "jaxa_aw3d30, data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet",
      "terrain feature agreement across Copernicus, NASADEM and optical AW3D30 on ten reference tiles"),
@@ -451,6 +476,8 @@ REBUILD = [
     ("python -m pipeline.moon_reference", "lunar reference, cells, footprints, hillshades"),
     ("python -m pipeline.sites", "scores, sites, ranking, tile summary, data/raw/earth_scored_full.parquet"),
     ("python -m pipeline.nasa_context --top 150 --images 60", "NASA POWER and Worldview per site (cached)"),
+    ("python -m pipeline.review_strict --zoom", "Worldview MODIS and HLS 30 m images and contact sheets of the "
+     "strict-mask top 30 (job J40, cached)"),
     ("python validation/pds_products.py --part all", "Diviner per region, PDS LOLA check"),
     ("python -m pipeline.lunar_products --fetch all / --extract all", "other LRO instruments (job J15)"),
     ("python validation/t1_reproduce.py", "reproduction of the NASA slope product"),
