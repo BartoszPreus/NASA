@@ -291,8 +291,10 @@ def main(argv=None):
     a = ap.parse_args(argv)
     groups = load_groups(a.top, not a.no_known)
     df = run(groups)
-    if (df.status == "error").all():
-        print("every site failed:", df.reason.iloc[0], file=sys.stderr)
+    if (df.status == "error").any():   # a read error is not "no data": fail and keep the committed outputs
+        bad = df[df.status == "error"]
+        print("%d site reads failed, outputs not written; first: %s %s" % (len(bad), bad.site_id.iloc[0],
+                                                                           bad.reason.iloc[0]), file=sys.stderr)
         return 1
     df.to_csv(a.out_csv, index=False, lineterminator="\n")
     s = summarise(df)
