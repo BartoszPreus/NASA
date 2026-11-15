@@ -1,57 +1,1625 @@
 {
-  "groups": [
-    {"id":"terrain","label":"Terrain and ranking"},
-    {"id":"context","label":"Surface and environment"},
-    {"id":"validation","label":"Validation checks"},
-    {"id":"outside","label":"Beyond the comparison"}
-  ],
-  "statuses": {
-    "scored": "In the terrain score",
-    "mask": "Eligibility mask",
-    "context": "Shown as context",
-    "validation": "Used in validation",
-    "rejected": "Rejected for this use",
-    "not_built": "Not included in this atlas",
-    "not_reproducible": "No equivalent Earth setting"
+ "groups": [
+  {
+   "id": "terrain",
+   "label": "Terrain and ranking"
   },
-  "items": [
-    {"group":"terrain","status":"scored","name":"Slope at 240 m and 570 m","plain":"Median absolute slope at two baselines.","status_note":"Both slopes enter the score."},
-    {"group":"terrain","status":"scored","name":"Roughness at 200 m","plain":"Small-scale elevation variability in the model.","status_note":"Enters the score. The elevation models differ most at this roughness scale."},
-    {"group":"terrain","status":"scored","name":"Roughness at 400 to 1,600 m","plain":"Elevation variability at three larger scales.","status_note":"All three roughness values enter the score."},
-    {"group":"terrain","status":"scored","name":"Closed depression share","plain":"Share of each cell occupied by closed depressions.","status_note":"Enters the score."},
-    {"group":"terrain","status":"scored","name":"Closed depression depth","plain":"Depth of the depressions detected by the same terrain algorithm.","status_note":"Enters the score."},
-    {"group":"terrain","status":"mask","name":"Land cover","plain":"Bare, ice and water shares constrain Earth eligibility.","status_note":"Moss and lichen count as bare."},
-    {"group":"terrain","status":"context","name":"Elevation","plain":"Median elevation of the Earth patch.","status_note":"Shown for context; the score uses terrain shape."},
-    {"group":"terrain","status":"context","name":"Gentle slopes","plain":"Share of terrain below each published slope threshold.","status_note":"Supports a landing and mobility comparison."},
-    {"group":"terrain","status":"rejected","name":"Total weighted patch area as primary rank","plain":"The sum of the similarities over an entire patch.","status_note":"The best window sets the rank to reduce the influence of patch size."},
-    {"group":"terrain","status":"rejected","name":"Dune-like relief as a sand detector","plain":"A rule based on the ratio of relief to roughness.","status_note":"Temperature and moisture checks did not confirm dry sand. The flag remains a terrain rule."},
-    {"group":"context","status":"context","name":"Earth climatology","plain":"NASA POWER skin temperature at the reanalysis grid scale.","status_note":"Separate from the satellite measurements."},
-    {"group":"context","status":"context","name":"Midsummer solar elevation","plain":"Estimated local noon Sun angle on Earth.","status_note":"Reported as an environmental difference."},
-    {"group":"context","status":"context","name":"Air pressure","plain":"Standard-atmosphere estimate from elevation.","status_note":"Actual field pressure varies."},
-    {"group":"context","status":"context","name":"Measured Earth surface temperatures","plain":"JAXA GCOM-C and MODIS day and night surface summaries.","status_note":"Coverage and available months vary by site."},
-    {"group":"context","status":"context","name":"Soil moisture","plain":"JAXA AMSR2 monthly soil moisture.","status_note":"Available only where the product covers a sampled site."},
-    {"group":"context","status":"context","name":"Permafrost and ground temperature","plain":"ESA CCI permafrost fraction and temperature at depth.","status_note":"Available only for sampled coverage."},
-    {"group":"context","status":"context","name":"Lunar temperatures and ice stability","plain":"Diviner surface temperatures and inferred stable ice depth.","status_note":"Temperature and ice stability are different measurements and inferences."},
-    {"group":"context","status":"context","name":"Lunar shadow and visibility","plain":"LOLA-derived permanent shadow and Sun and Earth visibility.","status_note":"Reported for the lunar region."},
-    {"group":"context","status":"context","name":"Lunar radar, neutrons and ultraviolet","plain":"Mini-RF, LEND and LAMP measurements.","status_note":"These products describe the lunar region and do not enter the score."},
-    {"group":"validation","status":"validation","name":"Lunar terrain estimator","plain":"Comparison with the published LOLA slope and roughness grids.","status_note":"Check against a NASA product."},
-    {"group":"validation","status":"validation","name":"Known analogs and matched random circles","plain":"Enrichment around documented sites and random locations.","status_note":"Relative to scanned bare terrain."},
-    {"group":"validation","status":"validation","name":"Recovery of known analog tiles","plain":"A tile-level test of separation from eligible background.","status_note":"The uncertainty interval includes chance."},
-    {"group":"validation","status":"validation","name":"Negative control tiles","plain":"Tests on terrain expected to fail the full candidate rule.","status_note":"Shows the joint effect of terrain and land cover."},
-    {"group":"validation","status":"validation","name":"Elevation model and grid sensitivity","plain":"Checks against a second DEM, lunar targets and legacy grid runs.","status_note":"Identifies results that depend on inputs or scale."},
-    {"group":"outside","status":"not_built","name":"Local roughness below model scale","plain":"Features smaller than the scale resolved by the elevation model.","status_note":"Available high-resolution examples do not cover the scan."},
-    {"group":"outside","status":"not_built","name":"Boulder hazard","plain":"Distribution of rocks and blocks for landing or travel.","status_note":"No comparable map for every Earth patch."},
-    {"group":"outside","status":"not_built","name":"Regolith chemistry","plain":"Mineral composition of the surface material.","status_note":"Requires different measurements."},
-    {"group":"outside","status":"not_built","name":"Particle size","plain":"Surface grain sizes and their variation.","status_note":"Terrain elevations do not resolve grain sizes."},
-    {"group":"outside","status":"not_built","name":"Trafficability","plain":"Bearing capacity, cohesion and resistance to rover wheels.","status_note":"Would need field and engineering data."},
-    {"group":"outside","status":"not_built","name":"Vegetation structure","plain":"Height and density of local vegetation.","status_note":"WorldCover only constrains classes and shares."},
-    {"group":"outside","status":"not_built","name":"Field access","plain":"Permits, access roads and time of year for an Earth field site.","status_note":"The rank makes no field access assessment."},
-    {"group":"outside","status":"not_built","name":"Solar power yield","plain":"Electrical output from a specific solar array.","status_note":"Visibility alone does not determine power."},
-    {"group":"outside","status":"not_built","name":"Communications coverage","plain":"Links for a specific antenna and mission architecture.","status_note":"Earth visibility is shown as context."},
-    {"group":"outside","status":"not_reproducible","name":"Lunar gravity","plain":"Lower gravitational acceleration on the Moon.","status_note":"Earth field terrain cannot reproduce it."},
-    {"group":"outside","status":"not_reproducible","name":"Vacuum","plain":"The Moon has essentially no atmosphere.","status_note":"Changes heat transfer and operations."},
-    {"group":"outside","status":"not_reproducible","name":"Lunar radiation environment","plain":"Exposure without Earth’s atmosphere or magnetosphere.","status_note":"Required for separate safety and equipment studies."},
-    {"group":"outside","status":"not_reproducible","name":"Micrometeoroid exposure","plain":"Impacts on an exposed lunar surface.","status_note":"Earth field terrain cannot reproduce the exposure."},
-    {"group":"outside","status":"not_reproducible","name":"Lunar day and night cycle","plain":"Solar timing and long illumination periods at the lunar surface.","status_note":"Earth field temperatures reflect a different cycle."}
-  ]
+  {
+   "id": "context",
+   "label": "Surface and environment"
+  },
+  {
+   "id": "validation",
+   "label": "Validation checks"
+  },
+  {
+   "id": "outside",
+   "label": "Beyond the comparison"
+  }
+ ],
+ "statuses": {
+  "scored": "In the terrain score",
+  "mask": "Eligibility mask",
+  "context": "Shown as context",
+  "validation": "Used in validation",
+  "rejected": "Rejected for this use",
+  "not_built": "Not included in this atlas",
+  "not_reproducible": "No equivalent Earth setting"
+ },
+ "items": [
+  {
+   "group": "terrain",
+   "status": "scored",
+   "name": "Slope at 240 m and 570 m",
+   "plain": "Median absolute slope at two baselines.",
+   "status_note": "Both slopes enter the score.",
+   "criteria_ids": [
+    "A6"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "terrain",
+   "status": "scored",
+   "name": "Roughness at 200 m",
+   "plain": "Small-scale elevation variability in the model.",
+   "status_note": "Enters the score. The elevation models differ most at this roughness scale.",
+   "criteria_ids": [
+    "A1"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "terrain",
+   "status": "scored",
+   "name": "Roughness at 400 to 1,600 m",
+   "plain": "Elevation variability at three larger scales.",
+   "status_note": "All three roughness values enter the score.",
+   "criteria_ids": [
+    "A1"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "terrain",
+   "status": "scored",
+   "name": "Closed depression share",
+   "plain": "Share of each cell occupied by closed depressions.",
+   "status_note": "Enters the score.",
+   "criteria_ids": [
+    "A3"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "terrain",
+   "status": "scored",
+   "name": "Closed depression depth",
+   "plain": "Depth of the depressions detected by the same terrain algorithm.",
+   "status_note": "Enters the score.",
+   "criteria_ids": [
+    "A3"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "terrain",
+   "status": "mask",
+   "name": "Land cover",
+   "plain": "Bare, ice and water shares constrain Earth eligibility.",
+   "status_note": "Moss and lichen count as bare.",
+   "criteria_ids": [
+    "A0"
+   ],
+   "dimension": "Geology, mineralogy and surface materials"
+  },
+  {
+   "group": "terrain",
+   "status": "context",
+   "name": "Elevation",
+   "plain": "Median elevation of the Earth patch.",
+   "status_note": "Shown for context; the score uses terrain shape.",
+   "criteria_ids": [
+    "A8"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "terrain",
+   "status": "context",
+   "name": "Gentle slopes",
+   "plain": "Share of terrain below each published slope threshold.",
+   "status_note": "Supports a landing and mobility comparison.",
+   "criteria_ids": [
+    "A7"
+   ],
+   "dimension": "Landing, mobility, navigation, operations and construction"
+  },
+  {
+   "group": "terrain",
+   "status": "rejected",
+   "name": "Total weighted patch area as primary rank",
+   "plain": "The sum of the similarities over an entire patch.",
+   "status_note": "The best window sets the rank to reduce the influence of patch size.",
+   "criteria_ids": [
+    "D2"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "terrain",
+   "status": "rejected",
+   "name": "Dune-like relief as a sand detector",
+   "plain": "A rule based on the ratio of relief to roughness.",
+   "status_note": "Temperature and moisture checks did not confirm dry sand. The flag remains a terrain rule.",
+   "criteria_ids": [
+    "D1"
+   ],
+   "dimension": "Dust, wind, erosion and surface processes"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Earth climatology",
+   "plain": "NASA POWER skin temperature at the reanalysis grid scale.",
+   "status_note": "Separate from the satellite measurements.",
+   "criteria_ids": [
+    "B2",
+    "B4",
+    "D5"
+   ],
+   "dimension": "Water, ice, permafrost and resources"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Midsummer solar elevation",
+   "plain": "Estimated local noon Sun angle on Earth.",
+   "status_note": "Reported as an environmental difference.",
+   "criteria_ids": [
+    "D7"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Air pressure",
+   "plain": "Standard-atmosphere estimate from elevation.",
+   "status_note": "Actual field pressure varies.",
+   "criteria_ids": [
+    "C2"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Measured Earth surface temperatures",
+   "plain": "JAXA GCOM-C and MODIS day and night surface summaries.",
+   "status_note": "Coverage and available months vary by site.",
+   "criteria_ids": [
+    "B4"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Soil moisture",
+   "plain": "JAXA AMSR2 monthly soil moisture.",
+   "status_note": "Available only where the product covers a sampled site.",
+   "criteria_ids": [
+    "D4"
+   ],
+   "dimension": "Water, ice, permafrost and resources"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Permafrost and ground temperature",
+   "plain": "ESA CCI permafrost fraction and temperature at depth.",
+   "status_note": "Available only for sampled coverage.",
+   "criteria_ids": [
+    "B3"
+   ],
+   "dimension": "Water, ice, permafrost and resources"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Lunar temperatures and ice stability",
+   "plain": "Diviner surface temperatures and inferred stable ice depth.",
+   "status_note": "Temperature and ice stability are different measurements and inferences.",
+   "criteria_ids": [
+    "B3",
+    "B4"
+   ],
+   "dimension": "Water, ice, permafrost and resources"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Lunar shadow and visibility",
+   "plain": "LOLA-derived permanent shadow and Sun and Earth visibility.",
+   "status_note": "Reported for the lunar region.",
+   "criteria_ids": [
+    "D7"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "context",
+   "status": "context",
+   "name": "Lunar radar, neutrons and ultraviolet",
+   "plain": "Mini-RF, LEND and LAMP measurements.",
+   "status_note": "These products describe the lunar region and do not enter the score.",
+   "criteria_ids": [
+    "B5",
+    "B7"
+   ],
+   "dimension": "Geology, mineralogy and surface materials"
+  },
+  {
+   "group": "validation",
+   "status": "validation",
+   "name": "Lunar terrain estimator",
+   "plain": "Comparison with the published LOLA slope and roughness grids.",
+   "status_note": "Check against a NASA product.",
+   "criteria_ids": [
+    "A1",
+    "A6",
+    "D11"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "validation",
+   "status": "validation",
+   "name": "Known analogs and matched random circles",
+   "plain": "Enrichment around documented sites and random locations.",
+   "status_note": "Relative to scanned bare terrain.",
+   "criteria_ids": [
+    "D9"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "validation",
+   "status": "validation",
+   "name": "Recovery of known analog tiles",
+   "plain": "A tile-level test of separation from eligible background.",
+   "status_note": "The uncertainty interval includes chance.",
+   "criteria_ids": [
+    "D9"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "validation",
+   "status": "validation",
+   "name": "Negative control tiles",
+   "plain": "Tests on terrain expected to fail the full candidate rule.",
+   "status_note": "Shows the joint effect of terrain and land cover.",
+   "criteria_ids": [
+    "A0"
+   ],
+   "dimension": "Geology, mineralogy and surface materials"
+  },
+  {
+   "group": "validation",
+   "status": "validation",
+   "name": "Elevation model and grid sensitivity",
+   "plain": "Checks against a second DEM, lunar targets and legacy grid runs.",
+   "status_note": "Identifies results that depend on inputs or scale.",
+   "criteria_ids": [
+    "D10",
+    "D2"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Local roughness below model scale",
+   "plain": "Features smaller than the scale resolved by the elevation model.",
+   "status_note": "Available high-resolution examples do not cover the scan.",
+   "criteria_ids": [
+    "A12",
+    "A11"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Boulder hazard",
+   "plain": "Distribution of rocks and blocks for landing or travel.",
+   "status_note": "No comparable map for every Earth patch.",
+   "criteria_ids": [
+    "B6"
+   ],
+   "dimension": "Geology, mineralogy and surface materials"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Regolith chemistry",
+   "plain": "Mineral composition of the surface material.",
+   "status_note": "Requires different measurements.",
+   "criteria_ids": [
+    "B1"
+   ],
+   "dimension": "Geology, mineralogy and surface materials"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Particle size",
+   "plain": "Surface grain sizes and their variation.",
+   "status_note": "Terrain elevations do not resolve grain sizes.",
+   "criteria_ids": [
+    "C4"
+   ],
+   "dimension": "Dust, wind, erosion and surface processes"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Trafficability",
+   "plain": "Bearing capacity, cohesion and resistance to rover wheels.",
+   "status_note": "Would need field and engineering data.",
+   "criteria_ids": [
+    "A7"
+   ],
+   "dimension": "Landing, mobility, navigation, operations and construction"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Vegetation structure",
+   "plain": "Height and density of local vegetation.",
+   "status_note": "WorldCover only constrains classes and shares.",
+   "criteria_ids": [
+    "A0"
+   ],
+   "dimension": "Geology, mineralogy and surface materials"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Field access",
+   "plain": "Permits, access roads and time of year for an Earth field site.",
+   "status_note": "The rank makes no field access assessment.",
+   "criteria_ids": [
+    "D8"
+   ],
+   "dimension": "Terrain, elevation, slope, roughness and craters"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Solar power yield",
+   "plain": "Electrical output from a specific solar array.",
+   "status_note": "Visibility alone does not determine power.",
+   "criteria_ids": [
+    "A9"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "outside",
+   "status": "not_built",
+   "name": "Communications coverage",
+   "plain": "Links for a specific antenna and mission architecture.",
+   "status_note": "Earth visibility is shown as context.",
+   "criteria_ids": [
+    "D7"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "outside",
+   "status": "not_reproducible",
+   "name": "Lunar gravity",
+   "plain": "Lower gravitational acceleration on the Moon.",
+   "status_note": "Earth field terrain cannot reproduce it.",
+   "criteria_ids": [
+    "C1"
+   ],
+   "dimension": "Landing, mobility, navigation, operations and construction"
+  },
+  {
+   "group": "outside",
+   "status": "not_reproducible",
+   "name": "Vacuum",
+   "plain": "The Moon has essentially no atmosphere.",
+   "status_note": "Changes heat transfer and operations.",
+   "criteria_ids": [
+    "C2"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "outside",
+   "status": "not_reproducible",
+   "name": "Lunar radiation environment",
+   "plain": "Exposure without Earth’s atmosphere or magnetosphere.",
+   "status_note": "Required for separate safety and equipment studies.",
+   "criteria_ids": [
+    "C3"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "outside",
+   "status": "not_reproducible",
+   "name": "Micrometeoroid exposure",
+   "plain": "Impacts on an exposed lunar surface.",
+   "status_note": "Earth field terrain cannot reproduce the exposure.",
+   "criteria_ids": [
+    "C3"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  },
+  {
+   "group": "outside",
+   "status": "not_reproducible",
+   "name": "Lunar day and night cycle",
+   "plain": "Solar timing and long illumination periods at the lunar surface.",
+   "status_note": "Earth field temperatures reflect a different cycle.",
+   "criteria_ids": [
+    "C5"
+   ],
+   "dimension": "Temperature, illumination and environmental extremes"
+  }
+ ],
+ "criteria_note": "Registry of analog criteria. Statuses come from the code and data of the repository, not from the plan; the proof of each status is in 'evidence' and in app/CRITERIA-NOTES.md. site_fields are dotted paths into one record of app/data/sites.json (and sites_flagged.json); moon_fields are dotted paths into one record of moon.json · regions (a named region; members only for base_regions). Ported from the J7 prototype and re-checked against the repository for J39 (issue #25); see app/CRITERIA-NOTES.md. Written with SI assistance (Claude Code).",
+ "criteria_statuses": {
+  "scored": "Part of the similarity score",
+  "mask": "Precondition: a cell must pass it to be a candidate",
+  "context": "Measured per site and shown, not scored",
+  "validation": "Used to check the method, not part of the ranking",
+  "rejected": "Tested and dropped",
+  "not_built": "Catalogued, not implemented",
+  "not_reproducible": "No place on Earth reproduces it"
+ },
+ "criteria_status_counts": {
+  "mask": 1,
+  "scored": 5,
+  "not_built": 8,
+  "rejected": 2,
+  "context": 12,
+  "validation": 5,
+  "not_reproducible": 5
+ },
+ "dimensions": [
+  "Geology, mineralogy and surface materials",
+  "Terrain, elevation, slope, roughness and craters",
+  "Temperature, illumination and environmental extremes",
+  "Water, ice, permafrost and resources",
+  "Dust, wind, erosion and surface processes",
+  "Biology, habitability and biosignatures",
+  "Caves, lava tubes and subsurface",
+  "Landing, mobility, navigation, operations and construction"
+ ],
+ "dimensions_without_criteria": [
+  "Biology, habitability and biosignatures",
+  "Caves, lava tubes and subsurface"
+ ],
+ "criteria_groups": [
+  {
+   "id": "A",
+   "name": "Terrain shape in 3D",
+   "summary": "Quantities computed from elevation models by the same code on the Moon and on Earth. Three of them (roughness at four sizes, two-point slope at two baselines, closed depressions) make the eight numbers of the similarity score; the bare-ground mask is the precondition."
+  },
+  {
+   "id": "B",
+   "name": "Material and environment",
+   "summary": "Rock, dryness, frozen ground, temperature, radar roughness, boulders and ice. None is scored. Dryness, permafrost and temperature are measured and shown; radar is shown as RADARSAT-1 texture on Earth and Mini-RF values on the Moon, without a numerical comparison; for the others only lunar data or no data is used."
+  },
+  {
+   "id": "C",
+   "name": "Not reproducible on Earth",
+   "summary": "Conditions no natural place on Earth has. They are stated in every site's list of breaks and never scored."
+  },
+  {
+   "id": "D",
+   "name": "Added during the build",
+   "summary": "Things the pipeline computes or the app shows that the catalogue did not list: the dune-field flag, the score and ranking key, the per-region lunar targets, further context layers and the checks of the method."
+  }
+ ],
+ "criteria": [
+  {
+   "id": "A0",
+   "group": "A",
+   "name": "Bare-ground mask",
+   "plain": "Only ground without forest, water, ice or buildings can be a candidate, because the elevation model measures the top of whatever covers the ground.",
+   "definition": "A precondition, not a feature. A cell of about 2 km can be a candidate only if at least 80% of it is bare ground, under 5% is snow or ice and under 5% is water.",
+   "dimension": "Geology, mineralogy and surface materials",
+   "status": "mask",
+   "status_note": "Implemented as catalogued. ESA WorldCover classes 'bare / sparse' (60) and 'moss and lichen' (100) count as bare, so Arctic tundra passes: without class 100, 8 of the top 30 sites keep a 4-cell core (data/validation/landcover_sensitivity.json · top30.pass_strict_cells) and 30 of the top 100 (top100.pass_strict_cells). Cells without land cover (north of 82.75 N and Antarctica) can never be candidates (data/validation/effectiveness.json · scan.land_cover_limit). A NASA variant with MODIS MCD12Q1 land cover exists and is used only in the cross-check of the second elevation model. With the mask, the four negative-control tiles give zero candidate cells (effectiveness.json · controls.*.with_mask.cells).",
+   "moon_data": "Not applicable: the Moon has no land cover.",
+   "earth_data": "ESA WorldCover 2021 v200 (10 m); MODIS MCD12Q1 v061 through NASA GIBS for the NASA variant",
+   "comparability": "One-sided: it removes Earth cells the Moon has no counterpart for. Of the known analog tiles, 9 have no bare cell and 6 have fewer than 100, so they cannot enter the tile-recovery test (effectiveness.json · recovery.known_tiles_without_bare, recovery.known_tiles_below_min_bare).",
+   "site_fields": [
+    "bare",
+    "ice",
+    "landcover_strict"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/score.py: candidate_mask, BARE_MIN = 0.8, ICE_MAX = 0.05, WATER_MAX = 0.05; pipeline/landcover.py: GROUPS",
+   "sources": [
+    {
+     "label": "ESA WorldCover 2021 (URL from docs/METHOD.md)",
+     "url": "https://esa-worldcover.org/"
+    },
+    {
+     "label": "NASA GIBS, MODIS MCD12Q1 land cover (URL from docs/METHOD.md)",
+     "url": "https://gibs.earthdata.nasa.gov/"
+    },
+    {
+     "label": "Copernicus DEM Product Handbook v5.0",
+     "url": "https://dataspace.copernicus.eu/sites/default/files/media/files/2024-06/geo1988-copernicusdem-spe-002_producthandbook_i5.0.pdf"
+    }
+   ]
+  },
+  {
+   "id": "A1",
+   "group": "A",
+   "name": "Roughness spectrum",
+   "plain": "How bumpy the ground is at four sizes, from 200 m to 1.6 km.",
+   "definition": "Catalogue: slope of a fitted plane and roughness as 1.48 x the median absolute deviation of the height residuals, in a disc of 200, 400, 800 and 1,600 m. Built: roughness as 1.4826 x the median absolute difference between the elevation and its moving mean over a window of each of the four sizes, per cell.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "scored",
+   "status_note": "Four of the eight scored features (r200, r400, r800, r1600). The detrending uses a moving mean, not NASA's plane fit, and the plane-fit slope is not a scored feature. The plane-fit estimator was written only for the check against NASA's own map: median absolute slope difference 0.042 deg on the 20 m grid and 0.064 deg at 30 m; roughness comes out at 0.84 of NASA's (docs/HANDOFF.md, section 6). The 100 m size is not built. The site records carry r200 and r1600 only; the lunar records carry all four.",
+   "moon_data": "LOLA south-pole elevation model LDEM_80S_20MPP_ADJ at 20 m, averaged to 30 m (NASA PGDA product 90); NASA maps LDRM_80S_50MPP_ADJ_SLP_200M and _ROUGH_200M for the check",
+   "earth_data": "Copernicus DEM GLO-30 (30 m surface model)",
+   "comparability": "Same code on both bodies. Caveat: the lunar grid is partly interpolated between laser tracks and the Earth model includes vegetation and smooths small landforms; the 200 m roughness differs between two Earth elevation models (docs/METHOD.md).",
+   "site_fields": [
+    "features.r200",
+    "features.r1600",
+    "score_amp"
+   ],
+   "moon_fields": [
+    "features.r200",
+    "features.r400",
+    "features.r800",
+    "features.r1600"
+   ],
+   "evidence": "pipeline/features.py: SCORED, ROUGH_WINDOWS_M, cell_features; validation/t1_reproduce.py; data/validation/t1_reproduce_nasa.json",
+   "sources": [
+    {
+     "label": "NASA PGDA product 90, LOLA south-pole products (Barker et al. 2023)",
+     "url": "https://pgda.gsfc.nasa.gov/products/90"
+    },
+    {
+     "label": "Barker et al. 2023, Planet. Sci. J. 4, 183 (preprint)",
+     "url": "https://ntrs.nasa.gov/api/citations/20230014419/downloads/BarkernewviewSTIupdated.pdf"
+    },
+    {
+     "label": "Copernicus DEM Product Handbook v5.0",
+     "url": "https://dataspace.copernicus.eu/sites/default/files/media/files/2024-06/geo1988-copernicusdem-spe-002_producthandbook_i5.0.pdf"
+    }
+   ]
+  },
+  {
+   "id": "A2",
+   "group": "A",
+   "name": "Distance between slope distributions",
+   "plain": "Compare the whole spread of slopes in a place, not only the typical slope.",
+   "definition": "Wasserstein-1 distance between the slope histograms of an Earth cell and of the lunar target, per baseline.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "not_built",
+   "status_note": "No code computes a Wasserstein distance or any histogram distance. The score uses the Mahalanobis distance of eight per-cell medians and shares instead.",
+   "moon_data": "Would use the slope histograms of A1",
+   "earth_data": "Would use the slope histograms of A1",
+   "comparability": "Not tested here. The catalogue itself marks the choice of this distance as the researchers' reasoning, not a published method.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "pipeline/features.py and pipeline/score.py contain no histogram distance (searched for 'wasserstein' in pipeline/, validation/, lidar/)",
+   "sources": [
+    {
+     "label": "Aharonson et al. 2001, JGR 106",
+     "url": "https://authors.library.caltech.edu/13034"
+    }
+   ]
+  },
+  {
+   "id": "A3",
+   "group": "A",
+   "name": "Closed depressions",
+   "plain": "How much of the ground lies in hollows with no outlet, as crater floors do.",
+   "definition": "Share of the cell inside closed depressions deeper than 3 m (dep_frac) and the 95th percentile of the fill depth (dep_depth), found by filling the cell with its border as the outlet.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "scored",
+   "status_note": "Two of the eight scored features (dep_frac, dep_depth). The catalogue also listed depression density per km2, circularity and depth-to-diameter ratio: those are not built. Adding the two depression features to slope and roughness lowers the share of cells that pass the terrain threshold from 9.83% to 4.88% (docs/VALIDATION.md). The site records carry dep_frac; dep_depth is in the lunar records only.",
+   "moon_data": "LOLA south-pole elevation model LDEM_80S_20MPP_ADJ at 20 m, averaged to 30 m (NASA PGDA product 90)",
+   "earth_data": "Copernicus DEM GLO-30 (30 m surface model)",
+   "comparability": "Same code on both bodies. Caveats: on Earth the detector also responds to lakes, playas, salt flats and thermokarst; the two Earth elevation models disagree on this feature (correlation 0.758, docs/VALIDATION.md), so the list of candidate cells depends on the elevation model.",
+   "site_fields": [
+    "features.dep_frac",
+    "score_dep"
+   ],
+   "moon_fields": [
+    "features.dep_frac",
+    "features.dep_depth",
+    "mean_dep_frac"
+   ],
+   "evidence": "pipeline/features.py: DEP, DEP_MIN_DEPTH_M, cell_features (skimage reconstruction); data/validation/effectiveness.json: ablation",
+   "sources": [
+    {
+     "label": "NASA PGDA product 90, LOLA south-pole products (Barker et al. 2023)",
+     "url": "https://pgda.gsfc.nasa.gov/products/90"
+    },
+    {
+     "label": "Copernicus DEM Product Handbook v5.0",
+     "url": "https://dataspace.copernicus.eu/sites/default/files/media/files/2024-06/geo1988-copernicusdem-spe-002_producthandbook_i5.0.pdf"
+    }
+   ]
+  },
+  {
+   "id": "A4",
+   "group": "A",
+   "name": "Drainage integration",
+   "plain": "Whether water would flow out of an area along valleys or collect in hollows inside it.",
+   "definition": "Share of a cell's area that drains beyond the cell against the share that drains into internal hollows.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "not_built",
+   "status_note": "No flow routing is computed. The closed-depression share of A3 is the only related quantity.",
+   "moon_data": "Would use the same lunar elevation model as A3",
+   "earth_data": "Would use the same Earth elevation model as A3",
+   "comparability": "Not tested here. The catalogue notes it has no anchor in the lunar literature.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "pipeline/features.py: no flow-direction or drainage code; the feature lists SCORED and EXTRA do not contain it",
+   "sources": []
+  },
+  {
+   "id": "A5",
+   "group": "A",
+   "name": "Anisotropy",
+   "plain": "Whether the landforms line up in one direction, as valleys and ridges do, or have no preferred direction, as crater fields do.",
+   "definition": "Catalogue: ratio of directional structure functions or of the eigenvalues of the surface-normal orientation tensor. Tested variant: coherence of the gradient structure tensor per cell, 0 for no preferred direction and 1 for one direction.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "rejected",
+   "status_note": "One variant (gradient coherence, coh) was tested on the 37 pilot tiles and did not change which cells match: the shares with and without it are nearly the same in every tile (columns amp_all and coh_all). It is still computed as a descriptive value for the lunar cells but is not scored and is not in the site records. The two variants named in the catalogue were not built.",
+   "moon_data": "LOLA south-pole elevation model LDEM_80S_20MPP_ADJ at 20 m, averaged to 30 m (NASA PGDA product 90)",
+   "earth_data": "Copernicus DEM GLO-30 (30 m surface model)",
+   "comparability": "Same code on both bodies, but the tested variant added no separation, so it is not used.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "analysis/discovery_test_results.txt (columns amp_all, coh_all); docs/HANDOFF.md, section 6: 'Gradient coherence adds nothing'; pipeline/features.py: EXTRA",
+   "sources": []
+  },
+  {
+   "id": "A6",
+   "group": "A",
+   "name": "Two-point slope at two baselines",
+   "plain": "How steep the ground typically is when measured between two points 240 m and 570 m apart.",
+   "definition": "Median absolute two-point slope |h(x + b) - h(x)| / b per cell, at baselines of about 240 m and 570 m, grid rows and columns pooled.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "scored",
+   "status_note": "Two of the eight scored features (s240, s570). Differences from the catalogue: baselines are 240 and 570 m (whole numbers of 30 m pixels) instead of 225 and 560 m; both grid directions are pooled instead of columns only; the lunar reference is computed by the same code from the lunar elevation model, not read from the PGDA 70 maps. PGDA 70 is used only as a check: the ratio of our grid slope to it is 1.01 to 1.03 along the north-south direction and 0.91 with both directions pooled (docs/HANDOFF.md, section 6).",
+   "moon_data": "LOLA south-pole elevation model LDEM_80S_20MPP_ADJ at 20 m, averaged to 30 m (NASA PGDA product 90); PGDA 70 along-track slope maps for the check",
+   "earth_data": "Copernicus DEM GLO-30 (30 m surface model)",
+   "comparability": "Same code on both bodies. Caveat: a 30 m surface model includes vegetation and its noise limits baselines to about 200 m and longer.",
+   "site_fields": [
+    "features.s240",
+    "features.s570",
+    "score_amp"
+   ],
+   "moon_fields": [
+    "features.s240",
+    "features.s570"
+   ],
+   "evidence": "pipeline/features.py: SLOPE_BASELINES_M, cell_features; data/validation/t1_reproduce_nasa.json: step5_profile_vs_grid",
+   "sources": [
+    {
+     "label": "NASA PGDA product 70, LOLA slope and Hurst maps (Rosenburg et al. 2011)",
+     "url": "https://pgda.gsfc.nasa.gov/products/70"
+    },
+    {
+     "label": "Rosenburg et al. 2011, JGR 116, E02001",
+     "url": "https://doi.org/10.1029/2010JE003716"
+    },
+    {
+     "label": "Kreslavsky and Head 2000, JGR 105",
+     "url": "https://doi.org/10.1029/2000JE001259"
+    },
+    {
+     "label": "NASA PGDA product 90, LOLA south-pole products (Barker et al. 2023)",
+     "url": "https://pgda.gsfc.nasa.gov/products/90"
+    }
+   ]
+  },
+  {
+   "id": "A7",
+   "group": "A",
+   "name": "Engineering slope shares",
+   "plain": "How much of the ground is gentle enough to land on or to walk and drive across.",
+   "definition": "Share of pixels in a cell whose slope is at or below 5, 8 and 15 degrees (central-difference slope over a 2-pixel baseline, about 60 m).",
+   "dimension": "Landing, mobility, navigation, operations and construction",
+   "status": "context",
+   "status_note": "Built in a reduced form: three thresholds (5, 8, 15 deg), shown per site and per lunar region, not scored. Not built: the 100 m erosion buffer for landing accuracy, the 20 and 25 deg classes and the largest connected traversable area. The lunar NASA slope maps at 5 m (PGDA 78 and 104) are not used; both sides are computed from the 30 m grids.",
+   "moon_data": "LOLA south-pole elevation model LDEM_80S_20MPP_ADJ at 20 m, averaged to 30 m (NASA PGDA product 90)",
+   "earth_data": "Copernicus DEM GLO-30 (30 m surface model)",
+   "comparability": "Same code and same baseline on both bodies. Caveat: the thresholds come from requirements at the scale of a lander or rover (metres), and a slope over about 60 m is lower than the slope a vehicle meets.",
+   "site_fields": [
+    "shares.f_le5",
+    "shares.f_le8",
+    "shares.f_le15"
+   ],
+   "moon_fields": [
+    "shares_range.f_le5",
+    "shares_range.f_le8",
+    "shares_range.f_le15",
+    "shares.f_le5",
+    "shares.f_le8",
+    "shares.f_le15"
+   ],
+   "evidence": "pipeline/features.py: EXTRA, cell_features (loop over 5, 8, 15); pipeline/sites.py: MEDIAN_COLS",
+   "sources": [
+    {
+     "label": "Kumari et al. 2022, Planet. Sci. J. 3:224",
+     "url": "https://doi.org/10.3847/PSJ/ac88c2"
+    },
+    {
+     "label": "LPSC 2022 abstract 1079, 100 m landing buffer",
+     "url": "https://www.hou.usra.edu/meetings/lpsc2022/pdf/1079.pdf"
+    },
+    {
+     "label": "NASA ACR24, Lunar Mobility Drivers and Needs",
+     "url": "https://www.nasa.gov/wp-content/uploads/2024/06/acr24-lunar-mobility-drivers-and-needs.pdf"
+    },
+    {
+     "label": "NASA PGDA product 78, 5 m DEMs of south-pole sites (Barker et al. 2021)",
+     "url": "https://pgda.gsfc.nasa.gov/products/78"
+    },
+    {
+     "label": "NASA PGDA product 104, 5 m DEMs of the 13 candidate regions",
+     "url": "https://pgda.gsfc.nasa.gov/products/104"
+    }
+   ]
+  },
+  {
+   "id": "A8",
+   "group": "A",
+   "name": "Local relief and hypsometry",
+   "plain": "The height difference between the low and the high ground inside an area, and how the heights are distributed.",
+   "definition": "Catalogue: 5th to 95th percentile elevation range, hypsometric integral and skewness of elevation in a window. Built: the percentile range (relief) and the median elevation per cell.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "context",
+   "status_note": "Relief (P95 - P5 of elevation per cell) and median elevation are computed on both bodies and are not scored. Relief is shown for the lunar regions and feeds the dune-field flag (D1); the site records carry the median elevation only. The hypsometric integral and the skewness are not built.",
+   "moon_data": "LOLA south-pole elevation model LDEM_80S_20MPP_ADJ at 20 m, averaged to 30 m (NASA PGDA product 90)",
+   "earth_data": "Copernicus DEM GLO-30 (30 m surface model)",
+   "comparability": "Same code on both bodies. Absolute elevation has no common reference between the two bodies, so only relief is comparable.",
+   "site_fields": [
+    "elev_med"
+   ],
+   "moon_fields": [
+    "features.relief"
+   ],
+   "evidence": "pipeline/features.py: EXTRA, cell_features (elev_med, relief); pipeline/sites.py: artefact_threshold",
+   "sources": []
+  },
+  {
+   "id": "A9",
+   "group": "A",
+   "name": "Shadow geometry at low sun",
+   "plain": "How much of the terrain would lie in shadow if the sun stood as low as it does at the lunar pole.",
+   "definition": "Share of terrain in shadow at sun elevations of 1.5 and 5 degrees, averaged over azimuths, from horizon rasters computed by the same code on both bodies.",
+   "dimension": "Temperature, illumination and environmental extremes",
+   "status": "not_built",
+   "status_note": "No horizon or shadow code exists. What the app shows instead is not this criterion: NASA's own illumination, permanent-shadow and Earth-visibility maps per lunar region (D7), and a line in each site's list of breaks giving the midsummer noon sun elevation from the site's latitude.",
+   "moon_data": "NASA PGDA product 69 would have been the check; it is used only as lunar context (D7)",
+   "earth_data": "None",
+   "comparability": "Not tested here. The catalogue warns that the result depends strongly on the resolution of the elevation model and that no place on Earth has lunar illumination.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "No horizon code in pipeline/, validation/ or lidar/; pipeline/sites.py: breaks_for, noon_sun_deg",
+   "sources": [
+    {
+     "label": "NASA PGDA product 69, polar illumination (Mazarico et al. 2011)",
+     "url": "https://pgda.gsfc.nasa.gov/products/69"
+    },
+    {
+     "label": "Glaeser et al. 2018, illumination of the lunar poles",
+     "url": "https://ntrs.nasa.gov/api/citations/20170007365/downloads/20170007365.pdf"
+    }
+   ]
+  },
+  {
+   "id": "A10",
+   "group": "A",
+   "name": "Differential slope and profile curvature",
+   "plain": "Slope with the regional tilt removed, and how sharply the ground bends.",
+   "definition": "Differential slope s(L) - s(2L) and the interquartile range of profile curvature at baselines from 115 m to 1.8 km (after Kreslavsky).",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "not_built",
+   "status_note": "Not implemented. The catalogue itself notes that the formulas were written from memory and not checked against the papers.",
+   "moon_data": "Would use the lunar elevation model",
+   "earth_data": "Would use the Earth elevation model",
+   "comparability": "Not tested here.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "pipeline/features.py: SCORED and EXTRA contain no differential slope or curvature",
+   "sources": [
+    {
+     "label": "Kreslavsky et al. 2013, Icarus 226",
+     "url": "https://doi.org/10.1016/j.icarus.2013.04.027"
+    },
+    {
+     "label": "Kreslavsky and Head 2000, JGR 105",
+     "url": "https://doi.org/10.1029/2000JE001259"
+    }
+   ]
+  },
+  {
+   "id": "A11",
+   "group": "A",
+   "name": "ICESat-2 laser profiles",
+   "plain": "Check the slopes from the 30 m elevation model against a satellite laser that measures the ground along a line, as the lunar laser altimeter does.",
+   "definition": "Median absolute point-to-point slope along ICESat-2 ground tracks at 60, 220, 240 and 560 m, compared with the grid slopes of the same site and with the lunar values.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "validation",
+   "status_note": "Run for eight sites, not for the ranking. The laser slope at 240 m is 0.43 to 1.16 times the grid slope, median 0.87 (data/validation/icesat2.json · sites.*.ratios.laser240_over_grid240); the three lowest are lava fields. Differences from the catalogue: the standard ATL06 product (heights fitted over 40 m segments, posted every 20 m) is used, so 60 m stands in for the 57 m lunar baseline, and the laser samples a square box of 10 x 10 km (half-size 5 km) around the site centre, not the site outline (icesat2.json · request.aoi).",
+   "moon_data": "NASA PGDA product 70 along-track medians; our lunar grid medians",
+   "earth_data": "ICESat-2 ATL06 (NASA) through SlideRule Earth; Copernicus DEM GLO-30 for the grid side",
+   "comparability": "The only Earth measurement with the same geometry as the lunar laser altimeter. Caveat: 40 m segment averages against laser spots of about 5 m on the Moon, different track directions and different footprints.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "validation/icesat2_profiles.py; data/validation/icesat2.json: sites.*.ratios.laser240_over_grid240; docs/VALIDATION.md",
+   "sources": [
+    {
+     "label": "SlideRule Earth, public cluster",
+     "url": "https://sliderule.slideruleearth.io/source/version"
+    },
+    {
+     "label": "NASA PGDA product 70, LOLA slope and Hurst maps (Rosenburg et al. 2011)",
+     "url": "https://pgda.gsfc.nasa.gov/products/70"
+    },
+    {
+     "label": "NASA Earthdata Search (URL from docs/METHOD.md)",
+     "url": "https://search.earthdata.nasa.gov/"
+    }
+   ]
+  },
+  {
+   "id": "A12",
+   "group": "A",
+   "name": "Airborne lidar close-ups at 1 m",
+   "plain": "Look at a few places with a far sharper elevation model to see what the 30 m model loses.",
+   "definition": "Catalogue: the A1 estimator on 1 m lidar terrain models averaged to 20 m, also at a 100 m baseline. Built: crater shape (rim diameter, depth, rim height, wall slope) from radial profiles on 1 m lidar, on the 30 m model and on the lunar 20 m model.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "validation",
+   "status_note": "Built as a crater close-up, not as the roughness estimator the catalogue describes. Meteor Crater on 1 m lidar: rim-crest diameter 1,222 m, depth 163 m; the 30 m model keeps size and depth (1,258 m, 162 m) and loses the steep walls (steepest profile slope 36.8 deg against 40.7 deg). A lunar crater of 1,140 m from the 20 m model is the comparison. The Morasko craters in Poland (1 m lidar) are a counter-example, not an analog: they are not resolved at 30 m. ArcticDEM is not used.",
+   "moon_data": "LOLA south-pole elevation model at 20 m (NASA PGDA product 90)",
+   "earth_data": "USGS 3DEP 1 m lidar (Meteor Crater); GUGiK NMT 1 m (Morasko, Poland); Copernicus DEM GLO-30",
+   "comparability": "Two craters and one counter-example only; it shows the limits of the 30 m model and does not enter the ranking.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "lidar/crater_profiles.py; data/validation/crater_profiles.json: a_meteor_3dep_1m, b_meteor_glo30, c_moon_lola_20m, d_morasko",
+   "sources": [
+    {
+     "label": "USGS 3DEP 1 m, S3 listing",
+     "url": "https://prd-tnm.s3.amazonaws.com/?list-type=2&prefix=StagedProducts/Elevation/1m/Projects/AZ&delimiter=/"
+    },
+    {
+     "label": "GUGiK, numerical terrain model (Poland)",
+     "url": "https://www.geoportal.gov.pl/en/dane/numeryczny-model-terenu"
+    },
+    {
+     "label": "NASA PGDA product 90, LOLA south-pole products (Barker et al. 2023)",
+     "url": "https://pgda.gsfc.nasa.gov/products/90"
+    }
+   ]
+  },
+  {
+   "id": "A13",
+   "group": "A",
+   "name": "Landform classes (geomorphons)",
+   "plain": "Classify every point as a pit, valley, ridge, peak and so on, and compare the mix of classes.",
+   "definition": "Share of each geomorphon class per cell, in particular pits against valleys, with the same search distance in metres on both bodies.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "not_built",
+   "status_note": "Not implemented. The catalogue found no use of geomorphons on lunar elevation models and marks the idea as untested.",
+   "moon_data": "Would use the lunar elevation model",
+   "earth_data": "Would use the Earth elevation model",
+   "comparability": "Not tested here.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "No geomorphon code in pipeline/, validation/ or lidar/ (searched for 'geomorphon')",
+   "sources": []
+  },
+  {
+   "id": "A14",
+   "group": "A",
+   "name": "Hurst exponent and power-spectrum slope",
+   "plain": "A single number for how roughness changes with scale.",
+   "definition": "Hurst exponent fitted to the structure function of elevation over a range of distances, or the slope of the power spectrum.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "rejected",
+   "status_note": "Tested in the pilot and dropped. From the 30 m Earth model the value was unstable (for Meteor Crater 0.40 or 0.83 depending on the window), and at the lunar south pole it has a median of 0.98, so it separates nothing. Not computed by the pipeline.",
+   "moon_data": "NASA PGDA product 70 Hurst map; Hurst layer of PGDA product 90",
+   "earth_data": "Copernicus DEM GLO-30 (pilot test only)",
+   "comparability": "Low: too few octaves of scale in a 30 m model, opposite biases from smoothing and noise, and saturation near 1 at the pole.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "analysis/validate.py: hurst; analysis/build_report.py (pilot report, Hurst rows); docs/HANDOFF.md, section 6; catalogue row A14",
+   "sources": [
+    {
+     "label": "NASA PGDA product 70, LOLA slope and Hurst maps (Rosenburg et al. 2011)",
+     "url": "https://pgda.gsfc.nasa.gov/products/70"
+    },
+    {
+     "label": "Barker et al. 2023, Planet. Sci. J. 4, 183 (preprint)",
+     "url": "https://ntrs.nasa.gov/api/citations/20230014419/downloads/BarkernewviewSTIupdated.pdf"
+    },
+    {
+     "label": "Rosenburg et al. 2011, JGR 116, E02001",
+     "url": "https://doi.org/10.1029/2010JE003716"
+    },
+    {
+     "label": "Landais et al., multifractal topography",
+     "url": "https://arxiv.org/abs/1805.11249"
+    }
+   ]
+  },
+  {
+   "id": "B1",
+   "group": "B",
+   "name": "Rock type",
+   "plain": "Whether the rock is of the same kind as the lunar highlands.",
+   "definition": "Categorical match of lithology: anorthosite first, then basalt, then sedimentary rock or ice.",
+   "dimension": "Geology, mineralogy and surface materials",
+   "status": "not_built",
+   "status_note": "No lithology data is read anywhere in the pipeline. The site records say nothing about rock type; the top-30 review describes landforms from satellite images, not rock.",
+   "moon_data": "None used (the catalogue did not review a lunar composition map)",
+   "earth_data": "None used (the catalogue proposed the GLiM global lithological map)",
+   "comparability": "Not tested here. GLiM has no separate class for anorthosite.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "No lithology reader in pipeline/; data/sources.csv has no lithology row",
+   "sources": [
+    {
+     "label": "GLiM global lithological map (Hartmann and Moosdorf 2012)",
+     "url": "https://doi.pangaea.de/10.1594/PANGAEA.788537"
+    }
+   ]
+  },
+  {
+   "id": "B2",
+   "group": "B",
+   "name": "Dryness",
+   "plain": "How little rain or snow falls; the Moon has none.",
+   "definition": "Catalogue: UNEP aridity index and precipitation. Built: mean annual precipitation at the site centre from NASA POWER (MERRA-2 climatology).",
+   "dimension": "Water, ice, permafrost and resources",
+   "status": "context",
+   "status_note": "Precipitation is shown for the top 150 sites and is not scored. The aridity index is not computed. Soil moisture is a separate entry (D4).",
+   "moon_data": "None: zero by definition",
+   "earth_data": "NASA POWER climatology (MERRA-2), parameter PRECTOTCORR",
+   "comparability": "One-sided: it says how close a site is to zero, which is the absence of a disturbing factor and not a similarity. The climate grid cell (0.5 x 0.625 deg) is much larger than a site.",
+   "site_fields": [
+    "power.precip_mm_per_year"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/nasa_context.py: POWER_PARAMS; data/sites/nasa_context.csv: precip_mm_per_year",
+   "sources": [
+    {
+     "label": "UNEP aridity index classes",
+     "url": "https://www.cbd.int/gbo1/chap-01-06.shtml"
+    },
+    {
+     "label": "NASA POWER (URL from docs/METHOD.md)",
+     "url": "https://power.larc.nasa.gov/"
+    }
+   ]
+  },
+  {
+   "id": "B3",
+   "group": "B",
+   "name": "Permafrost and ground ice",
+   "plain": "Whether the ground stays frozen all year on Earth, and where ice could stay stable in the lunar ground.",
+   "definition": "Earth: permafrost area fraction and ground temperature at 2 m depth in the pixel that holds the site centre. Moon: share of a region where water ice is stable at the surface or within 1 m, from the Diviner model.",
+   "dimension": "Water, ice, permafrost and resources",
+   "status": "context",
+   "status_note": "Shown, not scored. The Earth side was sampled for 118 sites (data/sites/partner_context.csv); 56 of them have a permafrost value, all north of 32.9 N (the product is an Arctic grid). The mechanisms differ: frozen ground under an atmosphere on Earth, sublimation in vacuum on the Moon.",
+   "moon_data": "LRO Diviner Polar Resource Product (NASA PDS)",
+   "earth_data": "ESA CCI Permafrost from the ESA Open Science Catalog (year 2019, about 927 m grid)",
+   "comparability": "Ordinal at best: two different physical quantities that both describe frozen ground.",
+   "site_fields": [
+    "partner.permafrost_fraction_pct",
+    "partner.ground_temp_c"
+   ],
+   "moon_fields": [
+    "instruments.diviner_prp_south.share_area_ice_stable_at_surface",
+    "headline.ice_1m",
+    "instruments.diviner_prp_south"
+   ],
+   "evidence": "pipeline/partner_context.py: PERMAFROST_ZARR; validation/pds_products.py (part diviner); data/sites/partner_context.csv; data/moon/instruments/diviner_regions.json",
+   "sources": [
+    {
+     "label": "ODE, Diviner Polar Resource Product (PRP)",
+     "url": "https://ode.rsl.wustl.edu/moon/pagehelp/Content/Missions_Instruments/LRO/DIVINER/PRP.htm"
+    },
+    {
+     "label": "ESA Permafrost CCI",
+     "url": "https://climate.esa.int/de/projekte/permafrost/data"
+    },
+    {
+     "label": "ESA Open Science Catalog (URL from docs/METHOD.md)",
+     "url": "https://opensciencedata.esa.int/"
+    },
+    {
+     "label": "LRO Diviner in the NASA Planetary Data System (URL from docs/METHOD.md)",
+     "url": "https://pds-geosciences.wustl.edu/missions/lro/diviner.htm"
+    }
+   ]
+  },
+  {
+   "id": "B4",
+   "group": "B",
+   "name": "Temperature level",
+   "plain": "How cold the surface is. The analogy breaks here: no place on Earth is as cold as the lunar polar regions.",
+   "definition": "Earth: climatological skin temperature (mean, minimum, maximum) and satellite land-surface temperature by day and night at the site centre. Moon: annual mean temperature at 2 cm depth, annual maximum surface temperature and summer maximum brightness temperature per region.",
+   "dimension": "Temperature, illumination and environmental extremes",
+   "status": "context",
+   "status_note": "Measured on both bodies, shown as the place where the analogy breaks, never scored. The coldest monthly night mean among the 60 top sites is 235 K; the lunar regions have annual means of 51 to 141 K (docs/METHOD.md). Climate values exist for the top 150 sites, satellite temperatures for the 118 sites of data/sites/partner_context.csv.",
+   "moon_data": "LRO Diviner Polar Resource Product and Polar Cumulative Product (NASA PDS)",
+   "earth_data": "NASA POWER (MERRA-2) skin temperature; JAXA GCOM-C SGLI land-surface temperature; NASA MODIS MOD11C1 land-surface temperature",
+   "comparability": "Not comparable as a match: the catalogue gives about 175 K for the coldest surface on Earth against a 110 K threshold for lunar water-ice cold traps. Satellite surface temperature exists for clear sky only and its pixels (2.6 to about 11 km) are larger than most sites.",
+   "site_fields": [
+    "power.ts_mean_c",
+    "power.ts_min_c",
+    "power.ts_max_c",
+    "power.ts_mean_k",
+    "partner.jaxa_sgli",
+    "partner.nasa_modis"
+   ],
+   "moon_fields": [
+    "headline.temp_avg_k",
+    "headline.temp_max_k",
+    "instruments.diviner_prp_south.temp_avg_K",
+    "instruments.diviner_prp_south.temp_max_K",
+    "instruments.diviner_pcp_summer"
+   ],
+   "evidence": "pipeline/nasa_context.py; pipeline/partner_context.py: LAYERS; pipeline/lunar_products.py; validation/pds_products.py; docs/sources/j24.md",
+   "sources": [
+    {
+     "label": "ODE, Diviner Polar Cumulative Product (PCP)",
+     "url": "https://ode.rsl.wustl.edu/moon/pagehelp/Content/Missions_Instruments/LRO/DIVINER/PCP.htm"
+    },
+    {
+     "label": "ODE, Diviner Polar Resource Product (PRP)",
+     "url": "https://ode.rsl.wustl.edu/moon/pagehelp/Content/Missions_Instruments/LRO/DIVINER/PRP.htm"
+    },
+    {
+     "label": "AGU press release, coldest place on Earth (Scambos et al. 2018)",
+     "url": "https://news.agu.org/press-release/coldest-place-on-earth-is-colder-than-scientists-thought/"
+    },
+    {
+     "label": "NASA POWER (URL from docs/METHOD.md)",
+     "url": "https://power.larc.nasa.gov/"
+    },
+    {
+     "label": "JAXA G-Portal products (URL from docs/METHOD.md)",
+     "url": "https://gportal.jaxa.jp/"
+    },
+    {
+     "label": "LRO Diviner in the NASA Planetary Data System (URL from docs/METHOD.md)",
+     "url": "https://pds-geosciences.wustl.edu/missions/lro/diviner.htm"
+    }
+   ]
+  },
+  {
+   "id": "B5",
+   "group": "B",
+   "name": "Decimetre-scale roughness from radar",
+   "plain": "How rough or blocky the surface is at the size of a boot, seen by radar.",
+   "definition": "Circular polarisation ratio (CPR) of the radar echo: Mini-RF S band on the Moon, a matching radar measurement on Earth.",
+   "dimension": "Geology, mineralogy and surface materials",
+   "status": "context",
+   "status_note": "The lunar half is the Mini-RF circular polarisation ratio and total power per lunar region. On Earth, RADARSAT-1 C-band HH scenes (CSA, job J27) were searched for 37 sites: 9 have a saved 40 km window and 28 have none (25 no scene over the centre, 3 no usable window; data/sites/radarsat1_index.csv · status). The Earth values are uncalibrated digital numbers shown as texture only; no Earth circular polarisation ratio exists in this project (CSA RCM compact polarimetry: 'looked at, not used', data/sources.csv · csa_rcm). Nothing is scored or compared numerically.",
+   "moon_data": "LRO Mini-RF S-band south-polar mosaics (NASA PDS)",
+   "earth_data": "CSA RADARSAT-1 archive (open data, C band, HH), uncalibrated DN quicklooks",
+   "comparability": "No numerical comparison: C-band linear polarisation against S-band circular polarisation ratio. The catalogue notes that a true CPR on Earth needs quad- or compact-polarisation scenes.",
+   "site_fields": [
+    "radar"
+   ],
+   "moon_fields": [
+    "headline.cpr",
+    "instruments.minirf_cpr_south",
+    "instruments.minirf_s1_south"
+   ],
+   "evidence": "pipeline/radarsat1.py; data/sites/radarsat1_index.csv; data/sites/radarsat1/*.png; data/moon/instruments/minirf_regions.json; data/sources.csv: rows csa_radarsat1 (used), csa_rcm, minirf",
+   "sources": [
+    {
+     "label": "ODE, Mini-RF polar mosaics",
+     "url": "https://ode.rsl.wustl.edu/moon/pagehelp/Content/Missions_Instruments/LRO/Mini-RF/MOSCDR.htm"
+    }
+   ]
+  },
+  {
+   "id": "B6",
+   "group": "B",
+   "name": "Rock abundance and thermal inertia",
+   "plain": "How many boulders lie on the surface and how fast the ground heats and cools.",
+   "definition": "Rock abundance and thermal inertia from Diviner on the Moon, apparent thermal inertia from surface temperature and albedo on Earth.",
+   "dimension": "Geology, mineralogy and surface materials",
+   "status": "not_built",
+   "status_note": "Looked at and not used: the lunar maps end at about 60 to 70 degrees of latitude and miss the pole, so there is nothing to compare with for the south-pole regions.",
+   "moon_data": "LRO Diviner rock abundance and thermal inertia maps (no polar coverage)",
+   "earth_data": "None",
+   "comparability": "Cannot be scored against the pole.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "data/sources.csv: row diviner_rock_ti, status 'looked at, not used'",
+   "sources": [
+    {
+     "label": "ODE, Diviner GDR level 3",
+     "url": "https://ode.rsl.wustl.edu/moon/pagehelp/Content/Missions_Instruments/LRO/DIVINER/GDR_L3.htm"
+    }
+   ]
+  },
+  {
+   "id": "B7",
+   "group": "B",
+   "name": "Ice evidence, regolith mechanics and albedo",
+   "plain": "Signs of ice, how the soil behaves under load, and how bright the surface is.",
+   "definition": "Indirect lunar ice indicators (neutron counts, far-ultraviolet albedo), soil mechanics from Apollo samples, and surface albedo; the catalogue rates all of them as description only.",
+   "dimension": "Water, ice, permafrost and resources",
+   "status": "not_built",
+   "status_note": "Only the lunar half exists: epithermal neutron counts (LEND), far-ultraviolet albedo (LAMP) and the brightness of the LROC wide-angle mosaic are summarised per lunar region and shown. Nothing comparable is measured for the Earth sites. Soil mechanics appears only as a fixed line in each site's list of breaks; the snow and ice share of a site belongs to the mask (A0); modelled ice stability is under B3.",
+   "moon_data": "LRO LEND, LAMP and LROC WAC products (NASA PDS)",
+   "earth_data": "None",
+   "comparability": "No comparison is made. The lunar indicators are indirect and do not agree with each other in the literature the catalogue cites.",
+   "site_fields": [],
+   "moon_fields": [
+    "headline.neutrons",
+    "headline.uv_albedo",
+    "instruments.lend_ald_south",
+    "instruments.lamp_lya_albedo",
+    "instruments.lamp_off_albedo",
+    "instruments.lroc_wac_south_summer"
+   ],
+   "evidence": "pipeline/lunar_products.py; data/moon/instruments/lend_regions.json, lamp_regions.json, lroc_regions.json; pipeline/sites.py: FIXED_BREAKS",
+   "sources": [
+    {
+     "label": "LRO in the NASA Planetary Data System (URL from docs/METHOD.md)",
+     "url": "https://pds-geosciences.wustl.edu/missions/lro/"
+    }
+   ]
+  },
+  {
+   "id": "C1",
+   "group": "C",
+   "name": "Gravity of one sixth of Earth's",
+   "plain": "Everything weighs six times less on the Moon; no natural place on Earth changes that.",
+   "definition": "Surface gravity: 1 g on Earth against 1/6 g on the Moon.",
+   "dimension": "Landing, mobility, navigation, operations and construction",
+   "status": "not_reproducible",
+   "status_note": "Stated as a fixed line in every site's list of breaks. Nothing is measured.",
+   "moon_data": "None",
+   "earth_data": "None",
+   "comparability": "Cannot be reproduced at a natural site on Earth.",
+   "site_fields": [
+    "breaks"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/sites.py: FIXED_BREAKS, breaks_for (the text is written into every site record); catalogue, Group C paragraph",
+   "sources": [
+    {
+     "label": "Foucher et al. 2021, Planet. Space Sci. 197",
+     "url": "https://doi.org/10.1016/j.pss.2021.105162"
+    }
+   ]
+  },
+  {
+   "id": "C2",
+   "group": "C",
+   "name": "Vacuum",
+   "plain": "The Moon has no air and no weather.",
+   "definition": "Ambient pressure: practically zero on the Moon; on Earth it depends on elevation.",
+   "dimension": "Temperature, illumination and environmental extremes",
+   "status": "not_reproducible",
+   "status_note": "Stated in every site's list of breaks, with the site's ambient pressure computed from its median elevation with the standard-atmosphere formula. The pressure is a computed value, not a measurement.",
+   "moon_data": "None",
+   "earth_data": "Site median elevation from the Copernicus DEM GLO-30",
+   "comparability": "Cannot be reproduced at a natural site on Earth.",
+   "site_fields": [
+    "breaks",
+    "elev_med"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/sites.py: FIXED_BREAKS, pressure_hpa, breaks_for",
+   "sources": [
+    {
+     "label": "Foucher et al. 2021, Planet. Space Sci. 197",
+     "url": "https://doi.org/10.1016/j.pss.2021.105162"
+    }
+   ]
+  },
+  {
+   "id": "C3",
+   "group": "C",
+   "name": "Radiation",
+   "plain": "The lunar surface is exposed to solar and cosmic radiation that Earth's atmosphere and magnetic field stop.",
+   "definition": "Ionising radiation dose at the surface.",
+   "dimension": "Temperature, illumination and environmental extremes",
+   "status": "not_reproducible",
+   "status_note": "Stated as a fixed line in every site's list of breaks ('No lunar radiation or thermal extremes'). Nothing is measured.",
+   "moon_data": "None",
+   "earth_data": "None",
+   "comparability": "Cannot be reproduced at a natural site on Earth.",
+   "site_fields": [
+    "breaks"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/sites.py: FIXED_BREAKS, breaks_for (the text is written into every site record); catalogue, Group C paragraph",
+   "sources": [
+    {
+     "label": "Foucher et al. 2021, Planet. Space Sci. 197",
+     "url": "https://doi.org/10.1016/j.pss.2021.105162"
+    }
+   ]
+  },
+  {
+   "id": "C4",
+   "group": "C",
+   "name": "Electrostatic charging and sharp-edged grains",
+   "plain": "Lunar dust is electrically charged and its grains are sharp, because nothing on the Moon rounds them.",
+   "definition": "Electrostatic behaviour of the dust and angularity of regolith grains.",
+   "dimension": "Dust, wind, erosion and surface processes",
+   "status": "not_reproducible",
+   "status_note": "Not measured. The nearest text in the site records is the fixed line 'Soil and rock mechanics differ from lunar regolith'.",
+   "moon_data": "None",
+   "earth_data": "None",
+   "comparability": "Cannot be reproduced at a natural site on Earth.",
+   "site_fields": [
+    "breaks"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/sites.py: FIXED_BREAKS, breaks_for (the text is written into every site record); catalogue, Group C paragraph",
+   "sources": [
+    {
+     "label": "Foucher et al. 2021, Planet. Space Sci. 197",
+     "url": "https://doi.org/10.1016/j.pss.2021.105162"
+    }
+   ]
+  },
+  {
+   "id": "C5",
+   "group": "C",
+   "name": "Extreme thermal cycles",
+   "plain": "The lunar surface swings between very hot and very cold far beyond any day and night on Earth.",
+   "definition": "Amplitude of the surface temperature cycle.",
+   "dimension": "Temperature, illumination and environmental extremes",
+   "status": "not_reproducible",
+   "status_note": "Stated as a fixed line in every site's list of breaks ('No lunar radiation or thermal extremes'). The measured temperatures of both bodies are under B4; the day minus night difference of the satellite surface temperature is part of those site values.",
+   "moon_data": "None (see B4)",
+   "earth_data": "None (see B4)",
+   "comparability": "Cannot be reproduced at a natural site on Earth.",
+   "site_fields": [
+    "breaks"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/sites.py: FIXED_BREAKS, breaks_for (the text is written into every site record); catalogue, Group C paragraph",
+   "sources": [
+    {
+     "label": "Foucher et al. 2021, Planet. Space Sci. 197",
+     "url": "https://doi.org/10.1016/j.pss.2021.105162"
+    }
+   ]
+  },
+  {
+   "id": "D1",
+   "group": "D",
+   "name": "Dune-field flag",
+   "plain": "Sand seas can have lunar-like slopes and hollows; a terrain rule marks such sites and moves them to the end of the ranking.",
+   "definition": "A cell is flagged when its relief divided by its 200 m roughness is below the 5th percentile of the same ratio over the lunar cells of the target; a site is flagged when at least half of its cells are.",
+   "dimension": "Dust, wind, erosion and surface processes",
+   "status": "context",
+   "status_note": "Not part of the similarity score and not a mask: flagged sites are kept and ranked after all unflagged sites. The threshold comes from the lunar cells, not from Earth data. 521 of the 3,175 sites carry the flag (app/data/meta.json · counts.sites_flagged_total). It is a terrain rule: a check against surface temperature and soil moisture did not confirm that it marks dry sand (docs/sources/j26.md; data/validation/partner_checks.json · comparisons.dune_flag), and it also flags N75W090-01 on Devon Island, a known analog.",
+   "moon_data": "Relief and 200 m roughness of the lunar target cells (data/moon/cells.parquet)",
+   "earth_data": "Relief and 200 m roughness of the Earth cells (Copernicus DEM GLO-30)",
+   "comparability": "Same two quantities on both bodies; by construction 5% of the target's own lunar cells would be flagged.",
+   "site_fields": [
+    "dune_like",
+    "artefact_share",
+    "artefact_reason"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/sites.py: ARTEFACT_QUANTILE, ARTEFACT_SITE_SHARE, artefact_threshold, artefact_flags, rank_sites; validation/partner_checks.py",
+   "sources": []
+  },
+  {
+   "id": "D2",
+   "group": "D",
+   "name": "Similarity score and best 15 km window",
+   "plain": "How the eight terrain numbers become one score per cell, and how cells become a ranked site.",
+   "definition": "Per cell: Mahalanobis distance of the eight transformed features to the lunar target, turned into p_all, the share of the target's own cells that lie farther from its centre; a candidate cell has p_all of at least 0.10 and passes the mask. Touching candidate cells (at least 4) form a site. Sites are ranked by the largest sum of p_all times cell area inside any 15 x 15 km window, the size of a lunar candidate region.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "scored",
+   "status_note": "This is the aggregation of A1, A3 and A6, not a further terrain measurement. The site's 'score' is the median p_all of its cells; score_amp and score_dep are the same for the slope and roughness group and for the depression group, for display only. The best-window key replaced total similarity-weighted area because total area rewarded sheer size (docs/METHOD.md). Exact site ranks move with the grid: 6 of the top 10 survive a half-cell shift on the older 37-tile pilot subset with the old polar target (data/validation/effectiveness.json · stability.legacy_grid.variants.0.top10_overlap = 0.6). Rank uncertainty per site (issue #18) is not produced yet.",
+   "moon_data": "Lunar reference populations in data/moon/reference.json",
+   "earth_data": "Scored Earth cells",
+   "comparability": "The depression features are zero-inflated, so the Gaussian distance is an approximation (pipeline/score.py).",
+   "site_fields": [
+    "score",
+    "score_amp",
+    "score_dep",
+    "best_window_km2",
+    "window",
+    "weighted_area_km2",
+    "area_km2",
+    "n_cells",
+    "rank"
+   ],
+   "moon_fields": [
+    "n_cells"
+   ],
+   "evidence": "pipeline/score.py: score_cells, P_MIN, candidate_mask; pipeline/sites.py: MIN_CELLS, BASE_REGION_KM, best_window, DEFAULT_RANK_KEY, rank_sites",
+   "sources": [
+    {
+     "label": "NASA, 13 candidate landing regions (19 Aug 2022)",
+     "url": "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/"
+    }
+   ]
+  },
+  {
+   "id": "D3",
+   "group": "D",
+   "name": "Lunar targets per region",
+   "plain": "A site is compared with seven named candidate base regions, with all seven together and with a wide window around the pole.",
+   "definition": "Reference populations of lunar cells: seven 30 x 30 km windows (Connecting Ridge, peak near Shackleton, Nobile Rim 2, Malapert massif, Mons Mouton, de Gerlache, Haworth), the seven pooled (1,575 cells, the default target) and a 160 x 160 km polar window (6,889 cells).",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "scored",
+   "status_note": "The ranking uses the pooled target. Every site also carries its score against each single region and the polar window, and the name of the region it matches best. The pooled target is a choice of definition: the validation does not separate it from the polar window (docs/METHOD.md). The windows are centred on gazetteer feature centres or on points from the cited papers, not on official region outlines.",
+   "moon_data": "LOLA south-pole elevation model (NASA PGDA product 90); region centres from the USGS Gazetteer of Planetary Nomenclature and the landing-site literature in data/sources.csv",
+   "earth_data": "Not applicable",
+   "comparability": "The named regions are steeper than the polar average (median slope at 240 m 7.0 deg against 5.1 deg, docs/METHOD.md), so the choice of target changes which Earth sites match.",
+   "site_fields": [
+    "region_scores",
+    "best_region"
+   ],
+   "moon_fields": [
+    "id",
+    "kind",
+    "is_default",
+    "members",
+    "window_km",
+    "coord_source",
+    "coord_status"
+   ],
+   "evidence": "pipeline/moon_reference.py; pipeline/score.py: DEFAULT_TARGET, NAMED_REGIONS, score_all_regions; data/moon/reference.json: regions, pooled_regions",
+   "sources": [
+    {
+     "label": "NASA PGDA product 90, LOLA south-pole products (Barker et al. 2023)",
+     "url": "https://pgda.gsfc.nasa.gov/products/90"
+    },
+    {
+     "label": "USGS Gazetteer of Planetary Nomenclature (URL from docs/METHOD.md)",
+     "url": "https://planetarynames.wr.usgs.gov/"
+    },
+    {
+     "label": "Pena-Asensio et al. 2024, multi-criteria ranking of south-pole points",
+     "url": "https://arxiv.org/abs/2406.19863"
+    },
+    {
+     "label": "NASA, 13 candidate landing regions (19 Aug 2022)",
+     "url": "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/"
+    }
+   ]
+  },
+  {
+   "id": "D4",
+   "group": "D",
+   "name": "Soil moisture",
+   "plain": "How wet the top of the soil is; lunar regolith is dry.",
+   "definition": "Soil moisture content from the JAXA AMSR2 monthly normals (2012 to 2021) in the pixel that holds the site centre.",
+   "dimension": "Water, ice, permafrost and resources",
+   "status": "context",
+   "status_note": "Shown for the sites that have a value, not scored. It was also used to test the dune-field flag (D1), without a confirming result.",
+   "moon_data": "None: no liquid water",
+   "earth_data": "JAXA GCOM-W AMSR2 level 3 soil moisture content (G-Portal product, read through the JAXA Earth API)",
+   "comparability": "One-sided, as for dryness (B2). The pixel is far larger than most sites and the value is missing for many polar sites.",
+   "site_fields": [
+    "partner.soil_moisture_pct",
+    "partner.soil_samples"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/partner_context.py: LAYERS (amsr2_smc_day, amsr2_smc_night); data/sites/partner_context.csv: jaxa_amsr2_soil_moisture_pct",
+   "sources": [
+    {
+     "label": "JAXA G-Portal products (URL from docs/METHOD.md)",
+     "url": "https://gportal.jaxa.jp/"
+    }
+   ]
+  },
+  {
+   "id": "D5",
+   "group": "D",
+   "name": "Wind",
+   "plain": "How windy the site is; the Moon has no wind.",
+   "definition": "Climatological mean wind speed at 10 m above ground from NASA POWER (MERRA-2) at the site centre.",
+   "dimension": "Dust, wind, erosion and surface processes",
+   "status": "context",
+   "status_note": "Shown for the top 150 sites, not scored. It describes a process (wind erosion and transport) that the Moon lacks.",
+   "moon_data": "None: no atmosphere",
+   "earth_data": "NASA POWER climatology (MERRA-2), parameter WS10M",
+   "comparability": "One-sided: a difference from the Moon, not a similarity. The climate grid cell is much larger than a site.",
+   "site_fields": [
+    "power.ws10m_m_s"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/nasa_context.py: POWER_PARAMS; data/sites/nasa_context.csv: ws10m_m_s",
+   "sources": [
+    {
+     "label": "NASA POWER (URL from docs/METHOD.md)",
+     "url": "https://power.larc.nasa.gov/"
+    }
+   ]
+  },
+  {
+   "id": "D6",
+   "group": "D",
+   "name": "Satellite image and review of the top sites",
+   "plain": "A true-colour satellite picture of the site and a short written description of what is there.",
+   "definition": "NASA Worldview snapshot of a box of about 0.6 x 0.6 degrees around the site, and for the top 30 a review that says what the landform is and whether it looks like an artefact.",
+   "dimension": "Geology, mineralogy and surface materials",
+   "status": "context",
+   "status_note": "Images exist for the top 60 sites and the review for the top 30. The review verdicts come from an SI model reading the images; a person had not checked them when docs/HANDOFF.md was written. Not scored.",
+   "moon_data": "Hillshade of each lunar region from the LOLA elevation model; LROC wide-angle mosaic",
+   "earth_data": "NASA Worldview Snapshots / GIBS corrected-reflectance imagery",
+   "comparability": "Visual context only; no quantity is compared.",
+   "site_fields": [
+    "image",
+    "image_date",
+    "image_layer",
+    "image_bbox",
+    "review"
+   ],
+   "moon_fields": [
+    "hillshade",
+    "quicklook"
+   ],
+   "evidence": "pipeline/nasa_context.py; pipeline/review.py; data/sites/top30_review.csv; data/sites/images/",
+   "sources": [
+    {
+     "label": "NASA Worldview / GIBS (URL from docs/METHOD.md)",
+     "url": "https://worldview.earthdata.nasa.gov/"
+    }
+   ]
+  },
+  {
+   "id": "D7",
+   "group": "D",
+   "name": "Lunar illumination, permanent shadow and Earth visibility",
+   "plain": "How often the Sun and the Earth are visible from a lunar region and how much of it never sees the Sun.",
+   "definition": "Per lunar region: mean share of time any part of the solar disc is visible, the same for the Earth disc (direct radio link), and the share of the area in permanent shadow, read from NASA's maps.",
+   "dimension": "Temperature, illumination and environmental extremes",
+   "status": "context",
+   "status_note": "Lunar side only, read from NASA products and shown on the region cards. The Earth side is one computed line in each site's list of breaks: the midsummer noon sun elevation from the site's latitude against about 1.5 deg at the lunar pole. The shadow statistic proposed in the catalogue (A9) is not built.",
+   "moon_data": "NASA PGDA product 69 (average solar and Earth visibility, 120 m); PGDA product 90 permanently shadowed regions (20 m)",
+   "earth_data": "None measured; noon sun elevation computed from latitude",
+   "comparability": "Not a comparison: no place on Earth has a sun that stays within a few degrees of the horizon all year.",
+   "site_fields": [
+    "breaks"
+   ],
+   "moon_fields": [
+    "headline.psr",
+    "headline.sun_vis",
+    "headline.earth_vis",
+    "instruments.lola_psr_20m",
+    "instruments.lola_psr_120m",
+    "instruments.lola_sun_vis_120m",
+    "instruments.lola_earth_vis_120m"
+   ],
+   "evidence": "pipeline/lunar_products.py; data/moon/instruments/lola_regions.json; pipeline/sites.py: noon_sun_deg, LUNAR_POLE_SUN_DEG",
+   "sources": [
+    {
+     "label": "NASA PGDA product 69, polar illumination (Mazarico et al. 2011)",
+     "url": "https://pgda.gsfc.nasa.gov/products/69"
+    },
+    {
+     "label": "NASA PGDA product 90, LOLA south-pole products (Barker et al. 2023)",
+     "url": "https://pgda.gsfc.nasa.gov/products/90"
+    },
+    {
+     "label": "Glaeser et al. 2018, illumination of the lunar poles",
+     "url": "https://ntrs.nasa.gov/api/citations/20170007365/downloads/20170007365.pdf"
+    }
+   ]
+  },
+  {
+   "id": "D8",
+   "group": "D",
+   "name": "Distance to known analog sites and literature check",
+   "plain": "Whether the site lies at or near a place that is already used or described as a planetary analog.",
+   "definition": "Great-circle distance from the site centre to the nearest of the catalogued known analog sites, a yes or no for lying inside that site's radius, and the verdict of a literature search for the top sites.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "context",
+   "status_note": "Shown per site, not scored. The list of known sites has a source for each row (77 rows: 19 moon, 34 both, 24 mars; data/reference/known_analogs.csv). Literature verdicts of the 200 ranked sites (data/sites/ranking.csv · novelty): 168 unchecked, 26 unreported, 4 mentioned, 2 established. 'mentioned' means an opened page names the region, not the site, and today every such page is a Mars statement (docs/NOVELTY.md section 3). The verdicts were judged by an SI model; a person has not confirmed them. No site is called a discovery.",
+   "moon_data": "Not applicable",
+   "earth_data": "data/reference/known_analogs.csv (one source per row); data/sites/novelty_check.csv",
+   "comparability": "Not a similarity measure.",
+   "site_fields": [
+    "is_known",
+    "known_match",
+    "nearest_known",
+    "nearest_known_km",
+    "nearest_known_for",
+    "nearest_lunar_known",
+    "novelty",
+    "novelty_record"
+   ],
+   "moon_fields": [],
+   "evidence": "pipeline/sites.py: load_known, add_context, load_novelty; data/reference/known_analogs.csv; docs/NOVELTY.md",
+   "sources": [
+    {
+     "label": "Lambert and Reimold 2023, terrestrial impact structures as analogs",
+     "url": "https://doi.org/10.3389/fspas.2023.1186173"
+    }
+   ]
+  },
+  {
+   "id": "D9",
+   "group": "D",
+   "name": "Recovery of known analog sites",
+   "plain": "Does the score find more lunar-like ground around places people already use as analogs than around random places?",
+   "definition": "Enrichment: the share of bare cells that are candidates inside the radius of a known analog site, divided by the same share over all scanned bare cells, compared with random circles of the same radii. Also negative-control tiles and a tile-level recovery curve.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "validation",
+   "status_note": "Enrichment around the 22 known lunar analogs (rows tagged moon or both; Mars-only rows excluded since issue #16): median 1.02 against 0.39 for matched random circles (5th to 95th percentile 0.12 to 0.91), 11 of 22 above 1, and 2.8% of 500 random runs reach our median (data/validation/enrichment.json · median_enrichment, random.median_enrichment_median, random.share_of_random_runs_with_median_at_least_ours). The typical known lunar site sits at about the scan-wide rate. At one-degree tile scale the tile-recovery AUC is 0.531 (90% interval 0.396 to 0.668), consistent with chance (effectiveness.json · recovery.auc, recovery.auc_ci90). The score finds terrain of a certain shape; it is not a detector of the sites people chose.",
+   "moon_data": "Lunar target as in D3",
+   "earth_data": "Scored Earth cells; data/reference/known_analogs.csv",
+   "comparability": "A test of the method, not a property of a site.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "validation/enrichment.py; validation/effectiveness.py; data/validation/enrichment.json; data/validation/effectiveness.json: controls, recovery",
+   "sources": [
+    {
+     "label": "Lambert and Reimold 2023, terrestrial impact structures as analogs",
+     "url": "https://doi.org/10.3389/fspas.2023.1186173"
+    }
+   ]
+  },
+  {
+   "id": "D10",
+   "group": "D",
+   "name": "Second and third elevation model",
+   "plain": "Does the result stay the same when the Earth elevation comes from a different satellite mission?",
+   "definition": "The same features and score from NASADEM with MODIS land cover on the tiles it covers, compared with Copernicus DEM and WorldCover; and the elevation features of JAXA AW3D30 on ten shared tiles.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "validation",
+   "status_note": "A rule written before the numbers existed decided which model feeds the ranking; it was not met (Spearman correlation of per-tile candidate share 0.637, 21 of the top 50 tiles shared), so Copernicus stays and NASADEM is the cross-check. Slopes and roughness from 400 m up agree; closed depressions do not; candidate cells: 33,911 with Copernicus, 2,996 with NASADEM, 2,237 in common (docs/METHOD.md). The ranking depends on the elevation model.",
+   "moon_data": "Not applicable",
+   "earth_data": "NASADEM (NASA JPL) with MODIS MCD12Q1 land cover; JAXA AW3D30 v4.1; Copernicus DEM GLO-30 with ESA WorldCover",
+   "comparability": "A test of the method, not a property of a site.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "pipeline/score.py: DEM_RULE, dem_policy_from_rule; validation/nasadem_vs_copdem.py; data/validation/nasadem_vs_copdem.json; data/validation/aw3d30_comparison.json",
+   "sources": [
+    {
+     "label": "JAXA AW3D30 v4.1 (URL from data/sources.csv)",
+     "url": "https://doi.org/10.57746/EO.01kkfx0ejw8r5ndc9bg5nt13ws"
+    },
+    {
+     "label": "NASA GIBS, MODIS MCD12Q1 land cover (URL from docs/METHOD.md)",
+     "url": "https://gibs.earthdata.nasa.gov/"
+    },
+    {
+     "label": "Copernicus DEM GLO-30 (URL from docs/METHOD.md)",
+     "url": "https://dataspace.copernicus.eu/"
+    }
+   ]
+  },
+  {
+   "id": "D11",
+   "group": "D",
+   "name": "Check of the lunar elevation grid against the archive copy",
+   "plain": "Do two NASA versions of the lunar elevation map agree?",
+   "definition": "Difference between the LOLA polar grid from the Planetary Data System (80 m) and the PGDA product 90 grid the pipeline uses, over the 160 x 160 km polar window.",
+   "dimension": "Terrain, elevation, slope, roughness and craters",
+   "status": "validation",
+   "status_note": "Median offset +0.191 m and RMS difference 1.709 m; both grids come from the same instrument (docs/VALIDATION.md).",
+   "moon_data": "LOLA gridded record LDEM_80S_80M (NASA PDS); LDEM_80S_20MPP_ADJ (NASA PGDA product 90)",
+   "earth_data": "Not applicable",
+   "comparability": "A check of the lunar input, not a property of a site.",
+   "site_fields": [],
+   "moon_fields": [],
+   "evidence": "validation/pds_products.py (part lola); data/validation/pds_lola.json: difference_pds_minus_pgda",
+   "sources": [
+    {
+     "label": "LRO in the NASA Planetary Data System (URL from docs/METHOD.md)",
+     "url": "https://pds-geosciences.wustl.edu/missions/lro/"
+    },
+    {
+     "label": "NASA PGDA product 90, LOLA south-pole products (Barker et al. 2023)",
+     "url": "https://pgda.gsfc.nasa.gov/products/90"
+    }
+   ]
+  }
+ ]
 }

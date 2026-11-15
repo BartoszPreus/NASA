@@ -18,6 +18,18 @@ FIXTURE = ROOT / "tests/fixtures/pipeline"
 EXPECTED = json.loads((FIXTURE / "expected.json").read_text(encoding="utf-8"))
 CONTEXT_TABLES = (
     "nasa_context.csv", "partner_context.csv", "images/index.csv", "top30_review.csv",
+    # J39: per-site side tables of the real run would describe other sites than the sample; header only.
+    "novelty_check.csv", "radarsat1_index.csv",
+)
+# J39 (issue #25): inputs of the app export copied as committed.
+EXPORT_INPUTS = (
+    "app/criteria.json", "data/earth/tiles/tiles_scanned.csv", "data/reference/pilot_tiles.csv",
+    "data/sites/nasa_context_summary.json", "data/sites/partner_context_summary.json",
+    "data/sites/target_comparison.csv", "data/sites/target_comparison_top_tiles.csv",
+    "data/run_log.csv", "data/catalog.csv", "data/moon/regions.geojson", "data/moon/instruments/registry.json",
+)
+EXPORT_PATTERNS = (
+    "data/validation/*.json", "data/moon/instruments/*/*.png", "docs/figures/*.png",
 )
 VALIDATION_INPUTS = (
     "effectiveness.json", "nasadem_vs_copdem.json", "pds_lola.json", "t1_reproduce_nasa.json",
@@ -75,6 +87,18 @@ def pipeline_run(tmp_path_factory):
         *(f"data/validation/{name}" for name in VALIDATION_INPUTS),
     ):
         copy_input(repo, path)
+    for pattern in EXPORT_PATTERNS:
+        for path in sorted(ROOT.glob(pattern)):
+            if path.name != "enrichment.json":  # written by the validate-enrichment stage below
+                copy_input(repo, path.relative_to(ROOT))
+    for path in EXPORT_INPUTS:
+        copy_input(repo, path)
+    landcover = Path("data/validation/landcover_sensitivity/sites_top100.csv")
+    with (ROOT / landcover).open(encoding="utf-8", newline="") as stream:
+        header = next(csv.reader(stream))
+    (repo / landcover).parent.mkdir(parents=True, exist_ok=True)
+    with (repo / landcover).open("w", encoding="utf-8", newline="") as stream:
+        csv.writer(stream).writerow(header)
     copy_input(repo, "data/sample/earth_cells_sample.parquet", "data/earth/cells/ci-sample.parquet")
     copy_input(repo, FIXTURE.relative_to(ROOT) / "known_analogs.csv", "data/reference/known_analogs.csv")
     for name in CONTEXT_TABLES:
@@ -165,10 +189,25 @@ def test_lunar_enrichment_excludes_mars_only_sites(pipeline_run):
     assert "Mars-only control" in {site["name"] for site in validation["mars_only_excluded"]["sites"]}
 
 
+def test_sample_export_has_the_schema_keys(pipeline_run):
+    """Every key of app/data/SCHEMA.md exists in the export built from the sample (J39, issue #25). Keys below an
+    object that the sample leaves null (no literature row, no radar row) count as present."""
+    from test_app_export import missing_keys
+
+    assert missing_keys(pipeline_run / "app/data", tolerant=True) == []
+    meta = read_json(pipeline_run / "app/data/meta.json")
+    assert "data/sites/rank_uncertainty.csv" in meta["absent"]
+    assert all(site["rank_uncertainty"] is None for site in read_json(pipeline_run / "app/data/sites.json"))
+
+
 @pytest.mark.parametrize(("missing", "output", "args", "message"), [
     ("data/raw/earth_scored_full.parquet", "data/validation/enrichment.json",
      ("-m", "pipeline.run", "validate-enrichment"), "earth_scored_full.parquet"),
     ("data/sites/ranking.csv", "app/data/sites.json", ("app/build_data.py",), "ranking.csv"),
+    ("data/sites/novelty_check.csv", "app/data/sites.json", ("app/build_data.py",),
+     "missing input file: data/sites/novelty_check.csv"),
+    ("data/validation/icesat2.json", "app/data/validation.json", ("app/build_data.py",),
+     "missing input file: data/validation/icesat2.json"),
 ])
 def test_missing_input_leaves_latest_output(pipeline_run, missing, output, args, message):
     repo = pipeline_run
