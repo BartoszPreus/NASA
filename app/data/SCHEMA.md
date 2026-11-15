@@ -30,7 +30,7 @@
 | `target_comparison.json` | 9 targets, 225 top tiles | `data/sites/target_comparison*.csv` |
 | `surface.json` | surface summaries, partner checks, cold-and-dry shortlist | `data/sites/*_summary.json`, `partner_checks.json` |
 | `method.json`, `method_sections.json` | ten steps; Two decisions, What the validation says, Limits | `docs/METHOD.md` |
-| `sources.json` | 45 sources | `data/sources.csv` |
+| `sources.json` | 46 sources | `data/sources.csv` |
 | `run_log.json`, `catalog.json` | run log, data catalogue | `data/run_log.csv`, `data/catalog.csv` |
 | `../criteria.json` (in `app/`) | comparison criteria; hand-maintained, not built | `app/CRITERIA-NOTES.md` |
 
