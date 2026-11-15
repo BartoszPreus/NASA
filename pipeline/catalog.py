@@ -621,11 +621,17 @@ def build_readme(catalog, sources):
     L += ["%d. `%s`: %s" % (i, c, d) for i, (c, d) in enumerate(REBUILD, 1)]
     L += ["", "Tests: `python -m pytest tests -q`.", "", "## data/raw/", "",
           "Git-ignored. One folder per source; every script recreates what it needs, so the folder is safe to delete "
-          "(rebuilding needs the network, about 0.3 MB/s at the venue). Folders present now:", ""]
-    if os.path.isdir(paths.RAW):
-        for d in sorted(os.listdir(paths.RAW)):
-            if os.path.isdir(os.path.join(paths.RAW, d)):
-                L.append("- `raw/%s/`%s" % (d, ": " + RAW_NOTES[d] if d in RAW_NOTES else ""))
+          "(rebuilding needs the network, about 0.3 MB/s at the venue). Folders the code uses (named in the source "
+          "registry or below; which of them exist depends on the machine and the stages run there):", ""]
+    # fixed list, not a scan of the disk, so the README is the same on every checkout (freeze review, issue #8)
+    raw = set(RAW_NOTES) | {"run_logs"}
+    for s in SOURCES:
+        for part in str(s.get("raw_folder") or "").replace(";", ",").split(","):
+            part = part.strip().replace("\\", "/")
+            if part.startswith("data/raw/"):
+                raw.add(part[len("data/raw/"):].split("/")[0])
+    for d in sorted(x for x in raw if x):
+        L.append("- `raw/%s/`%s" % (d, ": " + RAW_NOTES[d] if d in RAW_NOTES else ""))
     L += ["", "Written with SI assistance (Claude Code)."]
     return "\n".join(L) + "\n"
 

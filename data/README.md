@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 47 rows, 6.3 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 48 rows, 6.4 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -188,11 +188,31 @@ Tests: `python -m pytest tests -q`.
 
 ## data/raw/
 
-Git-ignored. One folder per source; every script recreates what it needs, so the folder is safe to delete (rebuilding needs the network, about 0.3 MB/s at the venue). Folders present now:
+Git-ignored. One folder per source; every script recreates what it needs, so the folder is safe to delete (rebuilding needs the network, about 0.3 MB/s at the venue). Folders the code uses (named in the source registry or below; which of them exist depends on the machine and the stages run there):
 
+- `raw/aw3d30_v41_optical/`
+- `raw/cells/`: per-tile Earth feature tables and scan logs
+- `raw/cloud/`: artifacts from the cloud runner
+- `raw/cloud_check/`: test artifacts of the cloud runner
+- `raw/cloud_scan/`: artifacts of the cloud Earth scan
+- `raw/copdem30/`: Copernicus GLO-30 tiles
+- `raw/cowork/`: files a person downloaded from sources that need a login
+- `raw/icesat2/`: ICESat-2 subsets (job J14)
+- `raw/j16_before/`: copies taken before the layout-v2 migration (regression check)
+- `raw/j4_check/`: intermediate checks of job J4
+- `raw/lidar/`: USGS 3DEP and GUGiK windows
+- `raw/lro/`: other LRO instrument products (job J15)
+- `raw/modis_igbp/`
+- `raw/moon/`: LOLA DEM windows (NASA PGDA)
+- `raw/nasa_context/`: NASA POWER and Worldview responses
+- `raw/nasadem/`
 - `raw/naturalearth/`: country outlines
 - `raw/partner_context/`
-- `raw/partner_context_backup_j37/`
+- `raw/pds/`: PDS Geosciences files (LOLA GDR, Diviner PRP columns)
+- `raw/radarsat1/`
 - `raw/run_logs/`
+- `raw/tiles_cache/`: tile list, WorldCover fractions and coarse slopes of the tile selection
+- `raw/validation/`: slow intermediate tables of the effectiveness tests
+- `raw/worldcover/`
 
 Written with SI assistance (Claude Code).

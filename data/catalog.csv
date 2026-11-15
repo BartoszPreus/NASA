@@ -1,5 +1,5 @@
 path,bytes,kind,rows,columns,produced_by,inputs,description
-data/run_log.csv,6259,csv,47,7,python -m pipeline.run (one row appended per stage run),,"log of the pipeline stages: command, start time, seconds, exit code, commit"
+data/run_log.csv,6379,csv,48,7,python -m pipeline.run (one row appended per stage run),,"log of the pipeline stages: command, start time, seconds, exit code, commit"
 data/earth/cells/known.parquet,3979228,parquet,71244,27,"python -m pipeline.earth_scan (job J3, tiles of the known analog sites)","copernicus_dem, esa_worldcover, data/reference/known_analogs.csv",Earth cells of the tiles holding known analog sites
 data/earth/cells/pilot.parquet,4643671,parquet,76574,27,"python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)","copernicus_dem, esa_worldcover",Earth cells of the 37 pilot tiles with features and land cover
 data/earth/cells/scan_s00of20.parquet,4552102,parquet,78924,27,"python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)","copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv","Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover)"
