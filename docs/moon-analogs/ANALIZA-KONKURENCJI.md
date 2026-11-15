@@ -1,190 +1,190 @@
-# Analiza konkurencji: wyzwanie „Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars”
+# Competitor analysis: the challenge "Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars"
 
-Stan: sobota 14.11.2026, ok. 20:45. Nasz kod: `origin/main` @ `da9fcd2` (po J18 i części J21).
-Przygotowane z pomocą SI (Claude Code). Wszystkie liczby konkurencji to **deklaracje z ich README**: kodu nie uruchamialiśmy, a liczb nie weryfikowaliśmy.
+State: Saturday 14 Nov 2026, about 20:45. Our code: `origin/main` @ `da9fcd2` (after J18 and part of J21).
+Prepared with SI assistance (Claude Code). All competitor numbers are **claims from their READMEs**: we did not run their code and did not verify the numbers. (Translated from Polish on 15 Nov 2026; historical. One remark about another team was removed before publication, see section 3.)
 
 ---
 
 ## TL;DR
 
-1. **Około 80 publicznych repozytoriów** na GitHubie dotyczy tego wyzwania. Mniej więcej 12 z nich to poważne projekty z prawdziwymi danymi, a 5 ma działającą stronę pod publicznym adresem.
-2. **Najgroźniejsi konkurenci to ShadowAstra Atlas, TwinWorlds i ODYSSEY.** Mają dopracowane aplikacje, wiele wymiarów analogii, Księżyc i Marsa oraz walidację na znanych analogach.
-3. **Nasza przewaga to rozdzielczość i rzetelność pomiaru.** Liczymy teren globalnie w komórkach około 2 km z DEM 30 m, a inni w komórkach 12–55 km. Mamy też zgodność z mapą nachyleń NASA na poziomie 0,042°, kontrole negatywne, lidar i ręczne sprawdzenie nowości w literaturze. **W README konkurentów nie znaleźliśmy porównania z oficjalnym produktem NASA.**
-4. **Nasza największa luka: nie mamy aplikacji.** Wszyscy z czołówki mają działającą stronę. Druga luka to obecny ranking: po J18 czołówkę zajmują skupiska komórek z dwóch arktycznych regionów (północna Grenlandia i, prawdopodobnie, Płaskowyż Putorana), a nie różnorodne miejsca.
-5. **Co warto przejąć**, w kolejności opłacalności:
-   - różnorodność rankingu (minimalny odstęp między miejscami),
-   - wybór zadania misji z wagami,
-   - test „na którym centylu wypada ukryty znany analog”,
-   - wymiary temperatury i niskiego Słońca liczone jako centyl w obrębie danego świata,
-   - funkcja „sprawdź swoje miasto” z Poznaniem i Moraskiem,
-   - publiczny dataset.
+1. **About 80 public repositories** on GitHub concern this challenge. Roughly 12 of them are serious projects with real data, and 5 have a working site at a public address.
+2. **The strongest competitors are ShadowAstra Atlas, TwinWorlds and ODYSSEY.** They have polished apps, many dimensions of analogy, the Moon and Mars, and validation on known analogs.
+3. **Our advantage is the resolution and rigour of the measurement.** We compute terrain globally in cells of about 2 km from a 30 m DEM, others in cells of 12-55 km. We also match the NASA slope map to 0.042°, have negative controls, lidar and a manual novelty check in the literature. **In the competitors' READMEs we found no comparison with an official NASA product.**
+4. **Our biggest gap: we have no app.** Everyone at the top has a working site. The second gap is the current ranking: after J18 the top is taken by clusters of cells from two Arctic regions (northern Greenland and, probably, the Putorana Plateau), not by diverse places.
+5. **What is worth adopting**, in order of payoff:
+   - diversity of the ranking (minimum distance between places),
+   - choice of the mission task with weights,
+   - the test "at which percentile does a hidden known analog land",
+   - temperature and low-Sun dimensions computed as a percentile within each world,
+   - a "check your town" feature with Poznań and Morasko,
+   - a public dataset.
 
 ---
 
-## 1. Jak szukaliśmy
+## 1. How we searched
 
-- Wyszukiwarka GitHuba (repozytoria i kod) po frazach: `permanent moon base`, `moon mars analog`, `terrestrial analog`, `earth analog moon`, `analog finder` oraz po adresie strony wyzwania `permanent-moon-base-locations-and-mars`. Filtr: aktualizacja po 1.10.2026.
-- Wynik to 82 repozytoria (bez naszego). Dla każdego pobraliśmy README i policzyliśmy słowa kluczowe dotyczące danych i metod: LOLA, MOLA, Diviner, Copernicus, NASADEM, MODIS, EMIT, slope, roughness, Mahalanobis, cosine, AUC, held-out, live, vercel i inne.
-- Szczegółowo przeczytaliśmy README 15 najwyżej ocenionych repozytoriów.
-- Repo `ThomasdeChillaz/moonwalk-spaceapps-2026`, które cytowaliśmy w raporcie, **zwraca dziś 404**: zostało usunięte albo stało się prywatne.
-- `faizjojin/Terra-Analog` i `shishir-kuet/terrestrial-analog-finder` mają **identyczne README**, czyli to kopia jednego projektu.
+- GitHub search (repositories and code) for the phrases `permanent moon base`, `moon mars analog`, `terrestrial analog`, `earth analog moon`, `analog finder` and for the challenge page address `permanent-moon-base-locations-and-mars`. Filter: updated after 1 Oct 2026.
+- The result is 82 repositories (excluding ours). For each we downloaded the README and counted keywords about data and methods: LOLA, MOLA, Diviner, Copernicus, NASADEM, MODIS, EMIT, slope, roughness, Mahalanobis, cosine, AUC, held-out, live, vercel and others.
+- We read the READMEs of the 15 highest-rated repositories in detail.
+- The repo `ThomasdeChillaz/moonwalk-spaceapps-2026`, which we cited in the report, **returns 404 today**: it was deleted or made private.
+- `faizjojin/Terra-Analog` and `shishir-kuet/terrestrial-analog-finder` have **identical READMEs**, i.e. copies of one project.
 
 ---
 
-## 2. Mapa konkurencji
+## 2. Map of the competition
 
-| Projekt | Siatka / skala | Dane | Metoda | Walidacja | Live |
+| Project | Grid / scale | Data | Method | Validation | Live |
 |---|---|---|---|---|---|
-| **ShadowAstra Atlas** ([repo](https://github.com/ABRUBAB/ShadowAstra_Atlas)) | 80 206 komórek 0,5° (~55 km); „best 10 km spot” | SRTM, POWER, MODIS LST/NDVI, EMIT, LOLA 118 m, MOLA 463 m, Diviner, LEND, Mini-RF, GRS, wulkany, kratery | 5 czynników (np. `0,65·overlap(histogramów nachyleń) + 0,35·zgodność deniwelacji`, odległość Wassersteina kątów Słońca) + model ML (XGBoost + LightGBM + regresja logistyczna, PU-learning na 38 miejscach), 60% wagi | Ukrywanie znanych miejsc z buforem 300 km: mediana w top 2,4%; 28 nigdy niewidzianych miejsc: top 18%; ±25% wag zostawia 9 z 10 | [tak](https://shadowastra-atlas.vercel.app) |
-| **TwinWorlds** ([repo](https://github.com/TayyabXtreme/Twin_World_Nasa_Space_APP_Challenge_2026)) | 354 342 komórek lądu, 16 celów | MODIS LST/NDVI/albedo, AW3D30 (JAXA), LOLA, MOLA, Diviner, TES, Odyssey, Sentinel-1, Mini-RF vs RCM | 7 wymiarów, ważona średnia podobieństw; temperatura, inercja i lód jako **centyl w obrębie świata** („tak zimno jak na Ziemi, jak Shackleton na Księżycu”) | ML: PCA + k-means (ARI 0,86); wyuczone wagi **nie pobiły** wag ręcznych (recall@5%: 17% wobec 22%) | [tak](https://twinworld-topaz.vercel.app) |
-| **ODYSSEY** ([repo](https://github.com/MahmoudAdelbghany/ODYSSEY)) | 39 ręcznie wybranych miejsc, 31 wymiarów | literatura + pomiary, agent LLM z 19 narzędziami | Od eksperymentu, a nie od planety: opis misji → eksperymenty → wymagania → ranking per eksperyment → luki → proponowane interwencje (komora próżniowa, odciążanie grawitacji) → plan kampanii | Weryfikacja cytatów, dwa poziomy: „screening” i „suitability” (np. 92 → 76) | tak (link w README) |
-| **Analogs (Oleksiiska)** ([repo](https://github.com/Oleksiiska/NASA_Space_Apps_Challenge_moon_mars_analogs)) | 88 883 komórek 0,5°, 12 celów, 7 zadań, 46 kryteriów | teren co 1 km, zimno, lód, goły grunt, niskie Słońce, minerały, wulkany, kratery | Wagi i twarde filtry per zadanie (`tasks.yaml`); **10 najlepszych regionów oddalonych od siebie o ≥600 km** | Mediana centyla znanych analogów 0,77; ±25% wag zostawia 75–99% top 5% | strona opublikowana |
-| **Planetary Analog Finder / Endurance** ([repo](https://github.com/OwenSolis03/Space_Apps_2026_Analogos_Luna_Marte)) | łaty 32 km, 64×64 px po 500 m; ~45 tys. kandydatów | GLO-90, MODIS NDVI/LST, LOLA, LROC WAC, Diviner PRP, MOLA, THEMIS | 7 wymiarów RBF, 5 profili misji, **różnorodność 150 km**; poniżej 60% dostępnych wag cel nie jest rankowany | odległość do drogi i lotniska; `KNOWN_ANALOG` / `NEW_CANDIDATE` | nie (prototyp) |
-| **EarthTwin / PLANEX** ([repo](https://github.com/es-ratt/earthtwin)) | lista miejsc | LOLA, MOLA, NASADEM, GLO-30, MODIS, Diviner | ta sama zmienna, w tych samych jednostkach i na tej samej siatce; misje Artemis IV i Mars | część danych oznaczona jako DEMO | [tak](https://es-ratt.github.io/earthtwin/web/) |
-| **SNSX SPACE** ([repo](https://github.com/sahusatya2008/moon-mars-earth-analogs)) | okno 40 km po 500 m, na żądanie dla wybranego obszaru | LOLA 128 ppd, MOLA, GLO-30, AWS Terrain Tiles | screening → doprecyzowanie na GLO-30 → MCDA; niezgodność metod obniża pewność | testy, raporty | lokalnie |
-| **Terra-Analog / terrestrial-analog-finder** ([repo](https://github.com/shishir-kuet/terrestrial-analog-finder)) | okna 12×12 km na wspólnej siatce 30 m; 558 okien | 3 DEM COG, ECOSTRESS, Diviner | 5 cech skalarnych + rozkład nachyleń; warstwa termiczna ma domyślnie wagę 0 | wykluczenia są podane z powodem | lokalnie |
-| **Planetary Analog Explorer (ytp-haha-py)** ([repo](https://github.com/ytp-haha-py/2026-NASA-Hackathon)) | indeksowany podzbiór + nowy obszar na żądanie | LOLA, GLO-30, WorldCover | ranking okien Ziemi według wektora celu, z jawnym pokryciem | „najlepsze w zindeksowanym podzbiorze” | lokalnie |
-| **Analog Finder (PuneetKumar)** ([repo](https://github.com/PuneetKumar1790/Analog-Finder)) | ~500 tys. komórek ~10 km | MOLA, LOLA, ETOPO 2022, WorldClim | z-score + cosinus + Mahalanobis, zmiana wag w przeglądarce w <2 ms | 6 znanych analogów | [tak](https://analog-finder-amber.vercel.app/) |
-| **TAVME** ([repo](https://github.com/pr1hm/TAVME--Terrestrial-Analog-Vector-Matching-Engine)) | 63 kafle | GLO-30 przez Planetary Computer, embeddingi modelu bazowego na GPU | ważony cosinus cech fizycznych i embeddingów, opis misji generowany przez LLM (Groq) | 15 znanych analogów | — |
-| **ATLAS (abdulhayykhan)** ([repo](https://github.com/abdulhayykhan/ATLAS)) | 14 „nowych” miejsc × 4 bazy | LOLA LDEM 80 m, LDSM, LDRM (oba bieguny), POWER, SoilGrids | profile i radar, klastry reżimów | — | [tak](https://atlas-ten-tan.vercel.app) |
+| **ShadowAstra Atlas** ([repo](https://github.com/ABRUBAB/ShadowAstra_Atlas)) | 80,206 cells of 0.5° (~55 km); "best 10 km spot" | SRTM, POWER, MODIS LST/NDVI, EMIT, LOLA 118 m, MOLA 463 m, Diviner, LEND, Mini-RF, GRS, volcanoes, craters | 5 factors (e.g. `0.65·overlap(slope histograms) + 0.35·relief agreement`, Wasserstein distance of Sun angles) + an ML model (XGBoost + LightGBM + logistic regression, PU learning on 38 sites), 60% of the weight | Hiding known sites with a 300 km buffer: median in the top 2.4%; 28 never-seen sites: top 18%; ±25% weights keep 9 of 10 | [yes](https://shadowastra-atlas.vercel.app) |
+| **TwinWorlds** ([repo](https://github.com/TayyabXtreme/Twin_World_Nasa_Space_APP_Challenge_2026)) | 354,342 land cells, 16 targets | MODIS LST/NDVI/albedo, AW3D30 (JAXA), LOLA, MOLA, Diviner, TES, Odyssey, Sentinel-1, Mini-RF vs RCM | 7 dimensions, weighted mean of similarities; temperature, inertia and ice as a **percentile within the world** ("as cold for Earth as Shackleton is for the Moon") | ML: PCA + k-means (ARI 0.86); learned weights **did not beat** hand weights (recall@5%: 17% vs 22%) | [yes](https://twinworld-topaz.vercel.app) |
+| **ODYSSEY** ([repo](https://github.com/MahmoudAdelbghany/ODYSSEY)) | 39 hand-picked sites, 31 dimensions | literature + measurements, an LLM agent with 19 tools | From the experiment, not from the planet: mission description → experiments → requirements → ranking per experiment → gaps → proposed interventions (vacuum chamber, gravity offloading) → campaign plan | Citation checks, two levels: "screening" and "suitability" (e.g. 92 → 76) | yes (link in README) |
+| **Analogs (Oleksiiska)** ([repo](https://github.com/Oleksiiska/NASA_Space_Apps_Challenge_moon_mars_analogs)) | 88,883 cells of 0.5°, 12 targets, 7 tasks, 46 criteria | terrain every 1 km, cold, ice, bare ground, low Sun, minerals, volcanoes, craters | Weights and hard filters per task (`tasks.yaml`); **10 best regions at least 600 km apart** | Median percentile of known analogs 0.77; ±25% weights keep 75-99% of the top 5% | site published |
+| **Planetary Analog Finder / Endurance** ([repo](https://github.com/OwenSolis03/Space_Apps_2026_Analogos_Luna_Marte)) | 32 km patches, 64×64 px of 500 m; ~45 thousand candidates | GLO-90, MODIS NDVI/LST, LOLA, LROC WAC, Diviner PRP, MOLA, THEMIS | 7 RBF dimensions, 5 mission profiles, **150 km diversity**; below 60% of available weights a target is not ranked | distance to road and airport; `KNOWN_ANALOG` / `NEW_CANDIDATE` | no (prototype) |
+| **EarthTwin / PLANEX** ([repo](https://github.com/es-ratt/earthtwin)) | list of sites | LOLA, MOLA, NASADEM, GLO-30, MODIS, Diviner | the same variable, in the same units and on the same grid; Artemis IV and Mars missions | part of the data marked DEMO | [yes](https://es-ratt.github.io/earthtwin/web/) |
+| **SNSX SPACE** ([repo](https://github.com/sahusatya2008/moon-mars-earth-analogs)) | 40 km window at 500 m, on demand for a chosen area | LOLA 128 ppd, MOLA, GLO-30, AWS Terrain Tiles | screening → refinement on GLO-30 → MCDA; disagreement between methods lowers confidence | tests, reports | locally |
+| **Terra-Analog / terrestrial-analog-finder** ([repo](https://github.com/shishir-kuet/terrestrial-analog-finder)) | 12×12 km windows on a common 30 m grid; 558 windows | 3 DEM COGs, ECOSTRESS, Diviner | 5 scalar features + slope distribution; the thermal layer has weight 0 by default | exclusions are given with a reason | locally |
+| **Planetary Analog Explorer (ytp-haha-py)** ([repo](https://github.com/ytp-haha-py/2026-NASA-Hackathon)) | indexed subset + new area on demand | LOLA, GLO-30, WorldCover | ranking of Earth windows by the target vector, with explicit coverage | "best in the indexed subset" | locally |
+| **Analog Finder (PuneetKumar)** ([repo](https://github.com/PuneetKumar1790/Analog-Finder)) | ~500 thousand cells of ~10 km | MOLA, LOLA, ETOPO 2022, WorldClim | z-score + cosine + Mahalanobis, weights changed in the browser in <2 ms | 6 known analogs | [yes](https://analog-finder-amber.vercel.app/) |
+| **TAVME** ([repo](https://github.com/pr1hm/TAVME--Terrestrial-Analog-Vector-Matching-Engine)) | 63 tiles | GLO-30 through Planetary Computer, embeddings of a foundation model on GPU | weighted cosine of physical features and embeddings, mission description generated by an LLM (Groq) | 15 known analogs | - |
+| **ATLAS (abdulhayykhan)** ([repo](https://github.com/abdulhayykhan/ATLAS)) | 14 "new" sites × 4 bases | LOLA LDEM 80 m, LDSM, LDRM (both poles), POWER, SoilGrids | profiles and radar, regime clusters | - | [yes](https://atlas-ten-tan.vercel.app) |
 
-Pozostałe około 70 repozytoriów to szkielety, puste README, dane syntetyczne (np. PTAE: „procedural DEMs”) albo strony bez pomiarów.
-
----
-
-## 3. Co robią najlepsi (krótko)
-
-### ShadowAstra Atlas: lider pod względem funkcji i walidacji
-- **Wybór zadania i celu** (baza, łazik, lód, jaskinie, życie, niskie Słońce). Suwaki przeliczają całą planetę na żywo w przeglądarce: 80 tys. komórek w około 16 ms.
-- **Uczciwy test:** ukrywa znane miejsce **razem ze wszystkimi znanymi miejscami w promieniu 300 km**, trenuje model od nowa i sprawdza, na którym miejscu wypada ukryte miejsce. Do tego 28 opublikowanych miejsc, których nigdy nie użyto w treningu.
-- **Zasada „nowe dane muszą zasłużyć na miejsce”:** minerały z EMIT i model ViT dostały wagę w wyniku tylko wtedy, gdy poprawiały pozycję znanych miejsc. Jeśli nie poprawiały, pokazują je jako fakt.
-- **Dodatki:** porównanie 3D z ruchomym Słońcem, „Earth twins of any spot” (klik w dowolny punkt Księżyca albo Marsa), warstwa jaskiń (MGC³ i atlas lunarnych zapadlisk), „Check your town”, raport miejsca do druku, gra, lekcje w trzech językach, flagi „consent before coordinates” (Antarktyda, parki, ziemie rdzennych mieszkańców), ślad CO₂ podróży, publiczny dataset na Hugging Face.
-- **Słabości:**
-  - komórka 55 km jest za duża dla prawdziwego stanowiska; sami piszą, że okno 10 km zawierające właściwe miejsce ma medianę na 42. centylu;
-  - na nigdy niewidzianych miejscach same czynniki misji (top 41%) wypadają tak jak prosta reguła (top 40%);
-  - **repo powstało 10.10.2026, a wersja v1.0 to według README „final pre-hackathon release (2 Nov 2026)”**. Nasz `docs/hackathon/FAQ-i-terminy.md` mówi: „Nie wolno zaczynać prac przed hackathonem”. Ocena należy do jury, my tego nie podnosimy, ale nie porównujmy się z nimi tak, jakby powstali w 48 godzin.
-
-### TwinWorlds: szerokość danych i sprytne porównanie temperatur
-- **Tryb „rank”:** temperatury na Księżycu (np. −230 °C) nie da się porównać z ziemską. Porównują więc **centyle w obrębie każdego świata**: komórka jest dla Ziemi tak samo zimna, jak Shackleton dla Księżyca. Dzięki temu temperatura, inercja termiczna i lód wchodzą do wyniku bez udawania, że liczby są porównywalne wprost.
-- **Mini-RF (Księżyc) obok RADARSAT RCM (Ziemia)**, czyli wykorzystują link CSA ze strony wyzwania.
-- **Uczciwy wynik ML:** wyuczone wagi nie pobiły ręcznych, więc domyślne zostały ręczne, a aplikacja mówi o tym wprost.
-- Panel „No Earth site can match these” przy każdym celu.
-
-### ODYSSEY: inna rama
-- **Od eksperymentu, a nie od planety.** Miejsce może być dobre do testów pyłu i słabe do geologii.
-- **Każda luka ma przyczynę i sposób zamknięcia:**
-  - brak integracji danych → zbiór danych,
-  - brak pomiaru → test w terenie z normą (ASTM D6951 to penetrometr, ASTM D5334 to sonda igłowa),
-  - fizyka nie do odtworzenia → interwencja (komora termiczno-próżniowa, odciążanie grawitacji).
-- Rozróżnienie „screening similarity is not suitability” i przycisk „Challenge this match”.
-
-### Oleksiiska i Endurance: wzorce dla rankingu
-- **Różnorodność rankingu:** 10 najlepszych regionów oddalonych o co najmniej 600 km (Oleksiiska) albo filtr różnorodności 150 km (Endurance). **To rozwiązuje dokładnie nasz problem z czołówką z jednego regionu.**
-- **Okno niskiego Słońca:** dla każdego miesiąca liczba godzin dziennie ze Słońcem 0–5° nad horyzontem, z oznaczeniem śniegu (Oleksiiska).
-- **Odmowa rankingu przy małym pokryciu:** poniżej 60% dostępnych wag cel nie jest rankowany (Endurance).
-- **Odległość do drogi i lotniska** jako miara logistyki (Endurance).
+The other roughly 70 repositories are skeletons, empty READMEs, synthetic data (e.g. PTAE: "procedural DEMs") or sites without measurements.
 
 ---
 
-## 4. Co mamy lepiej
+## 3. What the best do (briefly)
 
-| Obszar | My | Najlepszy konkurent |
+### ShadowAstra Atlas: the leader in features and validation
+- **Choice of task and target** (base, rover, ice, caves, life, low Sun). Sliders recompute the whole planet live in the browser: 80 thousand cells in about 16 ms.
+- **An honest test:** it hides a known site **together with all known sites within 300 km**, retrains the model and checks at which rank the hidden site lands. Plus 28 published sites never used in training.
+- **The rule "new data must earn their place":** EMIT minerals and a ViT model got weight in the score only if they improved the rank of known sites. If not, they are shown as a fact.
+- **Extras:** 3D comparison with a moving Sun, "Earth twins of any spot" (click any point of the Moon or Mars), a caves layer (MGC³ and an atlas of lunar pits), "Check your town", a printable site report, a game, lessons in three languages, "consent before coordinates" flags (Antarctica, parks, Indigenous lands), CO₂ footprint of travel, a public dataset on Hugging Face.
+- **Weaknesses:**
+  - a 55 km cell is too large for a real field site; they write themselves that the 10 km window containing the actual site has a median at the 42nd percentile;
+  - on never-seen sites the mission factors alone (top 41%) do as well as a simple rule (top 40%);
+  - [Removed before publication: a remark about the dates of this team's repository. Eligibility is for the jury to judge, not for us.]
+
+### TwinWorlds: breadth of data and a clever temperature comparison
+- **"Rank" mode:** a lunar temperature (e.g. −230 °C) cannot be compared with an Earth one. So they compare **percentiles within each world**: a cell is as cold for Earth as Shackleton is for the Moon. This way temperature, thermal inertia and ice enter the score without pretending that the numbers are directly comparable.
+- **Mini-RF (Moon) next to RADARSAT RCM (Earth)**, i.e. they use the CSA link of the challenge page.
+- **An honest ML result:** learned weights did not beat hand weights, so the hand weights stayed the default, and the app says so explicitly.
+- A "No Earth site can match these" panel for each target.
+
+### ODYSSEY: a different frame
+- **From the experiment, not from the planet.** A place can be good for dust tests and poor for geology.
+- **Each gap has a cause and a way to close it:**
+  - no data integration → a dataset,
+  - no measurement → a field test with a standard (ASTM D6951 is a penetrometer, ASTM D5334 a needle probe),
+  - physics that cannot be reproduced → an intervention (thermal-vacuum chamber, gravity offloading).
+- The distinction "screening similarity is not suitability" and a "Challenge this match" button.
+
+### Oleksiiska and Endurance: patterns for the ranking
+- **Diversity of the ranking:** the 10 best regions at least 600 km apart (Oleksiiska) or a 150 km diversity filter (Endurance). **This solves exactly our problem with a top from one region.**
+- **Low-Sun window:** for each month the number of hours per day with the Sun 0-5° above the horizon, with a snow flag (Oleksiiska).
+- **Refusal to rank with low coverage:** below 60% of available weights a target is not ranked (Endurance).
+- **Distance to road and airport** as a logistics measure (Endurance).
+
+---
+
+## 4. What we do better
+
+| Area | Us | Best competitor |
 |---|---|---|
-| **Rozdzielczość globalnego skanu** | Komórka ~2 km z DEM 30 m; 1,76 mln komórek z 2 101 kafli 1°; ranking według najlepszego okna ~15 km | ShadowAstra 55 km, Oleksiiska 55 km, Endurance 32 km (500 m/px), PuneetKumar ~10 km (ETOPO); 30 m mają tylko projekty z kilkuset oknami |
-| **Te same cechy na obu ciałach** | Ten sam kod (`pipeline/features.py`) dla LOLA 20→30 m i Copernicus 30 m, komórka 64×64 px | Podobnie robią Endurance i terrestrial-analog-finder, reszta porównuje produkty różnej skali |
-| **Zgodność z produktem NASA** | Nachylenie przy bazie 200 m zgadza się z mapą NASA `LDRM_80S_50MPP_ADJ_SLP_200M` z medianą różnicy **0,042°** (r = 0,9999); siatka LOLA z PDS sprawdzona | W przeczytanych README nie znaleźliśmy porównania z oficjalnym produktem NASA |
-| **Cecha kraterów** | Udział zamkniętych zagłębień (`dep_frac`). Bez niej z top 10 zostają tylko 2 miejsca; usuwa fałszywe trafienia (Tassili 15% → 1%) | ShadowAstra ma tylko „bliskość znanego krateru” z bazy danych |
-| **Kontrole negatywne** | Wielkopolska, Tatry, Alpy i erg Sahary dają 0 kandydatów | Brak w README |
-| **Kontrprzykład na zmianę skali** | Lidar 1 m: Meteor Crater (d/D 0,134) wobec GLO-30 wobec krateru księżycowego; Morasko znika przy 30 m | Brak |
-| **Sprawdzenie nowości w literaturze** | Ręczne sprawdzenie top 12 z URL-ami i zasadą słownictwa „not found in the analog catalogues and searches listed here” | Endurance i ShadowAstra mają flagę „known / new” z listy; ATLAS i PuneetKumar piszą „newly-discovered” / „Novel Discoveries” bez takiej kontroli |
-| **Profile laserowe ICESat-2** | J21: laser NASA mierzy jak LOLA (bazy 60/220/560 m) | Nikt |
-| **Instrumenty LRO per region** | Diviner (2 produkty), cień i oświetlenie z LOLA, Mini-RF, LEND, LAMP, LROC | ShadowAstra i TwinWorlds mają podobny zestaw |
-| **Powtarzalność** | Wszystko przez `python -m pipeline.run`, `data/run_log.csv`, katalog danych, ciężkie etapy w chmurze | ShadowAstra ma CI i testy; reszta różnie |
+| **Resolution of the global scan** | Cell ~2 km from a 30 m DEM; 1.76 million cells from 2,101 tiles of 1°; ranking by the best window of ~15 km | ShadowAstra 55 km, Oleksiiska 55 km, Endurance 32 km (500 m/px), PuneetKumar ~10 km (ETOPO); only projects with a few hundred windows have 30 m |
+| **The same features on both bodies** | The same code (`pipeline/features.py`) for LOLA 20→30 m and Copernicus 30 m, cell of 64×64 px | Endurance and terrestrial-analog-finder do similarly; the rest compare products of different scale |
+| **Agreement with a NASA product** | Slope at the 200 m baseline agrees with the NASA map `LDRM_80S_50MPP_ADJ_SLP_200M` with a median difference of **0.042°** (r = 0.9999); LOLA grid from PDS checked | In the READMEs read we found no comparison with an official NASA product |
+| **Crater feature** | Share of closed depressions (`dep_frac`). Without it only 2 places of the top 10 remain; it removes false hits (Tassili 15% → 1%) | ShadowAstra has only "proximity to a known crater" from a database |
+| **Negative controls** | Wielkopolska, Tatras, Alps and a Sahara erg give 0 candidates | Not in the READMEs |
+| **Counterexample for the change of scale** | 1 m lidar: Meteor Crater (d/D 0.134) vs GLO-30 vs a lunar crater; Morasko vanishes at 30 m | None |
+| **Novelty check in the literature** | Manual check of the top 12 with URLs and the wording rule "not found in the analog catalogues and searches listed here" | Endurance and ShadowAstra have a "known / new" flag from a list; ATLAS and PuneetKumar write "newly-discovered" / "Novel Discoveries" without such a check |
+| **ICESat-2 laser profiles** | J21: the NASA laser measures like LOLA (baselines 60/220/560 m) | Nobody |
+| **LRO instruments per region** | Diviner (2 products), shadow and illumination from LOLA, Mini-RF, LEND, LAMP, LROC | ShadowAstra and TwinWorlds have a similar set |
+| **Reproducibility** | Everything through `python -m pipeline.run`, `data/run_log.csv`, a data catalogue, heavy stages in the cloud | ShadowAstra has CI and tests; the rest vary |
 
-**Teza do pitchu:** „Inni porównują Ziemię z Księżycem w kwadratach 30–55 km. My mierzymy każdą 2-kilometrową komórkę suchego lądu tym samym kodem co LOLA, a nasz kod odtwarza mapę nachyleń NASA z dokładnością 0,04°.” Liczby w tym zdaniu pochodzą z `data/validation/t1_reproduce_nasa.json`. Słowo „inni” odnosi się do projektów z tabeli w sekcji 2.
+**Thesis for the pitch:** "Others compare Earth with the Moon in squares of 30-55 km. We measure every 2-kilometre cell of dry land with the same code as LOLA, and our code reproduces the NASA slope map to 0.04°." The numbers in this sentence come from `data/validation/t1_reproduce_nasa.json`. The word "others" refers to the projects in the table in section 2.
 
 ---
 
-## 5. Czego nam brakuje
+## 5. What we are missing
 
-| # | Luka | Kto to ma | Waga dla jury |
+| # | Gap | Who has it | Weight for the jury |
 |---|---|---|---|
-| 1 | **Brak aplikacji pod publicznym adresem** (J7 nie zaczęty, prototyp Wiktora poza gitem) | ShadowAstra, TwinWorlds, ODYSSEY, EarthTwin, PuneetKumar, ATLAS | krytyczna (Presentation, Impact) |
-| 2 | **Czołówka rankingu zdominowana przez jeden region** (po J18: północna Grenlandia, gdzie nie ma WorldCover, i prawdopodobnie Putorana; kolumna kraju pusta) | Oleksiiska (600 km), Endurance (150 km) mają różnorodność | krytyczna (Validity) |
-| 3 | **Jeden wymiar w wyniku** (teren + maska gołego gruntu); temperatura i Słońce tylko w „breaks” | wszyscy z czołówki mają 5–31 wymiarów | wysoka (wyzwanie wymienia 8 wymiarów) |
-| 4 | **Brak wyboru zadania misji** (lądowanie / łazik / baza) | ShadowAstra, Endurance, Oleksiiska, ODYSSEY | wysoka (konsideracja „Connect your analog to exploration”) |
-| 5 | **Brak jednej liczby „jak dobrze odnajdujemy znane analogi”** na pełnym skanie (enrichment spadł do 0,97 wobec 0,48 losowo, jeszcze na starym celu) | ShadowAstra (top 2,4%), Oleksiiska (centyl 0,77) | wysoka (Validity) |
-| 6 | **Brak Marsa** | prawie wszyscy | średnia: tytuł wyzwania mówi „Moon … and Mars”, ale analog „does not need to match” wszystkiego |
-| 7 | Brak „sprawdź swoje miasto” / lokalnego akcentu | ShadowAstra, Oleksiiska | średnia (Poznań: nagroda lokalna) |
-| 8 | Brak 3D i porównania obok siebie | ShadowAstra, A.R.E.S., SNSX | niska do średniej (efekt „wow”) |
-| 9 | Brak publicznego datasetu | ShadowAstra (HF, CC BY 4.0) | niska, mały koszt |
-| 10 | Brak informacji o dostępności i ochronie terenu przy miejscu | ShadowAstra, Endurance | niska |
+| 1 | **No app at a public address** (J7 not started, Wiktor's prototype outside git) | ShadowAstra, TwinWorlds, ODYSSEY, EarthTwin, PuneetKumar, ATLAS | critical (Presentation, Impact) |
+| 2 | **Top of the ranking dominated by one region** (after J18: northern Greenland, where there is no WorldCover, and probably Putorana; country column empty) | Oleksiiska (600 km), Endurance (150 km) have diversity | critical (Validity) |
+| 3 | **One dimension in the score** (terrain + bare-ground mask); temperature and Sun only in "breaks" | everyone at the top has 5-31 dimensions | high (the challenge names 8 dimensions) |
+| 4 | **No choice of mission task** (landing / rover / base) | ShadowAstra, Endurance, Oleksiiska, ODYSSEY | high (consideration "Connect your analog to exploration") |
+| 5 | **No single number "how well we find known analogs"** on the full scan (enrichment fell to 0.97 vs 0.48 random, still on the old target) | ShadowAstra (top 2.4%), Oleksiiska (percentile 0.77) | high (Validity) |
+| 6 | **No Mars** | almost everyone | medium: the challenge title says "Moon … and Mars", but an analog "does not need to match" everything |
+| 7 | No "check your town" / local touch | ShadowAstra, Oleksiiska | medium (Poznań: local award) |
+| 8 | No 3D and no side-by-side comparison | ShadowAstra, A.R.E.S., SNSX | low to medium ("wow" effect) |
+| 9 | No public dataset | ShadowAstra (HF, CC BY 4.0) | low, small cost |
+| 10 | No information on access and protection of the land at the site | ShadowAstra, Endurance | low |
 
 ---
 
-## 6. Co możemy przejąć: lista z kosztem
+## 6. What we can adopt: list with cost
 
-Czas do freeze'u: niedziela 9:30. Oceny kosztu są szacunkowe.
+Time until the freeze: Sunday 9:30. Cost estimates are rough.
 
-### A. Do zrobienia przed freezem (duży zysk, mały koszt)
+### A. To do before the freeze (large gain, small cost)
 
-1. **Różnorodność rankingu (minimalny odstęp między miejscami).** Wzorzec: Oleksiiska (600 km), Endurance (150 km).
-   - Zamiast `ranking.csv` z 15 komórkami Putorany pokazać top N regionów, zachłannie, z minimalnym odstępem np. 150–300 km. Pozostałe miejsca w regionie trafiają do karty jako „inne komórki tego regionu”.
-   - Pasuje do naszej walidacji: J6 pokazał, że stabilne są **regiony**, a nie pojedyncze łaty („Present results as regions and areas”).
-   - Koszt około 30 min w `pipeline/sites.py` albo jako widok w aplikacji. Właściciel: J19.
-2. **Maska dla obszarów bez WorldCover i dla tundry.** Ten pomysł nie pochodzi od konkurencji, wynika z obecnego wyniku. Północna Grenlandia ma `lc_source = none`. Trzeba albo wymagać pokrycia terenu w rankingu głównym, albo użyć MODIS IGBP z J17, albo oznaczyć takie miejsca flagą „no land-cover mask” i pokazywać osobno. Właściciel: J19.
-3. **Wybór zadania misji (re-sort po stronie przeglądarki).** Wzorzec: ShadowAstra, Endurance.
-   - „Lądowanie”: bliskość `f_le5` i `f_le8` do regionu celu, mała chropowatość `r200`.
-   - „Łazik”: `f_le8`, `f_le15`, `r200`.
-   - „Teren ogólnie”: ranking z pipeline'u.
-   - Wzór trzeba jawnie opisać na stronie Method. Kolumny już mamy. Koszt około 1 h w J7.
-4. **Test „ukryty znany analog”.** Wzorzec: ShadowAstra, Oleksiiska. To jest J20, część 3 (recovery AUC).
-   - Warto dodać **medianę centyla** pozycji znanych analogów, bo ta liczba jest porównywalna z konkurencją i łatwa do powiedzenia na scenie.
-   - Uwaga: u nas nie ma modelu do ponownego trenowania, więc bufor 300 km nie jest potrzebny. Ranking jest bez uczenia, a to jest zaleta i warto ją podkreślić.
-5. **Karta „Where the analogy breaks” z kolumną „jak to skompensować”.** Wzorzec: ODYSSEY, TwinWorlds. Grawitacja → stanowisko odciążające; próżnia i temperatura → komora termiczno-próżniowa; regolit → symulant regolitu; roślinność i 30 m → lidar albo pomiar w terenie. Sam tekst z URL-ami, około 30 min w J7.
+1. **Diversity of the ranking (minimum distance between places).** Pattern: Oleksiiska (600 km), Endurance (150 km).
+   - Instead of a `ranking.csv` with 15 Putorana cells, show the top N regions, greedily, with a minimum distance of e.g. 150-300 km. The other places in the region go to the card as "other cells of this region".
+   - Fits our validation: J6 showed that **regions** are stable, not single patches ("Present results as regions and areas").
+   - Cost about 30 min in `pipeline/sites.py` or as a view in the app. Owner: J19.
+2. **Mask for areas without WorldCover and for tundra.** This idea does not come from the competition; it follows from the current result. Northern Greenland has `lc_source = none`. Either require land cover in the main ranking, or use MODIS IGBP from J17, or mark such places with a "no land-cover mask" flag and show them separately. Owner: J19.
+3. **Choice of mission task (re-sort in the browser).** Pattern: ShadowAstra, Endurance.
+   - "Landing": closeness of `f_le5` and `f_le8` to the target region, low roughness `r200`.
+   - "Rover": `f_le8`, `f_le15`, `r200`.
+   - "Terrain in general": the pipeline ranking.
+   - The formula must be described explicitly on the Method page. We already have the columns. Cost about 1 h in J7.
+4. **"Hidden known analog" test.** Pattern: ShadowAstra, Oleksiiska. This is J20, part 3 (recovery AUC).
+   - Worth adding the **median percentile** of the positions of known analogs, because this number is comparable with the competition and easy to say on stage.
+   - Note: we have no model to retrain, so a 300 km buffer is not needed. The ranking has no learning, which is an advantage worth stressing.
+5. **A "Where the analogy breaks" card with a column "how to compensate".** Pattern: ODYSSEY, TwinWorlds. Gravity → offloading rig; vacuum and temperature → thermal-vacuum chamber; regolith → regolith simulant; vegetation and 30 m → lidar or field measurement. Text with URLs only, about 30 min in J7.
 
-### B. Jeśli zostanie czas w nocy
+### B. If there is time left at night
 
-6. **Temperatura jako centyl w obrębie świata.** Wzorzec: TwinWorlds.
-   - Ziemia: centyl temperatury powierzchni z NASA POWER (dane już mamy w `nasa_context.csv`, tylko dla miejsc z rankingu) albo MODIS LST.
-   - Księżyc: centyl temperatury z Divinera dla regionu.
-   - Pokazać jako osobny wymiar w karcie, **nie w wyniku głównym**. To uczciwie odpowiada na pytanie „dlaczego tylko teren”.
-   - Koszt 1–2 h. Ryzyko: niespójne populacje (POWER ma rozdzielczość 0,5°).
-7. **Okno niskiego Słońca.** Wzorzec: Oleksiiska. Dla miejsca pokazać miesiące, w których Słońce w południe stoi niżej niż 10° (na biegunie Księżyca to około 1,5°). Mamy już wysokość Słońca w przesileniu w `breaks`. Wystarczy prosty wzór astronomiczny w JS, około 45 min.
-8. **„Check your town”, czyli Poznań i Morasko.** Wzorzec: ShadowAstra, Oleksiiska. Na lokalnym evencie pokazać, gdzie wypada Poznań i jaki jest najbliższy silny kandydat. Morasko już mamy jako kontrprzykład z lidaru, więc to gotowa historia do pitchu. Około 1 h w J7 (offline'owa tabela miast).
-9. **Publiczny dataset.** Wzorzec: ShadowAstra. Komórki (parquet, 97 MB) plus ranking na Hugging Face albo Zenodo z licencją. Mało pracy, ale **decyzja człowieka** (licencje Copernicus i WorldCover, repo jest prywatne).
+6. **Temperature as a percentile within the world.** Pattern: TwinWorlds.
+   - Earth: percentile of the surface temperature from NASA POWER (we already have the data in `nasa_context.csv`, only for ranked places) or MODIS LST.
+   - Moon: percentile of the Diviner temperature for the region.
+   - Show as a separate dimension on the card, **not in the main score**. This honestly answers the question "why terrain only".
+   - Cost 1-2 h. Risk: inconsistent populations (POWER has a resolution of 0.5°).
+7. **Low-Sun window.** Pattern: Oleksiiska. For a place, show the months in which the noon Sun stands lower than 10° (at the lunar pole about 1.5°). We already have the solstice Sun elevation in `breaks`. A simple astronomical formula in JS is enough, about 45 min.
+8. **"Check your town", i.e. Poznań and Morasko.** Pattern: ShadowAstra, Oleksiiska. At the local event, show where Poznań lands and what the nearest strong candidate is. We already have Morasko as a lidar counterexample, so it is a ready story for the pitch. About 1 h in J7 (offline table of towns).
+9. **Public dataset.** Pattern: ShadowAstra. Cells (parquet, 97 MB) plus the ranking on Hugging Face or Zenodo with a licence. Little work, but **a person's decision** (Copernicus and WorldCover licences, the repo is private).
 
-### C. Nie robić przed deadline'em (świadoma decyzja)
+### C. Do not do before the deadline (deliberate decision)
 
-10. **Mars z MOLA.** MOLA ma 463 m/px, więc nasze bazy 240 i 570 m nie mają tam sensu, a dane trzeba by od nowa zwalidować. Na pytanie jury lepiej odpowiedzieć: „Świadomie skupiliśmy się na biegunie południowym Księżyca w skali 30 m; Mars od baz ~1 km to następny krok”. Tak już mówi J11.
-11. **ML i embeddingi** (ViT, Prithvi, cosinus po embeddingach). TwinWorlds i ShadowAstra same piszą, że ML nie pobiło formuły (wagi wyuczone 17% wobec 22%; ViT w pełnym wyniku „adds nothing”). Mamy argument, żeby tego nie robić, i warto go zacytować.
-12. **Agent LLM generujący plan misji** (ODYSSEY, TAVME). Efektowne, ale nie podnosi Validity i dokłada ryzyko.
-13. **3D i gry.** Efekt „wow”, ale kilka godzin pracy front-endu.
-
----
-
-## 7. Gotowe odpowiedzi na pytania jury
-
-- **„Czym różnicie się od innych zespołów?”** Rozdzielczością (2 km wobec 30–55 km) i tym, że nasz kod odtwarza mapę NASA (0,042°). Do tego kontrole negatywne i kontrprzykład z lidaru (Morasko).
-- **„Dlaczego nie ML?”** Etykiet jest za mało (kilkadziesiąt znanych analogów). Dwa zespoły w tym wyzwaniu raportują, że wyuczone wagi albo ViT nie pobiły prostej formuły. Mahalanobis do wzorca księżycowego nie wymaga etykiet i jest w pełni wyjaśnialny.
-- **„Dlaczego tylko teren?”** Bo teren da się zmierzyć tym samym instrumentem i kodem na obu ciałach. Temperatura (Diviner wobec POWER) i Słońce są w karcie jako wymiary, w których analogia się łamie. Jeśli zrobimy punkt 6, także jako centyl.
-- **„Czy to nowe miejsca?”** Stosujemy zasadę słownictwa z `docs/NOVELTY.md`: „not found in the analog catalogues and searches listed here”. Nigdy nie mówimy „discovered”.
+10. **Mars from MOLA.** MOLA has 463 m/px, so our 240 and 570 m baselines make no sense there, and the data would have to be validated anew. To a jury question it is better to answer: "We deliberately focused on the lunar south pole at the 30 m scale; Mars from ~1 km baselines is the next step". J11 already says so.
+11. **ML and embeddings** (ViT, Prithvi, cosine over embeddings). TwinWorlds and ShadowAstra write themselves that ML did not beat the formula (learned weights 17% vs 22%; ViT in the full score "adds nothing"). We have an argument for not doing it, and it is worth quoting.
+12. **LLM agent generating a mission plan** (ODYSSEY, TAVME). Impressive, but it does not raise Validity and adds risk.
+13. **3D and games.** "Wow" effect, but several hours of front-end work.
 
 ---
 
-## 8. Rekomendowana kolejność
+## 7. Ready answers to jury questions
 
-1. **J19** z dwoma dodatkami z tej analizy: różnorodność rankingu (punkt 1) i obsługa komórek bez maski terenu (punkt 2). Bez tego aplikacja pokaże czołówkę z jednego regionu.
-2. **J7** z wyborem zadania misji (punkt 3) i kartą „jak to skompensować” (punkt 5). Wiktor decyduje o hostingu.
-3. **J20** z medianą centyla znanych analogów (punkt 4) obok AUC.
-4. W nocy, jeśli zostanie czas: punkty 6, 7, 8.
-5. **J11:** teza z sekcji 4 i odpowiedzi z sekcji 7.
+- **"How are you different from other teams?"** Resolution (2 km vs 30-55 km) and the fact that our code reproduces the NASA map (0.042°). Plus negative controls and the lidar counterexample (Morasko).
+- **"Why not ML?"** There are too few labels (a few dozen known analogs). Two teams in this challenge report that learned weights or a ViT did not beat a simple formula. Mahalanobis distance to the lunar pattern needs no labels and is fully explainable.
+- **"Why terrain only?"** Because terrain can be measured with the same instrument and code on both bodies. Temperature (Diviner vs POWER) and the Sun are on the card as dimensions where the analogy breaks down. If we do item 6, also as a percentile.
+- **"Are these new places?"** We apply the wording rule of `docs/NOVELTY.md`: "not found in the analog catalogues and searches listed here". We never say "discovered".
 
 ---
 
-## 9. Źródła
+## 8. Recommended order
 
-README przeczytane 14.11.2026 między 20:20 a 20:45 przez GitHub API:
+1. **J19** with two additions from this analysis: diversity of the ranking (item 1) and handling of cells without a land-cover mask (item 2). Without this the app will show a top from one region.
+2. **J7** with the choice of mission task (item 3) and the "how to compensate" card (item 5). Wiktor decides on hosting.
+3. **J20** with the median percentile of known analogs (item 4) next to the AUC.
+4. At night, if there is time: items 6, 7, 8.
+5. **J11:** the thesis of section 4 and the answers of section 7.
+
+---
+
+## 9. Sources
+
+READMEs read on 14 Nov 2026 between 20:20 and 20:45 through the GitHub API:
 - https://github.com/ABRUBAB/ShadowAstra_Atlas · live https://shadowastra-atlas.vercel.app · dataset https://huggingface.co/datasets/ABRUBAB/shadowastra-atlas
 - https://github.com/TayyabXtreme/Twin_World_Nasa_Space_APP_Challenge_2026 · live https://twinworld-topaz.vercel.app
 - https://github.com/MahmoudAdelbghany/ODYSSEY · live https://odyssey.qd.je/
@@ -192,7 +192,7 @@ README przeczytane 14.11.2026 między 20:20 a 20:45 przez GitHub API:
 - https://github.com/OwenSolis03/Space_Apps_2026_Analogos_Luna_Marte
 - https://github.com/es-ratt/earthtwin · live https://es-ratt.github.io/earthtwin/web/
 - https://github.com/sahusatya2008/moon-mars-earth-analogs
-- https://github.com/shishir-kuet/terrestrial-analog-finder (kopia: https://github.com/faizjojin/Terra-Analog)
+- https://github.com/shishir-kuet/terrestrial-analog-finder (copy: https://github.com/faizjojin/Terra-Analog)
 - https://github.com/ytp-haha-py/2026-NASA-Hackathon
 - https://github.com/PuneetKumar1790/Analog-Finder · live https://analog-finder-amber.vercel.app/
 - https://github.com/pr1hm/TAVME--Terrestrial-Analog-Vector-Matching-Engine
@@ -202,6 +202,6 @@ README przeczytane 14.11.2026 między 20:20 a 20:45 przez GitHub API:
 - https://github.com/AntonioMelgarMendez/Atlas
 - https://github.com/KarimAshraf04/TerraMatch
 - https://github.com/pain-detox/spaceappschallange-2026-vilnius
-- https://github.com/Alpha-Science-Lab/nasa-space-apps-2026-ptae (dane proceduralne, nie pomiary)
+- https://github.com/Alpha-Science-Lab/nasa-space-apps-2026-ptae (procedural data, not measurements)
 
-Nasze liczby: `docs/HANDOFF.md` (sekcje 6 i 9), `docs/sources/j18.md`, `data/sites/ranking.csv` @ `da9fcd2`.
+Our numbers: `docs/HANDOFF.md` (sections 6 and 9), `docs/sources/j18.md`, `data/sites/ranking.csv` @ `da9fcd2`.
