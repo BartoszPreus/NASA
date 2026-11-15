@@ -1,6 +1,7 @@
 # Front-end specification: every backend output and every function of the app
 
-Written with SI assistance (Claude Code). Job J38, issue #24. State of the repository: commit `f6efd20` on `main`,
+Written with SI assistance (Claude Code). Job J38, issue #24. State of the repository: written against commit
+`f6efd20` and updated to `0ba6399` on `main` (issue #16 analog scope and the shortened J33 land-cover check, issue #19),
 Sun 15 Nov 2026. This document is the brief for the Penpot design. A designer can build every board from it without
 reading the pipeline. It does not change code or data.
 
@@ -11,12 +12,12 @@ backend and the current export `app/data/`. Section 7 is the Penpot handoff.
 
 **Notation.** `file · key` names where a value comes from. "Backend" means the pipeline outputs under `data/` and the
 texts under `docs/`. "Export" means `app/data/*.json`, which `app/build_data.py` writes from the backend. "Current app"
-means `app/index.html`, `app/app.js`, `app/views.js` at `f6efd20`. "Prototype" means the earlier data layer kept outside
+means `app/index.html`, `app/app.js`, `app/views.js`, `app/build_data.py` at `0ba6399`. "Prototype" means the earlier data layer kept outside
 git in `scratch/app_local_backup_0119/` (its `data/SCHEMA.md` and `criteria.json`). That folder is not in git, so
 nothing in the app may read from it. It is used here only as a reference for what the data layer should expose.
 
 Status marks in section 4: **EXISTS** (the current app does it), **PARTIAL** (it does part of it), **NEW** (it does not).
-**KEY** means that `app/build_data.py` must write a new key. Marks only describe the code at `f6efd20`.
+**KEY** means that `app/build_data.py` must write a new key. Marks only describe the code at `0ba6399`.
 
 ---
 
@@ -45,12 +46,12 @@ where the analogy breaks." It does not say "we found analogs".
 | W-02 | For `novelty = unreported` the text is "not found in the analog catalogues and searches listed here". | `docs/NOVELTY.md` sections 2.4 and 6 |
 | W-03 | Similarity is terrain shape at about 200 m to 1.6 km: slope at 240 m and 570 m, roughness at 200, 400, 800 and 1,600 m, closed depressions. For terrain use "slope and roughness statistics at 240 m to 1.6 km fall inside the range of the lunar south-pole candidate regions"; never "mare-like", "looks like the Moon" or "similar to lunar basalt". Features smaller than about 100 m are not resolved (`breaks` sentence of every site). | `docs/METHOD.md` step 3; `docs/NOVELTY.md` section 6; issue #18 item 3; issue #22 item 1 |
 | W-04 | The dune-field flag is a terrain rule, not a sand detector. Label: "dune-like relief (terrain rule)". Never "sand", "sand sea" or "artefact" in visible text for a site. | `docs/HANDOFF.md` section 0 (J26); `docs/TASKS.md` J7 step A6 |
-| W-05 | "Bare ground" includes the land-cover class "moss and lichen", so Arctic sites are partly tundra. Every place that shows `bare` or the mask carries this note. | `docs/METHOD.md` Limits; issue #19 |
+| W-05 | "Bare ground" includes the land-cover class "moss and lichen", so Arctic sites are partly tundra. Every place that shows `bare` or the mask carries this note. With class 100 not counted, 8 of the top 30 sites keep a 4-cell core and none of the 16 Putorana sites does (`data/validation/landcover_sensitivity.json · top30.pass_strict_cells` = 8; `docs/VALIDATION.md` J33 section). | `docs/METHOD.md` Limits and "Mask choice"; issue #19 |
 | W-06 | Validation verdict: at one-degree tile scale the tile-recovery AUC of 0.531 (90% interval 0.396 to 0.668) is consistent with chance. The app never says the method "recovers" or "finds" known analogs. | `data/validation/effectiveness.json · recovery.auc`, `recovery.auc_ci90`; `docs/VALIDATION.md` |
 | W-07 | A missing value is never 0 and never blank. "Not measured" = the row exists and the value is null. "Not sampled" = the site is outside the sample of that product (for example POWER covers ranks 1 to 150 only). "No image stored" for sites without a Worldview image. | `docs/TASKS.md` J7 rules; `app/data/SCHEMA.md` |
 | W-08 | Earth and Moon values are shown side by side, never merged. Temperatures say which is which ("Earth coldest monthly night mean ... against lunar annual mean at 2 cm depth"), never "as cold as". | issue #22 Accept ("as cold as" must not appear) |
-| W-09 | Literature verdict `mentioned` means "an opened page names the region (not the site) as an analog"; today every such page is a Mars statement. Label: "region named in an opened source (Mars analog, regional); site not named". `established` = "inside a region of the known-analog list". `unchecked` gets no badge. | `docs/NOVELTY.md` sections 2.4 and 3 ("What mentioned rests on") |
-| W-10 | The nearest known analog always shows whether it is a lunar, Martian or both analog (`known_analogs.csv · analog_for`). 82 of the 200 ranked sites have a Mars-only nearest analog (count from joining `ranking.csv · nearest_known` to `known_analogs.csv · name`; the join matches 200 of 200). | issue #16 item 3 |
+| W-09 | Literature verdict `mentioned` means "an opened page names the region (not the site) as an analog"; today every such page is a Mars statement. Label (current app, `views.js · badges`): "Region named as a Mars analog in general terms". `established` = "inside a region of the known-analog list". `unchecked` gets no badge. | `docs/NOVELTY.md` sections 2.4 and 3 ("What mentioned rests on") |
+| W-10 | The nearest known analog always shows whether it is a lunar, Martian or both analog (`known_analogs.csv · analog_for`; export `nearest_known_for`), and a Mars-only nearest analog is followed by the nearest lunar one (export `nearest_lunar_known`, `nearest_lunar_known_km`). 82 of the 200 ranked sites have a Mars-only nearest analog (count from joining `ranking.csv · nearest_known` to `known_analogs.csv · name`; the join matches 200 of 200). The "Known analog site" badge counts entries of every tag (caption in `app/index.html`). | issue #16 item 3 |
 | W-11 | No NASA logo, insignia or meatball anywhere. SI-generated images or videos carry a visible watermark "SI-generated". Plots made from data and agency imagery are not SI-generated and carry their credit instead. | `CLAUDE.md`, contest rules |
 | W-12 | Every number carries its source (file and key in a tooltip or footnote) and every dataset its citation and licence (`data/sources.csv`). English only. | `CLAUDE.md`; `docs/TASKS.md` J7 rules |
 | W-13 | SI review text (top-30 review, literature check) is labelled "Judged by an SI model; a person has not confirmed it". | `docs/HANDOFF.md` section 0 ("The verdicts come from an SI model; a person has not looked yet"); `docs/NOVELTY.md` header |
@@ -118,7 +119,7 @@ for example "data/moon.json: HTTP 404" (today `app/app.js · json()` builds this
 | One-sentence purpose | section 1.1 | text | - | - | no "found analogs" |
 | Scan counters | planned tiles `data/validation/effectiveness.json · scan.n_planned_tiles` (2,101); scanned tiles `scan.n_tiles` (2,060); valid cells `scan.n_valid` (1,758,778); bare cells `scan.n_bare` (1,213,569); candidate patches = features of `data/sites/sites.geojson` (3,175; export `meta.counts.sites_total`); of them dune-like `meta.counts.sites_flagged_total` (521); ranked in the atlas `meta.counts.sites` (300) | integers with thousands separators | M "not computed" | each counter links to S02 with the matching layer on | - |
 | Lunar target summary | `data/moon/reference.json · pooled_regions.base_regions.member_regions` (7 regions), `n_cells` (1,575) | text and count | - | -> S06 | - |
-| Validation verdict strip | `effectiveness.json · recovery.auc` (0.531), `recovery.auc_ci90`; `enrichment.json · median_enrichment` (0.91), `random.median_enrichment_median` (0.36); `effectiveness.json · controls.*.with_mask.cells` (0 in all four) | numbers with 2 to 3 decimals | - | -> S09 | W-06: "consistent with chance" is printed, not hidden |
+| Validation verdict strip | `effectiveness.json · recovery.auc` (0.531), `recovery.auc_ci90`; `enrichment.json · median_enrichment` (1.02, 22 lunar analogs), `random.median_enrichment_median` (0.39); `effectiveness.json · controls.*.with_mask.cells` (0 in all four) | numbers with 2 to 3 decimals | - | -> S09 | W-06: "consistent with chance" is printed, not hidden |
 | Top of the ranking as regions | `docs/NOVELTY.md` section 3 counts (top 30: 16 Putorana Plateau, 5 southern Peary Land, ...), joined with `data/sites/ranking.csv · country` | text | - | region chip -> S03 filtered | W-14: regions, not "the best patch" |
 | Three entry cards | - | - | - | "Open the map" -> S02; "See rank 1" -> S04 `N82W026-01`; "How we checked it" -> S09 | - |
 
@@ -138,7 +139,7 @@ Projection: the current Leaflet default (Web Mercator); polar tiles look stretch
 | Layer 6: scan coverage (NEW) | `data/earth/tiles/tiles_scanned.csv` (2,101 rows): `tile`, `region` (7 values: Arctic 1,479, Central Asia/Tibet 252, Sahara/Arabia 175, Americas 157, other 21, southern Africa 14, Antarctica 3), `prio` (0 to 3), `status` (done 2,023, cached 78), `n_cells`, `rank`, `reason`, `seconds`, `error`; the 41 planned tiles (status `done`; 37 Arctic, 3 Americas, 1 Sahara/Arabia) that have no row in `tile_summary.csv` are drawn hatched "scanned, no summary row" (the reason is not recorded in either file) | categorical by region or priority | - | switch "colour by region / by priority" | the scan is not a global survey: tiles were chosen coarse to fine (METHOD step 5) |
 | Legend | as above | units: "Candidate share of bare cells (%)" | - | collapsible on mobile | - |
 | Map toolbar | - | "2,060 survey tiles · N patches" (`app.js · map-count`) | - | "World view" reset; zoom | - |
-| Tundra caption | W-05 | text | - | - | - |
+| Tundra caption | W-05; `landcover_sensitivity.json · top30.pass_strict_cells` | "Moss and lichen count as bare land cover. Some Arctic patches are tundra; without moss and lichen 8 of the top 30 keep a core." | - | link -> S09 V14 | - |
 
 ### S03 Ranked list
 
@@ -174,11 +175,12 @@ collapsed on mobile. Missing data follow W-07.
 | S04.11 | Surface conditions, Earth against Moon | NASA POWER `nasa_context.csv`: `ts_mean_c`, `ts_min_c`, `ts_max_c`, `ts_mean_k`, `precip_mm_per_year`, `ws10m_m_s`, `power_grid_note` (export carries only the first three: NEW KEYS for the rest); measured `partner_context.csv`: `jaxa_sgli_lst_*`, `nasa_modis_lst_*` (day mean, night mean, day max, night min, day-night difference and their month counts), `jaxa_amsr2_soil_moisture_pct`, `jaxa_amsr2_values`, `esa_permafrost_fraction_pct`, `esa_ground_temp_2m`; lunar `moon.json · regions[target].headline.temp_avg_k`, `temp_max_k` (pooled: `headline_range`) | K for satellite and lunar, °C for POWER and ground temperature, %, mm/year, m/s; months as "n months" | M: POWER "Not sampled" for ranks 151 to 300; partner "Not sampled" without a row, "Not measured" for a null in a row (soil moisture null in 14% of rows, permafrost and ground temperature null in 53%: outside the Arctic grid) | each source name links to S18; -> S14 | W-08; caveat line "Earth and lunar products cover different time periods and use different summaries." (exists) and the pixel-size caveat of `partner_context_summary.json · caveats` |
 | S04.12 | Literature record (NEW) | `novelty_check.csv` row by `site_id` (44 sites): `place`, `terrain`, `access`, `protection`, `verdict`, `evidence_urls`, `why_moonlike_or_artefact`, `searches_run` | text; URLs as links | E "No literature check for this site" (`novelty = unchecked`) | links open in a new tab | W-01, W-09, W-13 |
 | S04.13 | Image review (ranks 1 to 30) | `top30_review.csv`: `what_it_is`, `looks_like_artefact` (26 "no", 4 "unsure"), `reason`; export `review` | text; verdict as words: no -> "Image review found no terrain concern", unsure -> "Image review inconclusive", yes -> "Possible terrain concern" (`views.js`) | E: block hidden for ranks above 30 | -> S11 | W-13 |
-| S04.14 | Nearest known analog | `nearest_known`, `nearest_known_km`; NEW KEY `nearest_known_for` = `known_analogs.csv · analog_for` of the row with that `name`, plus `type`, `source_url` | km, 1 decimal | - | -> S12 row | W-10 |
+| S04.14 | Nearest known analog | `nearest_known`, `nearest_known_km`, `nearest_known_for` (tag of the row with that `name`), `nearest_lunar_known`, `nearest_lunar_known_km` (export keys since `8edaad7`, computed in `build_data.py · analog_context`); NEW KEYS `type`, `source_url` of that row | km, 1 decimal; tag as words "lunar analog", "Mars analog", "lunar and Mars analog" (`views.js`) | M tag: "tag unknown" | -> S12 row | W-10 |
 | S04.15 | Dune-like relief explanation | `artefact_flag`, `artefact_share`, `artefact_reason` (`sites.geojson`; NEW KEYS) | share of cells, % | shown only for flagged sites | -> S08 step 8 | W-04 |
 | S04.16 | Radar look (NEW) | `radarsat1_index.csv` row by `site_id` (37 rows): `status`, `n_scenes`, `date`, `beam`, `product`, `incidence_deg`, `pass_direction`, `nominal_pixel_m`, `valid_share`, `cv_dn`, `power_share_200m_2km`, `image`, `rejected` | deg, m, shares | E "No RADARSAT-1 scene covers the site centre" (`no_scene_centre`) or "No scene had 90% usable pixels" (`no_usable_window`) | -> S15 | uncalibrated C-band DN, not comparable with Mini-RF values |
-| S04.17 | Planned context | land-cover sensitivity (issue #19, `data/validation/landcover_sensitivity/ranking_bare_strict.csv`), Sentinel-1 backscatter (issue #20, `data/sites/radar_context.csv`) | - | hidden until the files exist | - | Sentinel-1 text: "C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio" (issue #20 Accept) |
-| S04.18 | Actions | - | - | - | "Compare side by side" -> S05; "Download site package" (F-40); "What is compared and what is not" -> S13 | - |
+| S04.17 | Moss-and-lichen check (top 100, NEW) | `data/validation/landcover_sensitivity/sites_top100.csv` row by `site_id`: `region`, `n_cells`, `bare_med`, `bare_strict_med`, `moss_lichen_med`, `strict_passes_median`, `strict_kept_cells`, `strict_largest_group`, `strict_passes_cells`, `modis_bare_med`, `modis_passes_median`, `modis_passes_cells`; e.g. rank 1: `bare_strict_med` 0.0312, `strict_passes_cells` False | shares as %; pass / fail as words "keeps a 4-cell core without moss and lichen" / "does not" | E for ranks above 100: "not checked"; MODIS columns empty for 87 of 100 sites (MODIS covers 56 S to 60 N only): "not covered" | -> S09 V14 | the new rank of a surviving site is not computed (`landcover_sensitivity.json · cannot_show`) |
+| S04.18 | Planned context | Sentinel-1 backscatter (issue #20, `data/sites/radar_context.csv`); full-scan strict-mask ranking (issue #19 full version) | - | hidden until the files exist | - | Sentinel-1 text: "C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio" (issue #20 Accept) |
+| S04.19 | Actions | - | - | - | "Compare side by side" -> S05; "Download site package" (F-40); "What is compared and what is not" -> S13 | - |
 
 ### S05 Side by side Earth / Moon (issue #22)
 
@@ -240,7 +242,7 @@ numbers (each with `file · key` on hover, as `validation.json · items[].file`,
 | V3 Scan scope and ablation | `effectiveness.json · configuration`, `scan` (2,101 planned, 2,060 tiles, 1,758,778 valid cells), `scan.land_cover_limit`, `ablation.share6` (9.83%), `ablation.share8` (4.88%) | none | - |
 | V4 Negative controls | `effectiveness.json · controls.<tile>.label`, `n_valid`, `n_bare`, `with_mask.{cells,sites}`, `without_mask.{cells,sites}` (Tatra without mask: 33 cells, 2 sites) | `docs/figures/eff_j20_controls.png` | - |
 | V5 Tile recovery | `effectiveness.json · recovery.auc` (0.531), `auc_ci90`, `n_positive_tiles` (14), `n_background_tiles` (1,465), `median_positive_percentile` (54.2), `min_bare` (100), `known_tiles_without_bare` (9), `known_tiles_below_min_bare` (6), `n_background_tiles_excluded_known_regions` (32), `roc`, `all_candidates` | `docs/figures/eff_j20_recovery.png` | W-06 |
-| V6 Enrichment around known sites | `enrichment.json · n_sites_tested` (37), `sites_with_enrichment_above_1` (16), `median_enrichment` (0.91), `random.median_enrichment_median` (0.36), `random.median_enrichment_p05_p95`, `random.share_of_random_runs_with_median_at_least_ours` (0.014 = 7 of 500), `by_type_median`, `sites[]` table, `caveats` | `docs/figures/eff_enrichment.png` | 0.91 is below 1: the typical known site has less lunar-like ground than the average bare cell; 14 of the 37 entries are Mars-only (issue #16) |
+| V6 Enrichment around known lunar sites | `enrichment.json · analog_for_tested` (moon, both), `n_sites_tested` (22), `sites_with_enrichment_above_1` (11), `median_enrichment` (1.02), `random.median_enrichment_median` (0.39), `random.median_enrichment_p05_p95` (0.12 to 0.91), `random.share_of_random_runs_with_median_at_least_ours` (0.028 = 14 of 500), `by_type_median`, `sites[]` table, `mars_only_excluded` (reference only), `caveats` | `docs/figures/eff_enrichment.png` | "the typical known lunar site's circle sits at about the scan-wide rate" (`docs/VALIDATION.md`); not evidence that the score finds analogs |
 | V7 Stability | `effectiveness.json · stability.named_regions_spearman`, `stability.dem_comparison`, `stability.legacy_grid` (older 37-tile pilot subset, old target: top-10 overlap 0.6, 0.4, 0.4) | `docs/figures/eff_stability.png`, labelled "older 78-tile phase (J6)" | W-14 |
 | V8 Second elevation model | `nasadem_vs_copdem.json · ranking_nasa_vs_esa.{n_tiles,spearman_tile_share,top50_overlap}` (618, 0.637, 21), `candidates.{esa,dem_only,nasa}` (33,911, 4,886, 2,996), `candidate_cells_shared_esa_nasa` (2,237), `features.*.pearson`, `bare_mask_at_scale_conditional_on_worldcover_bare_ge_0.5`, `unflagged`, `other_targets.polar_160km`, `top_tiles_esa` | `docs/figures/nasadem_vs_copdem.png` | the ranking depends on the elevation model |
 | V9 Third elevation model (JAXA AW3D30) | `aw3d30_comparison.json · tiles` (10), `common_valid_cells` (15,761), `pairs.{copdem_vs_nasadem,copdem_vs_aw3d30,nasadem_vs_aw3d30}.<feature>`, `per_tile` | `docs/figures/aw3d30_comparison.png` | - |
@@ -248,6 +250,7 @@ numbers (each with `file · key` on hover, as `validation.json · items[].file`,
 | V11 Crater close-ups | `crater_profiles.json` (details in S16) | `docs/figures/crater_profile_overlay.png`, `docs/figures/morasko_1m_vs_30m.png` | - |
 | V12 Partner surface checks | `partner_checks.json · comparisons.dune_flag.*`, `comparisons.known_analog.*` (per latitude band: `group_a`, `group_b`, `rank_biserial`, `ci90`, `verdict`; `pooled_within_latitude`), `sample.sites` (978), `method` | `docs/figures/partner_checks.png` | the flag is not confirmed as dry sand (W-04) |
 | V13 What did not hold up | `docs/HANDOFF.md` section 9 "Does not hold up" | `docs/figures/eff_hidden_known.png` (first hidden-known test, "uninformative", replaced by enrichment) | - |
+| V14 Moss and lichen counted as bare (J33, top 100 only) | `landcover_sensitivity.json · groups`, `n_tiles_read` (67), `cells` (5,431), `cells_bare_mismatch` (0), `top30.pass_strict_cells` (8 of 30), `top30.pass_strict_median` (3), `top100.pass_strict_cells` (30 of 100), `top100.median_bare_minus_bare_strict` (0.93), `per_region.<region>.{top30,top100}` (10 regions), `cannot_show`; table `docs/VALIDATION.md` J33 section | none | no Putorana, Polar Urals or Chukotka site keeps a core; which sites would replace them is not measured (`cannot_show`) |
 
 ### S10 Literature check
 
@@ -272,7 +275,7 @@ numbers (each with `file · key` on hover, as `validation.json · items[].file`,
 | Component | Data | Units / format | States | Interactions | Not claimed |
 |---|---|---|---|---|---|
 | Table (NEW) | `data/reference/known_analogs.csv` (77 rows): `name`, `lat`, `lon`, `radius_km`, `analog_for` (19 moon, 34 both, 24 mars), `type` (volcanic 22, impact 16, region 12, desert 10, operational 9, polar 6, cave 2), `source_url`, `verified` (21 opened, 56 secondary) | km; badges | - | filter by `analog_for`, `type`, `verified`; row -> S02 layer 4 zoomed | `secondary` = source not opened by the team |
-| Scope note | issue #16 | "Lunar validation uses moon and both rows; Mars rows are kept for research" | - | - | - |
+| Scope note | issue #16; `enrichment.json · analog_for_tested` (moon, both); caption in `app/index.html` | "Lunar validation uses rows tagged moon or both; Mars-only rows are kept for research. The badge 'Known analog site' counts rows of every tag except operational stations." | - | - | - |
 | Ranked sites inside a known site | `ranking.csv · is_known` (11 of 200) | list | - | -> S04 | - |
 
 ### S13 Comparison criteria
@@ -396,8 +399,8 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 ### S04 Site card
 
 - **F-27** Head with rank, id, country, place, coordinates and badges. Data: `sites.json · rank`, `site_id`, `country`, `place`, `lat`, `lon`. EXISTS.
-- **F-28** Badges follow W-02, W-04, W-09; `mentioned` reads "region named in an opened source (Mars analog, regional); site not named". Data: `sites.json · is_known`, `dune_like`, `novelty`. PARTIAL (today `mentioned` reads "Literature check: not verified", written before issue #2 was closed).
-- **F-29** "Known analog site" badge names the matched known site and its `analog_for`. Data: `known_analogs.csv` (`name`, `lat`, `lon`, `radius_km`, `analog_for`), site `lat`, `lon`. NEW, KEY `known_match` = {name, analog_for, radius_km, distance_km} computed with the same rule as `pipeline/sites.py` (centroid inside `radius_km`; rows of type `operational` excluded, per its docstring).
+- **F-28** Badges follow W-02, W-04, W-09; `mentioned` reads "region named in an opened source (Mars analog, regional); site not named". Data: `sites.json · is_known`, `dune_like`, `novelty`. EXISTS (since `8edaad7`, `mentioned` reads "Region named as a Mars analog in general terms").
+- **F-29** "Known analog site" badge names the matched known site and its `analog_for` (today a page caption explains that every tag counts, `app/index.html`). Data: `known_analogs.csv` (`name`, `lat`, `lon`, `radius_km`, `analog_for`), site `lat`, `lon`. NEW, KEY `known_match` = {name, analog_for, radius_km, distance_km} computed with the same rule as `pipeline/sites.py` (centroid inside `radius_km`; rows of type `operational` excluded, per its docstring).
 - **F-30** Satellite image with credit "NASA Worldview / GIBS", date and layer; "No image stored" otherwise; a scale bar from the image extent. Data: `sites.json · image`, `image_date`, `image_layer`; `images/index.csv · bbox`. PARTIAL (scale bar NEW, KEY `image_bbox`).
 - **F-31** Patch facts: area, cells, elevation, ranking key, weighted area (plain and capped), best window centre, tile. Data: `sites.geojson · area_km2`, `n_cells`, `elev_med`, `best_window_km2`, `weighted_area_km2`, `weighted_area_capped_km2`, `window_lat`, `window_lon`, `tile`. PARTIAL, KEY `weighted_area_km2`, `weighted_area_capped_km2`, `window`.
 - **F-32** Five terrain bars: site value against the lunar median and p10–p90 of the selected target, label and unit from `feature_info`, "Earth outside range" in text. Data: `sites.json · features`, `moon.json · regions[target].features`, `feature_info`. EXISTS.
@@ -410,11 +413,11 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 - **F-39** Literature record for the 44 checked sites with links. Data: `novelty_check.csv` (12 columns). NEW, KEY `novelty_record`.
 - **F-40** "Download site package": one JSON with id, coordinates, polygon, rank, feature values, the lunar region compared, `breaks`, the novelty verdict with its sources, links to the elevation tiles and the image, each with source and licence. Data: `sites.json` record, `moon.json · regions[target]`, `novelty_check.csv`, `sources.json`. NEW (issue #22), KEY `novelty_record`, `sources.json · licence_or_citation` (exists).
 - **F-41** Image review block for ranks 1 to 30 with the SI label. Data: `sites.json · review`. EXISTS.
-- **F-42** Nearest known analog with distance and `analog_for`, linking to S12. Data: `sites.json · nearest_known`, `nearest_known_km`; `known_analogs.csv · analog_for`, `type`, `source_url`. PARTIAL, KEY `nearest_known_for`, `nearest_known_type`, `nearest_known_url`.
+- **F-42** Nearest known analog with distance and `analog_for`, and the nearest lunar analog when the nearest one is Mars-only, linking to S12. Data: `sites.json · nearest_known`, `nearest_known_km`, `nearest_known_for`, `nearest_lunar_known`, `nearest_lunar_known_km`; `known_analogs.csv · type`, `source_url`. PARTIAL (tag and lunar analog EXIST since `8edaad7`; link to S12 NEW), KEY `nearest_known_type`, `nearest_known_url`.
 - **F-43** Dune-like explanation for flagged sites: share of flagged cells and the reason sentence. Data: `sites.geojson · artefact_share`, `artefact_reason`. NEW, KEY `artefact_share`, `artefact_reason`.
 - **F-44** Radar block for the 37 sites of the RADARSAT-1 index, with the status sentence for the 28 without a window. Data: `radarsat1_index.csv`, `data/sites/radarsat1/*.png`. NEW, KEY `radar` and `img/` copies.
 - **F-45** Rank certainty block when `data/sites/rank_uncertainty.csv` exists; hidden otherwise. Data: issue #18 outputs. NEW (blocked by #18).
-- **F-46** Land-cover sensitivity and Sentinel-1 lines when their files exist; hidden otherwise. Data: issue #19 and #20 outputs. NEW (blocked by #19, #20).
+- **F-46** Moss-and-lichen check for ranks 1 to 100 ("keeps a 4-cell core without moss and lichen" or not, with `bare_strict_med`); "not checked" above rank 100; Sentinel-1 line only when its file exists. Data: `data/validation/landcover_sensitivity/sites_top100.csv`; issue #20 outputs. NEW, KEY `landcover_strict` per site (Sentinel-1 part blocked by #20).
 - **F-47** Every number in the card shows its file and key on hover. Data: as above. PARTIAL (validation items only).
 
 ### S05 Side by side
@@ -446,7 +449,7 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 
 ### S09 Validation
 
-- **F-63** One block per validation file (V1 to V13) with headline numbers, figure, holds / does not hold, link to the JSON. Data: the 9 files in `data/validation/`, the figures of section 5.3. PARTIAL (`validation.json` has 70 items from 5 files: `t1_reproduce_nasa.json`, `pds_lola.json`, `effectiveness.json`, `enrichment.json`, `nasadem_vs_copdem.json`; no figures), KEY items for `icesat2.json`, `aw3d30_comparison.json`, `crater_profiles.json`, `partner_checks.json`, `effectiveness.json · ablation`, `scan`, `stability.legacy_grid`, `stability.dem_comparison`; figure copies in `img/`.
+- **F-63** One block per validation file (V1 to V13) with headline numbers, figure, holds / does not hold, link to the JSON. Data: the 9 files in `data/validation/`, the figures of section 5.3. PARTIAL (`validation.json` has 70 items from 5 files: `t1_reproduce_nasa.json`, `pds_lola.json`, `effectiveness.json`, `enrichment.json`, `nasadem_vs_copdem.json`; no figures), KEY items for `icesat2.json`, `aw3d30_comparison.json`, `crater_profiles.json`, `partner_checks.json`, `landcover_sensitivity.json`, `effectiveness.json · ablation`, `scan`, `stability.legacy_grid`, `stability.dem_comparison`; figure copies in `img/`.
 - **F-64** The five plain sentences above the blocks, numbers read from `validation.json`, none typed. Data: `validation.json · items`, `summary`. EXISTS.
 - **F-65** Hover on any number shows `file · key`. Data: `validation.json · items[].file`, `key`. EXISTS.
 
@@ -477,7 +480,7 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 "Shown" is `yes` or `not shown`. A row that groups many files or columns counts once. Planned outputs of open issues
 are listed in 5.7 and are not counted.
 
-### 5.1 Every file of `data/catalog.csv` (294 paths)
+### 5.1 Every file of `data/catalog.csv` (297 paths at `0ba6399`)
 
 | Output (path or group) | Files | Screen · component | Shown |
 |---|---|---|---|
@@ -535,6 +538,9 @@ are listed in 5.7 and are not counted.
 | `data/validation/effectiveness.json` | 1 | S09 V3 to V5, V7; S01; S02 layer 5; S07 | yes |
 | `data/validation/enrichment.json` | 1 | S09 V6; S01 | yes |
 | `data/validation/icesat2.json` | 1 | S09 V10; S16 | yes |
+| `data/validation/landcover_sensitivity.json` | 1 | S09 V14; S02 tundra caption | yes |
+| `data/validation/landcover_sensitivity/sites_top100.csv` | 1 | S04.17 | yes |
+| `data/validation/landcover_sensitivity/cells_top100.parquet` | 1 | not shown: 5,431 single cells behind the site table | not shown |
 | `data/validation/nasadem_vs_copdem.json` | 1 | S09 V8 | yes |
 | `data/validation/partner_checks.json` | 1 | S09 V12; S14 | yes |
 | `data/validation/pds_lola.json` | 1 | S09 V2 | yes |
@@ -560,6 +566,9 @@ are listed in 5.7 and are not counted.
 | `enrichment.json · summary keys`, `random`, `by_type_median` | S09 V6 | yes |
 | `enrichment.json · sites[]` | S09 V6 table | yes |
 | `enrichment.json · caveats` | S09 V6 | yes |
+| `enrichment.json · mars_only_excluded` | S12 scope note (count of Mars-only rows kept apart); not a validation number | yes |
+| `landcover_sensitivity.json · top30`, `top100`, `per_region`, `cannot_show`, `groups`, `n_tiles_read`, `cells`, `cells_bare_mismatch` | S09 V14 | yes |
+| `landcover_sensitivity.json · job`, `question`, `bare_min`, `min_cells`, `top`, `cells_with_modis`, `files` | S09 V14 method line | yes |
 | `icesat2.json · sites`, `moon` | S09 V10; S16 | yes |
 | `icesat2.json · request`, `method`, `versions`, `caveats` | S09 V10 caveats and method line | yes |
 | `nasadem_vs_copdem.json · ranking_nasa_vs_esa`, `ranking_dem_only_vs_esa`, `candidates`, `candidate_cells_shared_esa_nasa` | S09 V8 | yes |
@@ -796,6 +805,15 @@ the rest:
 |---|---|---|
 | `tile`, `row`, `col`, `lat`, `lon`, `d2_all`, `p_all`, `p_amp`, `p_dep`, `candidate`, `site_id`, `bare`, `veg`, `ice`, `artefact_flag`, `dem_source`, and `d2_all_<region>`, `p_all_<region>` for the 8 lunar regions | not shown: single-cell values; site medians are shown | not shown |
 
+**`data/validation/landcover_sensitivity/sites_top100.csv`** (100 rows, 17 columns)
+
+| Column | Screen · component | Shown |
+|---|---|---|
+| `rank`, `site_id`, `country`, `lat`, `lon`, `region`, `n_cells` | S04.17 join and context | yes |
+| `bare_med`, `bare_strict_med`, `moss_lichen_med` | S04.17 | yes |
+| `strict_passes_median`, `strict_kept_cells`, `strict_largest_group`, `strict_passes_cells` | S04.17 | yes |
+| `modis_bare_med`, `modis_passes_median`, `modis_passes_cells` | S04.17 (empty for 87 of 100: "not covered") | yes |
+
 **`data/earth/tiles/tile_summary.csv`** (2,060 rows, 15 columns)
 
 | Column | Screen · component | Unit / format | Shown |
@@ -896,10 +914,10 @@ the rest:
 
 | Issue | Output | Where it goes |
 |---|---|---|
-| #16 | analog scope: `nearest_known` lunar / Mars label, known-analog badge scope | S04.2, S04.14, S12 (F-29, F-42, F-68) |
+| #16 | done on `main` (`8edaad7`): `nearest_known_for`, `nearest_lunar_known(_km)`, badge caption; still open for the app: the matched row of the badge (F-29) | S04.2, S04.14, S12 (F-29, F-42, F-68) |
 | #17 | `known_analogs.csv · selected_for`, `effectiveness.json · recovery.by_selected_for` | S12 column, S09 V5 table |
 | #18 | `data/sites/rank_uncertainty.csv`, `data/validation/rank_uncertainty.json`, `docs/figures/rank_uncertainty.png`, scale sentence | S04.9, S09 V7, S08 |
-| #19 | `data/validation/landcover_sensitivity.json`, `landcover_sensitivity/ranking_bare_strict.csv` | S04.17, S09 new block, S02 legend note |
+| #19 | shortened version done (top 100, counted in 5.1); the full-scan strict-mask ranking is not produced | S04.18, S09 V14 |
 | #20 | `data/sites/radar_context.csv`, `radar_context_summary.json` | S04.17, S15 |
 | #21 | updated `novelty_check.csv`, `docs/sources/j35.md` | S10 |
 | #22 | side by side, breaks, site package | S05, S04.10, F-40 |
@@ -912,18 +930,18 @@ which parses this section):
 
 | Table | Rows listed | Shown | Not shown |
 |---|---|---|---|
-| 5.1 Catalogue files and groups | 58 | 47 | 11 |
-| 5.2 Validation key groups | 29 | 24 | 5 |
+| 5.1 Catalogue files and groups | 61 | 49 | 12 |
+| 5.2 Validation key groups | 32 | 27 | 5 |
 | 5.3 Figures | 20 | 17 | 3 |
-| 5.4 Columns of product tables | 165 | 163 | 2 |
+| 5.4 Columns of product tables | 169 | 167 | 2 |
 | 5.5 Lunar entries | 19 | 17 | 2 |
 | 5.6 Texts and registries | 10 | 8 | 2 |
-| **Total** | **301** | **276** | **25** |
+| **Total** | **311** | **285** | **26** |
 
-The 58 rows of 5.1 cover all 294 paths of `data/catalog.csv` (check: 0 unmatched). The 130 columns of `ranking.csv`,
+The 61 rows of 5.1 cover all 297 paths of `data/catalog.csv` (check: 0 unmatched). The 130 columns of `ranking.csv`,
 `partner_context.csv`, `nasa_context.csv`, `novelty_check.csv`, `top30_review.csv`, `radarsat1_index.csv`,
 `tile_summary.csv` and `known_analogs.csv` all appear in 5.4 (check: 0 missing). In 5.4 a row that names several
-columns counts once, so the 165 rows stand for more than 165 columns.
+columns counts once, so the 169 rows stand for more than 169 columns.
 
 ---
 
@@ -933,9 +951,9 @@ columns counts once, so the 165 rows stand for more than 165 columns.
 
 | # | Missing in the export | Backend source | What `app/build_data.py` must add |
 |---|---|---|---|
-| G-01 | Known analog catalogue (77 rows) and the `analog_for` of `nearest_known` and of the `is_known` match (issue #16) | `data/reference/known_analogs.csv` | `known_analogs.json`; per site `nearest_known_for`, `nearest_known_type`, `nearest_known_url`, `known_match` |
+| G-01 | Known analog catalogue (77 rows) and the matched row of the `is_known` badge (the tag of `nearest_known` and the nearest lunar analog are exported since `8edaad7`) | `data/reference/known_analogs.csv` | `known_analogs.json`; per site `nearest_known_type`, `nearest_known_url`, `known_match` |
 | G-02 | Literature record (12 columns, 44 sites) | `data/sites/novelty_check.csv` | `novelty.json`; per site `novelty_record` |
-| G-03 | Every validation file beyond five, and every figure | `icesat2.json`, `aw3d30_comparison.json`, `crater_profiles.json`, `partner_checks.json`, `effectiveness.json · ablation`, `scan`, `stability.legacy_grid`; `docs/figures/*.png` | `validation.json` items (the prototype had groups `icesat2`, `lidar_craters`, `partner_checks`) and figure copies in `img/` |
+| G-03 | Every validation file beyond five, and every figure | `icesat2.json`, `aw3d30_comparison.json`, `crater_profiles.json`, `partner_checks.json`, `landcover_sensitivity.json` (and its `sites_top100.csv` per site), `effectiveness.json · ablation`, `scan`, `stability.legacy_grid`; `docs/figures/*.png` | `validation.json` items (the prototype had groups `icesat2`, `lidar_craters`, `partner_checks`) and figure copies in `img/` |
 | G-04 | Lunar instrument detail: all statistics, units, citations, caveats, the 80 maps, footprints, coordinate provenance, 9 more terrain features, share p10/p90 | `data/moon/instruments/*`, `regions.geojson`, `reference.json` | `moon.json · regions.*.instruments`, `instrument_info`, `maps`, `footprints`, `coord_*`, `notes`, `features.{r400,r800,dep_depth,relief,elev_med}`, `shares.*.{p10,p90}`, `mean_dep_frac`, `window_m`, `kind` |
 | G-05 | Radar look | `radarsat1_index.csv`, `data/sites/radarsat1/*.png` | `radar.json`; per site `radar`; image copies |
 | G-06 | Target comparison | `target_comparison.csv`, `target_comparison_top_tiles.csv` | `target_comparison.json` |
@@ -1032,11 +1050,11 @@ placeholders, for example "00.0"); no SI-generated picture without the watermark
 
 | Case | Record | Values to use (file · key) |
 |---|---|---|
-| Rank 1 with image and partner data | `N82W026-01` | `ranking.csv`: rank 1, Greenland, 82.4786 / -25.4948, `best_window_km2` 86.17, `area_km2` 309.41, `n_cells` 79, `score` 0.244, `score_amp` 0.42, `best_region` nobile_rim_2, `elev_m` 449, `slope_240m_deg` 3.5, `rough_1600m_m` 21.6, `novelty` unreported, `nearest_known` "Bockfjorden - Sverrefjellet volcano Svalbard (AMASE)" at 735.9 km (`known_analogs.csv · analog_for` = mars); `images/index.csv`: 2023-08-15, MODIS Terra true colour, `bbox` 82.1786,-26.9948,82.7786,-23.9948; `partner_context.csv`: JAXA SGLI day mean 266.25 K, night min 246.96 K (7 months); NASA MODIS night min 238.24 K; permafrost 100%, ground temperature -6.76 °C; `nasa_context.csv`: `ts_mean_c` -18.87, `ts_min_c` -49.44, `ts_max_c` 0.07; `top30_review.csv`: "Ice-free dissected upland in southern Peary Land, a polar desert ...", verdict no; `radarsat1_index.csv`: saved, 2009-01-02, beam F1, SGF |
+| Rank 1 with image and partner data | `N82W026-01` | `ranking.csv`: rank 1, Greenland, 82.4786 / -25.4948, `best_window_km2` 86.17, `area_km2` 309.41, `n_cells` 79, `score` 0.244, `score_amp` 0.42, `best_region` nobile_rim_2, `elev_m` 449, `slope_240m_deg` 3.5, `rough_1600m_m` 21.6, `novelty` unreported, `nearest_known` "Bockfjorden - Sverrefjellet volcano Svalbard (AMASE)" at 735.9 km (`nearest_known_for` = mars), nearest lunar analog "Svalbard archipelago (whole; AMASE field areas)" at 871.9 km (`sites.json · nearest_lunar_known_km`); `sites_top100.csv`: `bare_strict_med` 0.0312, `moss_lichen_med` 0.9688, `strict_passes_cells` False; `images/index.csv`: 2023-08-15, MODIS Terra true colour, `bbox` 82.1786,-26.9948,82.7786,-23.9948; `partner_context.csv`: JAXA SGLI day mean 266.25 K, night min 246.96 K (7 months); NASA MODIS night min 238.24 K; permafrost 100%, ground temperature -6.76 °C; `nasa_context.csv`: `ts_mean_c` -18.87, `ts_min_c` -49.44, `ts_max_c` 0.07; `top30_review.csv`: "Ice-free dissected upland in southern Peary Land, a polar desert ...", verdict no; `radarsat1_index.csv`: saved, 2009-01-02, beam F1, SGF |
 | No image, no POWER, no partner row | `N68E095-04` | `ranking.csv`: rank 152, Russia, `best_window_km2` 18.38, `score` 0.312, `best_region` mons_mouton, `novelty` unchecked, `nearest_known` "Svalbard archipelago (whole; AMASE field areas)" at 2,458.8 km (both); export `sites.json`: `image` null, `power` null, `partner` null, `review` null -> "No image stored", POWER "Not sampled", surface data "Not sampled", no review block |
 | Flagged (dune-like relief) | `N17E046-01` | `sites.geojson`: Saudi Arabia, 17.4949 / 46.5597, `artefact_flag` true, `artefact_share` 0.8774, `artefact_reason` "dune-field signature: cell relief / 200 m roughness below the 5th percentile of the target's lunar cells (88% of the cells)", `best_window_km2` 97.07, `best_region` peak_near_shackleton, `area_km2` 2205.01; export `sites_flagged.json`: rank 2655, `partner` present (group flagged); `breaks`: "Measured surface temperature 318 K by day and 294 K by night (JAXA GCOM-C/SGLI, 12 months with both) ..." |
-| Known analog (established) | `S21W070-01` | `ranking.csv`: rank 8, Chile, `is_known` true, `novelty` established, `nearest_known` "Atacama Desert region 2 of 5 (Tarapaca - Loa)" at 102.0 km (both), `best_window_km2` 57.35, `score` 0.255, `best_region` nobile_rim_2; `docs/NOVELTY.md` table: "known analog region (is_known = True), not a candidate" |
-| `mentioned` | `N62W074-01` | `ranking.csv`: rank 14, Canada, `novelty` mentioned, `nearest_known` "Pingualuit impact crater (Ungava; ...)" at 91.1 km (mars), `best_window_km2` 50.91, `score` 0.178, `best_region` mons_mouton; `docs/NOVELTY.md`: "region named in an opened source; the site itself is not; every image hazy, surface not seen"; `radarsat1_index.csv`: saved, 2011-10-03, SCWA |
+| Known analog (established) | `S21W070-01` | `ranking.csv`: rank 8, Chile, `is_known` true, `novelty` established, `nearest_known` "Atacama Desert region 2 of 5 (Tarapaca - Loa)" at 102.0 km (both); `sites_top100.csv`: `strict_passes_cells` True (90 of 90 cells kept), `best_window_km2` 57.35, `score` 0.255, `best_region` nobile_rim_2; `docs/NOVELTY.md` table: "known analog region (is_known = True), not a candidate" |
+| `mentioned` | `N62W074-01` | `ranking.csv`: rank 14, Canada, `novelty` mentioned, `nearest_known` "Pingualuit impact crater (Ungava; ...)" at 91.1 km (mars), nearest lunar analog "Clearwater West impact structure" at 656.8 km; `sites_top100.csv`: `strict_kept_cells` 6, `strict_largest_group` 2, `best_window_km2` 50.91, `score` 0.178, `best_region` mons_mouton; `docs/NOVELTY.md`: "region named in an opened source; the site itself is not; every image hazy, surface not seen"; `radarsat1_index.csv`: saved, 2011-10-03, SCWA |
 | Lunar target | `haworth` | `reference.json · regions.haworth`: Haworth crater, -86.9 / 356.0 E, 225 cells, `coord_status` "opened primary"; `diviner_regions.json · regions.haworth.temp_avg_K.median` 50.75 K |
 
 ---
@@ -1048,8 +1066,11 @@ placeholders, for example "00.0"); no SI-generated picture without the watermark
    `nasa_context.csv`, `novelty_check.csv`, `top30_review.csv`, `radarsat1_index.csv`, `tile_summary.csv` and
    `known_analogs.csv` appears in this document in backticks, and it counts the rows of section 5.8.
 2. **Ways this document could be wrong**, and what was checked:
-   - Counts taken from different runs: every count was read from the committed file at `f6efd20` (for example the
-     flagged rank 2655 from the current `app/data/sites_flagged.json`, not from the prototype).
+   - Counts taken from different runs: every count was read from the committed files (for example the flagged rank
+     2655 from the current `app/data/sites_flagged.json`, not from the prototype). While this document was written,
+     `main` moved from `f6efd20` to `0ba6399` and the enrichment changed (0.91 over 37 entries before issue #16,
+     1.02 over 22 lunar entries after it); the enrichment numbers here are the new ones, and every screen must read
+     them from `enrichment.json`, never from this document.
    - Two bare-cell totals exist and must not be shown side by side unlabelled: `effectiveness.json · scan.n_bare`
      (1,213,569) and `enrichment.json · n_bare_cells` (1,305,454) count different things; S01 uses the first.
    - Old numbers in texts: `docs/METHOD.md` step 10 says "75 known analog sites" while `known_analogs.csv` has 77 rows;
