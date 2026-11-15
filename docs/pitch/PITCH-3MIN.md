@@ -12,6 +12,6 @@ Third, the strict ranking. When we count only "bare or sparse vegetation", only 
 
 Fourth, what validation shows. Our slope code reproduces NASA's lunar slope map to 0.042 degrees. At the scale of one-degree tiles, the score does not pick out known analog sites: the AUC is 0.531, consistent with chance. Around 22 known lunar analog sites, the median site holds 1.02 times the scan-wide share of lunar-like ground, against 0.39 for random circles; that is borderline, because 2.8 percent of random runs reach it. The ranks hardly move when we resample the lunar data, but they change a lot when we leave a feature group out.
 
-Fifth, the literature. Of the strict top 30, 9 sites lie in known analog regions and 9 in regions that the pages we opened name as Mars analogs, never as Moon analogs; the other 12 were not found in the analog catalogues and searches we list. We do not call any of these places a discovery.
+Fifth, the literature. Of the strict top 30, 9 sites lie in known analog regions and 12 in regions that the pages we opened name as Mars analogs, never as Moon analogs; the other 9 were not found in the analog catalogues and searches we list. We do not call any of these places a discovery.
 
 A team could use Zodiak to narrow the search, look at the images and evidence, and decide which places deserve a field visit, with every step traceable from NASA's lunar measurements to the Earth site.

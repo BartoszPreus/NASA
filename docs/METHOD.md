@@ -91,9 +91,9 @@ the top-30 sites have a depression share of zero in the median cell, so that is 
 coldest monthly night mean among the 60 top sites is 235 K; the lunar regions
 have annual means of 51 to 141 K. Exact top sites move with the grid (6 of 10 survive a half-cell shift on the
 78-tile test); regions are stable. Nothing here is called a discovery. The literature checks (one to four
-English web searches per site row) found, for the default top 30, 2 sites in known analog regions, 4 in regions
-named as Mars analogs and 24 "not found in the analog catalogues and searches listed here"; for the strict top 30,
-9, 15 and 6 (`novelty` of `data/sites/ranking.csv` and of the strict ranking, ranks 1 to 30; `docs/NOVELTY.md`).
+English web searches per site row, and the J35 second pass of analog catalogues, OpenAlex and Russian searches)
+found, for the default top 30, 2 sites in known analog regions, 10 in regions named as Mars analogs and 18 "not
+found in the analog catalogues and searches listed here"; for the strict top 30, 9, 12 and 9 (`novelty` of `data/sites/ranking.csv` and of the strict ranking, ranks 1 to 30; `docs/NOVELTY.md`).
 Every "mentioned" is a Mars-analog statement. These verdicts are an SI model's; a person has not checked them.
 
 Mask choice (J33, full run on all 2,060 tiles): the default mask counts WorldCover class 100 "moss and lichen" as bare, so the top of the default ranking is mostly moss-and-lichen tundra. With class 60 only (`python -m pipeline.sites --bare-col bare_strict`, a variant; the default is unchanged) 3 of the default top 30 and 16 of the top 100 have a strict site within 3 km, candidate cells fall from 63,618 to 35,875 and sites from 3,175 to 1,561, and the strict top 30 is Atacama and Puna (13), the western Tibetan Plateau (8), southern Peru and Arica (4), the Hazen Plateau and northern Ellesmere (3) and Mauna Loa (1) (`data/validation/landcover_sensitivity.json`, `full_run.overlap`, `full_run.candidate_cells`, `full_run.sites`, `full_run.regions_top30`). Both rankings are presented; the strict one is the conservative reading ([VALIDATION.md](VALIDATION.md)). Its top 30 had the image review (NASA Worldview MODIS/VIIRS and HLS 30 m: 28 no, 2 unsure, 0 artefacts; `data/validation/landcover_sensitivity/top30_strict_review.csv`) and the literature check of J40 (`docs/NOVELTY.md` section 7). *DECISION FOR THE TEAM: which of the two rankings is the headline (issue #11).*
