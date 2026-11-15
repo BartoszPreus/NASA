@@ -52,3 +52,32 @@ def test_annual_stats_all_missing():
 
 def test_sample_key_rounds_coordinates():
     assert pc.Samples.key("c", "2021-07", 15.50471, 13.51092) == "c|2021-07|15.505|13.511"
+
+
+def test_strict_variant_options_keep_the_defaults():
+    """J42 (issue #28): the stages read another ranking through options; without them they read the published files."""
+    import importlib.util
+    import inspect
+    from pathlib import Path
+
+    from pipeline import nasa_context, paths
+    sig = inspect.signature(pc.pick_sites)
+    assert sig.parameters["ranking"].default == paths.RANKING
+    assert sig.parameters["geojson"].default == paths.SITES_GEOJSON
+    assert inspect.signature(nasa_context.run_power).parameters["out_csv"].default == nasa_context.OUT_CSV
+    assert nasa_context.OUT_CSV.name == "nasa_context.csv" and nasa_context.OUT_CSV.parent.name == "sites"
+    spec = importlib.util.spec_from_file_location("rank_uncertainty",
+                                                  Path(paths.ROOT) / "validation" / "rank_uncertainty.py")
+    ru = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ru)
+    assert ru.VARIANTS["bare"][1] == ru.OUT_CSV and ru.OUT_CSV.parent.name == "sites"
+    assert ru.VARIANTS["bare_strict"][1].name == "rank_uncertainty_strict.csv"
+
+
+def test_strict_variant_picks_the_strict_sites():
+    import os
+
+    from pipeline import paths
+    d = os.path.join(paths.VALIDATION, "landcover_sensitivity")
+    sel = pc.pick_sites(60, 0, 0, os.path.join(d, "ranking_bare_strict.csv"), os.path.join(d, "sites_bare_strict.geojson"))
+    assert len(sel) == 60 and set(sel["group"]) == {"ranked"} and sel["lat"].notna().all()

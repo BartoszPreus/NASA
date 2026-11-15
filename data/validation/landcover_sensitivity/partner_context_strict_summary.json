@@ -1,0 +1,261 @@
+{
+ "generated": "2026-11-15T07:27:18",
+ "job": "J24",
+ "sampling": "the one pixel that holds the site centre; no averaging over the site",
+ "ranking": "data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+ "sites": 60,
+ "groups": {
+  "ranked": 60
+ },
+ "layers": {
+  "sgli_lst_day": {
+   "collection": "JAXA.G-Portal_GCOM-C.SGLI_standard.L3-LST.daytime.v3_global_monthly",
+   "title": "Land Surface Temperature (Daytime/Monthly)",
+   "licence_label": "proprietary",
+   "licence_link": "https://earth.jaxa.jp/en/data/policy/",
+   "sources": [
+    {
+     "doi": "10.57746/EO.01gs73bfs5sbzhyxg4j9ytajsa",
+     "citation": "Japan Aerospace Exploration Agency. 2018. GCOM-C/SGLI L3 Map Land surface temperature (LST) (1-Month,1/24 deg).",
+     "version": "3"
+    }
+   ],
+   "dates": [
+    "2021-01",
+    "2021-12"
+   ],
+   "cog_level": 1,
+   "description": "Land surface temperature product in GCOM-C SGLI Level-3 Standard product Version 3."
+  },
+  "sgli_lst_night": {
+   "collection": "JAXA.G-Portal_GCOM-C.SGLI_standard.L3-LST.nighttime.v3_global_monthly",
+   "title": "Land Surface Temperature (Nighttime/Monthly)",
+   "licence_label": "proprietary",
+   "licence_link": "https://earth.jaxa.jp/en/data/policy/",
+   "sources": [
+    {
+     "doi": "10.57746/EO.01gs73bfs5sbzhyxg4j9ytajsa",
+     "citation": "Japan Aerospace Exploration Agency. 2018. GCOM-C/SGLI L3 Map Land surface temperature (LST) (1-Month,1/24 deg).",
+     "version": "3"
+    }
+   ],
+   "dates": [
+    "2021-01",
+    "2021-12"
+   ],
+   "cog_level": 1,
+   "description": "Land surface temperature product in GCOM-C SGLI Level-3 Standard product Version 3."
+  },
+  "modis_lst_day": {
+   "collection": "NASA.EOSDIS_Terra.MODIS_MOD11C1-LST.daytime.v061_global_monthly-normal",
+   "title": "Land Surface Temperature (Terra MODIS/Daytime/Monthly-normal)",
+   "licence_label": "proprietary",
+   "licence_link": "https://lpdaac.usgs.gov/data/data-citation-and-policies/",
+   "sources": null,
+   "dates": [
+    "01",
+    "12"
+   ],
+   "cog_level": 0,
+   "description": "Wan, Z., Hook, S., Hulley, G. (2021). MODIS/Terra Land Surface Temperature/Emissivity Daily L3 Global 0.05Deg CMG V061 [Data set]. NASA EOSDIS Land Processes DAAC. Accessed 2021-12-21 from https://doi.org/10.5067/MODIS/MOD11C1.061"
+  },
+  "modis_lst_night": {
+   "collection": "NASA.EOSDIS_Terra.MODIS_MOD11C1-LST.nighttime.v061_global_monthly-normal",
+   "title": "Land Surface Temperature (Terra MODIS/Nighttime/Monthly-normal)",
+   "licence_label": "proprietary",
+   "licence_link": "https://lpdaac.usgs.gov/data/data-citation-and-policies/",
+   "sources": null,
+   "dates": [
+    "01",
+    "12"
+   ],
+   "cog_level": 0,
+   "description": "Wan, Z., Hook, S., Hulley, G. (2021). MODIS/Terra Land Surface Temperature/Emissivity Daily L3 Global 0.05Deg CMG V061 [Data set]. NASA EOSDIS Land Processes DAAC. Accessed 2021-12-21 from https://doi.org/10.5067/MODIS/MOD11C1.061"
+  },
+  "amsr2_smc_day": {
+   "collection": "JAXA.G-Portal_GCOM-W.AMSR2_standard.L3-SMC.daytime.v3_global_monthly-normal",
+   "title": "Soil Moisture Content (Daytime/Monthly-normal)",
+   "licence_label": "proprietary",
+   "licence_link": "https://earth.jaxa.jp/policy/",
+   "sources": null,
+   "dates": [
+    "01",
+    "12"
+   ],
+   "cog_level": 0,
+   "description": "Volumetric water content over global land areas including arid and cold regions, except areas covered by vegetation with 2kg/m2 water equivalent. Accuracy is defined as mean absolute error of instantaneous observations."
+  },
+  "amsr2_smc_night": {
+   "collection": "JAXA.G-Portal_GCOM-W.AMSR2_standard.L3-SMC.nighttime.v3_global_monthly-normal",
+   "title": "Soil Moisture Content (Nighttime/Monthly-normal)",
+   "licence_label": "proprietary",
+   "licence_link": "https://earth.jaxa.jp/policy/",
+   "sources": null,
+   "dates": [
+    "01",
+    "12"
+   ],
+   "cog_level": 0,
+   "description": "Volumetric water content over global land areas including arid and cold regions, except areas covered by vegetation with 2kg/m2 water equivalent. Accuracy is defined as mean absolute error of instantaneous observations."
+  }
+ },
+ "jaxa_catalogue": "https://data.earth.jaxa.jp/stac/cog/v1/catalog.json",
+ "permafrost": {
+  "product": "esa-cci-permafrost",
+  "catalogue_entry": "https://esa-earthcode.github.io/open-science-catalog-metadata/products/esa-cci-permafrost/collection.json",
+  "store": "https://deep-esdl-public.s3.eu-central-1.amazonaws.com/esa-cci-permafrost-1x1151x1641-1.0.0.zarr/",
+  "year": 2019,
+  "grid_crs": "WGS 84 / Arctic Polar Stereographic",
+  "pixel_m": 926.6,
+  "units": {
+   "PFR": "percent",
+   "T2m": "degrees celsius"
+  },
+  "long_names": {
+   "PFR": "PFR permafrost area fraction",
+   "T2m": "T2m solid earth subsurface temperature"
+  },
+  "ground_temp_chunks_wanted": 4,
+  "ground_temp_chunks_read": 4,
+  "ground_temp_sites_not_read": 0
+ },
+ "failed_reads": [],
+ "allow_missing": [],
+ "by_group": {
+  "ranked": {
+   "n_sites": 60,
+   "jaxa_sgli_lst_day_mean_k": {
+    "n": 60,
+    "median": 300.98,
+    "p10": 288.55,
+    "p90": 314.04
+   },
+   "jaxa_sgli_lst_night_mean_k": {
+    "n": 60,
+    "median": 270.32,
+    "p10": 268.3,
+    "p90": 285.3
+   },
+   "jaxa_sgli_lst_day_max_k": {
+    "n": 60,
+    "median": 311.68,
+    "p10": 297.91,
+    "p90": 321.62
+   },
+   "jaxa_sgli_lst_night_min_k": {
+    "n": 60,
+    "median": 267.65,
+    "p10": 266.34,
+    "p90": 282.15
+   },
+   "jaxa_sgli_lst_day_night_diff_k": {
+    "n": 60,
+    "median": 28.7,
+    "p10": 17.64,
+    "p90": 34.49
+   },
+   "nasa_modis_lst_day_mean_k": {
+    "n": 60,
+    "median": 296.23,
+    "p10": 280.62,
+    "p90": 312.04
+   },
+   "nasa_modis_lst_night_mean_k": {
+    "n": 60,
+    "median": 265.2,
+    "p10": 257.58,
+    "p90": 285.7
+   },
+   "nasa_modis_lst_day_max_k": {
+    "n": 60,
+    "median": 309.56,
+    "p10": 294.33,
+    "p90": 319.04
+   },
+   "nasa_modis_lst_night_min_k": {
+    "n": 60,
+    "median": 259.52,
+    "p10": 244.25,
+    "p90": 282.45
+   },
+   "nasa_modis_lst_day_night_diff_k": {
+    "n": 60,
+    "median": 27.89,
+    "p10": 18.5,
+    "p90": 33.81
+   },
+   "jaxa_amsr2_soil_moisture_pct": {
+    "n": 52,
+    "median": 4.37,
+    "p10": 3.96,
+    "p90": 7.29
+   },
+   "esa_permafrost_fraction_pct": {
+    "n": 22,
+    "median": 100.0,
+    "p10": 100.0,
+    "p90": 100.0
+   },
+   "esa_ground_temp_2m": {
+    "n": 22,
+    "median": -5.24,
+    "p10": -16.54,
+    "p90": -2.17
+   }
+  }
+ },
+ "moon_diviner": {
+  "source": "data/moon/instruments/diviner_regions.json",
+  "regions": {
+   "polar_160km": {
+    "temp_avg_k_median": 82.66,
+    "temp_max_k_median": 224.13,
+    "share_area_ice_stable_within_1m": 0.6253
+   },
+   "connecting_ridge": {
+    "temp_avg_k_median": 116.12,
+    "temp_max_k_median": 250.68,
+    "share_area_ice_stable_within_1m": 0.3721
+   },
+   "peak_near_shackleton": {
+    "temp_avg_k_median": 112.51,
+    "temp_max_k_median": 238.62,
+    "share_area_ice_stable_within_1m": 0.4632
+   },
+   "nobile_rim_2": {
+    "temp_avg_k_median": 109.28,
+    "temp_max_k_median": 237.84,
+    "share_area_ice_stable_within_1m": 0.3646
+   },
+   "malapert_massif": {
+    "temp_avg_k_median": 141.47,
+    "temp_max_k_median": 274.47,
+    "share_area_ice_stable_within_1m": 0.3071
+   },
+   "mons_mouton": {
+    "temp_avg_k_median": 131.97,
+    "temp_max_k_median": 238.33,
+    "share_area_ice_stable_within_1m": 0.2676
+   },
+   "de_gerlache": {
+    "temp_avg_k_median": 75.88,
+    "temp_max_k_median": 237.11,
+    "share_area_ice_stable_within_1m": 0.4295
+   },
+   "haworth": {
+    "temp_avg_k_median": 50.75,
+    "temp_max_k_median": 212.37,
+    "share_area_ice_stable_within_1m": 0.6018
+   }
+  }
+ },
+ "caveats": [
+  "Pixels of 2.6 km (SGLI), 5.6 km (MODIS) and about 11 km (AMSR2 grid; the footprint is larger) against sites of a few km: the values describe the surroundings of a site, not the site.",
+  "Satellite land surface temperature is a clear-sky skin temperature. The day mean, the night mean and their difference use only the months that have both values (*_diff_months): in polar regions these are spring and autumn only, so they are not annual means there.",
+  "SGLI is one year (2021); MODIS and AMSR2 are 2012-2021 monthly normals.",
+  "The day-night difference depends on the overpass times of each satellite; compare sites within one sensor, not across sensors.",
+  "ESA CCI Permafrost is a model product (MODIS surface temperature, ERA5, CryoGrid), north of about 16 N only; ground temperature is read for every grid chunk that holds a ranked or known site unless --ground-temp-chunks limits it (see permafrost.ground_temp_sites_not_read).",
+  "Nothing here enters the terrain score. The Moon has no air and no liquid water: these columns quantify where the analogy breaks and which sites are cold and dry, they do not close the gap.",
+  "Licence labels in both catalogues are 'proprietary' with links to the providers' terms; the terms have to be read and cited before publication (job J25)."
+ ]
+}

@@ -24,7 +24,8 @@ least MIN_CELLS cells. Properties follow docs/TASKS.md, section 3 ("sites.geojso
                measured surface temperature (JAXA GCOM-C/SGLI L3 LST, doi:10.57746/EO.01gs73bfs5sbzhyxg4j9ytajsa;
                NASA MODIS MOD11C1 v061, doi:10.5067/MODIS/MOD11C1.061) against the LRO Diviner median annual mean
                temperature of the site's best_region (data/moon/instruments/diviner_regions.json; Paige et al.,
-               LRO-L-DLRE-5-PRP-V2.0, NASA PDS). Sites without a row keep the list above (job J25).
+               LRO-L-DLRE-5-PRP-V2.0, NASA PDS). Sites without a row keep the list above (job J25). The bare_strict
+               variant also reads data/validation/landcover_sensitivity/partner_context_strict.csv (job J42).
 Geometry: the dissolved outline (shapely.ops.unary_union) of the cell squares; cell edges are half the
 cell-centre spacing in lat and lon of the tile.
 
@@ -331,9 +332,15 @@ def mark_known_established(ranked, top=LIT_TOP):
     return ranked
 
 
+PARTNER_STRICT_CSV = os.path.join(paths.VALIDATION, "landcover_sensitivity", "partner_context_strict.csv")  # J42
+
+
 def load_partner(path=PARTNER_CSV):
-    """Measured surface values of job J24 (one row per sampled site, with its lat and lon), or None."""
-    return pd.read_csv(path) if os.path.exists(path) else None
+    """Measured surface values of job J24 (one row per sampled site, with its lat and lon) of one CSV or a list of
+    CSVs, or None. The bare_strict variant reads the J24 table and the J42 table (top 60 of the strict ranking);
+    rows are matched by position, and a point sampled in both tables has the same cached values in both."""
+    frames = [pd.read_csv(p) for p in ([path] if isinstance(path, str) else path) if os.path.exists(p)]
+    return pd.concat(frames, ignore_index=True) if frames else None
 
 
 def load_diviner(path=DIVINER_JSON):
@@ -635,7 +642,7 @@ def main(argv=None):
     print("known analogs: %s" % ("%d entries (operational excluded)" % len(known) if known is not None
                                  else "file missing, novelty fields null"))
     add_context(sites, known, countries, load_novelty([NOVELTY_CSV, NOVELTY_STRICT_CSV] if variant else NOVELTY_CSV),
-                load_partner(), load_diviner())
+                load_partner([PARTNER_CSV, PARTNER_STRICT_CSV] if variant else PARTNER_CSV), load_diviner())
     mark_known_established(rank_sites(sites, a.rank_key, a.flagged))
     scored["site_id"] = site_of_row
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",

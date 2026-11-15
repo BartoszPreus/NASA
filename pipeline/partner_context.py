@@ -35,6 +35,8 @@ printed and recorded in the summary JSON.
 
     python -m pipeline.partner_context                      # top 60 ranked + 30 flagged + 30 known sites
     python -m pipeline.partner_context --top 200 --flagged 100 --known 100
+    # another ranking (job J42, the strict-mask variant): --ranking, --geojson, --out-csv, --out-summary;
+    # python -m pipeline.run strict-context has the full command
 
 Libraries: rasterio (BSD-3), numcodecs (MIT), pyproj (MIT), requests (Apache-2.0), numpy, pandas.
 Written with SI assistance (Claude Code). Licence: Apache-2.0.
@@ -353,10 +355,14 @@ def sample_permafrost(sites, cache, ground_temp_sites=(), ground_temp_chunks=Non
 
 
 # ------------------------------------------------------------------------------------------------- the table
-def pick_sites(top=60, flagged=30, known=30):
-    """Sites to sample: the top of the ranking, the largest flagged (dune-field) sites, the best known analogs."""
-    rank = pd.read_csv(paths.RANKING)
-    with open(paths.SITES_GEOJSON, encoding="utf-8") as f:
+def pick_sites(top=60, flagged=30, known=30, ranking=paths.RANKING, geojson=paths.SITES_GEOJSON):
+    """Sites to sample: the top of the ranking, the largest flagged (dune-field) sites, the best known analogs.
+    `ranking` / `geojson`: another ranking and its sites (job J42: the strict-mask variant of J33)."""
+    for p in (ranking, geojson):
+        if not os.path.exists(p):
+            raise SystemExit("missing input %s" % paths.rel(p))
+    rank = pd.read_csv(ranking)
+    with open(geojson, encoding="utf-8") as f:
         allp = pd.DataFrame([x["properties"] for x in json.load(f)["features"]])
     keep = ["site_id", "lat", "lon", "tile", "is_known", "artefact_flag", "weighted_area_km2"]
     out = [rank.sort_values("rank").head(top).assign(group="ranked")[["site_id", "group"]]]
@@ -416,7 +422,7 @@ def lunar_side():
     return {"source": paths.rel(paths.MOON_DIVINER), "regions": out}
 
 
-def summarise(df, meta, failed, perma, allow_missing=()):
+def summarise(df, meta, failed, perma, allow_missing=(), ranking=paths.RANKING):
     cols = [c for c in df.columns if c not in ("site_id", "group", "lat", "lon") and not c.endswith("months")
             and not c.endswith("values")]
     by_group = {}
@@ -429,6 +435,7 @@ def summarise(df, meta, failed, perma, allow_missing=()):
                                 "p90": None if not len(v) else round(float(v.quantile(0.9)), 2)}
     return {"generated": time.strftime("%Y-%m-%dT%H:%M:%S"), "job": "J24",
             "sampling": "the one pixel that holds the site centre; no averaging over the site",
+            "ranking": paths.rel(ranking),
             "sites": int(len(df)), "groups": {k: int(v) for k, v in df["group"].value_counts().items()},
             "layers": meta, "jaxa_catalogue": JAXA_STAC, "permafrost": perma, "failed_reads": failed,
             "allow_missing": sorted(allow_missing),
@@ -464,9 +471,15 @@ def main(argv=None):
                     help="write the table even though this layer failed (its columns stay empty); recorded in "
                          "the summary. Without it a failed layer stops the stage with a non-zero exit code.")
     ap.add_argument("--workers", type=int, default=MAX_PARALLEL)
+    # J42: the same stage for another ranking (strict-mask variant of J33); defaults = the published ranking
+    ap.add_argument("--ranking", default=paths.RANKING, help="ranking CSV (default data/sites/ranking.csv)")
+    ap.add_argument("--geojson", default=paths.SITES_GEOJSON, help="sites of that ranking (default data/sites/sites.geojson)")
+    ap.add_argument("--out-csv", default=paths.PARTNER_CONTEXT, help="output table (default data/sites/partner_context.csv)")
+    ap.add_argument("--out-summary", default=paths.PARTNER_CONTEXT_SUMMARY,
+                    help="output summary (default data/sites/partner_context_summary.json)")
     a = ap.parse_args(argv)
-    paths.ensure(CACHE, paths.SITES)
-    sel = pick_sites(a.top, a.flagged, a.known)
+    paths.ensure(CACHE, os.path.dirname(os.path.abspath(a.out_csv)))
+    sel = pick_sites(a.top, a.flagged, a.known, a.ranking, a.geojson)
     pts = sorted({(round(float(s.lat), 3), round(float(s.lon), 3)) for s in sel.itertuples()})
     print("sites: %d (%s)" % (len(sel), sel["group"].value_counts().to_dict()), flush=True)
     cache = Samples()
@@ -493,11 +506,11 @@ def main(argv=None):
             perma = {"error": err}
             print("WARNING (--allow-missing permafrost): permafrost failed:", err, flush=True)
     df = build_table(sel, cache)
-    df.to_csv(paths.PARTNER_CONTEXT, index=False)
-    with open(paths.PARTNER_CONTEXT_SUMMARY, "w", encoding="utf-8") as f:
-        json.dump(summarise(df, meta, failed, perma, allow), f, indent=1)
+    df.to_csv(a.out_csv, index=False)
+    with open(a.out_summary, "w", encoding="utf-8") as f:
+        json.dump(summarise(df, meta, failed, perma, allow, a.ranking), f, indent=1)
     print("wrote %s (%d sites) and %s; failed tile reads: %d" % (
-        paths.rel(paths.PARTNER_CONTEXT), len(df), paths.rel(paths.PARTNER_CONTEXT_SUMMARY), len(failed)))
+        paths.rel(a.out_csv), len(df), paths.rel(a.out_summary), len(failed)))
     show = ["site_id", "group", "jaxa_sgli_lst_day_mean_k", "jaxa_sgli_lst_night_mean_k",
             "jaxa_sgli_lst_day_night_diff_k", "nasa_modis_lst_day_night_diff_k", "jaxa_amsr2_soil_moisture_pct",
             "esa_permafrost_fraction_pct", "esa_ground_temp_2m"]

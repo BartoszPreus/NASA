@@ -456,6 +456,35 @@ FILE_MAP = [
      "hand-curated by job J40 (SI-model literature and map search, no script)",
      "osm, analog_literature, data/validation/landcover_sensitivity/ranking_bare_strict.csv",
      "literature verdict for the strict top-30 sites outside a known analog radius (columns of data/sites/novelty_check.csv)"),
+    ("data/validation/landcover_sensitivity/nasa_context_strict.csv",
+     "python -m pipeline.nasa_context --top 100 --skip-images --ranking data/validation/landcover_sensitivity/"
+     "ranking_bare_strict.csv --out-csv ... (job J42)", "nasa_power, data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+     "VARIANT: NASA POWER skin temperature, precipitation and wind for the strict top 100 (columns of data/sites/nasa_context.csv)"),
+    ("data/validation/landcover_sensitivity/nasa_context_strict_summary.json", "python -m pipeline.nasa_context ... (job J42)",
+     "nasa_power", "VARIANT: range of annual mean skin temperature over the strict top 100"),
+    ("data/validation/landcover_sensitivity/partner_context_strict.csv",
+     "python -m pipeline.partner_context --top 60 --flagged 0 --known 0 --ranking data/validation/landcover_sensitivity/"
+     "ranking_bare_strict.csv --geojson ... (job J42)",
+     "jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, "
+     "data/validation/landcover_sensitivity/ranking_bare_strict.csv, data/validation/landcover_sensitivity/sites_bare_strict.geojson",
+     "VARIANT: measured surface temperature, soil moisture and permafrost for the strict top 60 (columns of data/sites/partner_context.csv)"),
+    ("data/validation/landcover_sensitivity/partner_context_strict_summary.json",
+     "python -m pipeline.partner_context ... (job J42)",
+     "jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/moon/instruments/diviner_regions.json",
+     "VARIANT: layers, medians, failed reads and caveats of the strict partner table"),
+    ("data/validation/landcover_sensitivity/rank_uncertainty_strict.csv",
+     "python validation/rank_uncertainty.py --bare-col bare_strict (job J42)",
+     "data/earth/cells/*.parquet, data/validation/landcover_sensitivity/cells_bare_strict.parquet, data/moon/cells.parquet, "
+     "data/moon/reference.json, data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+     "VARIANT: per strict top-100 site, bootstrap rank interval and leave-one-feature-group-out ranks (no NASADEM variant)"),
+    ("data/validation/landcover_sensitivity/rank_uncertainty_strict.json",
+     "python validation/rank_uncertainty.py --bare-col bare_strict (job J42)", "as rank_uncertainty_strict.csv",
+     "VARIANT: summary of the strict rank uncertainty (keys of data/validation/rank_uncertainty.json)"),
+    ("data/validation/landcover_sensitivity/context_comparison.json", "python -m validation.strict_context (job J42)",
+     "data/sites/{ranking,nasa_context,partner_context}.csv, data/validation/rank_uncertainty.json, the strict files above, "
+     "data/moon/instruments/diviner_regions.json",
+     "default top 30 against strict top 30: surface temperature, soil moisture, permafrost, precipitation, elevation, "
+     "difference to Diviner, rank stability"),
     ("data/validation/partner_checks.json", "python validation/partner_checks.py (job J26)",
      "data/sites/partner_context.csv, data/sites/sites.geojson, data/sites/ranking.csv",
      "dune-field flag and known analogs against measured surface temperature and soil moisture"),

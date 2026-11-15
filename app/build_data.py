@@ -143,6 +143,7 @@ OPTIONAL = (  # may not exist yet on main (issues #18, #19 full version, #20)
     "docs/figures/rank_uncertainty.png",
     "data/sites/radar_context.csv",
     "data/sites/radar_context_summary.json",
+    "data/validation/landcover_sensitivity/ranking_bare_strict.csv",  # J42: when present, every strict input is required
 )
 REFERENCE_TILES = {  # docs/sources/j18.md, header of the table of target_comparison.csv
     "N19W156": "Mauna Loa", "S25W070": "Atacama core", "N75W088": "Devon Island", "N75W090": "Devon Island",
@@ -439,8 +440,8 @@ def analog_context(site, known):
             "known_match": match}
 
 
-def novelty_rows():
-    rows = read_csv("data/sites/novelty_check.csv")
+def novelty_rows(path="data/sites/novelty_check.csv"):
+    rows = read_csv(path)
     output = []
     for row in rows:
         item = {key: text(value) for key, value in row.items()}
@@ -1002,12 +1003,15 @@ def catalog_data():
 
 def landcover_files(out):
     """Every CSV or JSON under data/validation/landcover_sensitivity* on main (strict ranking included once it
-    exists). Parquet cell tables are not exported."""
+    exists). Parquet cell tables are not exported, nor the per-site J42 tables that strict_ranking.json carries
+    (STRICT_IN_RECORDS, to stay under MAX_BYTES)."""
     exported = []
     for path in sorted((ROOT / "data/validation").glob("landcover_sensitivity*")):
         candidates = [path] if path.is_file() else sorted(p for p in path.rglob("*") if p.is_file())
         for file in candidates:
             rel = file.relative_to(ROOT).as_posix()
+            if rel in STRICT_IN_RECORDS:
+                continue
             if file.suffix == ".json":
                 put(out, "validation/" + file.relative_to(ROOT / "data/validation").as_posix(), read_json(rel))
             elif file.suffix == ".csv":
@@ -1028,6 +1032,122 @@ def landcover_files(out):
                 continue
             exported.append(rel)
     return exported
+
+
+STRICT_DIR = "data/validation/landcover_sensitivity"
+STRICT_SOURCES = {  # J42 (issue #28): the strict-mask ranking (J33) with the context the default sites have
+    "sites": f"{STRICT_DIR}/sites_bare_strict.geojson", "ranking": f"{STRICT_DIR}/ranking_bare_strict.csv",
+    "power": f"{STRICT_DIR}/nasa_context_strict.csv", "partner": f"{STRICT_DIR}/partner_context_strict.csv",
+    "rank_uncertainty": f"{STRICT_DIR}/rank_uncertainty_strict.csv", "image": f"{STRICT_DIR}/images/index.csv",
+    "review": f"{STRICT_DIR}/top30_strict_review.csv",
+    "novelty_record": [f"{STRICT_DIR}/novelty_check_strict.csv", "data/sites/novelty_check.csv"],
+    "stability": f"{STRICT_DIR}/rank_uncertainty_strict.json", "comparison": f"{STRICT_DIR}/context_comparison.json",
+}
+STRICT_MATCH_KM = 3.0  # pipeline/sites.py add_context: novelty rows are matched by position within 3 km
+STRICT_TOP = 100       # ranks with POWER and rank uncertainty; ranks 101-200 stay in ranking_bare_strict.json
+STRICT_IN_RECORDS = {STRICT_SOURCES[k] for k in ("power", "partner", "rank_uncertainty")}
+STRICT_IMAGE_PX = 400  # strict images are stored at 400 x 400 px, JPEG quality 75, to keep app/data/ under MAX_BYTES
+STRICT_IMAGES = {}
+
+
+def strict_image(out, path):
+    """A strict-ranking image: the default image's name when the bytes are the same, else img/strict_<site_id>.jpg
+    (the two runs number their sites independently, so a site id can name different places)."""
+    if not path:
+        return None
+    source = ROOT / path
+    same = out / "img" / source.name
+    if not source.is_file() or not source.resolve().is_relative_to(ROOT / "data"):
+        raise MissingInput(f"{path} (image referenced by the data)")
+    READ.add(Path(path).as_posix())
+    if same.is_file() and same.read_bytes() == source.read_bytes():
+        return same.name
+    from PIL import Image  # Pillow is in requirements.txt
+
+    image = Image.open(source)
+    image.load()
+    size = image.size
+    buffer = io.BytesIO()
+    image.convert("RGB").resize((STRICT_IMAGE_PX, STRICT_IMAGE_PX), Image.LANCZOS).save(
+        buffer, "JPEG", quality=75, optimize=True)
+    dest = out / "img" / ("strict_" + source.name)
+    dest.write_bytes(buffer.getvalue())
+    STRICT_IMAGES[Path(path).as_posix()] = [f"{size[0]} x {size[1]} px", source.stat().st_size,
+                                            f"{STRICT_IMAGE_PX} x {STRICT_IMAGE_PX} px", len(buffer.getvalue())]
+    return dest.name
+
+
+def _ring4(ring):
+    points = []
+    for lon, lat in ring:
+        point = [round(lat, 4), round(lon, 4)]
+        if not points or point != points[-1]:
+            points.append(point)
+    return points
+
+
+def strict_ranking_data(out):
+    """Every ranked site of the strict-mask ranking with polygon, review, novelty record, NASA POWER, partner
+    values, rank uncertainty and image (J42). Records are keyed by the strict run's site ids."""
+    src = STRICT_SOURCES
+    if not (ROOT / src["ranking"]).is_file():  # optional input (meta.json · absent): keys present, values null
+        return {"note": f"{src['ranking']} is not in this checkout", "source_files": src, "n": 0, "sites": [],
+                "stability": None, "comparison": None, "partner_info": None, "power_info": None}
+    ranking = read_csv(src["ranking"])
+    features = {f["properties"]["site_id"]: f for f in read_json(src["sites"])["features"]}
+    power, partner = by_id(src["power"]), by_id(src["partner"])
+    uncertainty = {row["site_id"]: row for row in auto_rows(read_csv(src["rank_uncertainty"]))}
+    images, reviews = by_id(src["image"]), by_id(src["review"])
+    novelty = [row for path in src["novelty_record"] for row in novelty_rows(path)]
+    sites = []
+    for row in ranking[:STRICT_TOP]:
+        sid = row["site_id"]
+        if sid not in features:
+            raise ValueError(f"{src['ranking']}: {sid} missing from {src['sites']}")
+        feature = features[sid]
+        p = feature["properties"]
+        for name, table in (("nasa_context_strict.csv", power), ("partner_context_strict.csv", partner),
+                            ("rank_uncertainty_strict.csv", uncertainty), ("images/index.csv", images)):
+            hit = table.get(sid)
+            if hit and (abs(number(hit["lat"]) - p["lat"]) > 0.02 or abs(number(hit["lon"]) - p["lon"]) > 0.05):
+                raise ValueError(f"{name}: position of {sid} does not match {src['sites']}")
+        near = [(distance_km(p["lat"], p["lon"], r["lat"], r["lon"]), i) for i, r in enumerate(novelty)]
+        km, i = min(near) if near else (None, None)
+        geometry = feature["geometry"]
+        polygons = [geometry["coordinates"]] if geometry["type"] == "Polygon" else geometry["coordinates"]
+        image, review = images.get(sid, {}), reviews.get(sid)
+        sites.append({
+            **{key: p[key] for key in ("site_id", "country", "place", "lat", "lon", "tile", "score", "area_km2",
+                                       "n_cells", "elev_med", "best_window_km2", "best_region", "is_known",
+                                       "novelty", "nearest_known", "nearest_known_km", "breaks")},
+            "rank": int(row["rank"]),
+            "dune_like": p["artefact_flag"],
+            # latitude first, 4 decimals (about 11 m; the cells are about 2 km), repeated points dropped
+            "polygon": [[_ring4(ring) for ring in polygon] for polygon in polygons],
+            "features": {key: p[key] for key in FEATURE_INFO},
+            "image": strict_image(out, image.get("file")),
+            "image_date": text(image.get("date")),
+            "image_layer": text(image.get("layer")),
+            "power": power_values(power.get(sid)),
+            "partner": partner_values(partner.get(sid)),
+            "review": ({key: review[key] for key in ("what_it_is", "looks_like_artefact", "reason")}
+                       if review else None),
+            "novelty_record": novelty[i] if km is not None and km <= STRICT_MATCH_KM else None,
+            "rank_uncertainty": uncertainty.get(sid),
+        })
+    return {
+        "note": ("Ranking of a separate sites run with the strict mask (WorldCover class 60 only, job J33). Its site "
+                 "ids are numbered within that run: do not join them to the default sites by id. Ranks 1 to 100 "
+                 "(ranks 101 to 200: validation/landcover_sensitivity/ranking_bare_strict.json). POWER and rank "
+                 "uncertainty for ranks 1 to 100, partner values for 1 to 60, images and review for 1 to 30; null "
+                 "= not sampled. Images: the default site image where the bytes are the same, else "
+                 "img/strict_<site_id>.jpg at 400 x 400 px (meta.json · strict_images)."),
+        "source_files": src, "n": len(sites), "sites": sites,
+        "stability": read_json(src["stability"]), "comparison": read_json(src["comparison"]),
+        "partner_info": {key: read_json(f"{STRICT_DIR}/partner_context_strict_summary.json").get(key)
+                         for key in ("sampling", "groups", "failed_reads", "allow_missing", "caveats")},
+        "power_info": read_json(f"{STRICT_DIR}/nasa_context_strict_summary.json"),
+    }
 
 
 # ------------------------------------------------------------------------------------------------ build
@@ -1094,6 +1214,7 @@ def build(out):
         "radar": radar_data(extras["radar"], sources), "target_comparison": target_comparison_data(),
         "surface": surface_data(), "scan_plan": scan_plan_data(plan, tiles), "controls": controls_data(),
         "method_sections": method_sections(), "run_log": run_log_data(), "catalog": catalog_data(),
+        "strict_ranking": strict_ranking_data(out),  # J42 (issue #28)
     }
     criteria = read_json("app/criteria.json")
     everything = sites + flagged
@@ -1116,7 +1237,15 @@ def build(out):
                    "lunar_targets": len(moon["regions"]), "validation_items": len(validation["items"]),
                    "sources": len(sources), "method_steps": len(method), "figures": len(figures),
                    "criteria_items": len(criteria.get("items", [])),
-                   "criteria": len(criteria.get("criteria", []))},
+                   "criteria": len(criteria.get("criteria", [])),
+                   # J42 (issue #28): the strict-mask ranking
+                   **{"strict_sites" + suffix: sum(bool(fn(s)) for s in files["strict_ranking"]["sites"])
+                      for suffix, fn in (("", lambda s: True), ("_with_image", lambda s: s["image"]),
+                                         ("_with_power", lambda s: s["power"]),
+                                         ("_with_partner", lambda s: s["partner"]),
+                                         ("_with_review", lambda s: s["review"]),
+                                         ("_with_novelty_record", lambda s: s["novelty_record"]),
+                                         ("_with_rank_uncertainty", lambda s: s["rank_uncertainty"]))}},
         "candidate_share_max": max(t["candidate_share"] for t in tiles if t["candidate_share"] is not None),
         "flagged_ranks": [flagged[0]["rank"], flagged[-1]["rank"]] if flagged else None,
         # J39 (issue #25)
@@ -1139,6 +1268,12 @@ def build(out):
         "files": dict(sorted(REPACKED.items())),
     }
     meta["reencoded_figures"] = {name: record for name, record in figures.items() if record["reencoded"]}
+    meta["strict_images"] = {  # J42 (issue #28)
+        "note": "Strict-ranking images (strict_ranking.json · sites.[].image) not identical to a default site image, "
+                "stored at 400 x 400 px, JPEG quality 75, to keep app/data/ under 25 MB. Values are [source size, "
+                "source bytes, stored size, stored bytes].",
+        "files": dict(sorted(STRICT_IMAGES.items())),
+    }
     put(out, "meta.json", meta)
     size = sum(p.stat().st_size for p in out.rglob("*") if p.is_file())
     print(f"{len(sites)} ranked sites, {len(flagged)} flagged, {len(tiles)} tiles, "

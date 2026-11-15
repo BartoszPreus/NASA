@@ -115,3 +115,25 @@ def test_export_size_and_missing_values():
 @pytest.mark.parametrize("key", ["sites.json", "sites_flagged.json", "tiles.json", "method.json", "sources.json"])
 def test_files_the_page_reads_keep_their_shape(key):
     assert isinstance(json.loads((DATA / key).read_text(encoding="utf-8")), list)
+
+
+def test_strict_ranking_export():
+    """J42 (issue #28): the strict-mask ranking with its context, in the order of ranking_bare_strict.csv."""
+    import csv
+    strict = json.loads((DATA / "strict_ranking.json").read_text(encoding="utf-8"))
+    with (ROOT / "data/validation/landcover_sensitivity/ranking_bare_strict.csv").open(encoding="utf-8") as f:
+        ranking = list(csv.DictReader(f))
+    sites = strict["sites"]
+    assert strict["n"] == len(sites) == 100
+    assert [s["site_id"] for s in sites] == [r["site_id"] for r in ranking[:100]]
+    assert [s["rank"] for s in sites] == list(range(1, 101))
+    for key in ("polygon", "image", "review", "novelty_record", "power", "partner", "rank_uncertainty", "breaks"):
+        assert all(key in s for s in sites), key
+    assert all(s["power"] is not None and s["rank_uncertainty"] is not None for s in sites)
+    assert all(s["rank_uncertainty"]["rank"] == s["rank"] for s in sites)
+    assert all((s["partner"] is not None) == (s["rank"] <= 60) for s in sites)
+    assert all((s["image"] is not None) == (s["review"] is not None) == (s["rank"] <= 30) for s in sites)
+    assert all((DATA / "img" / s["image"]).is_file() for s in sites if s["image"])
+    assert set(strict["comparison"]["groups"]) == {"default", "strict"}
+    meta = json.loads((DATA / "meta.json").read_text(encoding="utf-8"))
+    assert "strict_ranking.json" in meta["files"] and meta["counts"]["strict_sites"] == 100

@@ -7,7 +7,7 @@
 - **Null, never 0.** JSON `null` means not measured or not sampled; `0` is a measured or computed zero. "Not sampled" = the record has no row in that product (the object is null); "not measured" = the row exists and the value is null.
 - **Strict JSON.** No NaN or Infinity; values are copied as in the source unless the table says otherwise.
 - **Units.** Earth coordinates are degrees, east positive, -180 to 180. Lunar coordinates are latitude and east longitude 0 to 360. Shares are fractions 0 to 1 even where the label says %; the page multiplies by 100. Satellite and lunar temperatures are K, POWER and ground temperatures °C.
-- **Images.** `img/` holds the Earth satellite images (`<site_id>.jpg`), lunar hillshades (`<target>.png`), the 80 lunar instrument maps (`<target>__<product>.png`) and the RADARSAT-1 quicklooks (`radarsat1_<name>.png`). `fig/` holds the figures of `docs/figures/`. Images are copied byte for byte, except: lunar PNGs of at most 256 colours are stored as indexed PNG with identical pixels (`meta.json · repacked_images`), and figures over 600 kB as JPEG quality 90 at the original pixel size (`meta.json · reencoded_figures`), to keep `app/data/` under 25 MB (the build stops above).
+- **Images.** `img/` holds the Earth satellite images (`<site_id>.jpg`), lunar hillshades (`<target>.png`), the 80 lunar instrument maps (`<target>__<product>.png`) and the RADARSAT-1 quicklooks (`radarsat1_<name>.png`). `fig/` holds the figures of `docs/figures/`. Images are copied byte for byte, except: lunar PNGs of at most 256 colours are stored as indexed PNG with identical pixels (`meta.json · repacked_images`), figures over 600 kB as JPEG quality 90 at the original pixel size (`meta.json · reencoded_figures`), and the strict-ranking images that are not byte-identical to a default site image as `strict_<site_id>.jpg` at 400 x 400 px, JPEG quality 75 (`meta.json · strict_images`, J42), to keep `app/data/` under 25 MB (the build stops above).
 - **Validation files.** `validation/<name>.json` are the files of `data/validation/` as committed, except that `effectiveness.json · ablation.per_tile` and `partner_checks.json · observations` (not shown, docs/FRONTEND-SPEC.md 5.2) are left out and named in `_omitted_by_app_export`. CSV files under `data/validation/landcover_sensitivity/` become JSON with `rows` (or `columns` above 1,000 rows); the strict-mask ranking `ranking_bare_strict` comes from a separate sites run and is not joined to the default sites by id.
 - **Additive.** No key that `app/app.js` or `app/views.js` reads was renamed or removed by J39. In particular `moon.json · regions.*.shares` stays a number per key (the ranges are in `shares_range`), `sites.json`, `tiles.json`, `method.json` and `sources.json` stay lists, and `moon.json · feature_info` keeps the 5 features the page draws (all features: `feature_info_all`).
 
@@ -32,6 +32,7 @@
 | `method.json`, `method_sections.json` | ten steps; Two decisions, What the validation says, Limits | `docs/METHOD.md` |
 | `sources.json` | 46 sources | `data/sources.csv` |
 | `run_log.json`, `catalog.json` | run log, data catalogue | `data/run_log.csv`, `data/catalog.csv` |
+| `strict_ranking.json` | the strict-mask ranking (J33) top 100 with polygon, image, review, novelty record, NASA POWER, partner values, rank uncertainty, and the comparison with the default top 30 (J42, issue #28) | `data/validation/landcover_sensitivity/*` |
 | `../criteria.json` (in `app/`) | comparison criteria; hand-maintained, not built | `app/CRITERIA-NOTES.md` |
 
 ## Keys
@@ -639,6 +640,60 @@ All rows of `data/catalog.csv`.
 | `inputs` | string or null |  | catalog.csv · inputs | `"copernicus_dem, esa_worldcover, data/reference/known_analogs.csv"` |  |
 | `description` | string |  | catalog.csv · description | `"log of the pipeline stages: command, start time, seconds, exit cod..."` |  |
 
+### Strict-mask ranking (`strict_ranking.json`)
+
+Job J42 (issue #28). The ranking of the separate sites run with the strict mask (WorldCover class 60 only, J33), ranks 1 to 100, with the context the default sites have. Site ids are numbered within that run: never join them to `sites.json` by id. Examples are rank 1, `S21W070-01`. The per-site J42 tables (`nasa_context_strict.csv`, `partner_context_strict.csv`, `rank_uncertainty_strict.csv`) are not also exported under `validation/`; their summaries are.
+
+<!-- keys: strict_ranking.json . -->
+
+| Key | Type | Unit | Source (file · column or key) | Example | Note |
+|---|---|---|---|---|---|
+| `note` | string |  | app/build_data.py | `"Ranking of a separate sites run with the strict mask (WorldC..."` | ids are not joinable to sites.json |
+| `source_files` | object |  | app/build_data.py STRICT_SOURCES | `{sites, ranking, power, partner, rank_uncertainty, image, ...}` |  |
+| `n` | integer |  |  | `100` | ranks 1 to 100 |
+| `sites` | array |  | ranking_bare_strict.csv rows 1 to 100 | `list of 100` | rank order |
+| `sites.[].site_id` | string |  | data/validation/landcover_sensitivity/sites_bare_strict.geojson · site_id | `"S21W070-01"` | numbered within the strict run |
+| `sites.[].rank` | integer |  | ranking_bare_strict.csv · rank | `1` |  |
+| `sites.[].country` | string |  | sites_bare_strict.geojson · country | `"Chile"` |  |
+| `sites.[].place` | string or null |  | sites_bare_strict.geojson · place | `"Atacama Desert region 2 of 5 (Tarapaca - Loa) (known analog ..."` |  |
+| `sites.[].lat` | number | degrees | sites_bare_strict.geojson · lat | `-20.5168` | centroid |
+| `sites.[].lon` | number | degrees | sites_bare_strict.geojson · lon | `-69.2344` |  |
+| `sites.[].tile` | string |  | sites_bare_strict.geojson · tile | `"S21W070"` |  |
+| `sites.[].score` | number |  | sites_bare_strict.geojson · score | `0.255` | median p_all |
+| `sites.[].area_km2` | number | km2 | sites_bare_strict.geojson · area_km2 | `352.49` |  |
+| `sites.[].n_cells` | integer | cells | sites_bare_strict.geojson · n_cells | `90` |  |
+| `sites.[].elev_med` | number | m | sites_bare_strict.geojson · elev_med | `1990.4143` |  |
+| `sites.[].best_window_km2` | number | km2 | sites_bare_strict.geojson · best_window_km2 | `57.35` | ranking key |
+| `sites.[].best_region` | string |  | sites_bare_strict.geojson · best_region | `"nobile_rim_2"` |  |
+| `sites.[].is_known` | boolean |  | sites_bare_strict.geojson · is_known | `true` |  |
+| `sites.[].novelty` | string |  | sites_bare_strict.geojson · novelty | `"established"` | J40 verdicts, top 30 |
+| `sites.[].nearest_known` | string |  | sites_bare_strict.geojson · nearest_known | `"Atacama Desert region 2 of 5 (Tarapaca - Loa)"` |  |
+| `sites.[].nearest_known_km` | number | km | sites_bare_strict.geojson · nearest_known_km | `102.0` |  |
+| `sites.[].breaks` | array of strings |  | sites_bare_strict.geojson · breaks | `list of 8` | with the measured-temperature sentence where partner values exist (J42) |
+| `sites.[].dune_like` | boolean |  | sites_bare_strict.geojson · artefact_flag | `false` |  |
+| `sites.[].polygon` | array | [lat, lon] | sites_bare_strict.geojson · geometry | `list of 30` | latitude first, 4 decimals, repeated points dropped |
+| `sites.[].features` | object |  | sites_bare_strict.geojson | `{s240, s570, r200, r1600, dep_frac}` | as sites.json · features |
+| `sites.[].image` | string or null |  | images/index.csv · file | `"S21W070-01.jpg"` | file in img/; ranks 1 to 30 |
+| `sites.[].image_date` | string or null |  | images/index.csv · date | `"2025-01-15"` |  |
+| `sites.[].image_layer` | string or null |  | images/index.csv · layer | `"MODIS_Terra_CorrectedReflectance_TrueColor"` |  |
+| `sites.[].power` | object or null |  | nasa_context_strict.csv | `{ts_mean_c, ts_min_c, ts_max_c, ts_mean_k, precip_mm_per_year, ws10m_m_s, ...}` | as sites.json · power; ranks 1 to 100 |
+| `sites.[].power.precip_mm_per_year` | number | mm/year | nasa_context_strict.csv · precip_mm_per_year | `18.3` |  |
+| `sites.[].partner` | object or null |  | partner_context_strict.csv | `{group, jaxa_sgli, nasa_modis, soil_moisture_pct, soil_samples, permafrost_fraction_pct, ...}` | as sites.json · partner; ranks 1 to 60 |
+| `sites.[].partner.nasa_modis.night_mean_k` | number | K | partner_context_strict.csv · nasa_modis_lst_night_mean_k | `282.94` |  |
+| `sites.[].partner.soil_moisture_pct` | number or null | % | partner_context_strict.csv · jaxa_amsr2_soil_moisture_pct | `10.58` |  |
+| `sites.[].partner.permafrost_fraction_pct` | number or null | % | partner_context_strict.csv · esa_permafrost_fraction_pct | `null` | null outside the grid (southern hemisphere, south of about 16 N) |
+| `sites.[].review` | object or null |  | top30_strict_review.csv | `{what_it_is, looks_like_artefact, reason}` | ranks 1 to 30; SI-model verdicts |
+| `sites.[].novelty_record` | object or null |  | data/validation/landcover_sensitivity/novelty_check_strict.csv, data/sites/novelty_check.csv | `{site_id, lat, lon, country, place, terrain, ...}` | row within 3 km (pipeline/sites.py rule) |
+| `sites.[].rank_uncertainty` | object or null |  | rank_uncertainty_strict.csv | `{rank, site_id, lat, lon, country, rank_p05, ...}` | as sites.json · rank_uncertainty, without the NASADEM columns |
+| `sites.[].rank_uncertainty.rank_p95` | number | rank | rank_uncertainty_strict.csv · rank_p95 | `1.0` |  |
+| `stability` | object |  | data/validation/landcover_sensitivity/rank_uncertainty_strict.json | `{job, script, configuration, n_sites_published, bootstrap, variants, ...}` | the file in full |
+| `stability.bootstrap.top30_sites_in_top30_in_at_least_half_of_runs` | integer | sites | rank_uncertainty_strict.json | `28` |  |
+| `comparison` | object |  | data/validation/landcover_sensitivity/context_comparison.json | `{job, script, top, match_km, temperature_sensor, lunar_reference, ...}` | the file in full |
+| `comparison.groups.strict.modis_lst_night_mean_k.median` | number | K | context_comparison.json | `264.7` |  |
+| `comparison.groups.default.power_precip_mm_per_year.median` | number | mm/year | context_comparison.json | `642.8` |  |
+| `partner_info` | object |  | partner_context_strict_summary.json | `{sampling, groups, failed_reads, allow_missing, caveats}` |  |
+| `power_info` | object |  | nasa_context_strict_summary.json | `{source, climatology_period, n_sites_requested, n_sites_with_values, ts_mean_k_min, ts_mean_k_max, ...}` |  |
+
 ### Build metadata (`meta.json`)
 
 <!-- keys: meta.json . -->
@@ -669,13 +724,21 @@ All rows of `data/catalog.csv`.
 | `counts.validation_items` | integer |  |  | `172` |  |
 | `counts.figures` | integer |  |  | `18` |  |
 | `counts.criteria` | integer |  | app/criteria.json · criteria | `38` |  |
+| `counts.strict_sites` | integer |  | strict_ranking.json | `100` | J42 |
+| `counts.strict_sites_with_image` | integer |  | strict_ranking.json | `30` | J42 |
+| `counts.strict_sites_with_power` | integer |  | strict_ranking.json | `100` | J42 |
+| `counts.strict_sites_with_partner` | integer |  | strict_ranking.json | `60` | J42 |
+| `counts.strict_sites_with_review` | integer |  | strict_ranking.json | `30` | J42 |
+| `counts.strict_sites_with_novelty_record` | integer |  | strict_ranking.json | `23` | J42 |
+| `counts.strict_sites_with_rank_uncertainty` | integer |  | strict_ranking.json | `100` | J42 |
+| `strict_images.files` | object | path -> [source size, bytes, stored size, bytes] | app/build_data.py strict_image | `{data/validation/landcover_sensitivity/images/N33E084-01.jpg, data/validation/landcover_sensitivity/images/N34E082-01.jpg, data/validation/landcover_sensitivity/images/N34E084-01.jpg, data/validation/landcover_sensitivity/images/N34E084-02.jpg, data/validation/landcover_sensitivity/images/N35E080-01.jpg, data/validation/landcover_sensitivity/images/N35E080-02.jpg, ...}` | J42: stored at 400 x 400 px, JPEG quality 75 |
 | `candidate_share_max` | number | fraction | tiles.json | `0.6789` | end of the tile colour scale |
 | `flagged_ranks` | [first, last] |  | sites_flagged.json | `[2655, 2754]` |  |
 | `scan.n_planned_tiles` | integer |  | effectiveness.json · scan.n_planned_tiles | `2101` |  |
 | `scan.n_tiles` | integer |  | effectiveness.json · scan.n_tiles | `2060` |  |
 | `scan.n_valid` | integer | cells | effectiveness.json · scan.n_valid | `1758778` |  |
 | `scan.n_bare` | integer | cells | effectiveness.json · scan.n_bare | `1213569` | not enrichment.json · n_bare_cells |
-| `optional_inputs` | object | path -> present | app/build_data.py OPTIONAL | `{data/validation/rank_uncertainty.json, data/sites/rank_uncertainty.csv, docs/figures/rank_uncertainty.png, data/sites/radar_context.csv, data/sites/radar_context_summary.json}` |  |
+| `optional_inputs` | object | path -> present | app/build_data.py OPTIONAL | `{data/validation/rank_uncertainty.json, data/sites/rank_uncertainty.csv, docs/figures/rank_uncertainty.png, data/sites/radar_context.csv, data/sites/radar_context_summary.json, data/validation/landcover_sensitivity/ranking_bare_strict.csv}` | the last one (J42): when present, every input of strict_ranking.json is required |
 | `absent` | array |  | optional inputs not on disk | `list of 2` |  |
 | `files` | array |  | JSON files written | `list of 19` |  |
 | `inputs` | array |  | every repository file the build read | `list of 221` |  |

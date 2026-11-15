@@ -29,6 +29,13 @@ script stops if it does not reproduce the published top 100 exactly.
 Outputs: data/sites/rank_uncertainty.csv (top 100, keyed by site_id, lat, lon),
 data/validation/rank_uncertainty.json, docs/figures/rank_uncertainty.png.
 
+Strict-mask variant (job J42, the J33 ranking with WorldCover class 60 only):
+    python validation/rank_uncertainty.py --bare-col bare_strict
+reads data/validation/landcover_sensitivity/ranking_bare_strict.csv, applies the mask of
+pipeline.sites.apply_bare_variant (cells_bare_strict.parquet) and writes rank_uncertainty_strict.csv / .json next to
+it and docs/figures/rank_uncertainty_strict.png. Same bootstrap, seed and feature groups. The NASADEM variant is not
+run: its land cover is MODIS IGBP, which has no counterpart of the WorldCover class-60-only mask.
+
 Data: Copernicus GLO-30 (https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model),
 NASADEM (https://lpdaac.usgs.gov/products/nasadem_hgtv001/), ESA WorldCover (https://esa-worldcover.org),
 MODIS land cover (https://lpdaac.usgs.gov/products/mcd12q1v061/), LOLA LDEM_80S_20MPP_ADJ
@@ -64,6 +71,12 @@ GROUPS = {"no_slopes": ["s240", "s570"], "no_roughness": ["r200", "r400", "r800"
 OUT_JSON = Path(paths.VALIDATION) / "rank_uncertainty.json"
 OUT_CSV = Path(paths.SITES) / "rank_uncertainty.csv"
 OUT_FIG = Path(paths.FIGURES) / "rank_uncertainty.png"
+STRICT_DIR = Path(paths.VALIDATION) / "landcover_sensitivity"
+VARIANTS = {  # --bare-col -> ranking, csv, json, figure
+    "bare": (Path(paths.RANKING), OUT_CSV, OUT_JSON, OUT_FIG),
+    "bare_strict": (STRICT_DIR / "ranking_bare_strict.csv", STRICT_DIR / "rank_uncertainty_strict.csv",
+                    STRICT_DIR / "rank_uncertainty_strict.json", Path(paths.FIGURES) / "rank_uncertainty_strict.png"),
+}
 
 
 # ------------------------------------------------------------------------------------------- earth cells
@@ -189,7 +202,7 @@ def published_reference(target):
 
 
 # ------------------------------------------------------------------------------------------- main
-def run(n_boot=N_BOOT, seed=SEED, top=TOP, cells=None, ranking=paths.RANKING, check_published=True):
+def run(n_boot=N_BOOT, seed=SEED, top=TOP, cells=None, ranking=paths.RANKING, check_published=True, bare_col="bare"):
     t0 = time.time()
     target = score.DEFAULT_TARGET
     policy, _ = score.dem_policy_from_rule(target=target)
@@ -198,6 +211,9 @@ def run(n_boot=N_BOOT, seed=SEED, top=TOP, cells=None, ranking=paths.RANKING, ch
         cells, what = score.load_cells(dem_policy=policy)
     else:
         what = "cell table given by the caller"
+    if bare_col != "bare":   # land-cover mask variant (J33), exactly as pipeline.sites --bare-col
+        cells = sites.apply_bare_variant(cells, bare_col, sites.BARE_STRICT_TABLE)
+        what += "; mask %s (%s)" % (bare_col, paths.rel(sites.BARE_STRICT_TABLE))
     earth = Earth(cells)
     pub = published_reference(target)
     Xm, ratio_m, n_lunar = lunar_matrix(target)
@@ -249,7 +265,7 @@ def run(n_boot=N_BOOT, seed=SEED, top=TOP, cells=None, ranking=paths.RANKING, ch
             print("bootstrap %d/%d (%.0f s)" % (b + 1, n_boot, time.time() - t0), flush=True)
     # NASADEM where it exists (the nasa-first DEM policy)
     nasadem = None
-    if policy == "copdem" and own_cells:
+    if policy == "copdem" and own_cells and bare_col == "bare":
         ncells, nwhat = score.load_cells(dem_policy="nasa-first")
         nasa_tiles = set(ncells.loc[ncells["dem_source"].eq("nasadem"), "tile"])
         en = Earth(ncells)
@@ -259,7 +275,8 @@ def run(n_boot=N_BOOT, seed=SEED, top=TOP, cells=None, ranking=paths.RANKING, ch
         nasadem = {"ranks": site_ranks(keys, en, rk, n), "n_sites": n, "cells": nwhat,
                    "covered": np.array([t in nasa_tiles for t in tiles_of])}
         print("nasadem: %d sites (%.0f s)" % (n, time.time() - t0), flush=True)
-    return {"target": target, "dem_policy": policy, "cells": what, "n_bare": earth.n_bare, "n_lunar": n_lunar,
+    return {"target": target, "dem_policy": policy, "cells": what, "bare_col": bare_col, "ranking": ranking,
+            "n_bare": earth.n_bare, "n_lunar": n_lunar,
             "n_lunar_finite": int(len(Xm)), "n_sites": n_pub, "top": top, "published": published.iloc[:top],
             "runs": runs, "boot": boot, "boot_sites": boot_sites, "nasadem": nasadem, "seed": seed,
             "seconds": round(time.time() - t0, 1)}
@@ -307,6 +324,10 @@ def summarise(res):
     summary = {
         "job": JOB, "script": "validation/rank_uncertainty.py",
         "configuration": {"target": res["target"], "dem_policy": res["dem_policy"], "cells": res["cells"],
+                          **({} if res.get("bare_col", "bare") == "bare" else
+                             {"bare_col": res["bare_col"], "ranking": paths.rel(str(res["ranking"])),
+                              "nasadem_variant": "not run: NASADEM cells carry MODIS IGBP land cover, which has no "
+                                                 "counterpart of the WorldCover class-60-only mask"}),
                           "n_bare_cells": res["n_bare"], "n_lunar_cells": res["n_lunar"],
                           "n_lunar_cells_finite": res["n_lunar_finite"], "n_bootstrap": len(boot),
                           "seed": res["seed"], "top": top, "ranking_key": sites.RANK_KEYS[sites.DEFAULT_RANK_KEY],
@@ -344,7 +365,7 @@ def summarise(res):
     return table, summary
 
 
-def figure(table, n_boot, path=OUT_FIG):
+def figure(table, n_boot, path=OUT_FIG, label=""):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -362,7 +383,8 @@ def figure(table, n_boot, path=OUT_FIG):
     ax.set_yticks(y, ["%d %s (%s)" % (r, s, c) for r, s, c in zip(t["rank"], t["site_id"], t["country"])], fontsize=8)
     ax.axvline(30.5, color="#777777", ls="--", lw=1)
     ax.set(xlabel="Rank (log scale; right of the dashed line = outside the top 30)",
-           title="Rank uncertainty of the top 30 sites (lunar reference bootstrap)")
+           title="Rank uncertainty of the top 30 sites (lunar reference bootstrap)" + (
+               "\n" + label if label else ""))
     ax.grid(axis="x", alpha=0.25, which="both")
     ax.legend(loc="lower right", fontsize=8)
     paths.ensure(paths.FIGURES)
@@ -375,20 +397,25 @@ def main(argv=None):
     ap.add_argument("--n-boot", type=int, default=N_BOOT)
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--top", type=int, default=TOP)
+    ap.add_argument("--bare-col", default="bare", choices=sorted(VARIANTS),
+                    help="bare = the published ranking (default); bare_strict = the J33 strict-mask ranking (J42)")
     a = ap.parse_args(argv)
-    res = run(a.n_boot, a.seed, a.top)
+    ranking, out_csv, out_json, out_fig = VARIANTS[a.bare_col]
+    if not ranking.exists():
+        raise SystemExit("missing input %s" % paths.rel(str(ranking)))
+    res = run(a.n_boot, a.seed, a.top, ranking=ranking, bare_col=a.bare_col)
     table, summary = summarise(res)
     if table[["rank_p05", "rank_median", "rank_p95"]].isna().any().any():
         raise SystemExit("empty rank interval")
     cells_m = pd.concat([pd.read_parquet(f, columns=["cell_m"]) for f in paths.earth_cell_tables()])["cell_m"]
     summary["scale"]["cell_m_median"] = round(float(cells_m.median()), 1)
-    paths.ensure(paths.SITES)
-    table.to_csv(OUT_CSV, index=False)
-    paths.ensure(paths.VALIDATION)
-    OUT_JSON.write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8")
-    figure(table, summary["configuration"]["n_bootstrap"])
+    paths.ensure(str(out_csv.parent), str(out_json.parent))
+    table.to_csv(out_csv, index=False)
+    out_json.write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+    figure(table, summary["configuration"]["n_bootstrap"], out_fig,
+           "" if a.bare_col == "bare" else "strict mask (WorldCover class 60 only), job J42")
     print(json.dumps({k: summary[k] for k in ("bootstrap", "variants")}, indent=1)[:4000])
-    print("wrote %s, %s, %s" % (paths.rel(str(OUT_CSV)), paths.rel(str(OUT_JSON)), paths.rel(str(OUT_FIG))))
+    print("wrote %s, %s, %s" % (paths.rel(str(out_csv)), paths.rel(str(out_json)), paths.rel(str(out_fig))))
 
 
 if __name__ == "__main__":

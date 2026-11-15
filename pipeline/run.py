@@ -23,6 +23,7 @@ from . import paths
 PY = sys.executable
 RUN_LOG = os.path.join(paths.DATA, "run_log.csv")
 
+LC = "data/validation/landcover_sensitivity/"   # relative to the repository root (the commands run there)
 # name, kind, what it does, commands, main outputs
 STAGES = [
     ("known-analogs", "curated", "List of known Moon and Mars analog sites with sourced coordinates (jobs J8, J9).",
@@ -61,6 +62,21 @@ STAGES = [
     ("rank-uncertainty", "local", "Rank interval per top-100 site: lunar reference bootstrap, NASADEM, one feature group left out (J32).",
      [[PY, "validation/rank_uncertainty.py"]], [os.path.join(paths.VALIDATION, "rank_uncertainty.json"),
                                                 os.path.join(paths.SITES, "rank_uncertainty.csv")]),
+    ("strict-context", "local", "The strict-mask ranking (J33) with the context of the default one: NASA POWER (top 100), "
+     "partner surface data (top 60), rank uncertainty (top 100), the comparison of the two top 30s (J42).",
+     [[PY, "-m", "pipeline.nasa_context", "--top", "100", "--skip-images",
+       "--ranking", LC + "ranking_bare_strict.csv",
+       "--out-csv", LC + "nasa_context_strict.csv",
+       "--out-summary", LC + "nasa_context_strict_summary.json"],
+      [PY, "-m", "pipeline.partner_context", "--top", "60", "--flagged", "0", "--known", "0",
+       "--ranking", LC + "ranking_bare_strict.csv",
+       "--geojson", LC + "sites_bare_strict.geojson",
+       "--out-csv", LC + "partner_context_strict.csv",
+       "--out-summary", LC + "partner_context_strict_summary.json"],
+      [PY, "validation/rank_uncertainty.py", "--bare-col", "bare_strict"],
+      [PY, "-m", "pipeline.sites", "--bare-col", "bare_strict", "--out-dir", LC.rstrip("/")],
+      [PY, "-m", "validation.strict_context"]],
+     [os.path.join(paths.ROOT, LC, "context_comparison.json")]),
     ("validate-icesat2", "local", "ICESat-2 laser profiles over top sites against our grid slopes and the Moon.",
      [[PY, "validation/icesat2_profiles.py"]], [paths.VALIDATION_ICESAT2]),
     ("lidar", "local", "Crater close-ups: Meteor Crater (1 m lidar), a lunar crater, Morasko.",

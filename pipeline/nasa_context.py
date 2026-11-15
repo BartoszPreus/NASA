@@ -21,6 +21,8 @@ refetched, so the CLI can be rerun after the ranking changes.
 
 Usage (from the repo root):
     python -m pipeline.nasa_context --top 150 --images 60
+    # another ranking (job J42, the strict-mask variant): --ranking, --out-csv, --out-summary, --img-dir;
+    # python -m pipeline.run strict-context has the full command
 
 Libraries: requests (Apache-2.0), pandas (BSD-3), numpy (BSD-3), Pillow (HPND).
 
@@ -139,11 +141,12 @@ def power_row(site: pd.Series) -> dict:
     return row
 
 
-def run_power(sites: pd.DataFrame) -> pd.DataFrame:
+def run_power(sites: pd.DataFrame, out_csv: Path = OUT_CSV, out_summary: Path = OUT_SUMMARY,
+              ranking: Path = RANKING) -> pd.DataFrame:
     with ThreadPoolExecutor(MAX_PARALLEL) as ex:
         rows = list(ex.map(power_row, [s for _, s in sites.iterrows()]))
     df = pd.DataFrame(rows)
-    df.to_csv(OUT_CSV, index=False)
+    df.to_csv(out_csv, index=False)
     ok = df.dropna(subset=["ts_mean_k"])
     summary = {
         "source": "NASA POWER climatology API v2 (MERRA-2), parameter TS annual (ANN) mean",
@@ -161,7 +164,9 @@ def run_power(sites: pd.DataFrame) -> pd.DataFrame:
                  "lunar south-pole surface temperatures from job J13. Grid cells are about "
                  "50 km, so values describe the surroundings, not the exact site."),
     }
-    OUT_SUMMARY.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    if Path(ranking).resolve() != RANKING.resolve():   # a variant ranking: say which (the default file is unchanged)
+        summary["ranking"] = paths.rel(str(ranking))
+    Path(out_summary).write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return df
 
 
@@ -202,7 +207,7 @@ def wvs_fetch(bbox, date: str, layer: str) -> bytes:
     return r.content
 
 
-def image_row(site: pd.Series) -> dict:
+def image_row(site: pd.Series, img_dir: Path = IMG_DIR) -> dict:
     lat, lon = float(site.lat), float(site.lon)
     bbox = site_bbox(lat, lon)
     dates = DATES_NORTH if lat >= 0 else DATES_SOUTH
@@ -231,7 +236,7 @@ def image_row(site: pd.Series) -> dict:
                     "dark_share": None, "bytes": None, "note": "; ".join(errors)[:300]})
         return row
     _, white, dark, date, layer, jpg = best
-    out = IMG_DIR / f"{site.site_id}.jpg"
+    out = Path(img_dir) / f"{site.site_id}.jpg"
     if len(jpg) > TARGET_BYTES:  # re-encode only (no overlays, no edits)
         img = Image.open(io.BytesIO(jpg)).convert("RGB")
         for q in (85, 78, 70, 62):
@@ -248,31 +253,42 @@ def image_row(site: pd.Series) -> dict:
     return row
 
 
-def run_images(sites: pd.DataFrame) -> pd.DataFrame:
-    IMG_DIR.mkdir(parents=True, exist_ok=True)
+def run_images(sites: pd.DataFrame, img_dir: Path = IMG_DIR) -> pd.DataFrame:
+    img_dir = Path(img_dir)
+    img_dir.mkdir(parents=True, exist_ok=True)
     with ThreadPoolExecutor(MAX_PARALLEL) as ex:
-        rows = list(ex.map(image_row, [s for _, s in sites.iterrows()]))
+        rows = list(ex.map(lambda s: image_row(s, img_dir), [s for _, s in sites.iterrows()]))
     df = pd.DataFrame(rows)
-    df.to_csv(IMG_DIR / "index.csv", index=False)
+    df.to_csv(img_dir / "index.csv", index=False)
     return df
 
 
-def main() -> None:
+def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--top", type=int, default=150, help="sites for NASA POWER")
     ap.add_argument("--images", type=int, default=60, help="sites for Worldview images")
     ap.add_argument("--skip-power", action="store_true")
     ap.add_argument("--skip-images", action="store_true")
-    args = ap.parse_args()
+    # J42: the same stage for another ranking (the strict-mask variant of J33); defaults = the published ranking
+    ap.add_argument("--ranking", type=Path, default=RANKING, help="ranking CSV to read (default %(default)s)")
+    ap.add_argument("--out-csv", type=Path, default=OUT_CSV, help="POWER table (default %(default)s)")
+    ap.add_argument("--out-summary", type=Path, default=OUT_SUMMARY, help="POWER summary JSON (default %(default)s)")
+    ap.add_argument("--img-dir", type=Path, default=IMG_DIR, help="folder of the images and index.csv")
+    args = ap.parse_args(argv)
+    if not args.ranking.exists():
+        raise SystemExit(f"missing input {args.ranking}")
 
-    rank = pd.read_csv(RANKING).sort_values("rank")
+    rank = pd.read_csv(args.ranking).sort_values("rank")
     if not args.skip_power:
-        df = run_power(rank.head(args.top))
-        print(f"POWER: {df.ts_mean_k.notna().sum()}/{len(df)} sites with values -> {OUT_CSV}")
+        args.out_csv.parent.mkdir(parents=True, exist_ok=True)
+        df = run_power(rank.head(args.top), args.out_csv, args.out_summary, args.ranking)
+        print(f"POWER: {df.ts_mean_k.notna().sum()}/{len(df)} sites with values -> {args.out_csv}")
+        if df.ts_mean_k.isna().all():
+            raise SystemExit("NASA POWER returned no value for any site")
     if not args.skip_images:
-        di = run_images(rank.head(args.images))
+        di = run_images(rank.head(args.images), args.img_dir)
         print(f"Worldview: {di.file.notna().sum()}/{len(di)} images, "
-              f"{int(di.bytes.fillna(0).sum())} bytes -> {IMG_DIR}")
+              f"{int(di.bytes.fillna(0).sum())} bytes -> {args.img_dir}")
 
 
 if __name__ == "__main__":
