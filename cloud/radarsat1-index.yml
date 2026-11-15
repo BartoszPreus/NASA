@@ -1,0 +1,104 @@
+name: radarsat1-index
+on:
+  workflow_dispatch:
+    inputs:
+      footprint_run:
+        description: Workflow run with the completed footprint index. Leave blank to build it.
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  index:
+    if: inputs.footprint_run == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy pandas pyarrow rasterio shapely
+      - uses: actions/cache@v4
+        with:
+          path: data/raw/radarsat1/headers-${{ matrix.shard }}-of-6.jsonl
+          key: radarsat1-headers-v1-${{ matrix.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: radarsat1-headers-v1-${{ matrix.shard }}-
+      - run: >-
+          python -m pipeline.radarsat1 index --shard ${{ matrix.shard }} --shards 6
+          --out data/reference/radarsat1-${{ matrix.shard }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: footprints-${{ matrix.shard }}
+          path: |
+            data/reference/radarsat1-${{ matrix.shard }}.parquet
+            data/reference/radarsat1-${{ matrix.shard }}.failures.json
+          if-no-files-found: error
+
+  merge:
+    needs: index
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy pandas pyarrow rasterio shapely
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: footprints-*
+          path: shards
+          merge-multiple: true
+      - run: python -m pipeline.radarsat1 merge shards/*.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radarsat1-footprints
+          path: |
+            data/reference/radarsat1_footprints.parquet
+            data/reference/radarsat1_footprints.failures.json
+          if-no-files-found: error
+
+  quicklook:
+    if: inputs.footprint_run != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install numpy pandas pyarrow rasterio shapely pyproj matplotlib pillow requests
+      - uses: actions/download-artifact@v4
+        with:
+          name: radarsat1-footprints
+          path: data/reference
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.footprint_run }}
+      - run: python -m pipeline.radarsat1 find
+      - run: python -m pipeline.radarsat1 quicklook
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: radarsat1-quicklooks
+          path: |
+            data/raw/radarsat1/matches.json
+            data/sites/radarsat1_index.csv
+            data/sites/radarsat1/*.png
+            docs/figures/radar_earth_vs_moon.png
+          if-no-files-found: error
