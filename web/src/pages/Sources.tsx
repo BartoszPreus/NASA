@@ -20,6 +20,12 @@ const CREDITS: { name: string; lic: string; url: string }[] = [
   { name: "Natural Earth land outlines", lic: "Public domain", url: "https://www.naturalearthdata.com/" },
   { name: "ShadowAstra Atlas: interface design, globe textures and adapted globe and terrain code", lic: "MIT, (c) 2026 Team ShadowAstra", url: "https://github.com/ABRUBAB/ShadowAstra_Atlas" },
   { name: "Globe textures: NASA Blue Marble, Black Marble (GIBS), LRO LROC WAC mosaic (Solar System Treks)", lic: "NASA imagery, no copyright", url: "https://gibs.earthdata.nasa.gov/" },
+  { name: "Rock type: Macrostrat API v2 geologic map units (via its compiled geological maps)", lic: "CC BY 4.0", url: "https://macrostrat.org/" },
+  { name: "Impact structures: Wikipedia List of impact structures on Earth (rev. 1385736404, based on the Earth Impact Database) and Wikidata", lic: "CC BY-SA 4.0; CC0", url: "https://en.wikipedia.org/wiki/List_of_impact_structures_on_Earth" },
+  { name: "Holocene volcanoes: Smithsonian Global Volcanism Program, Volcanoes of the World v5", lic: "free use with citation, doi:10.5479/si.GVP.VOTW5", url: "https://volcano.si.edu/" },
+  { name: "Topsoil sand, silt, clay, coarse fragments: SoilGrids 2.0 (ISRIC), 0-5 cm", lic: "CC BY 4.0, doi:10.5194/soil-7-217-2021", url: "https://soilgrids.org/" },
+  { name: "Permafrost fraction: ESA CCI Permafrost, 2019", lic: "CC BY 4.0", url: "https://climate.esa.int/en/projects/permafrost/" },
+  { name: "Moon geometric albedo 0.12: NASA Moon fact sheet", lic: "NASA, public", url: "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html" },
   { name: "Compare elevation grids: Copernicus DEM GLO-30 (ESA, AWS open data) and LOLA LDEM_80S_20MPP_ADJ (NASA PGDA 90)", lic: "Copernicus DEM licence; NASA open data", url: "https://registry.opendata.aws/copernicus-dem/" },
 ];
 

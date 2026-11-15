@@ -2,6 +2,11 @@
 
 Issue #29, branch `t-web-react`. Newest first. Written with SI assistance (Claude Code).
 
+## 2026-11-15, geology and ground context data
+
+- `public/sites/context_geology_<run>.json` for all 4,736 patches (`scripts/build_context_geology.py`, notes in `scripts/README_context.md`): rock type and lunar-likeness score (Macrostrat), nearest impact structure (211 structures, Wikipedia list based on the Earth Impact Database plus Wikidata; the PASSC site is offline), nearest Holocene volcano (Smithsonian GVP), topsoil sand/silt/clay/coarse fragments (SoilGrids 2.0), permafrost fraction (ESA CCI). Coverage: rock, craters, volcanoes 100%; soil 99%; permafrost 69% default / 40% strict (the ESA product does not cover Greenland or the Southern Hemisphere). Ground ice is not measured (the NSIDC map needs a login).
+- Sources page lists the new data sources with licences.
+
 ## 2026-11-15, criteria beyond terrain
 
 - New criteria groups in Explore: **Light and surface** (low sun and long shadows, brightness close to the Moon's albedo of 0.12, no vegetation, dry climate) and **Geology and ground** (rock like the lunar crust, near an impact structure, near volcanic terrain, fine loose ground, permafrost and ground ice).
