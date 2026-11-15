@@ -1,4 +1,5 @@
-// Written with SI assistance (Codex). Source metadata is exported from data/sources.csv.
+// Written with SI assistance (Codex; J36 blocks with Claude Code). Source metadata is exported from data/sources.csv.
+import {literatureBlock, reviewBlock, mossBlock, certaintyBlock, radarBlock, scoreBlock, sideBySide, packageButton} from './card.js';
 export function element(tag, text, className) {
   const node = document.createElement(tag);
   if (text != null) node.textContent = text;
@@ -11,17 +12,17 @@ export function number(value, precision = 2) {
   return value.toLocaleString('en-US', {maximumFractionDigits: precision});
 }
 
-function withUnit(value, unit = '', precision = 2) {
+export function withUnit(value, unit = '', precision = 2) {
   if (!Number.isFinite(value)) return 'Not measured';
   if (unit === '°' || unit === '%') return number(value, precision) + unit;
   return [number(value, precision), unit].filter(Boolean).join(' ');
 }
 
-function lunarNumber(value, unit) {
+export function lunarNumber(value, unit) {
   return withUnit(unit === '%' && value != null ? value * 100 : value, unit);
 }
 
-function statList(entries) {
+export function statList(entries) {
   const list = element('dl', null, 'metrics');
   for (const [label, value] of entries) {
     const item = element('div');
@@ -31,13 +32,13 @@ function statList(entries) {
   return list;
 }
 
-function link(label, url) {
+export function link(label, url) {
   const anchor = element('a', label);
   anchor.href = url;
   return anchor;
 }
 
-function sourceLinks(text) {
+export function sourceLinks(text) {
   const urls = text.split(/\s*;\s*/);
   return urls.filter((url) => /^https?:\/\/[^\s]+$/i.test(url));
 }
@@ -57,7 +58,7 @@ export function badges(site) {
   return wrap;
 }
 
-function photo(file, alt, caption, empty) {
+export function photo(file, alt, caption, empty) {
   const figure = element('figure', null, 'site-photo');
   if (!file) {
     figure.append(element('p', empty, 'unavailable'));
@@ -72,7 +73,7 @@ function photo(file, alt, caption, empty) {
   return figure;
 }
 
-function panel(title, className = '') {
+export function panel(title, className = '') {
   const card = element('section', null, 'panel ' + className);
   card.append(element('h3', title));
   return card;
@@ -136,7 +137,7 @@ function regionalScores(site, regions) {
   return block;
 }
 
-function formatRange(values, unit) {
+export function formatRange(values, unit) {
   if (!values) return 'Not measured';
   return lunarNumber(values[0], unit) + ' to ' + lunarNumber(values[1], unit);
 }
@@ -176,16 +177,26 @@ function temperaturePanel(label, data, target, source) {
 function analogyBreaks(site, lunar, sources) {
   const block = panel('Where the analogy breaks', 'breaks wide');
   const reasons = element('ul');
-  reasons.append(...site.breaks.map((reason) => element('li', reason)));
+  reasons.append(...(site.breaks || []).map((reason) => element('li', reason)));
+  const record = site.novelty_record;
+  const access = element('li');
+  access.append(element('strong', 'Access · '), document.createTextNode(record?.access || 'Not recorded (no literature check for this site)'));
+  const protection = element('li');
+  protection.append(element('strong', 'Protection · '), document.createTextNode(record?.protection || 'Not recorded (no literature check for this site)'));
+  reasons.append(access, protection);
   block.append(reasons, element('h4', 'Surface conditions'));
   const grid = element('div', null, 'context-grid');
   const power = element('div');
   power.append(element('h4', 'Earth climatology (reanalysis)'), reference(sources, 'nasa_power', 'NASA POWER'));
-  power.append(statList([
-    ['Annual mean skin temperature', withUnit(site.power?.ts_mean_c, '°C')],
-    ['Monthly mean skin temperature range', site.power && site.power.ts_min_c != null && site.power.ts_max_c != null
+  if (!site.power) power.append(element('p', 'Not sampled.'));
+  else power.append(statList([
+    ['Annual mean skin temperature', withUnit(site.power.ts_mean_c, '°C') + ' · ' + withUnit(site.power.ts_mean_k, 'K')],
+    ['Monthly mean skin temperature range', site.power.ts_min_c != null && site.power.ts_max_c != null
       ? formatRange([site.power.ts_min_c, site.power.ts_max_c], '°C') : 'Not measured'],
+    ['Precipitation', withUnit(site.power.precip_mm_per_year, 'mm/year')],
+    ['Wind at 10 m', withUnit(site.power.ws10m_m_s, 'm/s')],
   ]));
+  if (site.power?.grid_note) power.append(element('p', site.power.grid_note, 'small'));
   const moon = element('div');
   moon.append(element('h4', lunar.display_name), reference(sources, 'diviner_prp', 'NASA LRO Diviner'));
   moon.append(statList(['temp_avg_k', 'temp_max_k'].map((key, i) => [
@@ -213,16 +224,19 @@ function analogyBreaks(site, lunar, sources) {
   return block;
 }
 
-export function showSite(container, site, target, moon, sources, permalink) {
+export function showSite(container, site, target, moon, sources, permalink, ctx = {}) {
   const lunar = moon.regions[target];
   const head = element('div', null, 'site-head');
   const titles = element('div');
   const title = element('h3', [site.country, site.site_id].filter(Boolean).join(' · '));
   title.tabIndex = -1;
-  titles.append(element('p', 'Rank ' + number(site.rank, 0), 'eyebrow'), title);
+  titles.append(element('p', (site.dune_like ? 'Dune-like group · rank ' : 'Rank ') + number(site.rank, 0), 'eyebrow'), title);
   if (site.place) titles.append(element('p', site.place));
+  titles.append(element('p', withUnit(site.lat, '°', 4) + ' / ' + withUnit(site.lon, '°', 4), 'small'));
   titles.append(badges(site));
-  head.append(titles, link('Link to this comparison', permalink));
+  const actions = element('div', null, 'site-actions');
+  actions.append(link('Link to this comparison', permalink), packageButton(site, () => target, moon, {...ctx, sources}));
+  head.append(titles, actions);
   const layout = element('div', null, 'details-layout');
   const overview = panel('Earth patch');
   const credit = ['NASA Worldview / GIBS', site.image_date, site.image_layer].filter(Boolean).join(' · ');
@@ -235,6 +249,9 @@ export function showSite(container, site, target, moon, sources, permalink) {
     ['Similarity-weighted window', withUnit(site.best_window_km2, 'km²')],
   ]));
   const analogTag = {moon: 'lunar analog', mars: 'Mars analog', both: 'lunar and Mars analog'};
+  if (site.known_match) overview.append(element('p', 'Known analog site · inside ' + site.known_match.name + ' (' +
+    (analogTag[site.known_match.analog_for] || 'tag unknown') + ', ' + withUnit(site.known_match.distance_km, 'km') +
+    ' from its centre)', 'small'));
   if (site.nearest_known) overview.append(element('p',
     'Nearest listed analog · ' + site.nearest_known + ' (' + (analogTag[site.nearest_known_for] || 'tag unknown') +
     ') · ' + withUnit(site.nearest_known_km, 'km'), 'small'));
@@ -246,122 +263,15 @@ export function showSite(container, site, target, moon, sources, permalink) {
   const criteriaLink = link('See which criteria enter the comparison', '#criteria');
   criteriaLink.addEventListener('click', () => { document.getElementById('criteria').open = true; });
   shape.append(criteriaLink);
-  layout.append(overview, shape, regionalScores(site, moon.regions));
-  if (site.review) {
-    const review = panel('Satellite image review');
-    review.append(element('p', 'Judged from satellite images by an SI model. A person has not confirmed it.', 'small'));
-    const verdicts = {no: 'Image review found no terrain concern', unsure: 'Image review inconclusive',
-      yes: 'Possible terrain concern'};
-    const verdict = verdicts[site.review.looks_like_artefact];
-    if (verdict) review.append(element('p', verdict, 'small'));
-    review.append(element('p', site.review.what_it_is), element('p', site.review.reason));
-    layout.append(review);
-  }
-  layout.append(analogyBreaks(site, lunar, sources));
+  layout.append(overview, shape, sideBySide(site, target, moon), scoreBlock(site), regionalScores(site, moon.regions));
+  const certainty = certaintyBlock(site, ctx);
+  if (certainty) layout.append(certainty);
+  layout.append(mossBlock(site, ctx));
+  if (site.review) layout.append(reviewBlock(site.review, ctx.siteInfo?.sources?.review));
+  const radar = radarBlock(site, ctx);
+  if (radar) layout.append(radar);
+  layout.append(literatureBlock(site, ctx), analogyBreaks(site, lunar, sources));
   container.replaceChildren(head, layout);
-}
-
-export function showMoon(container, moon, target) {
-  const region = moon.regions[target];
-  const head = element('h3', region.display_name);
-  const description = region.members
-    ? 'Pooled regions · ' + region.members.map(key => moon.regions[key].display_name).join(', ')
-    : 'Window ' + region.window_km.map(v => number(v)).join(' × ') + ' km · ' +
-      withUnit(region.lat, '°', 4) + ' / ' + withUnit(region.lon, '°', 4);
-  const context = element('p', description, 'caption');
-  const metrics = statList(Object.entries(moon.headline_info).map(([key, [label, unit, instrument]]) => [
-    label + ' (' + instrument + ')',
-    region.headline ? lunarNumber(region.headline[key], unit) : formatRange(region.headline_range[key], unit),
-  ]));
-  container.replaceChildren(head, context, metrics);
-  container.dataset.target = target;
-  if (!region.members) {
-    const figures = element('div', null, 'lunar-photos');
-    figures.append(photo(region.hillshade, 'Hillshade of ' + region.display_name, 'Hillshade · NASA LRO LOLA', 'No hillshade stored'),
-      photo(region.quicklook, 'LROC view of ' + region.display_name, 'Summer illumination mosaic · NASA LROC', 'No quicklook stored'));
-    container.append(figures);
-  }
-}
-
-function withLink(text) {
-  const node = element('span');
-  for (const part of text.split(/(https?:\/\/[^\s,;]+)/)) {
-    if (/^https?:\/\//.test(part)) node.append(link(part, part));
-    else node.append(document.createTextNode(part));
-  }
-  return node;
-}
-
-export function showEvidence(method, validation, sources) {
-  const methods = document.getElementById('method');
-  for (const step of method) {
-    const row = element('li');
-    row.append(element('strong', step.name + '. '), element('span', step.description),
-      element('div', null, 'small'));
-    row.lastElementChild.append(withLink(step.source));
-    methods.append(row);
-  }
-  const value = (key) => validation.items.find((item) => item.key === key)?.value;
-  const {native_slope_error, masked_control_cells, control_count} = validation.summary;
-  const notes = [
-    'Our lunar slope estimate differs from NASA’s map by a median of ' + withUnit(native_slope_error, '°', 4) + ' at the native grid scale.',
-    'With the land-cover mask, ' + number(masked_control_cells, 0) + ' candidate cells remained across ' +
-      number(control_count, 0) + ' negative controls.',
-    'Terrain enrichment was ' + withUnit(value('median_enrichment'), '×') + ' around known sites and ' +
-      withUnit(value('random.median_enrichment_median'), '×') + ' in matched random circles, relative to scanned bare cells.',
-    'At tile scale the score did not reliably distinguish known analog tiles from background tiles. AUC ' +
-      number(value('recovery.auc'), 3) + ' (90% interval ' + number(value('recovery.auc_ci90.0'), 3) + '–' +
-      number(value('recovery.auc_ci90.1'), 3) + ').',
-    'Rankings depend on the elevation and land-cover sources. Copernicus and NASA inputs shared ' +
-      number(value('ranking_nasa_vs_esa.top50_overlap'), 0) + ' tiles in the top 50.',
-  ];
-  document.getElementById('evidence-summary').append(...notes.map((note) => element('li', note)));
-  const table = document.getElementById('validation');
-  for (const group of validation.groups) {
-    const details = element('details');
-    details.append(element('summary', group));
-    const metrics = element('table', null, 'metric-table');
-    metrics.setAttribute('aria-label', group);
-    const body = element('tbody');
-    for (const metric of validation.items.filter((item) => item.group === group)) {
-      const row = element('tr');
-      const label = element('th', metric.label);
-      label.scope = 'row';
-      const location = metric.file + ' · ' + metric.key;
-      label.title = location;
-      label.append(element('small', location));
-      row.append(label, element('td', withUnit(metric.value, metric.unit, 4)));
-      body.append(row);
-    }
-    metrics.append(body);
-    details.append(metrics);
-    table.append(details);
-  }
-  const result = document.getElementById('sources');
-  for (const agency of new Set(sources.map((source) => source.agency))) {
-    const details = element('details');
-    details.append(element('summary', agency));
-    const list = element('ul');
-    for (const source of sources.filter((source) => source.agency === agency)) {
-      const item = element('li');
-      item.dataset.source = source.source_id;
-      const urls = sourceLinks(source.url);
-      item.append(urls.length ? link(source.name, urls[0]) : element('strong', source.name),
-        element('div', source.licence_or_citation + ' · ' + source.status, 'small'),
-        element('div', 'Use · ' + source.used_by, 'small'));
-      for (const url of urls.slice(1)) {
-        item.append(element('span', ' '), link(url, url));
-      }
-      list.append(item);
-    }
-    details.append(list);
-    result.append(details);
-  }
-  const tools = element('p', 'Application tools · ', 'small');
-  tools.append(link('Leaflet (BSD-2-Clause)', 'https://github.com/Leaflet/Leaflet/blob/v1.9.4/LICENSE'),
-    element('span', ' · '), link('Natural Earth land (public domain)', 'https://www.naturalearthdata.com/about/terms-of-use/'),
-    element('span', ' · System typefaces.'));
-  result.append(tools);
 }
 
 export function showCriteria(container, data) {

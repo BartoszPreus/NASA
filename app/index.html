@@ -32,6 +32,7 @@
       <dl class="stats" id="stats" aria-label="Scan summary"></dl>
     </section>
     <p id="load-status" class="notice" role="status">Loading the terrain data…</p>
+    <p id="partial-status" class="notice" role="alert" hidden></p>
     <noscript><p class="notice">JavaScript is required to load the terrain map and comparisons.</p></noscript>
     <div id="atlas" hidden>
       <section id="explore" aria-labelledby="explore-title">
@@ -42,8 +43,21 @@
           </div>
           <div class="filters" aria-label="Ranking filters">
             <label><input type="checkbox" id="hide-known"> Hide known analog sites</label>
-            <label><input type="checkbox" id="show-flagged"> Show dune-like terrain</label>
+            <label><input type="checkbox" id="show-flagged"> Show dune-like terrain<span id="flag-count"></span></label>
           </div>
+        </div>
+        <fieldset class="mask-switch" id="mask-switch" hidden>
+          <legend>Land-cover mask of the ranking (list and map)</legend>
+          <label><input type="radio" name="mask" id="mask-default" value="default" checked> Default mask (moss and lichen count as bare)</label>
+          <label><input type="radio" name="mask" id="mask-strict" value="strict"> Strict mask (bare rock and soil only)</label>
+          <p class="caption" id="strict-note"></p>
+        </fieldset>
+        <div class="filters layer-toggles" aria-label="Map layers">
+          <span class="layer-title">Map layers</span>
+          <label><input type="checkbox" id="layer-moon"> <i class="key ring moon"></i>Known lunar analogs<span id="count-moon"></span></label>
+          <label><input type="checkbox" id="layer-mars"> <i class="key ring mars"></i>Known Mars analogs<span id="count-mars"></span></label>
+          <label><input type="checkbox" id="layer-both"> <i class="key ring both"></i>Known lunar and Mars analogs<span id="count-both"></span></label>
+          <label><input type="checkbox" id="layer-controls"> <i class="key square"></i>Control and pilot tiles<span id="count-controls"></span></label>
         </div>
         <div class="explorer">
           <section class="map-panel" aria-label="Earth survey map">
@@ -55,7 +69,7 @@
             <div class="legend" aria-label="Map legend">
               <div class="scale-wrap"><strong>Candidate share of bare cells</strong><span class="scale"></span><div><span>0%</span><span id="scale-max"></span></div></div>
               <span><i class="key grey"></i>No bare ground</span>
-              <span><i class="key dot"></i>Candidate patch</span>
+              <span><i class="key dot" id="dot-key-icon"></i><span id="dot-key">Candidate patch</span></span>
               <span id="flag-key" hidden><i class="key flagged"></i>Dune-like terrain</span>
             </div>
           </section>
@@ -70,7 +84,8 @@
             <p id="ranking-status" class="ranking-status" aria-live="polite"></p>
           </section>
         </div>
-        <p class="caption">This ranking counts moss and lichen as bare land cover, so most Arctic patches near the top are tundra. Under a mask without moss and lichen most of the top 30 patches do not remain, and desert and high-plateau patches (Atacama, Puna, western Tibet) lead; that stricter ranking is in data/validation/landcover_sensitivity/ranking_bare_strict.csv.</p>
+        <p class="caption" id="known-scope"></p>
+        <p class="caption" id="mask-caption">This ranking counts moss and lichen as bare land cover, so most Arctic patches near the top are tundra. Under a mask without moss and lichen most of the top 30 patches do not remain, and desert and high-plateau patches (Atacama, Puna, western Tibet) lead; that stricter ranking is in data/validation/landcover_sensitivity/ranking_bare_strict.csv and behind the mask switch above.</p>
         <p class="caption">"Known analog site" and its filter: the patch centre lies inside the listed radius of an entry in the shared analog catalogue (data/reference/known_analogs.csv), whether tagged lunar, Mars or both; operational stations are not counted. The ranking itself targets the lunar south pole.</p>
       </section>
       <section id="comparison" aria-labelledby="comparison-title">
@@ -96,7 +111,7 @@
           <div><p class="eyebrow">Data and validation</p><h2 id="evidence-title">Method &amp; sources</h2></div>
         </div>
         <div class="evidence-grid">
-          <section class="panel"><h3>Method</h3><ol id="method"></ol></section>
+          <section class="panel"><h3>Method</h3><ol id="method"></ol><div id="method-sections"></div></section>
           <section class="panel"><h3>What the validation showed</h3><ul id="evidence-summary"></ul><div id="validation"></div></section>
         </div>
         <details class="panel sources" id="criteria">
