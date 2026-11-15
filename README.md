@@ -1,4 +1,59 @@
-# Zodiak | Earth terrain analogs for the lunar south pole
+<div align="center">
+
+# Zodiak
+
+### Find places on Earth that look like the ground at the Moon's south pole.
+
+**[Open the live app](https://zodiak-atlas.vercel.app/)** &nbsp;|&nbsp; [How it works](#how-it-works) &nbsp;|&nbsp; [What the checks show](#validation) &nbsp;|&nbsp; [Sources and licences](#data-and-acknowledgements)
+
+*Team Zodiak, NASA Space Apps Challenge 2026: Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars*
+
+<a href="https://zodiak-atlas.vercel.app/"><img src="docs/figures/readme/landing.webp" alt="Screenshot of the Zodiak web app landing page: a large Moon beside the headline 'The shape of the lunar south pole, measured on Earth.'" width="100%"></a>
+
+<sub>All pictures on this page are screenshots of the Zodiak web app. The lunar and Earth imagery inside them keeps the credits listed under [Data and acknowledgements](#data-and-acknowledgements).</sub>
+
+</div>
+
+## In plain words
+
+Space agencies plan to build a permanent base near the south pole of the Moon. Nobody can practise there. A rover, a lander or a crew needs to be tested on ground that is shaped like the real place: the same slopes, the same bumps, the same dips.
+
+Earth has such places. They are hard to find, because the Earth is big and most of it looks nothing like the Moon.
+
+Zodiak looks for them. We took the shape of the ground at seven candidate base regions near the lunar south pole. We measured the same things on a large part of the Earth's land. Then we ranked patches of land, about 15 by 15 kilometres each, by how close their ground shape is to the lunar one.
+
+The result is a shortlist, not a verdict. A mission team could use it to choose where to test a rover, rehearse a landing or train a crew. The shortlist says nothing yet about dust, rock type, cold or light, so a person still has to check each place.
+
+### Why it matters
+
+- Nobody can test on the Moon before the first missions, so tests happen on Earth.
+- A test is more useful on ground that has the same shape as the real target.
+- A ranked list of candidate places gives a team a place to start searching.
+
+### What you can do in the app
+
+| | |
+|---|---|
+| [![Plan a mission: choose a lunar destination on a 3D Moon](docs/figures/readme/discover.webp)](https://zodiak-atlas.vercel.app/#/discover) | [![Explore: a 3D Earth with ranked patches and a list of results](docs/figures/readme/explore.webp)](https://zodiak-atlas.vercel.app/#/explore) |
+| **Plan a mission.** Turn the Moon, pick a place near its south pole and fly to it, then choose a kind of exercise, such as a rover drive or a base camp. | **Explore.** Turn a 3D Earth and see the best matching patches. Zoom in and it becomes a sharp satellite map. Switch criteria on and off. |
+| [![A site card with a satellite image, score and a short reason why the patch stands out](docs/figures/readme/site-card.webp)](https://zodiak-atlas.vercel.app/#/explore?site=N69E093-01) | [![Compare: an Earth patch and a lunar patch side by side with their terrain numbers](docs/figures/readme/compare.webp)](https://zodiak-atlas.vercel.app/#/compare?site=N69E093-01) |
+| **Open any site.** See a satellite image, its score and what stands out. | **Compare.** Put an Earth patch next to its lunar twin, then see where the patch stands among all others: move a slider, click a criterion, switch the lunar target. |
+| [![Moon: the nine lunar targets on a map of the south pole](docs/figures/readme/moon.webp)](https://zodiak-atlas.vercel.app/#/moon) | |
+| **Moon.** The lunar targets, with their slopes and measurements. | |
+
+The app runs in a web browser. Nothing has to be installed.
+
+### What Zodiak does not claim
+
+- It does not prove that a place is a good training ground. It only says the shape of the ground is similar.
+- It does not measure dust, rock, temperature or light.
+- It does not see anything smaller than about 100 metres, so no boulders and no small craters.
+- When we tested it against places that experts already use as lunar analogs, it did not pick them out better than chance at the scale of one-degree map tiles. The details are under [Validation](#validation).
+- None of the places on the list is called a discovery.
+
+---
+
+# Technical part
 
 Zodiak maps Earth terrain that resembles candidate lunar south-pole base regions. It ranks contiguous patches by local terrain similarity, identifies documented analogs, and exposes the evidence behind the score. Surface conditions and imagery show where each analogy breaks. A mission team could use the results to shortlist field sites for rover mobility or landing terrain rehearsals.
 
@@ -8,7 +63,7 @@ Zodiak maps Earth terrain that resembles candidate lunar south-pole base regions
 
 **1,758,778 valid cells** in **2,060 scanned tiles** with stored data yielded **3,175 candidate terrain patches**. The map shows the published ranking rather than the entire candidate catalogue. See [site ranking](data/sites/ranking.csv), [validation](docs/VALIDATION.md), and [number sources](docs/pitch/NUMBERS.md).
 
-**Demo:** DEMO LINK PLACEHOLDER. *DECISION FOR THE TEAM: hosting of the web app in `app/` and the public demo link (issue #11).*
+**Demo:** the live web app is at https://zodiak-atlas.vercel.app/ (React app in `web/`, see [web/README.md](web/README.md); the earlier plain-JavaScript app lives in `app/`).
 
 ## What we found, in short
 
@@ -44,6 +99,19 @@ python -m pytest tests -q
 ```
 
 The committed [ranking](data/sites/ranking.csv), [site polygons](data/sites/sites.geojson) and [map](docs/pitch/ranking-map.png) can be inspected without rescanning. Follow the [data catalogue](data/README.md) for individual rebuild stages. The [cloud runner guide](cloud/README.md) covers the large Earth scan. To regenerate the static map, run `python docs/pitch/build_ranking_map.py`. The [web app task](https://github.com/BartoszPreus/NASA/issues/3) tracks the interactive demo.
+
+### Run the web app
+
+Node.js 20 or later.
+
+```sh
+cd web
+npm install
+npm run dev      # http://127.0.0.1:5173/
+npm run build    # type check and production build into web/dist
+```
+
+The app reads the committed export in `app/data`; nothing is computed outside the repository. Details, deployment and credits: [web/README.md](web/README.md). The screenshots on this page are taken with `node web/scripts/readme_screenshots.mjs http://127.0.0.1:5173` (needs Chrome and Python with Pillow) and written to `docs/figures/readme/`.
 
 On Windows, if the checkout and system temporary directory live on different drives, run pytest with `--basetemp` pointing to a dedicated temporary directory on the checkout drive.
 
@@ -115,7 +183,8 @@ WorldCover map-layer credit: © ESA WorldCover project 2021 / Contains modified 
 | literature | Lunar site literature · [source](https://www.hou.usra.edu/meetings/lpsc2024/pdf/1695.pdf) · [archive / access](https://arxiv.org/abs/2406.19863) | Candidate region coordinates and interpretation. | Gracy & Lee; Peña-Asensio et al.; see the linked papers. |
 | literature | Strict top-30 literature check (J40) · [Radebaugh et al., EPSC 2022](https://meetingorganizer.copernicus.org/EPSC2022/EPSC2022-715.html) · [Tavernier et al., EPSC 2021](https://meetingorganizer.copernicus.org/EPSC2021/EPSC2021-452.html) · [ISRO HOPE analog mission](https://www.isro.gov.in/ISRO_EN/Space_Analog_Mission.html) · [Pandey et al. 2020, Ladakh](https://www.cambridge.org/core/journals/international-journal-of-astrobiology/article/ladakh-diverse-highaltitude-extreme-environments-for-offearth-analogue-and-astrobiology-research/F9FE95516A6B5D650333ABBCCF2F7512) · [Valdivia-Silva et al. 2011, Pampas de La Joya](https://cris.utec.edu.pe/en/publications/multidisciplinary-approach-of-the-hyperarid-desert-of-pampas-de-l/) · [Up Here 2019](https://uphere.ca/node/2310) · [Harris et al. 2022](https://www.frontiersin.org/articles/10.3389/fspas.2022.849078) · [Ngari geography page (weak, no source)](https://americageography.github.io/china-geography/tibet-geography/ngari-geography) | Mars-analog statements about the regions of the strict top 30. | Quoted sentences and status per page in `docs/sources/j40.md`. |
 | literature | Second-pass literature check (J35) · [ESA Catalogue of Planetary Analogues, Preston, Grady and Barber 2012](https://freight.cargo.site/m/D1821053255089660420449933921929/The-Catalogue-of-Planetary-Analogues.pdf) · [NASA Planetary Analog Explorer](https://science.nasa.gov/solar-system/analog-explorer/) · [NASA Planetary Analogs](https://science.nasa.gov/solar-system/planets/planetary-analogs) · [NASA Ames Arctic analog sites](https://www.nasa.gov/?p=139659) · [IMEWG Mars on Earth](https://imewg.org/joint-initiatives/mars-on-earth-analogues) · [Europlanet TA1 field sites](https://www.europlanet.org/?p=8693) · [LPI Contribution 1612](https://www.lpi.usra.edu/lpi/contribution_docs/LPI-001612.pdf) · [LPI Contribution 1738](https://www.lpi.usra.edu/lpi/contribution_docs/LPI-001738.pdf) · [Osinski et al. 2006, Geoscience Canada](https://journals.lib.unb.ca/index.php/GC/article/download/10224/10596?inline=1) · [Salinas-García 2025, Peary Land thesis](https://researchprofiles.ku.dk/da/publications/5e687b9b-5288-4d52-91da-c68a174eaf0a) · [EGU24-10372](https://meetingorganizer.copernicus.org/EGU24/EGU24-10372.html) · [Arfstrom, LPSC 2015](https://www.hou.usra.edu/meetings/lpsc2015/pdf/1006.pdf) · [Lau et al. 2022](https://www.frontiersin.org/articles/10.3389/fspas.2022.825019/full) · [Jangir and Dutta 2026 (recorded, not counted)](https://www.frontiersin.org/journals/astronomy-and-space-sciences/articles/10.3389/fspas.2025.1712191/full) · [OpenAlex](https://openalex.org) (CC0) | Analog catalogues and literature searched for the leading regions of both rankings (English, Russian, Chinese). | Listed / not listed per catalogue and region, quoted sentences and every search in `docs/sources/j35.md`. |
-| Leaflet | Leaflet 1.9.4 · [source](https://leafletjs.com/) · [archive / access](https://github.com/Leaflet/Leaflet) | Map of the web app in `app/` (bundled copy in `app/vendor/`). | BSD-2-Clause, `app/vendor/LICENSE-Leaflet`. |
+| Leaflet | Leaflet 1.9.4 · [source](https://leafletjs.com/) · [archive / access](https://github.com/Leaflet/Leaflet) | Map of the web app in `app/` (bundled copy in `app/vendor/`) and the 2D map of the Explore page in `web/` (npm package). | BSD-2-Clause, `app/vendor/LICENSE-Leaflet`. |
+| EOX IT Services GmbH | Sentinel-2 cloudless 2016 and 2020 · [source](https://s2maps.eu) · [tiles](https://tiles.maps.eox.at) | Live satellite imagery in the web app: list thumbnails and Compare (WMS layer `s2cloudless`, 2016), the zoomed-in 2D map of Explore (WMTS layer `s2cloudless-2020_3857`). Loaded by the browser, not stored. | CC BY 4.0; "Sentinel-2 cloudless - https://s2maps.eu by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 / 2020)". |
 | SlideRule (Univ. of Washington) | SlideRule Earth · [source](https://slideruleearth.io/) | Access and subset ICESat-2 ATL06 data. | BSD-3-Clause; Shean et al., [software paper](https://doi.org/10.21105/joss.04982). |
 
 The pipeline uses [Python](https://www.python.org/), [NumPy](https://numpy.org/), [SciPy](https://scipy.org/), [pandas](https://pandas.pydata.org/), [PyArrow](https://arrow.apache.org/), [Rasterio](https://rasterio.readthedocs.io/), [pyproj](https://pyproj4.github.io/pyproj/), [scikit-image](https://scikit-image.org/) and [Shapely](https://shapely.readthedocs.io/). The tools also use [Matplotlib](https://matplotlib.org/), [Pillow](https://python-pillow.org/), [ReportLab](https://www.reportlab.com/), [Requests](https://requests.readthedocs.io/), [Numcodecs](https://numcodecs.readthedocs.io/) and [pytest](https://docs.pytest.org/); [pypdf](https://pypdf.readthedocs.io/) was used once to read the legend page of the WorldCover manual (job J33, not in `requirements.txt`). The ICESat-2 step (`validation/icesat2_profiles.py`) also needs the [SlideRule client](https://github.com/SlideRuleEarth/sliderule) and [GeoPandas](https://geopandas.org/), which are not in `requirements.txt`.
