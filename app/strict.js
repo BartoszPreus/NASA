@@ -56,7 +56,7 @@ export function strictSites(full, j33, review, novelty, images) {
     const filled = Object.fromEntries(Object.entries(row).filter(([, value]) => value != null));
     const site = {...base, ...filled, review: row.review ?? null, novelty_record: row.novelty_record ?? null,
       power: row.power ?? null, partner: row.partner ?? null, rank_uncertainty: row.rank_uncertainty ?? null,
-      image: row.image ?? null, shares: base.shares || {}, ranking_label: 'strict mask (WorldCover class 60 only)',
+      image: row.image ?? null, shares: row.shares || base.shares || {}, region_scores: row.region_scores ?? null, ranking_label: 'strict mask (WorldCover class 60 only)',
       strict: true, full: true};
     if (site.novelty_record && !site.novelty_record.evidence_url_list) {
       site.novelty_record = {...site.novelty_record, evidence_url_list: (site.novelty_record.evidence_urls || '').split(' ; ').filter(Boolean)};

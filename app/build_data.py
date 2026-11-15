@@ -1125,6 +1125,10 @@ def strict_ranking_data(out):
             # latitude first, 4 decimals (about 11 m; the cells are about 2 km), repeated points dropped
             "polygon": [[_ring4(ring) for ring in polygon] for polygon in polygons],
             "features": {key: p[key] for key in FEATURE_INFO},
+            "shares": {key: p[key] for key in SHARE_INFO},
+            "region_scores": p["region_scores"],
+            "window": (None if p.get("window_lat") is None or p.get("window_lon") is None
+                       else [p["window_lat"], p["window_lon"]]),
             "image": strict_image(out, image.get("file")),
             "image_date": text(image.get("date")),
             "image_layer": text(image.get("layer")),
@@ -1139,8 +1143,8 @@ def strict_ranking_data(out):
         "note": ("Ranking of a separate sites run with the strict mask (WorldCover class 60 only, job J33). Its site "
                  "ids are numbered within that run: do not join them to the default sites by id. Ranks 1 to 100 "
                  "(ranks 101 to 200: validation/landcover_sensitivity/ranking_bare_strict.json). POWER and rank "
-                 "uncertainty for ranks 1 to 100, partner values for 1 to 60, images and review for 1 to 30; null "
-                 "= not sampled. Images: the default site image where the bytes are the same, else "
+                 "uncertainty for ranks 1 to 100, partner values for 1 to 60, images and review for 1 to 30; a "
+                 "value outside these ranks was not sampled and is shown as not measured. Images: the default site image where the bytes are the same, else "
                  "img/strict_<site_id>.jpg at 400 x 400 px (meta.json · strict_images)."),
         "source_files": src, "n": len(sites), "sites": sites,
         "stability": read_json(src["stability"]), "comparison": read_json(src["comparison"]),

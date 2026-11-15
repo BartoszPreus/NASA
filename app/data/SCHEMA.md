@@ -673,6 +673,9 @@ Job J42 (issue #28). The ranking of the separate sites run with the strict mask 
 | `sites.[].dune_like` | boolean |  | sites_bare_strict.geojson · artefact_flag | `false` |  |
 | `sites.[].polygon` | array | [lat, lon] | sites_bare_strict.geojson · geometry | `list of 30` | latitude first, 4 decimals, repeated points dropped |
 | `sites.[].features` | object |  | sites_bare_strict.geojson | `{s240, s570, r200, r1600, dep_frac}` | as sites.json · features |
+| `sites.[].shares` | object | fraction 0 to 1 | sites_bare_strict.geojson · f_le5, f_le8, f_le15 | `{f_le5, f_le8, f_le15}` | as sites.json · shares |
+| `sites.[].region_scores` | object |  | sites_bare_strict.geojson · region_scores | `{base_regions, polar_160km, ...}` | as sites.json · region_scores |
+| `sites.[].window` | array or null | [lat, lon] | sites_bare_strict.geojson · window_lat, window_lon | `[-20.4354, -69.2125]` | centre of the best window, as sites.json · window |
 | `sites.[].image` | string or null |  | images/index.csv · file | `"S21W070-01.jpg"` | file in img/; ranks 1 to 30 |
 | `sites.[].image_date` | string or null |  | images/index.csv · date | `"2025-01-15"` |  |
 | `sites.[].image_layer` | string or null |  | images/index.csv · layer | `"MODIS_Terra_CorrectedReflectance_TrueColor"` |  |
