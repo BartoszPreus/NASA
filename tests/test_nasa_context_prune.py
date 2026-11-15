@@ -1,4 +1,5 @@
-"""pipeline.nasa_context deletes images that its index.csv no longer lists (J41 note, issue #27)."""
+"""pipeline.nasa_context deletes images that its index.csv no longer lists (J41 note, issue #27).
+Written with SI assistance (Claude Code)."""
 import pandas as pd
 
 from pipeline import nasa_context
