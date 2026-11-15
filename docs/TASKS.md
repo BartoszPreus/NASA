@@ -99,7 +99,7 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 ### `sites.geojson` properties
 `site_id, lat, lon, area_km2, n_cells, score, score_amp, score_dep, best_region, tile, country, bare, ice, elev_med, s240, s570, r200, r1600, dep_frac, f_le5, f_le8, f_le15, nearest_known, nearest_known_km, is_known, novelty (J9: unreported | mentioned | established | unchecked), breaks (list of strings)`; geometry = polygon of the cells (a point is acceptable for v0).
 
-## 4. Status of the jobs (Sat 14 Nov, 23:20)
+## 4. Status of the jobs (Sun 15 Nov, 01:40)
 
 | Job | What | State |
 |---|---|---|
@@ -119,11 +119,16 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | J17 | NASA data at the core of the Earth side (NASADEM, MODIS land cover) | **done** (with J17b, 23:20): code, NASADEM cells of 619 tiles, comparison at scale. The rule of J19 is not met (Spearman 0.637, 21 of the top 50 tiles), so Copernicus stays primary and NASADEM is a cross-check (`docs/sources/j17.md`). The LP DAAC citation pages still have to be opened by a person |
 | J18 | algorithm fix: target, ranking key, sand seas, fast enrichment | **done**; full-scan outputs, key comparison, flag impact and enrichment are recorded in `docs/sources/j18.md` |
 | J19 | final configuration and ranking | **done** (conductor, 23:20): the DEM rule is code, the ranking of J18 was reproduced, top-30 review in `data/sites/top30_review.csv`, `docs/METHOD.md`. The rule was evaluated at 23:20 and returns Copernicus (`docs/sources/j17.md`) |
-| J20, J22, J23, J7, J11 | see section 5 | **to do**; J20 and J22 are unblocked |
+| J20 | validation on the full scan | delivered (`docs/VALIDATION.md`, commit 36c794e); **correction open, not taken**: the tile-recovery AUC uses different rules for the two groups (0.407; about 0.5 with one rule), and the validation was not rerun after J22 changed `known_analogs.csv` (issue 1) |
+| J22 | novelty check of the final ranking | delivered (`docs/NOVELTY.md`, commit af51fbd); **not closed**: the `country` column of `ranking.csv` came out empty, the `mentioned` verdicts rest on pages that do not mention analogs, wording to correct (issue 2) |
+| J11 | README, pitch, submission texts | drafts on `main` (commit 9f37db3): `README.md`, `docs/pitch/`; final numbers after J20, wording after J22, demo link, a person approves (issue 4) |
+| J7, J23 | see section 5 | **to do**; `app/` is still uncommitted |
 | J24 | partner-agency data per site (JAXA, ESA Open Science Catalog, NASA MODIS temperature) | **done**; `docs/sources/j24.md` |
-| J25-J29 | use of the partner data, CSA RADARSAT, a third elevation model | **to do**; specs in `docs/TASKS-PARTNER-DATA.md` |
+| J26 | the dune-field flag against temperature and moisture | **done** (commit 2b7e9fa, issue 6 closed): 978 sites; the temperature contrasts do not separate flagged from unflagged sites and flagged sites are wetter, so the flag is not confirmed as a sand detector (`docs/sources/j26.md`) |
+| J25, J27-J29 | use of the partner data, CSA RADARSAT, a third elevation model | **to do**; specs in `docs/TASKS-PARTNER-DATA.md` |
+| J30 | Polish lidar areas against lunar sites at 1 to 2 m, 3D viewer | **in progress** on branch `t-pl2moon` (issue 14; spec in the issue) |
 
-Open jobs as GitHub issues: J20 = issue 1, J22 = 2, J7 = 3, J11 = 4, J25 = 5, J26 = 6, J27 = 7, J23 = 8, J28 = 9, J29 = 10; checklist for people = 11; backlog = 12; the board with order and deadlines = 13 (pinned).
+Jobs as GitHub issues: J20 = issue 1, J22 = 2, J7 = 3, J11 = 4, J25 = 5, J26 = 6 (closed), J27 = 7, J23 = 8, J28 = 9, J29 = 10, J30 = 14; checklist for people = 11; backlog = 12; the board with order and deadlines = 13 (pinned).
 | J21 | ICESat-2 profiles in the cloud | **done**; 8/8 sites passed the 60 m sample threshold; results in `data/validation/icesat2.json` |
 
 ## 5. Remaining jobs: exact specifications

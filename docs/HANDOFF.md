@@ -1,10 +1,33 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update 23:20, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 01:40, by the conductor session (Claude Code, Fable) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
-## 0. START HERE (state at 23:20, Sat 14 Nov)
+## 0. START HERE (state at 01:40, Sun 15 Nov)
+
+**Since 23:20 (three agents worked on `main`; reviews are comments on the issues):**
+- **J26 done** (issue 6, closed): temperature and soil moisture of 978 sites do not confirm that the dune-field
+  flag marks dry sand (`docs/sources/j26.md`). The flag stays a terrain rule; say so.
+- **J11 drafts are on `main`** (issue 4, open): `README.md`, `docs/pitch/` (seven slides, pitch, Q&A, portal
+  fields, `NUMBERS.md`). They wait for the two items below, for the demo link and for a person.
+- **J22 delivered, not closed** (issue 2): 30 rows in `data/sites/novelty_check.csv`, `docs/NOVELTY.md` rewritten.
+  The review found: (1) **the `country` column of `ranking.csv` is empty in all 200 rows** (the Natural Earth
+  file under `data/raw/` was missing on that machine and `pipeline/sites.py` does not complain); (2) the verdict
+  `mentioned` of 27 top-30 sites rests on pages that do not mention analogs, so it is UNVERIFIED; (3)
+  `docs/NOVELTY.md` says the Putorana sites "mimic lunar maria", which nothing here measures (the target is the
+  south-pole highland regions), and names hollows at four sites whose depression share is zero.
+- **J20 correction not taken by anyone** (issue 1): the tile-recovery AUC of 0.407 compares two groups under
+  different rules; with one rule it is about 0.5. J22 also appended two rows to `known_analogs.csv` without
+  rerunning the validation, so `enrichment.json` and `effectiveness.json` are older than the list they test.
+  **One run fixes both this and the empty `country` column**, on a machine that has
+  `data/raw/naturalearth/ne_50m_admin_0_countries.geojson` (Wiktor's has it): correct `recovery()` as the review
+  on issue 1 says, then `python -m pipeline.run sites validate-enrichment validate-effectiveness catalog`.
+- **J30 in progress** (issue 14, branch `t-pl2moon`, not merged): Polish lidar areas against lunar sites at 1 to
+  2 m with a 3D viewer; scope extension agreed with the team owner.
+- Not started: J7 web app (`app/` still uncommitted), J25, J27. The repository is still private.
+
+Everything below describes the state at 23:20 and still holds, except where this list says otherwise.
 
 **The method is complete end to end and the final ranking is in the repo.** Read `docs/METHOD.md` (ten steps,
 the data source of each, the two decisions, the limits): it is the text the README and the pitch quote.
@@ -39,18 +62,19 @@ the data source of each, the two decisions, the limits): it is the text the READ
 
 **What is left** (every job is a GitHub issue with its full spec; the board is the pinned issue 13; the same
 specs are in `docs/TASKS.md` section 5 and `docs/TASKS-PARTNER-DATA.md`):
-J20 validation on the full scan ·
-J22 literature check of the top regions (start with Putorana Plateau, Peary Land, Hazen Plateau), ends with a
-person opening the evidence · J7 web app (`app/` is Wiktor's prototype, still uncommitted on his machine) ·
-J11 README, pitch, submission texts (no `README.md` exists yet) · J25 show the measured surface data in the site
-card and cite it · J26 test the dune-field flag against temperature and moisture · J27 radar look with CSA
-RADARSAT-1 · J28, J29 optional · J23 fresh-clone check and freeze, Sun 08:30.
+J20 correction and reruns (about 30 min, blocks the final numbers) ·
+J22 fixes: verify or withdraw the `mentioned` verdicts, correct the wording, then a person opens the evidence ·
+J7 web app (`app/` is Wiktor's prototype, still uncommitted on his machine) ·
+J11 final texts after J20 and J22, demo link, a person approves · J25 show the measured surface data in the
+site card and cite it · J30 Poland against the Moon (in progress) · J27 radar look with CSA RADARSAT-1 ·
+J28, J29 optional · J23 fresh-clone check and freeze, Sun 08:30 (a fresh clone has no Natural Earth file).
 
 **How to talk about the result** (details in section 9): the method finds terrain of a lunar shape; it is not a
 detector of the sites people chose. Known analogs lie in more lunar-like ground than random places (median
 enrichment 0.91 against 0.35) but below the average bare cell (0.91 is under 1). The top of the ranking is
 Arctic plateau terrain whose "bare ground" is partly tundra. The coldest site is still about 94 K warmer than
-the warmest lunar region. Nothing is called a discovery before J22.
+the warmest lunar region. Nothing is called a discovery, and "mentioned in analog literature" is not verified
+(issue 2). The dune-field flag is a terrain rule, not a confirmed sand detector (J26).
 
 **Rules.** No `Claude-Session:` line or any session link in a commit; no keys, tokens or private e-mail
 addresses in the repo (Wiktor, 14 Nov; history was rewritten at about 19:45, so a clone made earlier must be
@@ -61,7 +85,8 @@ not used since 23:20 on 14 Nov** (`CLAUDE.md`): take an issue before you start, 
 **People still owe.** Bartosz: switch the team's challenge on the Space Apps website; make the repository public
 before submission, after deciding what to do with `docs/hackathon/` (it holds a private e-mail address of the
 Local Lead and a summary of Wiktor's mailbox). Someone: look at the three contact sheets and at the five sites
-J22 will name. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 306.40 E) is fresh.
+of `docs/NOVELTY.md` section 5; read and approve the drafts in `README.md` and `docs/pitch/`; put the demo link
+into `docs/pitch/SUBMISSION-FIELDS.md`. The full list is issue 11. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 306.40 E) is fresh.
 
 ## 1. Where things stand
 
@@ -72,7 +97,12 @@ J22 will name. Confirm on an LROC image that the lunar crater of J10 (87.68 S, 3
 | J17 NASA Earth core (with J17b) | **done**: code, NASADEM cells of 619 tiles, comparison at scale, recommendation (Copernicus stays primary). Open: the LP DAAC citation pages could not be opened (HTTP 403), a person has to |
 | J9 novelty check | done for the old 78-tile ranking only; replaced by J22 |
 | J14 ICESat-2 on Windows | blocked; replaced by J21 (done) |
-| J20, J22, J7, J11, J25, J26, J27, J23 | to do |
+| J26 dune-field flag against temperature and moisture | **done** (15 Nov, issue 6 closed): the flag is not confirmed as a sand detector; `docs/sources/j26.md` |
+| J20 validation on the full scan | delivered (`docs/VALIDATION.md`); **correction open and not taken**: tile-recovery AUC, reruns after the change of `known_analogs.csv` (issue 1) |
+| J22 novelty check of the final ranking | delivered (`docs/NOVELTY.md`); **not closed**: empty `country` column, unverified `mentioned` verdicts, wording (issue 2) |
+| J11 README, pitch, submission texts | drafts on `main`; final numbers and wording open (issue 4) |
+| J30 Poland against the Moon at 1 to 2 m | in progress on branch `t-pl2moon` (issue 14) |
+| J7, J25, J27, J23 | to do |
 | J28, J29 | optional |
 
 ## 2. How the conductor works here
