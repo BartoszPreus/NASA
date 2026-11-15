@@ -21,7 +21,7 @@ What is already measured (do not redo; read `docs/RAPORT-ANALOGI-KSIEZYCA-ZODIAK
 ## 2. Rules for every job
 
 1. **GitHub issues** as in `CLAUDE.md`: every job is an issue with its full specification; take the issue before you start, comment when you stop, close it with the result. Axis is not used since Sat 14 Nov, 23:20. No secrets in issues.
-2. **Files**: edit only what your job owns. Need a change elsewhere? Comment on the issue of the job that owns the file. The "Owns" list overrides the default folder in `.claude/agents/opus-worker.md`.
+2. **Files**: edit only what your job owns. A defect you find in another file: fix it in a separate commit if it is a few lines and you can verify the fix, and say so in your result comment; otherwise comment on the issue of the job that owns the file. A change of a shared contract (data schema, column names, API) always needs a comment first. The "Owns" list overrides the default folder in `.claude/agents/opus-worker.md`.
 3. **Git**: small commits to `main`, `git pull --rebase origin main` before every push, never force-push. Never commit raw data, files over 50 MB, or keys. Raw downloads go to `data/raw/` (git-ignored).
 4. **Python**: repo-root `.venv` (Python 3.12, Windows). Run everything from the repo root. Add packages to `requirements.txt`.
 5. **English** in code, comments and every file that can end up in the submission. Polish only in `docs/` notes for the team.
@@ -30,6 +30,7 @@ What is already measured (do not redo; read `docs/RAPORT-ANALOGI-KSIEZYCA-ZODIAK
 8. **Numbers**: report only numbers that came out of a run. Anything from memory or a search snippet is marked UNVERIFIED. If a result contradicts this file, say so; do not bend it to fit.
 9. **Timebox**: each job states one. When it runs out, commit what works, report PARTIAL or BLOCKED and stop. Needs a human: sign-ups, the challenge switch on the website, deployment settings, final wording of the pitch.
 10. **Do not change the feature definitions** in `pipeline/features.py` without the J1 owner; every downstream number depends on them.
+11. **Before you report DONE**: the five checks under that heading in `AGENTS.md` and `CLAUDE.md` (what you changed that other jobs read; nothing read from outside git; evidence for every claim; three ways the result could be wrong; defects of the specification itself). The Accept checks of a job are the minimum, not the definition of done. Not for the web app in `app/`.
 
 ## 3. Contract v1 (shared data and code)
 
@@ -99,7 +100,7 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 ### `sites.geojson` properties
 `site_id, lat, lon, area_km2, n_cells, score, score_amp, score_dep, best_region, tile, country, bare, ice, elev_med, s240, s570, r200, r1600, dep_frac, f_le5, f_le8, f_le15, nearest_known, nearest_known_km, is_known, novelty (J9: unreported | mentioned | established | unchecked), breaks (list of strings)`; geometry = polygon of the cells (a point is acceptable for v0).
 
-## 4. Status of the jobs (Sun 15 Nov, 01:40)
+## 4. Status of the jobs (Sun 15 Nov, 01:30)
 
 | Job | What | State |
 |---|---|---|

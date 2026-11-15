@@ -1,12 +1,22 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 01:40, by the conductor session (Claude Code, Fable) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 01:30, by the conductor session (Claude Code, Fable) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
-## 0. START HERE (state at 01:40, Sun 15 Nov)
+## 0. START HERE (state at 01:30, Sun 15 Nov)
+
+**New rule since 01:30: "Before you report DONE"** (`AGENTS.md` for Codex and other agents, the same text in
+`CLAUDE.md`): five checks an agent does on its own result before the result comment, and a defect found in
+another file may be fixed in a separate commit if it is a few lines. Reason: every defect found in review this
+night had passed the Accept checks of its job.
 
 **Since 23:20 (three agents worked on `main`; reviews are comments on the issues):**
+- **J29 delivered** (issue 10, open, waits for review): a third elevation model from JAXA (AW3D30) against
+  Copernicus and NASADEM (`docs/sources/j29.md`).
+- **J10 follow-up** (commit 9289260): the crater close-up no longer reads from `scratch/` and exits non-zero
+  when a part fails; the overlay figure says that the lunar crater (20 m pixels) is to be compared with Meteor
+  Crater at 30 m, not at 1 m.
 - **J26 done** (issue 6, closed): temperature and soil moisture of 978 sites do not confirm that the dune-field
   flag marks dry sand (`docs/sources/j26.md`). The flag stays a terrain rule; say so.
 - **J11 drafts are on `main`** (issue 4, open): `README.md`, `docs/pitch/` (seven slides, pitch, Q&A, portal
