@@ -260,7 +260,22 @@ def run_images(sites: pd.DataFrame, img_dir: Path = IMG_DIR) -> pd.DataFrame:
         rows = list(ex.map(lambda s: image_row(s, img_dir), [s for _, s in sites.iterrows()]))
     df = pd.DataFrame(rows)
     df.to_csv(img_dir / "index.csv", index=False)
+    prune_images(img_dir, df)
     return df
+
+
+def prune_images(img_dir: Path, index: pd.DataFrame) -> list[str]:
+    """Delete the JPEGs of img_dir that index.csv does not list (sites that left the image top N), so a rerun of
+    the stage leaves only indexed images (J41, issue #27). Only *.jpg directly in img_dir; returns the names removed."""
+    keep = {Path(str(f)).name for f in index["file"].dropna()}
+    removed = []
+    for jpg in sorted(Path(img_dir).glob("*.jpg")):
+        if jpg.name not in keep:
+            jpg.unlink()
+            removed.append(jpg.name)
+    if removed:
+        print(f"Worldview: removed {len(removed)} images not in {Path(img_dir) / 'index.csv'}")
+    return removed
 
 
 def main(argv=None) -> None:
