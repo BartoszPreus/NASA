@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 63 rows, 8.3 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 68 rows, 8.9 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -57,6 +57,8 @@ data/
 | `sites/novelty_check.csv` | literature verdict for the top new sites, 44 rows, 90.5 kB | `hand-curated by job J9 (agent literature and map search, no script)` | osm, wikipedia, analog_literature, data/sites/ranking.csv |
 | `sites/partner_context.csv` | per site: measured day and night surface temperature (JAXA, NASA), soil moisture, permafrost fraction and ground temperature, 118 rows, 15.6 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/sites/ranking.csv, data/sites/sites.geojson |
 | `sites/partner_context_summary.json` | layers, medians by site group, the Diviner temperatures of the lunar regions, caveats, 12.2 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/moon/instruments/diviner_regions.json |
+| `sites/radar_context.csv` | per site and group (default top 30, strict top 30, known): Sentinel-1 summer median co-pol and cross-pol gamma0 and cross/co ratio in dB (C-band linear polarisation; not comparable with the Mini-RF CPR), 88 rows, 13.8 kB | `python -m pipeline.radar_context (job J34)` | ebd_s1_seasonal, data/sites/ranking.csv, data/sites/sites.geojson, data/sites/partner_context.csv, data/validation/landcover_sensitivity/ranking_bare_strict.csv, data/validation/landcover_sensitivity/sites_bare_strict.geojson |
+| `sites/radar_context_summary.json` | medians by group and polarisation pair, missing sites with the reason, caveats, 12.5 kB | `python -m pipeline.radar_context (job J34)` | ebd_s1_seasonal, data/sites/radar_context.csv |
 | `sites/radarsat1_index.csv` | site coverage, chosen scene and two uncalibrated Earth texture statistics, 37 rows, 6.8 kB | `python -m pipeline.radarsat1 find and quicklook (job J27)` | data/reference/radarsat1_footprints.parquet, data/sites/ranking.csv, data/sites/sites.geojson, nasa_erg_oriental |
 | `sites/rank_uncertainty.csv` | per top-100 site: bootstrap rank p05 / median / p95, share of runs in the top 30, rank in the NASADEM and leave-one-feature-group-out variants, 100 rows, 9.1 kB | `python validation/rank_uncertainty.py (job J32)` | data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, data/moon/reference.json, data/sites/ranking.csv |
 | `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 182.2 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
@@ -133,6 +135,12 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 - `csa_rcm` (link 6): RADARSAT Constellation Mission data. *looked at, not used*. https://donnees-data.asc-csa.gc.ca/en/dataset/rcm
 - `csa_radarsat1` (link 7): RADARSAT-1 SCW and SGF GeoTIFFs from the public AWS archive. *used*. https://donnees-data.asc-csa.gc.ca/en/dataset/radarsat1
 - `csa_sar_tutorial` (link 8): Synthetic Aperture Radar (SAR) Python tutorial. *used*. https://github.com/asc-csa/Synthetic_Aperture_Radar_Tutorial
+
+**NASA JPL / Earth Big Data / Gamma RS**
+- `ebd_s1_seasonal`: Global Seasonal Sentinel-1 Interferometric Coherence and Backscatter Data Set (1 Dec 2019 - 30 Nov 2020): seasonal mean gamma0 VV/VH or HH/HV, local incidence and layover/shadow maps, 1x1 degree tiles at 3 arcsec (job J34). *used*. https://registry.opendata.aws/ebd-sentinel-1-global-coherence-backscatter/
+
+**Microsoft**
+- `pc_sentinel1_rtc`: Planetary Computer sentinel-1-rtc (Sentinel-1 RTC, Catalyst processing, job J34 candidate). *needs login, not downloaded*. https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-1-rtc
 
 **ESA**
 - `copernicus_dem` (link 9): Copernicus DEM GLO-30 (read from the AWS Open Data copy, the same product as in the Copernicus Data Space Ecosystem). *used*. https://dataspace.copernicus.eu/

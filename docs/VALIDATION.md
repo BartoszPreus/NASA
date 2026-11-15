@@ -103,6 +103,22 @@ What the numbers say: the strict leaders are high, dry, mid-latitude deserts (At
 
 What the shortened run alone cannot show (the full run above answers it): which sites outside the default top 100 move up into the top 30 under the strict mask, and the new rank of a surviving site (survivors shrink, e.g. N82W031-01 from 47 to 6 cells).
 
+## Sentinel-1 radar backscatter of the top sites (J34)
+
+**Sentinel-1 is C band with linear polarisation. These values are not comparable with the Mini-RF circular polarisation ratio.** Cross-pol backscatter responds to volume scattering (vegetation, rough rock). It is context, not a test of the ranking, and it does not enter the score. The data are seasonal mean gamma0 from the login-free Global Seasonal Sentinel-1 data set (1 Dec 2019 to 30 Nov 2020, CC BY 4.0, contains modified Copernicus Sentinel data). Each site uses its hemisphere's summer (JJA or DJF), with layover and shadow removed. Access, licence and method are in [J34 notes](sources/j34.md).
+
+**Question.** Do the Arctic sites of the default top 30 differ in cross-pol backscatter from the desert sites of the strict top 30 and from the known analogs, in the direction expected for vegetated tundra? For tundra, volume scattering should raise the cross-pol channel more than the co-pol channel, so the cross/co ratio should be higher.
+
+**Coverage.** 11 of the default top 30 have a value: 9 Arctic and 2 non-Arctic (Atacama, Mauna Loa). 26 of the strict top 30 and 28 of 28 known sites have one. Five Peary Land sites and the Hazen Plateau sites lie north of the last tile (81 N). In 2020 the Putorana sites (13 of the default top 30) have no summer VV+VH backscatter. The answer below therefore rests on 7 default Arctic sites in VV+VH (Chukotka 1, Ungava 2, Polar Urals 1, Putorana edge 3) and is not about the default top 30 as a whole.
+
+| VV+VH, median of per-site medians | n | Cross-pol (VH) | Co-pol (VV) | Cross/co ratio |
+|---|---:|---:|---:|---:|
+| Default top 30, Arctic (lat ≥ 60°) | 7 | −18.2 dB | −8.1 dB | −9.6 dB |
+| Strict top 30, non-Arctic (Atacama/Puna, Tibet, Peru, Mauna Loa) | 26 | −21.4 dB | −11.8 dB | −9.3 dB |
+| Known sites, non-Arctic (mostly Atacama) | 24 | −20.1 dB | −10.5 dB | −9.4 dB |
+
+**Answer.** The default Arctic sites have **3.2 dB higher cross-pol** backscatter than the strict desert sites (Mann-Whitney p = 0.0007) and 1.9 dB higher than the non-Arctic known sites (p = 0.0006). Co-pol is higher by about the same amount (3.7 dB and 2.4 dB), so the **cross/co ratio does not differ** (−9.6 against −9.3 dB, p = 0.64; against −9.4 dB, p = 0.29). The brighter cross-pol channel points the way vegetation would. But brightness in both channels with an unchanged ratio fits rougher or moister ground just as well, so these data cannot tell vegetated tundra from rough rock. The p-values are indicative only, because sites in one region are not independent. Over full polygons only (4 sites), the medians are −16.75, −7.65 and −9.38 dB, which leads to the same reading. In HH+HV, which is not compared with VV+VH, the two Baffin Island default sites have cross-pol −16.3 dB and ratio −8.5 dB. The two Devon Island known sites (Haughton) have −17.6 and −9.1 dB. Two sites per group are too few to conclude anything.
+
 ## Limits
 
 The metric compares terrain shape. A high score gives no evidence of matching regolith, temperatures, or conditions for a lunar base. The ROC uses catalogued point analogs and the scanned background, which can contain unrecorded analogs. Nearby tiles can share landforms, so the interval describes the tile bootstrap and does not account for spatial dependence.
@@ -121,6 +137,7 @@ Files below are under [`data/validation/`](../data/validation/). Data and licens
 | Why the known analogs were chosen (J31) | `effectiveness.json` · `recovery.by_selected_for.<group>`, `recovery.strict_mask`; `enrichment.json` · `by_selected_for.<group>`, `strict_mask`; classification `../reference/known_analogs_selected_for.csv` |
 | Moss and lichen, full run (J33) | `landcover_sensitivity.json` · `full_run.{bare_cells,candidate_cells,sites,overlap.top10,overlap.top30,overlap.top100,regions_top30,regions_top100,regions_all_sites,default_top30_strict_rank}`; ranking `landcover_sensitivity/ranking_bare_strict.csv` (`is_known`, `novelty`); cells `landcover_sensitivity/cells_bare_strict.parquet` |
 | Context of the strict ranking (J42) | `landcover_sensitivity/context_comparison.json` · `groups.{default,strict}.{modis_lst_day_mean_k,modis_lst_night_mean_k,modis_lst_night_min_k,coldest_night_k,night_minus_diviner_mean_k,amsr2_soil_moisture_pct,permafrost_sites_at_least_50pct,power_precip_mm_per_year,elev_m,stability}`; `landcover_sensitivity/rank_uncertainty_strict.json` (keys of `rank_uncertainty.json`) |
+| Sentinel-1 backscatter (J34) | `../sites/radar_context_summary.json` · `comparison_vv_vh.{default_top30_arctic,strict_top30_non_arctic,known_non_arctic}.{n,median_cross_pol_db,median_co_pol_db,median_cross_co_ratio_db,p_*,difference_*}`, `groups.<group>.by_pol_pair`, `missing`; per site `../sites/radar_context.csv` |
 | Moss and lichen sensitivity (J33) | `landcover_sensitivity.json` · `n_tiles_read`, `cells`, `cells_bare_mismatch`, `top30.{pass_strict_median,pass_strict_cells,median_bare_minus_bare_strict}`, `top100.{...,n_sites_with_modis,pass_modis_median}`, `per_region.<region>.{top30,top100}`; per site `landcover_sensitivity/sites_top100.csv` (N82W031-01: `n_cells`, `strict_kept_cells`, `strict_largest_group`) |
 
 ## Rank uncertainty per site (J32)

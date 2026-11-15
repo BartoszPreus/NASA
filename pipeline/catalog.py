@@ -109,6 +109,21 @@ SOURCES = [
       "RADARSAT-1 (c) Canadian Space Agency; Open Government Licence - Canada "
       "https://open.canada.ca/en/open-government-licence-canada", "no for AWS", "used",
       "pipeline/radarsat1.py (job J27): site imagery and texture, outside the ranking score", "data/raw/radarsat1/"),
+    S("ebd_s1_seasonal", "NASA JPL / Earth Big Data / Gamma RS", "Global Seasonal Sentinel-1 Interferometric "
+      "Coherence and Backscatter Data Set (1 Dec 2019 - 30 Nov 2020): seasonal mean gamma0 VV/VH or HH/HV, local "
+      "incidence and layover/shadow maps, 1x1 degree tiles at 3 arcsec (job J34)", "",
+      "https://registry.opendata.aws/ebd-sentinel-1-global-coherence-backscatter/ ; "
+      "http://sentinel-1-global-coherence-earthbigdata.s3-website-us-west-2.amazonaws.com/",
+      "CC BY 4.0, 'Contains modified Copernicus Sentinel data.' (read 15 Nov 2026 on the data set documentation "
+      "page and the AWS registry entry); cite Kellndorfer et al. (2022), Scientific Data 9, 73, "
+      "doi:10.1038/s41597-022-01189-6", "no", "used",
+      "pipeline/radar_context.py (job J34): C-band linear-polarisation backscatter per site, outside the score; "
+      "not comparable with the Mini-RF circular polarisation ratio", ""),
+    S("pc_sentinel1_rtc", "Microsoft", "Planetary Computer sentinel-1-rtc (Sentinel-1 RTC, Catalyst processing, "
+      "job J34 candidate)", "", "https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-1-rtc",
+      "CC-BY-4.0 in the collection record; the record says 'A Planetary Computer account is required to retrieve "
+      "SAS tokens to read the RTC data.' (msft:requires_account true, read 15 Nov 2026)",
+      "yes (account)", "needs login, not downloaded", "none: J34 used the login-free ebd_s1_seasonal instead", ""),
     S("csa_sar_tutorial", "CSA", "Synthetic Aperture Radar (SAR) Python tutorial", 8,
       "https://github.com/asc-csa/Synthetic_Aperture_Radar_Tutorial", "modified MIT; see the repository licence", "no",
       "used", "pipeline/radarsat1.py (job J27): reference for reading and plotting radar rasters", ""),
@@ -397,6 +412,14 @@ FILE_MAP = [
      "bbox, date, layer and cloud share of every site image"),
     ("data/sites/images/*.jpg", "python -m pipeline.nasa_context --top 150 --images 60", "worldview_gibs",
      "MODIS or VIIRS true-colour image around one site (NASA imagery, unmodified)"),
+    ("data/sites/radar_context.csv", "python -m pipeline.radar_context (job J34)",
+     "ebd_s1_seasonal, data/sites/ranking.csv, data/sites/sites.geojson, data/sites/partner_context.csv, "
+     "data/validation/landcover_sensitivity/ranking_bare_strict.csv, data/validation/landcover_sensitivity/sites_bare_strict.geojson",
+     "per site and group (default top 30, strict top 30, known): Sentinel-1 summer median co-pol and cross-pol "
+     "gamma0 and cross/co ratio in dB (C-band linear polarisation; not comparable with the Mini-RF CPR)"),
+    ("data/sites/radar_context_summary.json", "python -m pipeline.radar_context (job J34)",
+     "ebd_s1_seasonal, data/sites/radar_context.csv", "medians by group and polarisation pair, missing sites "
+     "with the reason, caveats"),
     ("data/sites/radarsat1_index.csv", "python -m pipeline.radarsat1 find and quicklook (job J27)",
      "data/reference/radarsat1_footprints.parquet, data/sites/ranking.csv, data/sites/sites.geojson, nasa_erg_oriental",
      "site coverage, chosen scene and two uncalibrated Earth texture statistics"),

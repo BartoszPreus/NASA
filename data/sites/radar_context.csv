@@ -1,0 +1,89 @@
+site_id,group,rank,country,lat,lon,arctic,season,pol_pair,co_pol_db,cross_pol_db,cross_co_ratio_db,n_pixels,valid_share,layover_shadow_share,local_incidence_median_deg,n_orbits,tiles,status,reason
+N82W026-01,default_top30,1.0,Greenland,82.4786,-25.4948,True,JJA 2020,,,,,,,,,,N83W027;N83W026,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N69E093-01,default_top30,2.0,Russia,69.1493,93.3899,True,JJA 2020,,,,,,,,,,N70E092;N70E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+N82W028-01,default_top30,3.0,Greenland,82.5717,-27.4738,True,JJA 2020,,,,,,,,,,N83W029;N83W028,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N82W027-01,default_top30,4.0,Greenland,82.5759,-26.5997,True,JJA 2020,,,,,,,,,,N83W028;N83W027,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N68E093-01,default_top30,5.0,Russia,68.741,93.3675,True,JJA 2020,,,,,,,,,,N69E092;N69E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+N68E095-01,default_top30,6.0,Russia,68.3519,95.5373,True,JJA 2020,VV+VH,-9.38,-18.68,-9.46,88733.0,0.341,0.0,39.0,2.0,N69E094;N69E095,ok,
+N69E093-02,default_top30,7.0,Russia,69.5189,93.2402,True,JJA 2020,,,,,,,,,,N70E092;N70E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+S21W070-01,default_top30,8.0,Chile,-20.5168,-69.2344,False,DJF 2019-20,VV+VH,-17.36,-26.84,-9.19,43828.0,1.0,0.0,39.0,2.0,S20W070,ok,
+N68E094-01,default_top30,9.0,Russia,68.3459,94.7495,True,JJA 2020,,,,,,,,,,N69E094,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+N68E093-02,default_top30,10.0,Russia,68.906,93.6133,True,JJA 2020,,,,,,,,,,N70E093;N69E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+N82W031-01,default_top30,11.0,Greenland,82.6278,-30.4546,True,JJA 2020,,,,,,,,,,N83W032;N83W031,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N65W172-01,default_top30,12.0,Russia,65.8479,-171.8344,True,JJA 2020,VV+VH,-7.6,-16.62,-8.87,68069.0,1.0,0.0,38.0,4.0,N66W173;N66W172,ok,
+N68E094-02,default_top30,13.0,Russia,68.2283,94.1446,True,JJA 2020,,,,,,,,,,N69E093;N69E094,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+N62W074-01,default_top30,14.0,Canada,62.0954,-73.7958,True,JJA 2020,VV+VH,-8.51,-18.2,-9.63,76671.0,1.0,0.0,38.0,3.0,N63W075;N63W074,ok,
+N68E094-03,default_top30,15.0,Russia,68.8757,94.55,True,JJA 2020,,,,,,,,,,N69E094,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+N69E092-01,default_top30,16.0,Russia,69.4452,92.4112,True,JJA 2020,VV+VH,-8.12,-18.85,-10.66,115795.0,0.565,0.0,40.0,2.0,N70E091;N70E092,ok,
+N82W029-01,default_top30,17.0,Greenland,82.5321,-28.527,True,JJA 2020,,,,,,,,,,N83W030;N83W029,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N81W072-01,default_top30,18.0,Canada,81.4017,-71.5403,True,JJA 2020,,,,,,,,,,N82W073;N82W072,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N69E092-02,default_top30,19.0,Russia,69.1594,92.7526,True,JJA 2020,,,,,,,,,,N70E092,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+N68E093-03,default_top30,20.0,Russia,68.2348,93.5162,True,JJA 2020,,,,,,,,,,N69E092;N69E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+N69E094-01,default_top30,21.0,Russia,69.2921,94.1861,True,JJA 2020,,,,,,,,,,N70E093;N70E094,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+N71W078-01,default_top30,22.0,Canada,71.3407,-77.6888,True,JJA 2020,HH+HV,-8.32,-16.6,-8.28,50466.0,0.358,0.0,36.0,4.0,N72W079;N72W078,ok,
+N69E096-01,default_top30,23.0,Russia,69.2013,96.4869,True,JJA 2020,VV+VH,-10.07,-19.47,-9.6,168172.0,0.708,0.0,40.0,2.0,N70E095;N70E096,ok,
+N19W156-01,default_top30,24.0,United States of America,19.4806,-155.5683,False,JJA 2020,VV+VH,-7.22,-15.07,-7.91,60886.0,1.0,0.0,37.0,1.0,N20W156,ok,
+N69E093-03,default_top30,25.0,Russia,69.3816,93.7497,True,JJA 2020,,,,,,,,,,N70E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+N68E093-04,default_top30,26.0,Russia,68.5606,93.5743,True,JJA 2020,,,,,,,,,,N69E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+N67E066-01,default_top30,27.0,Russia,67.4843,66.8012,True,JJA 2020,VV+VH,-6.61,-16.52,-9.89,39211.0,1.0,0.0,40.0,2.0,N68E066,ok,
+N67E093-01,default_top30,28.0,Russia,67.4439,93.7745,True,JJA 2020,,,,,,,,,,N68E093,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+N71W077-01,default_top30,29.0,Canada,71.3035,-76.5722,True,JJA 2020,HH+HV,-7.37,-16.05,-8.67,142230.0,1.0,0.0,37.0,4.0,N72W078;N72W077,ok,
+N61W074-01,default_top30,30.0,Canada,61.9183,-73.6369,True,JJA 2020,VV+VH,-7.71,-16.88,-9.12,56223.0,1.0,0.0,38.0,3.0,N63W074;N62W074,ok,
+S21W070-01,strict_top30,1.0,Chile,-20.5168,-69.2344,False,DJF 2019-20,VV+VH,-17.36,-26.84,-9.19,43828.0,1.0,0.0,39.0,2.0,S20W070,ok,
+N19W156-01,strict_top30,2.0,United States of America,19.4806,-155.5683,False,JJA 2020,VV+VH,-7.22,-15.07,-7.91,60886.0,1.0,0.0,37.0,1.0,N20W156,ok,
+S26W069-01,strict_top30,3.0,Argentina,-25.6808,-68.4742,False,DJF 2019-20,VV+VH,-9.48,-17.88,-8.27,20291.0,1.0,0.0,40.0,2.0,S25W069,ok,
+N81W072-01,strict_top30,4.0,Canada,81.4027,-71.5926,True,JJA 2020,,,,,,,,,,N82W073;N82W072,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N32E078-01,strict_top30,5.0,India,32.9073,78.6966,False,JJA 2020,VV+VH,-11.07,-20.34,-9.34,15613.0,1.0,0.0,39.0,2.0,N33E078,ok,
+S27W069-01,strict_top30,6.0,Argentina,-26.5776,-68.214,False,DJF 2019-20,VV+VH,-10.29,-19.57,-9.29,13261.0,1.0,0.0,38.0,2.0,S26W069,ok,
+S26W069-02,strict_top30,7.0,Chile,-25.3647,-68.8529,False,DJF 2019-20,VV+VH,-10.28,-19.86,-9.55,21047.0,1.0,0.0,36.0,2.0,S25W069,ok,
+S27W068-01,strict_top30,8.0,Argentina,-26.6545,-67.2751,False,DJF 2019-20,VV+VH,-11.88,-22.12,-9.94,18885.0,1.0,0.0,39.0,1.0,S26W068,ok,
+N34E084-01,strict_top30,9.0,China,34.4735,84.8932,False,JJA 2020,VV+VH,-13.08,-24.45,-11.3,13062.0,1.0,0.0,38.0,4.0,N35E084,ok,
+N35E080-01,strict_top30,10.0,China,35.3218,80.071,False,JJA 2020,VV+VH,-13.27,-24.66,-11.26,15981.0,1.0,0.0,40.0,5.0,N36E079;N36E080,ok,
+S26W069-03,strict_top30,11.0,Argentina,-25.3491,-68.1808,False,DJF 2019-20,VV+VH,-10.78,-20.5,-9.58,10605.0,1.0,0.0,38.0,2.0,S25W069,ok,
+S26W069-04,strict_top30,12.0,Argentina,-25.4868,-68.2833,False,DJF 2019-20,VV+VH,-11.48,-20.58,-8.98,14203.0,1.0,0.0,41.0,2.0,S25W069,ok,
+S25W068-01,strict_top30,13.0,Argentina,-24.4723,-67.8236,False,DJF 2019-20,VV+VH,-10.9,-20.96,-9.96,13068.0,1.0,0.0,38.0,2.0,S24W068,ok,
+S16W075-01,strict_top30,14.0,Peru,-15.5221,-74.5781,False,DJF 2019-20,VV+VH,-18.99,-26.88,-6.83,7480.0,1.0,0.0,43.0,3.0,S15W075,ok,
+N70W087-01,strict_top30,15.0,Canada,70.198,-86.1979,True,JJA 2020,,,,,,,,,,N71W087,no_season,"no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+N81W074-01,strict_top30,16.0,Canada,81.4765,-73.2932,True,JJA 2020,,,,,,,,,,N82W074,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+N34E084-02,strict_top30,17.0,China,34.4034,84.7218,False,JJA 2020,VV+VH,-12.44,-22.83,-10.39,16296.0,1.0,0.0,40.0,4.0,N35E084,ok,
+N35E080-02,strict_top30,18.0,China,35.2283,80.3676,False,JJA 2020,VV+VH,-12.91,-23.14,-10.02,25789.0,0.998,0.002,39.0,4.0,N36E080,ok,
+S25W069-01,strict_top30,19.0,Argentina,-24.758,-68.512,False,DJF 2019-20,VV+VH,-8.99,-17.86,-8.91,17758.0,1.0,0.0,34.0,2.0,S24W069,ok,
+N81W073-01,strict_top30,20.0,Canada,81.345,-72.477,True,JJA 2020,,,,,,,,,,N82W073,no_data,the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)
+S18W072-01,strict_top30,21.0,Peru,-17.6942,-71.2575,False,DJF 2019-20,VV+VH,-21.2,-29.69,-8.04,4333.0,1.0,0.0,42.0,2.0,S17W072,ok,
+N35E080-03,strict_top30,22.0,China,35.1722,80.6308,False,JJA 2020,VV+VH,-11.45,-21.81,-10.18,15435.0,1.0,0.0,39.0,4.0,N36E080,ok,
+S26W068-01,strict_top30,23.0,Argentina,-25.2689,-67.927,False,DJF 2019-20,VV+VH,-11.07,-21.01,-10.02,9595.0,1.0,0.0,39.0,2.0,S25W069;S25W068,ok,
+N33E084-01,strict_top30,24.0,China,33.9172,84.1669,False,JJA 2020,VV+VH,-12.19,-22.94,-10.49,13086.0,1.0,0.0,38.0,4.0,N35E084;N34E084,ok,
+S28W069-01,strict_top30,25.0,Argentina,-27.383,-68.9321,False,DJF 2019-20,VV+VH,-9.87,-18.14,-8.01,9744.0,1.0,0.0,43.0,3.0,S27W070;S27W069,ok,
+S25W071-01,strict_top30,26.0,Chile,-24.6154,-70.2885,False,DJF 2019-20,VV+VH,-11.96,-20.88,-8.89,20638.0,1.0,0.0,39.0,2.0,S24W071,ok,
+S19W071-01,strict_top30,27.0,Peru,-18.2558,-70.2419,False,DJF 2019-20,VV+VH,-19.3,-28.55,-9.11,9234.0,1.0,0.0,40.0,2.0,S18W071,ok,
+S16W076-01,strict_top30,28.0,Peru,-15.0736,-75.1745,False,DJF 2019-20,VV+VH,-21.12,-29.48,-7.46,9303.0,1.0,0.0,42.0,3.0,S15W076,ok,
+S26W071-01,strict_top30,29.0,Chile,-25.129,-70.2408,False,DJF 2019-20,VV+VH,-11.66,-20.74,-9.01,10649.0,1.0,0.0,39.0,3.0,S25W071,ok,
+N34E082-01,strict_top30,30.0,China,34.4299,82.126,False,JJA 2020,VV+VH,-13.61,-24.76,-11.04,14196.0,1.0,0.0,38.0,4.0,N35E082,ok,
+S26W069-02,known,69.0,Chile,-25.3647,-68.8529,False,DJF 2019-20,VV+VH,-10.28,-19.86,-9.55,21047.0,1.0,0.0,36.0,2.0,S25W069,ok,
+N75W088-01,known,79.0,Canada,75.4739,-87.3185,True,JJA 2020,HH+HV,-8.69,-17.79,-9.14,72966.0,0.998,0.002,37.0,6.0,N76W088,ok,
+S26W069-03,known,95.0,Argentina,-25.3491,-68.1808,False,DJF 2019-20,VV+VH,-10.78,-20.5,-9.58,10605.0,1.0,0.0,38.0,2.0,S25W069,ok,
+S26W069-04,known,100.0,Argentina,-25.4868,-68.2833,False,DJF 2019-20,VV+VH,-11.48,-20.58,-8.98,14203.0,1.0,0.0,41.0,2.0,S25W069,ok,
+S25W068-01,known,104.0,Argentina,-24.4723,-67.8236,False,DJF 2019-20,VV+VH,-10.9,-20.96,-9.96,13068.0,1.0,0.0,38.0,2.0,S24W068,ok,
+S25W069-01,known,116.0,Argentina,-24.758,-68.512,False,DJF 2019-20,VV+VH,-8.99,-17.86,-8.91,17758.0,1.0,0.0,34.0,2.0,S24W069,ok,
+S25W071-01,known,151.0,Chile,-24.6154,-70.2885,False,DJF 2019-20,VV+VH,-11.96,-20.88,-8.89,20638.0,1.0,0.0,39.0,2.0,S24W071,ok,
+S26W071-01,known,161.0,Chile,-25.129,-70.2408,False,DJF 2019-20,VV+VH,-11.66,-20.74,-9.01,10649.0,1.0,0.0,39.0,3.0,S25W071,ok,
+S22W069-01,known,179.0,Chile,-21.8236,-68.4206,False,DJF 2019-20,VV+VH,-10.89,-20.23,-9.44,5869.0,1.0,0.0,44.0,2.0,S21W069,ok,
+S26W069-06,known,,Argentina,-25.2487,-68.062,False,DJF 2019-20,VV+VH,-12.26,-21.4,-9.16,8032.0,1.0,0.0,42.0,2.0,S25W069,ok,
+S26W069-07,known,,Chile,-25.8347,-68.7613,False,DJF 2019-20,VV+VH,-9.9,-19.05,-8.76,12209.0,1.0,0.0,38.0,2.0,S25W069,ok,
+S26W068-03,known,,Argentina,-25.1359,-67.9588,False,DJF 2019-20,VV+VH,-10.32,-19.81,-9.55,10078.0,1.0,0.0,40.0,2.0,S25W069;S25W068,ok,
+S26W070-01,known,,Chile,-25.867,-69.9038,False,DJF 2019-20,VV+VH,-12.06,-22.12,-10.11,9181.0,1.0,0.0,44.0,3.0,S25W070,ok,
+N75W088-02,known,,Canada,75.486,-87.8079,True,JJA 2020,HH+HV,-8.39,-17.45,-9.1,34553.0,1.0,0.0,37.0,6.0,N76W089;N76W088,ok,
+S24W068-01,known,,Chile,-23.3918,-67.6238,False,DJF 2019-20,VV+VH,-9.98,-20.3,-10.26,5465.0,1.0,0.0,36.0,2.0,S23W068,ok,
+S25W071-02,known,,Chile,-24.3721,-70.1259,False,DJF 2019-20,VV+VH,-10.53,-19.35,-8.66,7947.0,1.0,0.0,39.0,2.0,S24W071,ok,
+S22W070-01,known,,Chile,-21.1776,-69.911,False,DJF 2019-20,VV+VH,-15.26,-25.55,-10.1,5868.0,1.0,0.0,39.0,2.0,S21W070,ok,
+S23W068-01,known,,Bolivia,-22.4725,-67.8558,False,DJF 2019-20,VV+VH,-9.71,-19.2,-9.44,5906.0,1.0,0.0,36.0,2.0,S22W068,ok,
+S26W069-09,known,,Chile,-25.1273,-68.5346,False,DJF 2019-20,VV+VH,-11.04,-20.16,-8.95,7554.0,1.0,0.0,38.0,2.0,S25W069,ok,
+S24W070-01,known,,Chile,-23.6513,-69.1166,False,DJF 2019-20,VV+VH,-10.46,-19.16,-8.77,6919.0,1.0,0.0,44.0,2.0,S23W070,ok,
+N65W018-01,known,,Iceland,65.1235,-17.6012,True,JJA 2020,VV+VH,-8.75,-19.89,-11.22,23031.0,1.0,0.0,39.0,5.0,N66W018,ok,
+S25W069-02,known,,Argentina,-24.5966,-68.2571,False,DJF 2019-20,VV+VH,-9.95,-20.07,-10.14,7529.0,1.0,0.0,32.0,2.0,S24W069,ok,
+S26W069-10,known,,Argentina,-25.1944,-68.1947,False,DJF 2019-20,VV+VH,-10.05,-19.93,-9.68,9067.0,1.0,0.0,35.0,2.0,S25W069,ok,
+S26W069-11,known,,Argentina,-25.2369,-68.2877,False,DJF 2019-20,VV+VH,-10.48,-20.05,-9.44,6127.0,1.0,0.0,36.0,2.0,S25W069,ok,
+N65W017-01,known,,Iceland,65.2187,-16.5658,True,JJA 2020,VV+VH,-8.08,-18.87,-10.79,12040.0,1.0,0.0,38.0,5.0,N66W017,ok,
+S25W069-03,known,,Argentina,-24.4496,-68.2206,False,DJF 2019-20,VV+VH,-9.97,-19.37,-9.32,4912.0,0.999,0.001,33.0,2.0,S24W069,ok,
+S26W071-02,known,,Chile,-25.3616,-70.0523,False,DJF 2019-20,VV+VH,-10.98,-20.23,-9.3,6563.0,1.0,0.0,39.0,3.0,S25W071,ok,
+S25W068-03,known,,Argentina,-24.247,-67.8458,False,DJF 2019-20,VV+VH,-10.17,-18.71,-8.44,5098.0,1.0,0.0,46.0,2.0,S24W068,ok,

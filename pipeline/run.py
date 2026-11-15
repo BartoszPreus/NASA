@@ -77,6 +77,10 @@ STAGES = [
       [PY, "-m", "pipeline.sites", "--bare-col", "bare_strict", "--out-dir", LC.rstrip("/")],
       [PY, "-m", "validation.strict_context"]],
      [os.path.join(paths.ROOT, LC, "context_comparison.json")]),
+    ("radar-context", "local", "Sentinel-1 C-band seasonal backscatter (linear polarisation, not the Mini-RF CPR) "
+     "for the default and strict top 30 and the known-analog sites (J34); context, outside the score.",
+     [[PY, "-m", "pipeline.radar_context"]], [os.path.join(paths.SITES, "radar_context.csv"),
+                                              os.path.join(paths.SITES, "radar_context_summary.json")]),
     ("validate-icesat2", "local", "ICESat-2 laser profiles over top sites against our grid slopes and the Moon.",
      [[PY, "validation/icesat2_profiles.py"]], [paths.VALIDATION_ICESAT2]),
     ("lidar", "local", "Crater close-ups: Meteor Crater (1 m lidar), a lunar crater, Morasko.",

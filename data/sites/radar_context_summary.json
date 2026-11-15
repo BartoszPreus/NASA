@@ -1,0 +1,444 @@
+{
+ "caveat": "Sentinel-1 C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio. Cross-pol backscatter responds to volume scattering (vegetation, rough rock): context, not a test of the ranking. HH+HV and VV+VH values are not mixed in one comparison.",
+ "credit": "Global Seasonal Sentinel-1 Interferometric Coherence and Backscatter Data Set (Kellndorfer et al. 2022), CC BY 4.0. Contains modified Copernicus Sentinel data.",
+ "data_period": "1 Dec 2019 - 30 Nov 2020 (seasonal means)",
+ "comparison_vv_vh": {
+  "pol_pair": "VV+VH",
+  "test": "two-sided Mann-Whitney U on per-site medians (indicative: sites cluster by region)",
+  "default_top30_arctic": {
+   "n": 7,
+   "full_polygon_n": 4,
+   "median_cross_pol_db": -18.2,
+   "median_cross_pol_db_full_polygon": -16.75,
+   "median_co_pol_db": -8.12,
+   "median_co_pol_db_full_polygon": -7.65,
+   "median_cross_co_ratio_db": -9.6,
+   "median_cross_co_ratio_db_full_polygon": -9.38
+  },
+  "strict_top30_non_arctic": {
+   "n": 26,
+   "median_cross_pol_db": -21.41,
+   "p_cross_pol_db": 0.00069,
+   "difference_cross_pol_db": 3.21,
+   "median_co_pol_db": -11.77,
+   "p_co_pol_db": 0.00039,
+   "difference_co_pol_db": 3.65,
+   "median_cross_co_ratio_db": -9.31,
+   "p_cross_co_ratio_db": 0.64,
+   "difference_cross_co_ratio_db": -0.29
+  },
+  "known_non_arctic": {
+   "n": 24,
+   "median_cross_pol_db": -20.12,
+   "p_cross_pol_db": 0.00061,
+   "difference_cross_pol_db": 1.92,
+   "median_co_pol_db": -10.5,
+   "p_co_pol_db": 5e-05,
+   "difference_co_pol_db": 2.38,
+   "median_cross_co_ratio_db": -9.38,
+   "p_cross_co_ratio_db": 0.29,
+   "difference_cross_co_ratio_db": -0.22
+  }
+ },
+ "method": "median gamma0 in dB inside the site polygon (3 arcsec pixels), median of per-pixel cross/co ratio in dB; layover/shadow pixels of any relative orbit removed; JJA north of the equator, DJF south of it; arctic = |lat| >= 60",
+ "groups": {
+  "default_top30": {
+   "n_sites": 30,
+   "n_with_value": 11,
+   "by_pol_pair": {
+    "HH+HV": {
+     "n": 2,
+     "median_co_pol_db": -7.85,
+     "median_cross_pol_db": -16.33,
+     "median_cross_co_ratio_db": -8.47,
+     "sites": [
+      "N71W078-01",
+      "N71W077-01"
+     ]
+    },
+    "VV+VH": {
+     "n": 9,
+     "median_co_pol_db": -8.12,
+     "median_cross_pol_db": -18.2,
+     "median_cross_co_ratio_db": -9.46,
+     "sites": [
+      "N68E095-01",
+      "S21W070-01",
+      "N65W172-01",
+      "N62W074-01",
+      "N69E092-01",
+      "N69E096-01",
+      "N19W156-01",
+      "N67E066-01",
+      "N61W074-01"
+     ]
+    }
+   }
+  },
+  "strict_top30": {
+   "n_sites": 30,
+   "n_with_value": 26,
+   "by_pol_pair": {
+    "VV+VH": {
+     "n": 26,
+     "median_co_pol_db": -11.77,
+     "median_cross_pol_db": -21.41,
+     "median_cross_co_ratio_db": -9.31,
+     "sites": [
+      "S21W070-01",
+      "N19W156-01",
+      "S26W069-01",
+      "N32E078-01",
+      "S27W069-01",
+      "S26W069-02",
+      "S27W068-01",
+      "N34E084-01",
+      "N35E080-01",
+      "S26W069-03",
+      "S26W069-04",
+      "S25W068-01",
+      "S16W075-01",
+      "N34E084-02",
+      "N35E080-02",
+      "S25W069-01",
+      "S18W072-01",
+      "N35E080-03",
+      "S26W068-01",
+      "N33E084-01",
+      "S28W069-01",
+      "S25W071-01",
+      "S19W071-01",
+      "S16W076-01",
+      "S26W071-01",
+      "N34E082-01"
+     ]
+    }
+   }
+  },
+  "known": {
+   "n_sites": 28,
+   "n_with_value": 28,
+   "by_pol_pair": {
+    "HH+HV": {
+     "n": 2,
+     "median_co_pol_db": -8.54,
+     "median_cross_pol_db": -17.62,
+     "median_cross_co_ratio_db": -9.12,
+     "sites": [
+      "N75W088-01",
+      "N75W088-02"
+     ]
+    },
+    "VV+VH": {
+     "n": 26,
+     "median_co_pol_db": -10.47,
+     "median_cross_pol_db": -20.06,
+     "median_cross_co_ratio_db": -9.44,
+     "sites": [
+      "S26W069-02",
+      "S26W069-03",
+      "S26W069-04",
+      "S25W068-01",
+      "S25W069-01",
+      "S25W071-01",
+      "S26W071-01",
+      "S22W069-01",
+      "S26W069-06",
+      "S26W069-07",
+      "S26W068-03",
+      "S26W070-01",
+      "S24W068-01",
+      "S25W071-02",
+      "S22W070-01",
+      "S23W068-01",
+      "S26W069-09",
+      "S24W070-01",
+      "N65W018-01",
+      "S25W069-02",
+      "S26W069-10",
+      "S26W069-11",
+      "N65W017-01",
+      "S25W069-03",
+      "S26W071-02",
+      "S25W068-03"
+     ]
+    }
+   }
+  },
+  "default_top30_arctic": {
+   "n_sites": 28,
+   "n_with_value": 9,
+   "by_pol_pair": {
+    "HH+HV": {
+     "n": 2,
+     "median_co_pol_db": -7.85,
+     "median_cross_pol_db": -16.33,
+     "median_cross_co_ratio_db": -8.47,
+     "sites": [
+      "N71W078-01",
+      "N71W077-01"
+     ]
+    },
+    "VV+VH": {
+     "n": 7,
+     "median_co_pol_db": -8.12,
+     "median_cross_pol_db": -18.2,
+     "median_cross_co_ratio_db": -9.6,
+     "sites": [
+      "N68E095-01",
+      "N65W172-01",
+      "N62W074-01",
+      "N69E092-01",
+      "N69E096-01",
+      "N67E066-01",
+      "N61W074-01"
+     ]
+    }
+   }
+  },
+  "known_arctic": {
+   "n_sites": 4,
+   "n_with_value": 4,
+   "by_pol_pair": {
+    "HH+HV": {
+     "n": 2,
+     "median_co_pol_db": -8.54,
+     "median_cross_pol_db": -17.62,
+     "median_cross_co_ratio_db": -9.12,
+     "sites": [
+      "N75W088-01",
+      "N75W088-02"
+     ]
+    },
+    "VV+VH": {
+     "n": 2,
+     "median_co_pol_db": -8.41,
+     "median_cross_pol_db": -19.38,
+     "median_cross_co_ratio_db": -11.0,
+     "sites": [
+      "N65W018-01",
+      "N65W017-01"
+     ]
+    }
+   }
+  },
+  "known_non_arctic": {
+   "n_sites": 24,
+   "n_with_value": 24,
+   "by_pol_pair": {
+    "VV+VH": {
+     "n": 24,
+     "median_co_pol_db": -10.5,
+     "median_cross_pol_db": -20.12,
+     "median_cross_co_ratio_db": -9.38,
+     "sites": [
+      "S26W069-02",
+      "S26W069-03",
+      "S26W069-04",
+      "S25W068-01",
+      "S25W069-01",
+      "S25W071-01",
+      "S26W071-01",
+      "S22W069-01",
+      "S26W069-06",
+      "S26W069-07",
+      "S26W068-03",
+      "S26W070-01",
+      "S24W068-01",
+      "S25W071-02",
+      "S22W070-01",
+      "S23W068-01",
+      "S26W069-09",
+      "S24W070-01",
+      "S25W069-02",
+      "S26W069-10",
+      "S26W069-11",
+      "S25W069-03",
+      "S26W071-02",
+      "S25W068-03"
+     ]
+    }
+   }
+  },
+  "strict_top30_non_arctic": {
+   "n_sites": 26,
+   "n_with_value": 26,
+   "by_pol_pair": {
+    "VV+VH": {
+     "n": 26,
+     "median_co_pol_db": -11.77,
+     "median_cross_pol_db": -21.41,
+     "median_cross_co_ratio_db": -9.31,
+     "sites": [
+      "S21W070-01",
+      "N19W156-01",
+      "S26W069-01",
+      "N32E078-01",
+      "S27W069-01",
+      "S26W069-02",
+      "S27W068-01",
+      "N34E084-01",
+      "N35E080-01",
+      "S26W069-03",
+      "S26W069-04",
+      "S25W068-01",
+      "S16W075-01",
+      "N34E084-02",
+      "N35E080-02",
+      "S25W069-01",
+      "S18W072-01",
+      "N35E080-03",
+      "S26W068-01",
+      "N33E084-01",
+      "S28W069-01",
+      "S25W071-01",
+      "S19W071-01",
+      "S16W076-01",
+      "S26W071-01",
+      "N34E082-01"
+     ]
+    }
+   }
+  }
+ },
+ "missing": [
+  {
+   "site_id": "N82W026-01",
+   "group": "default_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N69E093-01",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+  },
+  {
+   "site_id": "N82W028-01",
+   "group": "default_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N82W027-01",
+   "group": "default_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N68E093-01",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+  },
+  {
+   "site_id": "N69E093-02",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+  },
+  {
+   "site_id": "N68E094-01",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+  },
+  {
+   "site_id": "N68E093-02",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+  },
+  {
+   "site_id": "N82W031-01",
+   "group": "default_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N68E094-02",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+  },
+  {
+   "site_id": "N68E094-03",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+  },
+  {
+   "site_id": "N82W029-01",
+   "group": "default_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N81W072-01",
+   "group": "default_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N69E092-02",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+  },
+  {
+   "site_id": "N68E093-03",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+  },
+  {
+   "site_id": "N69E094-01",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+  },
+  {
+   "site_id": "N69E093-03",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+  },
+  {
+   "site_id": "N68E093-04",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,winter"
+  },
+  {
+   "site_id": "N67E093-01",
+   "group": "default_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+  },
+  {
+   "site_id": "N81W072-01",
+   "group": "strict_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N70W087-01",
+   "group": "strict_top30",
+   "status": "no_season",
+   "reason": "no JJA 2020 (summer) backscatter pair with >= 30 valid pixels in the polygon; seasons in the tile(s): fall,spring,summer,winter"
+  },
+  {
+   "site_id": "N81W074-01",
+   "group": "strict_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  },
+  {
+   "site_id": "N81W073-01",
+   "group": "strict_top30",
+   "status": "no_data",
+   "reason": "the bucket has no tile for the site (stated coverage 82 N - 79 S; no tile north of 81 N exists at these sites)"
+  }
+ ]
+}

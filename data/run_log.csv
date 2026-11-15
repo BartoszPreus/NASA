@@ -63,3 +63,7 @@ catalog,python.exe -m pipeline.catalog,2026-11-15 07:49:56,2.1,0,96d8814,data/ra
 sites,python.exe -m pipeline.sites,2026-11-15 07:56:11,81.0,0,d765520,data/raw/run_logs/sites_20261115_075611.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 07:58:24,1.7,0,d765520,data/raw/run_logs/catalog_20261115_075824.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 08:50:31,1.8,0,9299fe3,data/raw/run_logs/catalog_20261115_085031.log
+radar-context,python.exe -m pipeline.radar_context,2026-11-15 08:48:16,86.7,0,9299fe3,data/raw/run_logs/radar-context_20261115_084816.log
+catalog,python.exe -m pipeline.catalog,2026-11-15 08:49:42,2.4,0,9299fe3,data/raw/run_logs/catalog_20261115_084942.log
+radar-context,python.exe -m pipeline.radar_context,2026-11-15 08:50:20,82.6,0,9299fe3,data/raw/run_logs/radar-context_20261115_085020.log
+catalog,python.exe -m pipeline.catalog,2026-11-15 08:51:42,1.6,0,9299fe3,data/raw/run_logs/catalog_20261115_085142.log
