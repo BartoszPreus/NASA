@@ -52,7 +52,13 @@ SOURCES = [
       "GIBS acknowledgement requested: 'We acknowledge the use of imagery provided by services from NASA's Global "
       "Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).' "
       "(https://nasa-gibs.github.io/gibs-api-docs/, read 15 Nov 2026: NASA 'promotes full and open sharing of data'). "
-      "Worldview-specific citation UNVERIFIED (https://worldview.earthdata.nasa.gov/ returned HTTP 403, again on 15 Nov)", "no", "used", "pipeline/nasa_context.py",
+      "Worldview terms (the 'Imagery Use' text of the Worldview About dialog, read 15 Nov 2026 in NASA's own repository "
+      "https://github.com/nasa-gibs/worldview/blob/main/config/default/common/brand/about/imagery.md, because "
+      "https://worldview.earthdata.nasa.gov/ serves only a script page to automated readers): 'NASA promotes full and open "
+      "sharing of data and we encourage publication of imagery from Worldview; when doing so for image captions, please "
+      "cite it as \"NASA Worldview\"'; journal acknowledgement: 'We acknowledge the use of imagery from the NASA Worldview "
+      "application (https://worldview.earthdata.nasa.gov), part of the NASA Earth Science Data and Information System (ESDIS).'",
+      "no", "used", "pipeline/nasa_context.py",
       "data/raw/nasa_context/wvs/"),
     S("hls_gibs", "NASA", "Harmonized Landsat Sentinel-2 (HLS) v2.0 true colour, layers "
       "HLS_S30_Nadir_BRDF_Adjusted_Reflectance and HLS_L30_Nadir_BRDF_Adjusted_Reflectance, 30 m, read through the "
@@ -175,8 +181,13 @@ SOURCES = [
       "https://power.larc.nasa.gov/api/temporal/climatology/point ; https://power.larc.nasa.gov/docs/referencing/",
       "'The data was obtained from National Aeronautics and Space Administration (NASA) Langley Research Center's "
       "Prediction Of Worldwide Energy Resources (POWER) project funded through the NASA Earth Science Division.' "
+      "The referencing page asks to 'include both POWER's Reference and POWER's Data Reference in any work product or "
+      "publication' (data reference form: 'The data was obtained from the POWER Project's <product> <version> version on "
+      "YYYY/MM/DD'; here: Climatology API v2, read 14 and 15 Nov 2026, exact version not recorded). "
       "Licence UNVERIFIED for POWER specifically: https://power.larc.nasa.gov/docs/referencing/ and "
-      "https://power.larc.nasa.gov/docs/ (opened 15 Nov 2026) state no licence; NASA open data policy assumed", "no", "used", "pipeline/nasa_context.py",
+      "https://power.larc.nasa.gov/docs/ (opened again 15 Nov 2026) state no licence; the NASA Earthdata data use "
+      "guidance page (https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance) "
+      "returned HTTP 403; NASA open data policy assumed", "no", "used", "pipeline/nasa_context.py",
       "data/raw/nasa_context/power/"),
     S("icesat2_atl06", "NASA", "ICESat-2 ATL06 v7 land ice height, subset through SlideRule (NSIDC DAAC)", 1,
       "https://nsidc.org/data/atl06 ; doi:10.5067/ATLAS/ATL06.007",
