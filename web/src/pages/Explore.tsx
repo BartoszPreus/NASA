@@ -115,7 +115,7 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
 
   const dq = useDeferredValue(q.trim().toLowerCase());
 
-  const { listed, matched } = useMemo(() => {
+  const { listed, matched, comb } = useMemo(() => {
     const ev = (s: Site) => evals.get(s.site_id) ?? {};
     const base = pool.filter((s) => {
       if (extra.novelty !== "all" && s.novelty !== extra.novelty) return false;
@@ -129,12 +129,27 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
       : base;
     const met = (s: Site) => activeCrits.filter((c) => ev(s)[c.id]?.pass).length;
     const overall = (s: Site) => s.region_scores[target] ?? -1;
+    // combined score: mean position (0 = last, 1 = first) over the active criteria the patch has data for;
+    // with no criterion active it is the terrain similarity to the target
+    const combined = (s: Site) => {
+      if (!activeCrits.length) return overall(s);
+      let sum = 0;
+      let n = 0;
+      for (const c of activeCrits) {
+        const v = ev(s)[c.id]?.score;
+        if (v != null) {
+          sum += v;
+          n++;
+        }
+      }
+      return n ? sum / n : -1;
+    };
     const strongest = (s: Site) => Math.max(0, ...activeCrits.map((c) => ev(s)[c.id]?.score ?? 0));
     // every key puts the best patch first; `flip` reverses it, ties keep the ranking order
     let key: (s: Site) => number;
-    if (sort === "best") key = (s) => met(s) * 10 + overall(s);
+    if (sort === "best") key = (s) => met(s) * 10 + combined(s);
     else if (sort === "strongest") key = strongest;
-    else if (sort === "target") key = overall;
+    else if (sort === "target") key = combined;
     else if (sort.startsWith("c:")) {
       const id = sort.slice(2);
       key = (s) => ev(s)[id]?.score ?? -1;
@@ -145,7 +160,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
       if (ka < 0 !== kb < 0) return ka < 0 ? 1 : -1; // not sampled always last
       return (flip ? ka - kb : kb - ka) || a.rank - b.rank;
     });
-    return { listed: base, matched: sorted };
+    const comb = new Map(sorted.map((s) => [s.site_id, combined(s)]));
+    return { listed: base, matched: sorted, comb };
   }, [pool, extra, dq, evals, activeCrits, mode, sort, flip, target]);
 
   // the globe lights the first LIT results of the list; everything else that is listed stays faint
@@ -259,6 +275,7 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
             onHover={setHoverId}
             sort={sort}
             flip={flip}
+            comb={comb}
             setFlip={setFlip}
             setSort={setSort}
             mode={mode}

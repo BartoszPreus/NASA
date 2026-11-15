@@ -7,7 +7,7 @@ import { num } from "./format";
 
 export type Dataset = "default" | "strict";
 export type Mode = "any" | "all";
-export type Group = "Terrain shape" | "Surface" | "Ranking";
+export type Group = "Terrain shape" | "Surface conditions" | "Size and stability";
 
 export interface Ctx {
   target: string;
@@ -55,7 +55,7 @@ export const CRITERIA: Criterion[] = [
   {
     id: "window",
     label: "Best 15 km window",
-    group: "Ranking",
+    group: "Size and stability",
     kind: "pct",
     dir: 1,
     value: (s) => s.best_window_km2,
@@ -131,7 +131,7 @@ export const CRITERIA: Criterion[] = [
   {
     id: "area",
     label: "Patch area",
-    group: "Ranking",
+    group: "Size and stability",
     kind: "pct",
     dir: 1,
     value: (s) => s.area_km2,
@@ -143,7 +143,7 @@ export const CRITERIA: Criterion[] = [
   {
     id: "stable",
     label: "Rank certainty",
-    group: "Ranking",
+    group: "Size and stability",
     kind: "pct",
     dir: -1,
     value: (s) => {
@@ -158,7 +158,7 @@ export const CRITERIA: Criterion[] = [
   {
     id: "cold",
     label: "Cold surface",
-    group: "Surface",
+    group: "Surface conditions",
     kind: "pct",
     dir: -1,
     value: (s) => s.power?.ts_mean_c ?? null,
@@ -170,7 +170,7 @@ export const CRITERIA: Criterion[] = [
   {
     id: "nightcold",
     label: "Cold nights",
-    group: "Surface",
+    group: "Surface conditions",
     kind: "pct",
     dir: -1,
     value: (s) => s.partner?.nasa_modis?.night_min_k ?? null,
@@ -182,7 +182,7 @@ export const CRITERIA: Criterion[] = [
   {
     id: "dry",
     label: "Dry climate",
-    group: "Surface",
+    group: "Surface conditions",
     kind: "pct",
     dir: -1,
     value: (s) => s.power?.precip_mm_per_year ?? null,

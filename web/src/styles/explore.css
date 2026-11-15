@@ -44,7 +44,9 @@
 .crits-head .mono { font-size: 11px; font-weight: 400; }
 .acc { border: 1px solid var(--line); border-radius: 14px; background: rgba(255, 255, 255, 0.015); transition: background 0.3s, border-color 0.3s; }
 .acc.open { background: rgba(255, 255, 255, 0.03); border-color: var(--line-2); }
-.acc-head { width: 100%; display: flex; align-items: center; gap: 10px; padding: 13px 14px; text-align: left; font-size: 13.5px; }
+.acc-headrow { display: flex; align-items: center; gap: 2px; padding-left: 14px; }
+.acc-head { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 13px 14px 13px 10px; text-align: left; font-size: 13.5px; }
+.acc.off .acc-t { color: var(--dim); }
 .acc-t { flex: 1; }
 .acc-n { font-size: 11px; color: var(--dim); }
 .acc-head .chev { color: var(--dim); transition: transform 0.3s var(--ease); }

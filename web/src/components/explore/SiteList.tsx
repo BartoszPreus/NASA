@@ -117,6 +117,7 @@ export function SiteList(p: {
   sort: Sort;
   setSort: (s: Sort) => void;
   flip: boolean;
+  comb: Map<string, number>;
   setFlip: (f: boolean) => void;
   mode: Mode;
   pins: number;
@@ -136,7 +137,7 @@ export function SiteList(p: {
   }, [p.selId]);
 
   const sortOpts: Option<Sort>[] = [
-    { value: "target", label: "Best score", group: "General" },
+    { value: "target", label: "Best combined score", group: "General" },
     { value: "best", label: "Most criteria met", group: "General" },
     { value: "strongest", label: "Strongest single criterion", group: "General" },
     { value: "rank", label: "Ranking order", group: "General" },
@@ -198,8 +199,15 @@ export function SiteList(p: {
                     )}
                   </span>
                   <span className="row-side">
-                    <span className="mono tab row-score" title={`Similarity to the selected lunar target (sites.json · region_scores)`}>
-                      {num(s.region_scores[p.target], 3)}
+                    <span
+                      className="mono tab row-score"
+                      title={
+                        p.active.length
+                          ? "Combined score: mean position of the patch across the active criteria with data, 0 to 1"
+                          : "Similarity to the selected lunar target (region_scores), 0 to 1"
+                      }
+                    >
+                      {num(p.comb.get(s.site_id) ?? s.region_scores[p.target], 3)}
                     </span>
                     <Fingerprint crits={p.crits} ev={ev} activeIds={activeIds} />
                   </span>

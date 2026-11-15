@@ -94,14 +94,31 @@ function CritRow({ c, on, t, st, nPass, toggle, setT }: { c: Criterion; on: bool
 }
 
 // Collapsible section with an animated height.
-function Accordion({ title, count, open, onToggle, children }: { title: string; count: string; open: boolean; onToggle: () => void; children: ReactNode }) {
+function Accordion({
+  title,
+  count,
+  open,
+  onToggle,
+  children,
+  all,
+}: {
+  title: string;
+  count: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+  all?: { on: boolean; set: (v: boolean) => void };
+}) {
   return (
-    <div className={`acc ${open ? "open" : ""}`}>
-      <button className="acc-head" onClick={onToggle} aria-expanded={open}>
-        <span className="acc-t">{title}</span>
-        <span className="acc-n mono">{count}</span>
-        <Chevron />
-      </button>
+    <div className={`acc ${open ? "open" : ""} ${all && !all.on ? "off" : ""}`}>
+      <div className="acc-headrow">
+        {all && <Switch on={all.on} onChange={all.set} label={`${title}: all criteria of the group`} />}
+        <button className="acc-head" onClick={onToggle} aria-expanded={open}>
+          <span className="acc-t">{title}</span>
+          <span className="acc-n mono">{count}</span>
+          <Chevron />
+        </button>
+      </div>
       <div className="acc-body">
         <div className="acc-inner">{children}</div>
       </div>
@@ -184,7 +201,24 @@ export function Filters(p: Props) {
           const list = p.crits.filter((c) => c.group === g);
           const on = list.filter((c) => c.id in p.active).length;
           return (
-            <Accordion key={g} title={g} count={`${on} of ${list.length}`} open={openG === g} onToggle={() => setOpenG(openG === g ? null : g)}>
+            <Accordion
+              key={g}
+              title={g}
+              count={`${on} of ${list.length}`}
+              open={openG === g}
+              onToggle={() => setOpenG(openG === g ? null : g)}
+              all={{
+                on: on > 0,
+                set: (v) => {
+                  const a = { ...p.active };
+                  for (const c of list) {
+                    if (v) a[c.id] = a[c.id] ?? NaN;
+                    else delete a[c.id];
+                  }
+                  p.setActive(a);
+                },
+              }}
+            >
               <ul>
                 {list.map((c) => (
                   <CritRow
