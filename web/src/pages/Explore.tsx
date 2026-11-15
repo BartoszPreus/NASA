@@ -2,7 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { loadContext, loadPolygons, type Load, type SiteContext } from "../lib/data";
 import type { Atlas, Site } from "../lib/types";
 import { replaceParams } from "../lib/router";
-import { criteriaFor, evaluate, type Dataset, type Mode, type Thresholds } from "../lib/criteria";
+import { criteriaFor, evaluate, thresholdsFor, type Dataset, type Pref, type Prefs } from "../lib/criteria";
 import { Failed, Loading, Switch } from "../components/kit";
 import { Filters, type Extra } from "../components/explore/Filters";
 import { SiteList, type Sort } from "../components/explore/SiteList";
@@ -11,24 +11,24 @@ import { EarthGlobe, type GlobePoint } from "../components/three/EarthGlobe";
 import { siteName } from "../lib/format";
 import "../styles/explore.css";
 
-// URL: #/explore?set=strict&target=haworth&c=score:10,cold:15&m=all&site=N82W026-01
-// No `c` = every criterion active at its default threshold (the default view); `c=none` = no criterion.
-function readCrit(p: URLSearchParams, all: string[]): Thresholds {
+// URL: #/explore?set=strict&target=haworth&c=score,cold:m&k=25&site=N82W026-01
+// No `c` = every criterion counts (the default view); `c=none` = none; `:m` = must.
+function readPrefs(p: URLSearchParams, all: string[]): Prefs {
   const raw = p.get("c");
-  if (raw == null) return Object.fromEntries(all.map((id) => [id, NaN]));
-  const out: Thresholds = {};
+  if (raw == null) return Object.fromEntries(all.map((id) => [id, "count" as Pref]));
+  const out: Prefs = {};
   if (raw === "none") return out;
   for (const part of raw.split(",")) {
-    const [id, t] = part.split(":");
-    if (id) out[id] = Number(t) || NaN;
+    const [id, m] = part.split(":");
+    if (id) out[id] = m === "m" ? "must" : "count";
   }
   return out;
 }
-function writeCrit(a: Thresholds, all: string[]): string | null {
+function writePrefs(a: Prefs, all: string[]): string | null {
   const ids = Object.keys(a);
   if (!ids.length) return "none";
-  if (ids.length === all.length && all.every((id) => id in a && !Number.isFinite(a[id]))) return null;
-  return ids.map((k) => (Number.isFinite(a[k]) ? `${k}:${a[k]}` : k)).join(",");
+  if (ids.length === all.length && ids.every((k) => a[k] === "count")) return null;
+  return ids.map((k) => (a[k] === "must" ? `${k}:m` : k)).join(",");
 }
 
 export function Explore({ atlas, params }: { atlas: Load<Atlas>; params: URLSearchParams }) {
@@ -48,8 +48,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
   });
   const crits = useMemo(() => criteriaFor(dataset), [dataset]);
   const allIds = useMemo(() => crits.map((c) => c.id), [crits]);
-  const [active, setActive] = useState<Thresholds>(() => readCrit(params, criteriaFor(params.get("set") === "strict" ? "strict" : "default").map((c) => c.id)));
-  const [mode, setMode] = useState<Mode>(params.get("m") === "all" ? "all" : "any");
+  const [prefs, setPrefs] = useState<Prefs>(() => readPrefs(params, criteriaFor(params.get("set") === "strict" ? "strict" : "default").map((c) => c.id)));
+  const [strict, setStrict] = useState(() => (["10", "25", "50"].includes(params.get("k") ?? "") ? Number(params.get("k")) : 25));
   const [extra, setExtra] = useState<Extra>({ novelty: "all", hideKnown: false, onlyImage: false, dune: false });
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<Sort>(() => (params.get("sort") as Sort) || "target");
@@ -72,19 +72,20 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
     if (linked) setSelId(linked);
   }, [linked]);
 
-  const activeCrits = useMemo(() => crits.filter((c) => c.id in active), [crits, active]);
+  const activeCrits = useMemo(() => crits.filter((c) => c.id in prefs), [crits, prefs]);
+  const mustCrits = useMemo(() => crits.filter((c) => prefs[c.id] === "must"), [crits, prefs]);
 
   useEffect(() => {
     replaceParams({
       set: dataset === "strict" ? "strict" : null,
       target: target === atlas.moon.default_target ? null : target,
-      c: writeCrit(Object.fromEntries(Object.entries(active).filter(([k]) => allIds.includes(k))), allIds),
-      m: mode === "all" ? "all" : null,
+      c: writePrefs(Object.fromEntries(Object.entries(prefs).filter(([k]) => allIds.includes(k))), allIds),
+      k: strict === 25 ? null : String(strict),
       sort: sort === "target" ? null : sort,
       dir: flip ? "asc" : null,
       site: selId,
     });
-  }, [dataset, target, active, mode, selId, allIds, sort, flip, atlas.moon.default_target]);
+  }, [dataset, target, prefs, strict, selId, allIds, sort, flip, atlas.moon.default_target]);
 
   // per-patch context (climate, vegetation, geology); attached once it has loaded
   const [context, setContext] = useState<SiteContext | null>(null);
@@ -123,11 +124,7 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
     };
   }, [dataset]);
 
-  const thresholds = useMemo(() => {
-    const t: Thresholds = {};
-    for (const c of crits) t[c.id] = Number.isFinite(active[c.id]) ? active[c.id] : c.def;
-    return t;
-  }, [crits, active]);
+  const thresholds = useMemo(() => thresholdsFor(crits, strict), [crits, strict]);
 
   const ctx = useMemo(() => ({ target, moon: atlas.moon }), [target, atlas.moon]);
   const { evals, stats } = useMemo(() => evaluate(pool, ctx, crits, thresholds), [pool, ctx, crits, thresholds]);
@@ -143,9 +140,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
       if (dq && !`${s.site_id} ${s.country ?? ""} ${s.place ?? ""}`.toLowerCase().includes(dq)) return false;
       return true;
     });
-    const m = activeCrits.length
-      ? base.filter((s) => (mode === "any" ? activeCrits.some((c) => ev(s)[c.id]?.pass) : activeCrits.every((c) => ev(s)[c.id]?.pass)))
-      : base;
+    // a Must criterion keeps only the patches in its best part; Count only feeds the score
+    const m = mustCrits.length ? base.filter((s) => mustCrits.every((c) => ev(s)[c.id]?.pass)) : base;
     const met = (s: Site) => activeCrits.filter((c) => ev(s)[c.id]?.pass).length;
     const overall = (s: Site) => s.region_scores[target] ?? -1;
     // combined score: mean position (0 = last, 1 = first) over the active criteria the patch has data for;
@@ -179,9 +175,9 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
       if (ka < 0 !== kb < 0) return ka < 0 ? 1 : -1; // not sampled always last
       return (flip ? ka - kb : kb - ka) || a.rank - b.rank;
     });
-    const comb = new Map(sorted.map((s) => [s.site_id, combined(s)]));
+    const comb = new Map(base.map((s) => [s.site_id, combined(s)]));
     return { listed: base, matched: sorted, comb };
-  }, [pool, extra, dq, evals, activeCrits, mode, sort, flip, target]);
+  }, [pool, extra, dq, evals, activeCrits, mustCrits, sort, flip, target]);
 
   // the globe lights the first LIT results of the list; everything else that is listed stays faint
   const points: GlobePoint[] = useMemo(() => {
@@ -208,11 +204,11 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
 
   const switchDataset = (d: Dataset) => {
     const ids = criteriaFor(d).map((c) => c.id);
-    const next: Thresholds = {};
-    for (const [k, v] of Object.entries(active)) if (ids.includes(k)) next[k] = v;
+    const next: Prefs = {};
+    for (const [k, v] of Object.entries(prefs)) if (ids.includes(k)) next[k] = v;
     // keep "every criterion" when it was every criterion
-    if (Object.keys(active).length === allIds.length) for (const id of ids) if (!(id in next)) next[id] = NaN;
-    setActive(next);
+    if (Object.keys(prefs).length === allIds.length) for (const id of ids) if (!(id in next)) next[id] = "count";
+    setPrefs(next);
     setDataset(d);
     setSelId(null);
   };
@@ -272,12 +268,11 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
             target={target}
             setTarget={setTarget}
             crits={crits}
-            active={active}
-            setActive={setActive}
-            thresholds={thresholds}
+            prefs={prefs}
+            setPrefs={setPrefs}
+            strict={strict}
+            setStrict={setStrict}
             stats={stats}
-            mode={mode}
-            setMode={setMode}
             extra={extra}
             setExtra={setExtra}
             q={q}
@@ -298,7 +293,6 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
             comb={comb}
             setFlip={setFlip}
             setSort={setSort}
-            mode={mode}
             pins={TOP_PINS}
             polys={polys}
             run={dataset}
@@ -317,6 +311,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
           crits={crits}
           evals={evals.get(selected.site_id) ?? null}
           activeIds={activeCrits.map((c) => c.id)}
+          score={comb.get(selected.site_id) ?? null}
+          nPool={pool.length}
           onClose={() => setSelId(null)}
           fields={context?.fields ?? {}}
         />

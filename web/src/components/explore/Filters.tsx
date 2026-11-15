@@ -1,7 +1,7 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { Atlas, Novelty } from "../../lib/types";
-import type { Criterion, Dataset, Mode, Stats, Thresholds } from "../../lib/criteria";
-import { Chevron, Dropdown, SearchIcon, Segmented, Slider, Switch, type Option } from "../kit";
+import type { Criterion, Dataset, Pref, Prefs, Stats } from "../../lib/criteria";
+import { Chevron, Dropdown, SearchIcon, Segmented, Switch, type Option } from "../kit";
 import { int } from "../../lib/format";
 
 export interface Extra {
@@ -18,12 +18,11 @@ interface Props {
   target: string;
   setTarget: (t: string) => void;
   crits: Criterion[];
-  active: Thresholds;
-  setActive: (a: Thresholds) => void;
-  thresholds: Thresholds;
+  prefs: Prefs;
+  setPrefs: (p: Prefs) => void;
+  strict: number;
+  setStrict: (n: number) => void;
   stats: Record<string, Stats>;
-  mode: Mode;
-  setMode: (m: Mode) => void;
   extra: Extra;
   setExtra: (e: Extra) => void;
   q: string;
@@ -38,81 +37,17 @@ const NOVELTY_OPTS: Option<Novelty | "all">[] = [
   { value: "unchecked", label: "Not checked" },
 ];
 
-// Distribution of one criterion over the dataset; the part that passes the threshold is lit.
-function Histogram({ c, st, t }: { c: Criterion; st: Stats; t: number }) {
-  const bins = useMemo(() => {
-    const v = [...st.values].sort((a, b) => a - b);
-    if (!v.length) return null;
-    const k = c.kind === "min" ? (c.max ?? 5) + 1 : 28;
-    const lo = c.kind === "min" ? 0 : v[Math.floor(v.length * 0.02)];
-    const hi = c.kind === "min" ? (c.max ?? 5) : v[Math.min(v.length - 1, Math.floor(v.length * 0.98))];
-    const w = (hi - lo) / (c.kind === "min" ? k - 1 : k) || 1;
-    const counts = new Array(k).fill(0);
-    for (const x of v) counts[Math.max(0, Math.min(k - 1, c.kind === "min" ? Math.round(x) : Math.floor((x - lo) / w)))]++;
-    const mid = counts.map((_, i) => (c.kind === "min" ? i : lo + (i + 0.5) * w));
-    return { counts, mid, max: Math.max(...counts) };
-  }, [st.values, c]);
-  if (!bins) return <div className="hist empty mono">not sampled for this list</div>;
-  const cut = c.kind === "min" ? t : st.cut;
-  return (
-    <svg className="hist" viewBox={`0 0 ${bins.counts.length * 6} 22`} preserveAspectRatio="none" aria-hidden>
-      {bins.counts.map((n, i) => {
-        const h = n ? Math.max(1.5, (n / bins.max) * 20) : 0;
-        const lit = cut != null && (c.dir === 1 ? bins.mid[i] >= cut : bins.mid[i] <= cut);
-        return <rect key={i} x={i * 6 + 0.5} y={22 - h} width={5} height={h} rx={1} className={lit ? "lit" : ""} />;
-      })}
-    </svg>
-  );
-}
+const PREF_OPTS: { value: Pref | "off"; label: string }[] = [
+  { value: "off", label: "Off" },
+  { value: "count", label: "Count" },
+  { value: "must", label: "Must" },
+];
 
-function CritRow({ c, on, t, st, nPass, toggle, setT }: { c: Criterion; on: boolean; t: number; st: Stats; nPass: number; toggle: () => void; setT: (v: number) => void }) {
-  return (
-    <li className={`crit ${on ? "on" : ""}`}>
-      <div className="crit-head">
-        <Switch on={on} onChange={toggle} label={c.label} />
-        <button className="crit-name" onClick={toggle} title={`${c.why} Source: ${c.source}`}>
-          {c.label}
-        </button>
-        <span className="crit-n mono tab" title="Patches that do well on this criterion">
-          {st.n ? int(nPass) : "–"}
-        </span>
-      </div>
-      <Histogram c={c} st={st} t={t} />
-      {on && (
-        <div className="crit-ctl">
-          <span className="mono">{c.kind === "pct" ? `Top ${t}%` : `At least ${t}`}</span>
-          {c.kind === "pct" ? (
-            <Slider value={t} min={1} max={50} onChange={setT} label={`${c.label}: share of the best patches`} />
-          ) : (
-            <Slider value={t} min={c.min ?? 1} max={c.max ?? 5} onChange={setT} label={`${c.label}: minimum`} />
-          )}
-          <span className="mono tab dim cut">{st.cut != null ? `${c.dir === 1 ? "≥" : "≤"} ${c.fmt(st.cut)}` : "–"}</span>
-        </div>
-      )}
-    </li>
-  );
-}
-
-// Collapsible section with an animated height.
-function Accordion({
-  title,
-  count,
-  open,
-  onToggle,
-  children,
-  all,
-}: {
-  title: string;
-  count: string;
-  open: boolean;
-  onToggle: () => void;
-  children: ReactNode;
-  all?: { on: boolean; set: (v: boolean) => void };
-}) {
+function Accordion({ title, count, open, onToggle, children, all }: { title: string; count: string; open: boolean; onToggle: () => void; children: ReactNode; all?: { on: boolean; set: (v: boolean) => void } }) {
   return (
     <div className={`acc ${open ? "open" : ""} ${all && !all.on ? "off" : ""}`}>
       <div className="acc-headrow">
-        {all && <Switch on={all.on} onChange={all.set} label={`${title}: all criteria of the group`} />}
+        {all && <Switch on={all.on} onChange={all.set} label={`${title}: every criterion of the group`} />}
         <button className="acc-head" onClick={onToggle} aria-expanded={open}>
           <span className="acc-t">{title}</span>
           <span className="acc-n mono">{count}</span>
@@ -126,6 +61,23 @@ function Accordion({
   );
 }
 
+function CritRow({ c, pref, setPref, nPass, strict }: { c: Criterion; pref: Pref | "off"; setPref: (p: Pref | "off") => void; nPass: number | null; strict: number }) {
+  return (
+    <li className={`crit2 ${pref}`}>
+      <div className="crit2-text">
+        <span className="crit2-name">{c.label}</span>
+        <span className="crit2-why">{c.why}</span>
+        {pref === "must" && nPass != null && (
+          <span className="crit2-must mono">
+            best {strict}% only · {int(nPass)} patches
+          </span>
+        )}
+      </div>
+      <Segmented label={`${c.label}: how it is used`} value={pref} onChange={setPref} options={PREF_OPTS} />
+    </li>
+  );
+}
+
 export function Filters(p: Props) {
   const [openG, setOpenG] = useState<string | null>(null);
   const targets: Option<string>[] = Object.values(p.atlas.moon.regions).map((r) => ({
@@ -133,19 +85,20 @@ export function Filters(p: Props) {
     label: r.display_name,
     group: r.kind === "pooled" || r.id === "polar_160km" ? "Pooled" : "Named regions",
   }));
-  const nActive = p.crits.filter((c) => c.id in p.active).length;
+  const groups = [...new Set(p.crits.map((c) => c.group))];
+  const nCount = p.crits.filter((c) => p.prefs[c.id] === "count").length;
+  const nMust = p.crits.filter((c) => p.prefs[c.id] === "must").length;
+  const setOne = (id: string, v: Pref | "off") => {
+    const n = { ...p.prefs };
+    if (v === "off") delete n[id];
+    else n[id] = v;
+    p.setPrefs(n);
+  };
   const passCount = (c: Criterion) => {
     const st = p.stats[c.id];
-    if (!st || st.cut == null) return 0;
+    if (!st || st.cut == null) return null;
     return st.values.filter((v) => (c.dir === 1 ? v >= st.cut! : v <= st.cut!)).length;
   };
-  const toggle = (id: string) => {
-    const a = { ...p.active };
-    if (id in a) delete a[id];
-    else a[id] = NaN;
-    p.setActive(a);
-  };
-  const groups = [...new Set(p.crits.map((c) => c.group))];
 
   return (
     <div className="flt">
@@ -173,33 +126,34 @@ export function Filters(p: Props) {
       <section className="crits">
         <div className="crits-head">
           <span>Criteria</span>
-          <span className="mono dim">
-            {nActive} of {p.crits.length} active
-          </span>
-          {nActive < p.crits.length ? (
-            <button className="link" onClick={() => p.setActive(Object.fromEntries(p.crits.map((c) => [c.id, p.active[c.id] ?? NaN])))}>
-              All
-            </button>
-          ) : null}
-          {nActive > 0 && (
-            <button className="link" onClick={() => p.setActive({})}>
-              None
-            </button>
-          )}
+          <button className="link" onClick={() => p.setPrefs(Object.fromEntries(p.crits.map((c) => [c.id, "count" as Pref])))}>
+            Reset
+          </button>
         </div>
-        <Segmented
-          full
-          label="How criteria combine"
-          value={p.mode}
-          onChange={p.setMode}
-          options={[
-            { value: "any", label: "Strong in at least one" },
-            { value: "all", label: "Strong in all" },
-          ]}
-        />
+        <div className="crits-explain">
+          <p>
+            <b>Count</b> adds the criterion to the score. <b>Must</b> also hides every patch outside the best part of that criterion.
+          </p>
+          <div className="crits-strict">
+            <span>Must means the best</span>
+            <Segmented
+              label="Share kept by a Must criterion"
+              value={String(p.strict)}
+              onChange={(v) => p.setStrict(Number(v))}
+              options={[
+                { value: "10", label: "10%" },
+                { value: "25", label: "25%" },
+                { value: "50", label: "50%" },
+              ]}
+            />
+          </div>
+          <p className="mono crits-sum">
+            {nCount + nMust} of {p.crits.length} in the score{nMust ? ` · ${nMust} must` : ""}
+          </p>
+        </div>
         {groups.map((g) => {
           const list = p.crits.filter((c) => c.group === g);
-          const on = list.filter((c) => c.id in p.active).length;
+          const on = list.filter((c) => p.prefs[c.id]).length;
           return (
             <Accordion
               key={g}
@@ -210,27 +164,18 @@ export function Filters(p: Props) {
               all={{
                 on: on > 0,
                 set: (v) => {
-                  const a = { ...p.active };
+                  const n = { ...p.prefs };
                   for (const c of list) {
-                    if (v) a[c.id] = a[c.id] ?? NaN;
-                    else delete a[c.id];
+                    if (v) n[c.id] = n[c.id] ?? "count";
+                    else delete n[c.id];
                   }
-                  p.setActive(a);
+                  p.setPrefs(n);
                 },
               }}
             >
               <ul>
                 {list.map((c) => (
-                  <CritRow
-                    key={c.id}
-                    c={c}
-                    on={c.id in p.active}
-                    t={p.thresholds[c.id]}
-                    st={p.stats[c.id]}
-                    nPass={passCount(c)}
-                    toggle={() => toggle(c.id)}
-                    setT={(v) => p.setActive({ ...p.active, [c.id]: v })}
-                  />
+                  <CritRow key={c.id} c={c} pref={p.prefs[c.id] ?? "off"} setPref={(v) => setOne(c.id, v)} nPass={passCount(c)} strict={p.strict} />
                 ))}
               </ul>
             </Accordion>
@@ -250,8 +195,8 @@ export function Filters(p: Props) {
             Hide known analog sites
           </label>
           <label className="opt">
-            <Switch on={p.extra.onlyImage} onChange={(v) => p.setExtra({ ...p.extra, onlyImage: v })} label="Only patches with a satellite image" />
-            Only patches with a satellite image
+            <Switch on={p.extra.onlyImage} onChange={(v) => p.setExtra({ ...p.extra, onlyImage: v })} label="Only patches with a stored satellite image" />
+            Only patches with a stored satellite image
           </label>
           <label className="opt">
             <Switch on={p.extra.dune} onChange={(v) => p.setExtra({ ...p.extra, dune: v })} label="Include dune-like relief (terrain rule)" />

@@ -8,6 +8,7 @@ import { img } from "../../lib/data";
 import { href } from "../../lib/router";
 import { ANALOG_FOR, NOVELTY_LABEL, REVIEW_LABEL, coord, int, num, pct, siteName } from "../../lib/format";
 import { Close, Dropdown, Segmented, type Option } from "../kit";
+import { ScoreBadge, scoreColor } from "./ScoreBadge";
 
 const KM_PER_DEG = 111.32;
 
@@ -191,6 +192,71 @@ function ContextList({ s, fields }: { s: Site; fields: Record<string, ContextFie
   );
 }
 
+// What makes the patch stand out: the criteria where it ranks highest, then its weak points, then all of them.
+function Strengths({ crits, ev, activeIds, nPool }: { crits: Criterion[]; ev: Record<string, Eval>; activeIds: string[]; nPool: number }) {
+  const [all, setAll] = useState(false);
+  const scored = crits.filter((c) => ev[c.id]?.score != null && ev[c.id]?.value != null);
+  const best = [...scored].sort((a, b) => ev[b.id].score! - ev[a.id].score!).filter((c) => ev[c.id].score! >= 0.75).slice(0, 5);
+  const weak = [...scored].sort((a, b) => ev[a.id].score! - ev[b.id].score!).filter((c) => ev[c.id].score! <= 0.3).slice(0, 3);
+  const better = (v: number) => `better than ${Math.round(v * 100)}% of patches`;
+  return (
+    <section className="cb">
+      <h3>Why it stands out</h3>
+      {best.length ? (
+        <ul className="strong-list">
+          {best.map((c) => (
+            <li key={c.id} title={`${c.why} Source: ${c.source}`}>
+              <span className="sl-pct mono">{Math.round(ev[c.id].score! * 100)}</span>
+              <span className="sl-text">
+                <span className="sl-name">{c.label}</span>
+                <span className="sl-sub">
+                  {c.kind === "min" ? c.fmt(ev[c.id].value!) : `${c.fmt(ev[c.id].value!)} · ${better(ev[c.id].score!)}`}
+                  {activeIds.includes(c.id) ? "" : " · not counted"}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="dim">No criterion where this patch is in the best quarter.</p>
+      )}
+      {weak.length > 0 && (
+        <>
+          <h4 className="weak-h">Weak points</h4>
+          <ul className="weak-list">
+            {weak.map((c) => (
+              <li key={c.id} title={`${c.why} Source: ${c.source}`}>
+                <span>{c.label}</span>
+                <span className="mono tab">{c.fmt(ev[c.id].value!)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <button className="link all-crit" onClick={() => setAll((x) => !x)} aria-expanded={all}>
+        {all ? "Hide" : "Show"} all {crits.length} criteria
+      </button>
+      {all && (
+        <ul className="cl">
+          {crits.map((c) => {
+            const e = ev[c.id];
+            return (
+              <li key={c.id} className={activeIds.includes(c.id) ? "on" : ""} title={`${c.why} Source: ${c.source}`}>
+                <span className="cl-name">{c.label}</span>
+                <span className="cl-bar">
+                  <i style={{ width: `${(e?.score ?? 0) * 100}%`, background: e?.score != null ? scoreColor(e.score) : undefined }} />
+                </span>
+                <span className="cl-v mono tab">{e?.value == null ? "not sampled" : c.fmt(e.value)}</span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <p className="fine">Position among the {nPool.toLocaleString("en-GB")} patches of this ranking: 100 = best in that criterion.</p>
+    </section>
+  );
+}
+
 export function SiteCard(p: {
   site: Site;
   atlas: Atlas;
@@ -202,6 +268,8 @@ export function SiteCard(p: {
   activeIds: string[];
   onClose: () => void;
   fields: Record<string, ContextField>;
+  score: number | null;
+  nPool: number;
 }) {
   const s = p.site;
   const moon = p.atlas.moon;
@@ -251,7 +319,10 @@ export function SiteCard(p: {
             <Close />
           </button>
         </div>
-        <h2>{siteName(s)}</h2>
+        <div className="card-title">
+          <h2>{siteName(s)}</h2>
+          <ScoreBadge value={p.score} size="lg" label="score" />
+        </div>
         <div className="card-meta mono">
           <span>{s.country ?? "Country unknown"}</span>
           <span>{coord(s.lat, s.lon)}</span>
@@ -296,26 +367,7 @@ export function SiteCard(p: {
           {view === "compare" && <p className="fine">Terrain shape at 200 m to 1.6 km is compared, not appearance. Features smaller than about 100 m are not resolved.</p>}
         </section>
 
-        {p.evals && (
-          <Block title="Criteria" src="computed in this page from sites.json">
-            <ul className="cl">
-              {p.crits.map((c) => {
-                const e = p.evals![c.id];
-                const on = p.activeIds.includes(c.id);
-                return (
-                  <li key={c.id} className={`${e?.pass ? "pass" : ""} ${on ? "on" : ""}`} title={`${c.why} Source: ${c.source}`}>
-                    <span className="cl-name">{c.label}</span>
-                    <span className="cl-bar">
-                      <i style={{ width: `${(e?.score ?? 0) * 100}%` }} />
-                    </span>
-                    <span className="cl-v mono tab">{e?.value == null ? "not sampled" : c.fmt(e.value)}</span>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="fine">Bars show the position within this ranking; a lit bar is within the criterion's threshold.</p>
-          </Block>
-        )}
+        {p.evals && <Strengths crits={p.crits} ev={p.evals} activeIds={p.activeIds} nPool={p.nPool} />}
 
         <Block title="Terrain shape against the Moon" src="sites.json · features; moon.json · regions[target].features">
           <div className="cb-target">

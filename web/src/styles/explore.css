@@ -305,3 +305,55 @@
 .ctx { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
 .ctx dt { font-size: 11px; color: var(--dim); }
 .ctx dd { margin: 2px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+
+/* ------------------------------------------------ score badge */
+.score-badge { position: relative; flex: none; display: inline-grid; place-items: center; width: 48px; height: 48px; }
+.score-badge svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-badge circle { fill: none; stroke-width: 2.6; stroke-linecap: round; }
+.score-badge .bg { stroke: rgba(255, 255, 255, 0.08); }
+.score-badge .fg { stroke: var(--sc); filter: drop-shadow(0 0 4px color-mix(in oklab, var(--sc) 45%, transparent)); transition: stroke-dasharray 0.6s var(--ease); }
+.score-badge .score-n { position: relative; font-size: 15px; font-weight: 500; color: var(--sc); letter-spacing: -0.02em; }
+.score-badge::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: radial-gradient(circle, color-mix(in oklab, var(--sc) 14%, transparent), transparent 70%); }
+.score-badge.lg { width: 76px; height: 76px; }
+.score-badge.lg .score-n { font-size: 24px; margin-top: -8px; }
+.score-badge .score-l { position: absolute; bottom: 17px; font: 9px var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+
+/* ------------------------------------------------ rows, calmer */
+.row { grid-template-columns: 84px 1fr auto; align-items: center; }
+.row-main { gap: 4px; }
+.row-name { font-size: 14.5px; }
+.row-met { font-size: 11.5px; color: var(--chrome); }
+
+/* ------------------------------------------------ criteria: Off / Count / Must */
+.crits-explain { display: grid; gap: 10px; padding: 12px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.025); border: 1px solid var(--line); font-size: 12.5px; color: var(--chrome); line-height: 1.5; }
+.crits-explain b { color: var(--text); font-weight: 500; }
+.crits-strict { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.crits-strict .seg button { padding: 5px 10px; font-size: 12px; }
+.crits-sum { font-size: 11px; color: var(--dim); }
+.crit2 { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 10px; }
+.crit2 + .crit2 { border-top: 1px solid var(--line); border-radius: 0; }
+.crit2-text { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.crit2-name { font-size: 13px; color: var(--chrome); }
+.crit2.count .crit2-name, .crit2.must .crit2-name { color: var(--text); }
+.crit2-why { font-size: 11px; color: var(--dim); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.crit2-must { font-size: 10.5px; color: var(--flare); }
+.crit2 .seg { flex: none; }
+.crit2 .seg button { padding: 4px 9px; font-size: 11.5px; }
+.crit2.off .seg .thumb { background: rgba(255, 255, 255, 0.18); }
+.crit2.off .seg button.on { color: var(--text); }
+.crit2.must .seg .thumb { background: var(--flare); }
+
+/* ------------------------------------------------ card: score and strengths */
+.card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.strong-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.strong-list li { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 12px; background: linear-gradient(90deg, rgba(124, 200, 160, 0.1), rgba(124, 200, 160, 0.02)); border: 1px solid rgba(124, 200, 160, 0.22); }
+.sl-pct { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; background: rgba(124, 200, 160, 0.14); color: var(--strong); font-size: 16px; }
+.sl-text { display: grid; gap: 2px; min-width: 0; }
+.sl-name { font-size: 14px; color: var(--text); }
+.sl-sub { font-size: 11.5px; color: var(--chrome); }
+.weak-h { font-size: 12px; font-weight: 500; color: var(--chrome); margin-top: 6px; }
+.weak-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.weak-list li { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--dim); padding-left: 14px; position: relative; }
+.weak-list li::before { content: ""; position: absolute; left: 0; top: 0.65em; width: 6px; height: 1px; background: var(--weak); }
+.all-crit { justify-self: start; margin-top: 4px; }
+.cl li.on { color: var(--text); }

@@ -2,6 +2,12 @@
 
 Issue #29, branch `t-web-react`. Newest first. Written with SI assistance (Claude Code).
 
+## 2026-11-15, simpler filtering, score badge, strengths
+
+- Filtering: each criterion is Off, Count or Must. Count adds it to the score; Must also hides every patch outside the best 10%, 25% or 50% of that criterion (one switch for all). Replaces the per-criterion "top X%" sliders and the any/all mode, which were hard to read.
+- List rows: no criterion pills and no bar strip; a coloured score badge (0 to 100, red to green) and one line "Strong in N of M". The number on the thumbnail is the position in the list.
+- Site card: the score in the header; "Why it stands out" lists the up to five criteria where the patch ranks highest (with its value and the share of patches it beats), then its weak points; the full criteria list opens on demand.
+
 ## 2026-11-15, climate, vegetation and brightness context data
 
 - `public/sites/context_climate_<run>.json` for all 4,736 patches, every field filled (`scripts/build_context_climate.py`): albedo (MODIS MCD43 white-sky, 2023, snow months excluded), NDVI highest and mean month (MOD13C2, 2023), precipitation, temperature and aridity index (NASA POWER 2001-2025). NASA NEO no longer serves files, so the MODIS products are read through NASA GIBS and decoded with GIBS colour maps; POWER cells were fetched in parallel.

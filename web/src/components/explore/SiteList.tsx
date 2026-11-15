@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { Site } from "../../lib/types";
-import type { Criterion, Eval, Mode } from "../../lib/criteria";
+import type { Criterion, Eval } from "../../lib/criteria";
 import { Dropdown, type Option } from "../kit";
-import { num, siteName } from "../../lib/format";
+import { ScoreBadge } from "./ScoreBadge";
+import { siteName } from "../../lib/format";
 import { img } from "../../lib/data";
 import { hillshadeCanvas, loadGrid, loadManifest } from "../../lib/terrain";
 
@@ -68,7 +69,7 @@ function ThumbRelief({ s, run, poly }: { s: Site; run: string; poly: [number, nu
 
 // Satellite image of the patch (NASA Worldview) when one is stored, else the shaded relief of its 30 km grid,
 // else its outline.
-function Thumb({ s, poly, n, run }: { s: Site; poly: [number, number][][][] | null; n: number | null; run: string }) {
+function Thumb({ s, poly, n, pin, run }: { s: Site; poly: [number, number][][][] | null; n: number; pin: boolean; run: string }) {
   return (
     <span className="sthumb">
       {s.image ? (
@@ -76,8 +77,8 @@ function Thumb({ s, poly, n, run }: { s: Site; poly: [number, number][][][] | nu
       ) : (
         <ThumbRelief s={s} run={run} poly={poly} />
       )}
-      <span className={`sthumb-n mono ${n ? "pin" : ""}`} title={`Rank ${s.rank} in the ranking`}>
-        {n ?? s.rank}
+      <span className={`sthumb-n mono ${pin ? "pin" : ""}`} title={`Position ${n} in this list; rank ${s.rank} in the terrain ranking`}>
+        {n}
       </span>
     </span>
   );
@@ -119,14 +120,12 @@ export function SiteList(p: {
   flip: boolean;
   comb: Map<string, number>;
   setFlip: (f: boolean) => void;
-  mode: Mode;
   pins: number;
   polys: Record<string, [number, number][][][]> | null;
   run: "default" | "strict";
 }) {
   const [limit, setLimit] = useState(PAGE);
   const ref = useRef<HTMLOListElement>(null);
-  const activeIds = new Set(p.active.map((c) => c.id));
   useEffect(() => setLimit(PAGE), [p.sites]);
   useEffect(() => {
     if (!p.selId) return;
@@ -137,7 +136,7 @@ export function SiteList(p: {
   }, [p.selId]);
 
   const sortOpts: Option<Sort>[] = [
-    { value: "target", label: "Best combined score", group: "General" },
+    { value: "target", label: "Best score", group: "General" },
     { value: "best", label: "Most criteria met", group: "General" },
     { value: "strongest", label: "Strongest single criterion", group: "General" },
     { value: "rank", label: "Ranking order", group: "General" },
@@ -149,7 +148,7 @@ export function SiteList(p: {
       <div className="lst-head">
         <div className="lst-count">
           <span className="big tab">{p.sites.length}</span>
-          <span className="dim">{p.active.length ? `of ${p.nListed} patches ${p.mode === "any" ? "strong in at least one criterion" : "strong in every criterion"}` : `patches`}</span>
+          <span className="dim">{p.sites.length === p.nListed ? "patches" : `of ${p.nListed} patches pass the Must criteria`}</span>
         </div>
         <div className="lst-sortbox">
           <Dropdown label="Sort by" value={sortOpts.some((o) => o.value === p.sort) ? p.sort : "target"} options={sortOpts} onChange={p.setSort} className="lst-sort" />
@@ -167,7 +166,6 @@ export function SiteList(p: {
           {p.sites.slice(0, limit).map((s, i) => {
             const ev = p.evals.get(s.site_id) ?? {};
             const hits = p.active.filter((c) => ev[c.id]?.pass);
-            const shown = hits.slice(0, 2);
             return (
               <li key={s.site_id} data-id={s.site_id}>
                 <button
@@ -178,39 +176,19 @@ export function SiteList(p: {
                   onFocus={() => p.onHover(s.site_id)}
                   onBlur={() => p.onHover(null)}
                 >
-                  <Thumb s={s} run={p.run} poly={s.polygon ?? p.polys?.[s.site_id] ?? null} n={i < p.pins ? i + 1 : null} />
+                  <Thumb s={s} run={p.run} poly={s.polygon ?? p.polys?.[s.site_id] ?? null} n={i + 1} pin={i < p.pins} />
                   <span className="row-main">
                     <span className="row-name">{siteName(s)}</span>
                     <span className="row-sub mono">
-                      {s.country ?? "–"} · {s.site_id}
+                      {s.country ?? "–"} · {s.site_id} · rank {s.rank}
                     </span>
-                    {hits.length > 0 && (
-                      <span className="row-hits">
-                        <span className="hit-n mono">
-                          {hits.length} of {p.active.length}
-                        </span>
-                        {shown.map((c) => (
-                          <span key={c.id} className="hit-chip">
-                            {c.label}
-                          </span>
-                        ))}
-                        {hits.length > shown.length && <span className="hit-chip more-chip">+{hits.length - shown.length}</span>}
+                    {p.active.length > 0 && (
+                      <span className="row-met">
+                        Strong in {hits.length} of {p.active.length}
                       </span>
                     )}
                   </span>
-                  <span className="row-side">
-                    <span
-                      className="mono tab row-score"
-                      title={
-                        p.active.length
-                          ? "Combined score: mean position of the patch across the active criteria with data, 0 to 1"
-                          : "Similarity to the selected lunar target (region_scores), 0 to 1"
-                      }
-                    >
-                      {num(p.comb.get(s.site_id) ?? s.region_scores[p.target], 3)}
-                    </span>
-                    <Fingerprint crits={p.crits} ev={ev} activeIds={activeIds} />
-                  </span>
+                  <ScoreBadge value={p.comb.get(s.site_id) ?? null} />
                 </button>
               </li>
             );

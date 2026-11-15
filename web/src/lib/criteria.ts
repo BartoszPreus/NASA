@@ -12,6 +12,16 @@ const num0 = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 
 
 export type Dataset = "default" | "strict";
 export type Mode = "any" | "all";
+/** how a criterion is used: "count" adds it to the combined score, "must" also hides patches outside its best part */
+export type Pref = "count" | "must";
+export type Prefs = Record<string, Pref>;
+
+/** thresholds of every criterion for a "must" share of strict % (min-kind criteria: 5, 4 or 3 of 5) */
+export function thresholdsFor(crits: Criterion[], strict: number): Thresholds {
+  const t: Thresholds = {};
+  for (const c of crits) t[c.id] = c.kind === "pct" ? strict : strict <= 10 ? 5 : strict <= 25 ? 4 : 3;
+  return t;
+}
 export type Group = "Terrain shape" | "Size and stability" | "Light and surface" | "Geology and ground";
 
 export interface Ctx {
