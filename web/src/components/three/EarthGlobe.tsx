@@ -2,7 +2,7 @@
 // screen-space merging of close points into plain dots (lib/cluster.ts) with a list of their places,
 // numbered pins for single top results, fly-to on selection, outline of the selected patch, and (flatMap)
 // a cross-fade to a high-resolution 2D map when zoomed in close. Earth shader (day/night from NASA
-// mosaics, thin limb) adapted from ShadowAstra Atlas (MIT), src/components/three/Planet.tsx.
+// mosaics, thin limb) uses code covered by web/public/licenses/atlas-mit.txt.
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";

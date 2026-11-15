@@ -1,5 +1,5 @@
 // Progressive NASA textures (1K first, then 2K/4K) and small WebGL helpers.
-// Loading scheme adapted from ShadowAstra Atlas (MIT), src/components/three/textures.ts.
+// The loading scheme uses code covered by web/public/licenses/atlas-mit.txt.
 import { useEffect, useState } from "react";
 import * as THREE from "three";
 

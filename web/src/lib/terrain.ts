@@ -1,7 +1,7 @@
 // Elevation grids of the Compare page (web/public/terrain, built by web/scripts/build_terrain.py) and the
 // statistics computed from them in the browser. Slope by central differences, the horizon-march shadow mask and
 // the Sun height are adapted from the team's pl2moon viewer (pl2moon/web/src/lib/terrain.ts, sun.ts), which
-// adapted them from ShadowAstra Atlas (MIT, (c) 2026 Team ShadowAstra).
+// includes code covered by web/public/licenses/atlas-mit.txt.
 
 export interface TerrainRec {
   min: number;

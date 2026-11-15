@@ -1,6 +1,6 @@
 // Independent Earth/Moon scenes with one shared camera pose and physical terrain scale.
 // Slab, walls and the shadow veil are adapted from the team's pl2moon viewer (pl2moon/web/src/components/Twins3D.tsx),
-// itself adapted from ShadowAstra Atlas (MIT, (c) 2026 Team ShadowAstra), src/components/three/TerrainTwins.tsx.
+// with upstream adaptations covered by web/public/licenses/atlas-mit.txt.
 import { useEffect, useMemo, useRef, type RefObject } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";

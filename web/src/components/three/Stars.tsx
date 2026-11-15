@@ -1,5 +1,5 @@
 // A quiet starfield: one draw call, warm and cool stars, a tiny drift.
-// Adapted from ShadowAstra Atlas (MIT), src/components/three/Starfield.tsx.
+// Adapted code is covered by web/public/licenses/atlas-mit.txt.
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";

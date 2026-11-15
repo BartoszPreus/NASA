@@ -18,7 +18,6 @@ const CREDITS: { name: string; lic: string; url: string }[] = [
   { name: "Geist and Geist Mono, Vercel", lic: "SIL OFL 1.1", url: "https://vercel.com/font" },
   { name: "Fontsource packaging", lic: "MIT", url: "https://fontsource.org/" },
   { name: "Natural Earth land outlines", lic: "Public domain", url: "https://www.naturalearthdata.com/" },
-  { name: "ShadowAstra Atlas: interface design, globe textures and adapted globe and terrain code", lic: "MIT, (c) 2026 Team ShadowAstra", url: "https://github.com/ABRUBAB/ShadowAstra_Atlas" },
   { name: "Globe textures: NASA Blue Marble, Black Marble (GIBS), LRO LROC WAC mosaic (Solar System Treks)", lic: "NASA imagery, no copyright", url: "https://gibs.earthdata.nasa.gov/" },
   { name: "Surface albedo: MODIS MCD43 C6.1 white-sky shortwave albedo, 2023, read through NASA GIBS", lic: "NASA open data", url: "https://gibs.earthdata.nasa.gov/" },
   { name: "Vegetation: MODIS MOD13C2 C6.1 monthly NDVI, 2023, read through NASA GIBS", lic: "NASA open data", url: "https://gibs.earthdata.nasa.gov/" },

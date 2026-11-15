@@ -1,6 +1,6 @@
 // A slowly turning Moon with the LRO LROC WAC mosaic, lit by a low Sun from one side so the
 // terminator stays dramatic. Optional markers for the lunar south-pole regions.
-// Texture loading adapted from ShadowAstra Atlas (MIT).
+// Texture loading uses code covered by web/public/licenses/atlas-mit.txt.
 import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";

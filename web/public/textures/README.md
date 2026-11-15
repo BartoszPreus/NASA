@@ -1,6 +1,6 @@
 # Globe textures
 
-Equirectangular mosaics for the 3D Earth and Moon (`src/components/three/`). Every file is derived from a NASA product; nothing is painted or SI-generated. The files were built by the ShadowAstra Atlas script `scripts/build_textures.py` (https://github.com/ABRUBAB/ShadowAstra_Atlas, MIT licence) and copied here unchanged.
+Equirectangular mosaics for the 3D Earth and Moon (`src/components/three/`). Every file is derived from a NASA product; nothing is painted or SI-generated.
 
 | File | Source |
 |---|---|

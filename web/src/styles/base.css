@@ -1,5 +1,4 @@
-/* Design tokens. Dominant black, bone-white type, one sunlight accent; colour carries meaning only.
-   Inspired by the ShadowAstra Atlas design system (MIT); values and components are our own. */
+/* Design tokens. Dominant black, bone-white type, one sunlight accent. */
 :root {
   color-scheme: dark;
   --void: #050608;
