@@ -8,6 +8,16 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
 ## 0. START HERE (state at 01:30, Sun 15 Nov)
 
+**Read first (05:30, J33 full run, issue #19): the top of the default ranking is mostly moss-and-lichen tundra.**
+The default mask counts WorldCover class 100 "moss and lichen" as bare. With class 60 "bare / sparse vegetation"
+only, 3 of the default top 30 (16 of the top 100) have a strict site within 3 km; Putorana Plateau sites fall
+from 228 to 1, all sites from 3,175 to 1,561, candidate cells from 63,618 to 35,875. The strict top 30 is
+Atacama and Puna 13, western Tibetan Plateau 8, southern Peru and Arica 4, Hazen Plateau and northern Ellesmere
+3, Mauna Loa 1 (`data/validation/landcover_sensitivity.json`, key `full_run`; ranking
+`data/validation/landcover_sensitivity/ranking_bare_strict.csv`). Conductor's decision: the default mask does
+not change before the freeze; both rankings are presented, the strict one as the conservative reading (team
+decision request on issue #11). Never call the Putorana tops "bare rock".
+
 **New rule since 01:30: "Before you report DONE"** (`AGENTS.md` for Codex and other agents, the same text in
 `CLAUDE.md`): five checks an agent does on its own result before the result comment, and a defect found in
 another file may be fixed in a separate commit if it is a few lines. Reason: every defect found in review this
@@ -233,6 +243,14 @@ Selection funnel behind `tiles_scanned.csv`: 26,450 GLO-30 tiles -> 18,836 with 
 - **Top of the ranking**: Arctic plateaus (section 0). The closed-depression share of all top-30 sites is zero
   in the median cell, so the lake artefact of the 78-tile ranking is not what puts them there; vegetation (tundra
   counted as bare) is the weak point instead.
+- **How to talk about the top of the ranking (J33 full run).** Say: "Our default mask counts moss and lichen as
+  bare ground, so the Arctic plateaus at the top are mostly tundra. Under a strict mask (bare / sparse
+  vegetation only) only 3 of our top 30 remain, and the top 30 becomes the Atacama and Puna, the western Tibetan
+  Plateau, the coastal desert of southern Peru, northern Ellesmere and Mauna Loa. We show both; the strict
+  ranking is the conservative one." Do not say "bare rock" about Putorana, Peary Land, Ungava, Baffin, Chukotka
+  or the Polar Urals. The strict ranking has had no novelty check (27 of its top 30 are `unchecked`) and 9 of its
+  top 30 lie inside a known analog radius (`is_known`), against 2 in the default top 30. Keys:
+  `data/validation/landcover_sensitivity.json` `full_run.*`.
 
 Holds up:
 - **Our code matches NASA's lunar slope map**: median absolute difference 0.042 deg (20 m) and 0.064 deg (30 m) for a plane-fit slope at 200 m. This validates the data handling and a plane-fit estimator written for the test, not the two-point slopes used for scoring.

@@ -73,12 +73,13 @@ replaces total area because total area rewarded sheer size: with it, sand seas h
 
 Shape of the terrain at 240 m to 1.6 km only: no rocks, no regolith, no vacuum, no low sun. A 30 m surface
 model sees vegetation and smooths small craters. The top of the ranking is Arctic plateau terrain (16 of the
-top 30 sites are one landform, the Putorana Plateau) and its "bare ground" is partly tundra, because the
-land-cover class "moss and lichen" counts as bare: read it with the review in `data/sites/top30_review.csv`
+top 30 sites are one landform, the Putorana Plateau) and its "bare ground" is mostly moss-and-lichen tundra,
+because the land-cover class "moss and lichen" counts as bare (see "Mask choice" below: under a mask without
+it, 3 of the top 30 remain); read it with the review in `data/sites/top30_review.csv`
 (26 of 30 not artefacts, 4 unsure under cloud). Closed depressions on Earth are often lakes and thermokarst;
 the top-30 sites have a depression share of zero in the median cell, so that is not what ranks them. The
 coldest monthly night mean among the 60 top sites is 235 K; the lunar regions
 have annual means of 51 to 141 K. Exact top sites move with the grid (6 of 10 survive a half-cell shift on the
 78-tile test); regions are stable. Nothing here is called a discovery: the literature check decides that.
 
-Mask choice (J33, shortened run on the top 100 only): with WorldCover class 100 "moss and lichen" not counted as bare, 8 of the top 30 sites keep a 4-cell core (none of the 16 Putorana sites) and 30 of the top 100 (`data/validation/landcover_sensitivity.json`, `top30.pass_strict_cells`, `top100.pass_strict_cells`); which sites would replace them is not measured ([VALIDATION.md](VALIDATION.md)).
+Mask choice (J33, full run on all 2,060 tiles): the default mask counts WorldCover class 100 "moss and lichen" as bare, so the top of the default ranking is mostly moss-and-lichen tundra. With class 60 only (`python -m pipeline.sites --bare-col bare_strict`, a variant; the default is unchanged) 3 of the default top 30 and 16 of the top 100 have a strict site within 3 km, candidate cells fall from 63,618 to 35,875 and sites from 3,175 to 1,561, and the strict top 30 is Atacama and Puna (13), the western Tibetan Plateau (8), southern Peru and Arica (4), the Hazen Plateau and northern Ellesmere (3) and Mauna Loa (1) (`data/validation/landcover_sensitivity.json`, `full_run.overlap`, `full_run.candidate_cells`, `full_run.sites`, `full_run.regions_top30`). Both rankings are presented; the strict one is the conservative reading ([VALIDATION.md](VALIDATION.md)).

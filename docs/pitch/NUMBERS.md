@@ -20,7 +20,10 @@ Paths and keys identify the committed inputs. Displayed decimals are rounded. Pr
 | Three Canadian Space Agency challenge resources | RADARSAT Constellation Mission, RADARSAT-1 and the SAR tutorial | [Source register](../../data/sources.csv), `csa_rcm`, `csa_radarsat1`, `csa_sar_tutorial` |
 | Zero candidate cells and sites; four controls | Masked result for each negative control | [Effectiveness](../../data/validation/effectiveness.json), `controls.*.with_mask.cells`, `controls.*.with_mask.sites`, four entries |
 | Eight sites; 240 m; 0.43–1.16×; median 0.87× | Footprint-limited ICESat-2 check of Earth grid slopes | [ICESat-2 profiles](../../data/validation/icesat2.json), `sites.*.ratios.laser240_over_grid240` (count, min, max, median) |
-| Ten questions | Number of Q&A prompts | [QA.md](QA.md) |
+| 3 of the top 30; 16 of the top 100 | Default top sites with a site of the strict-mask ranking (WorldCover class 60 only, without 100 "moss and lichen") within 3 km | [Land-cover sensitivity](../../data/validation/landcover_sensitivity.json), `full_run.overlap.top30.default_in_strict`, `full_run.overlap.top100.default_in_strict` |
+| 63,618 → 35,875 candidate cells; 3,175 → 1,561 sites; Putorana 228 → 1 sites | Default against strict mask, all 2,060 tiles | [Land-cover sensitivity](../../data/validation/landcover_sensitivity.json), `full_run.candidate_cells`, `full_run.sites`, `full_run.regions_all_sites.*.Putorana Plateau` |
+| Strict top 30: Atacama and Puna 13, western Tibetan Plateau 8, southern Peru and Arica 4, Hazen Plateau and northern Ellesmere 3, Mauna Loa 1, other 1 | Regions of the strict ranking's top 30 (lat/lon boxes) | [Land-cover sensitivity](../../data/validation/landcover_sensitivity.json), `full_run.regions_top30.bare_strict`; [strict ranking](../../data/validation/landcover_sensitivity/ranking_bare_strict.csv) |
+| Eleven questions | Number of Q&A prompts | [QA.md](QA.md) |
 
 ### Figure inputs
 

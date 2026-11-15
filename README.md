@@ -114,10 +114,13 @@ The pipeline uses [Python](https://www.python.org/), [NumPy](https://numpy.org/)
 | Known-site enrichment | Over the **22** known lunar analogs (tagged lunar or both; Mars-only entries excluded), median **1.02×** the bare-cell baseline versus **0.39×** around matched random circles (5–95%: 0.12–0.91); 14 of 500 random repeats reached the observed median. The typical known lunar analog's circle sits at about the scan-wide bare-cell rate. |
 | Negative controls | No candidates survived the land-cover mask in the four control tiles. |
 | ICESat-2 | Across eight sites, laser slopes at **240 m** were **0.43–1.16×** their grid counterparts, median **0.87×**. Track and grid footprints differ. |
+| Moss and lichen in the bare mask | The default mask counts WorldCover class 100 "moss and lichen" as bare. With class 60 "bare / sparse vegetation" only, **3 of the default top 30** sites (and **16 of the top 100**) have a site of the strict ranking within 3 km. Candidate cells fall from **63,618** to **35,875**, sites from **3,175** to **1,561**, and Putorana Plateau sites from **228** to **1**. [Strict ranking](data/validation/landcover_sensitivity/ranking_bare_strict.csv) |
 
 At the scale of one-degree tiles, the score does not separate known analog sites from the rest of the scanned land. [Full validation report](docs/VALIDATION.md)
 
 ## Limits
+
+**The top of the default ranking is mostly moss-and-lichen tundra, not bare rock.** The default land-cover mask counts ESA WorldCover class 100 "moss and lichen" as bare ground. With class 60 "bare / sparse vegetation" only, the Arctic plateaus that lead the ranking mostly drop out: none of the 16 Putorana Plateau sites in the top 30 remains, and only **3 of the default top 30** sites have a site of the strict ranking within 3 km. The strict ranking is led by the Atacama and Puna (13 of its top 30), the western Tibetan Plateau (8), the coastal desert of southern Peru and Arica (4), the Hazen Plateau and northern Ellesmere Island (3) and Mauna Loa (1). We present both rankings: the default one and the [strict one](data/validation/landcover_sensitivity/ranking_bare_strict.csv) as the conservative reading. The default mask is unchanged ([numbers and keys](docs/VALIDATION.md)).
 
 The scan favours selected, mostly bare land and cannot certify global coverage. Tundra lichen, river erosion, thaw basins and dunes can resemble lunar relief in a grid. Rankings depend on the elevation model and cell grid. Terrain similarity alone cannot establish regolith, thermal conditions, illumination, access or permission to conduct field work. The lunar analysis covers the south-pole targets. Mars remains a separate calibration task.
 

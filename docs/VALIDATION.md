@@ -23,9 +23,23 @@ With slopes and roughness alone, **9.83%** of valid cells passed the terrain thr
 - **Elevation input changes which cells qualify.** With WorldCover held fixed, switching from Copernicus to NASADEM reduced the candidate count from **33,911** to **4,886**. Switching from WorldCover to MODIS reduced it further to **2,996**. Copernicus/WorldCover and NASADEM/MODIS shared **2,237** candidates.
 - **Sand seas can score highly.** The ranking pushes sites with the dune-field flag down. That flag can also affect real analogs, including parts of Devon Island. Missing land cover or vegetation can exclude known sites. WorldCover does not provide a mask north of **82.75° N** or in Antarctica.
 
-## Moss and lichen counted as bare ground (J33, shortened version)
+## Moss and lichen counted as bare ground (J33)
 
-The default mask counts WorldCover classes 60 "bare / sparse vegetation" and 100 "moss and lichen" as bare. For the **top 100 sites** of the default ranking we re-read WorldCover on the scan's own grid for the **67** tiles that hold them and kept class 60 only (`bare_strict`). The recomputed default `bare` equals the stored one in all **5,431** site cells (`cells_bare_mismatch` = **0**). A site "stays (cells)" if at least 4 connected cells still have `bare_strict >= 0.8` (the site rule); "stays (median)" if its median cell does.
+**Full run (all 2,060 tiles).** `bare_strict` (WorldCover class 60 only) was computed for every scanned cell on the scan's own grid (`python -m validation.landcover_strict_cells`): the recomputed default `bare` equals the stored one in all **1,756,655** cells with WorldCover (3 Antarctic tiles have none). The sites stage was then rerun as a variant, `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity`, and compared with the default ranking (`python -m validation.landcover_strict_ranking`). A default site "has a strict match" when a strict site's centroid lies within 3 km. The default ranking itself is unchanged; a rerun of the default from git reproduces `data/sites/ranking.csv` exactly.
+
+| | Default mask (60 + 100) | Strict mask (60 only) |
+|---|---|---|
+| Bare cells (valid, bare ≥ 0.8, ice and water < 0.05) | 1,213,569 | 902,926 |
+| Candidate cells | 63,618 | 35,875 |
+| Sites (≥ 4 cells) | 3,175 | 1,561 |
+| Putorana Plateau sites | 228 | 1 |
+| Default top 10 / 30 / 100 with a strict match in the strict top 10 / 30 / 100 | – | 1 / **3** / **16** |
+| Top 30 by region | Putorana 16, southern Peary Land 5, northern Ungava 2, northern Baffin 2, Polar Urals 1, Chukotka 1, Hazen Plateau 1, Atacama / Puna 1, Mauna Loa 1 | Atacama / Puna 13, western Tibetan Plateau 8, southern Peru / Arica coast 4, Hazen Plateau / northern Ellesmere 3, Mauna Loa 1, other 1 |
+| Top 30 inside a known analog radius (`is_known`) | 2 | 9 |
+
+The three default top-30 sites that keep their place are the Atacama site S21W070-01 (strict rank 1), Mauna Loa N19W156-01 (2) and the Hazen Plateau site N81W072-01 (4). Two more default top-30 sites have a strict site within 3 km but far down (N82W029-01 at strict rank 554, N61W074-01 at 930). The shortened run below finds 8 default top-30 sites with a 4-cell core; the other 3 shrink until their centroid moves more than 3 km (N82W031-01: 5.4 km). The strict ranking has had no literature check (27 of its top 30 are `unchecked`). Regions are lat/lon boxes of the site centroid (`validation/landcover_sensitivity.py` `REGIONS` plus `validation/landcover_strict_ranking.py` `EXTRA_REGIONS`). The MODIS Barren comparison was run on the top 100 only (below); MODIS has no data north of 60° N, so it cannot test the Arctic sites. Whether the default mask changes is a decision for the team (issue #11); until then both rankings are shown, the strict one as the conservative reading.
+
+**Shortened run (top 100 sites only).** The default mask counts WorldCover classes 60 "bare / sparse vegetation" and 100 "moss and lichen" as bare. For the **top 100 sites** of the default ranking we re-read WorldCover on the scan's own grid for the **67** tiles that hold them and kept class 60 only (`bare_strict`). The recomputed default `bare` equals the stored one in all **5,431** site cells (`cells_bare_mismatch` = **0**). A site "stays (cells)" if at least 4 connected cells still have `bare_strict >= 0.8` (the site rule); "stays (median)" if its median cell does.
 
 | Region (sites in default top 30 / top 100) | Top 30 stays: median / cells | Top 100 stays: median / cells | Median bare − bare_strict, top 100 |
 |---|---|---|---|
@@ -43,7 +57,7 @@ The default mask counts WorldCover classes 60 "bare / sparse vegetation" and 100
 
 **No Putorana, Polar Urals or Chukotka site survives**: their "bare ground" is almost entirely moss and lichen. Of the 28 Arctic sites in the top 30, 6 keep a 4-cell core by the cell rule (2 Peary Land, 2 Baffin, 1 Ungava, 1 Hazen Plateau) and only the Hazen Plateau site N81W072-01 passes by the median rule. The MODIS Barren mask (J17) covers 56° S–60° N only, so it tests none of the Arctic sites; on the **13** top-100 sites it covers (Atacama/Puna, Mauna Loa, Tibet/Ladakh, Mongolian Altai) it agrees with `bare_strict` on every site: 12 pass, the Mongolian site N47E090-01 fails both.
 
-What this shortened run cannot show: which sites outside the default top 100 would move up into the top 30 under the strict mask, and the new rank of a surviving site (its ranking key is not recomputed, and survivors shrink, e.g. N82W031-01 from 47 to 6 cells). That needs `bare_strict` for all 2,060 tiles and a rerun of the sites stage. Whether the default mask changes is a decision for the team (issue #11).
+What the shortened run alone cannot show (the full run above answers it): which sites outside the default top 100 move up into the top 30 under the strict mask, and the new rank of a surviving site (survivors shrink, e.g. N82W031-01 from 47 to 6 cells).
 
 ## Limits
 
@@ -60,6 +74,7 @@ Files below are under [`data/validation/`](../data/validation/). Data and licens
 | DEM comparison | `nasadem_vs_copdem.json` · `ranking_nasa_vs_esa.{n_tiles,spearman_tile_share,top50_overlap}`, `features.{s240,dep_frac}.pearson`, `candidates.{esa,dem_only,nasa}`, `candidate_cells_shared_esa_nasa` |
 | Enrichment / laser | `enrichment.json` · `n_sites_tested`, `sites_with_enrichment_above_1`, `median_enrichment`, `random.median_enrichment_median`, `random.median_enrichment_p05_p95`, `random.share_of_random_runs_with_median_at_least_ours`, `mars_only_excluded` (reference only); `icesat2.json` · `sites.*.ratios.laser240_over_grid240` (range and median) |
 | Controls, recovery and stability | `effectiveness.json` · `controls`, `recovery`, `stability.named_regions_spearman`, `stability.legacy_grid`, `scan.land_cover_limit` |
+| Moss and lichen, full run (J33) | `landcover_sensitivity.json` · `full_run.{bare_cells,candidate_cells,sites,overlap.top10,overlap.top30,overlap.top100,regions_top30,regions_top100,regions_all_sites,default_top30_strict_rank}`; ranking `landcover_sensitivity/ranking_bare_strict.csv` (`is_known`, `novelty`); cells `landcover_sensitivity/cells_bare_strict.parquet` |
 | Moss and lichen sensitivity (J33) | `landcover_sensitivity.json` · `n_tiles_read`, `cells`, `cells_bare_mismatch`, `top30.{pass_strict_median,pass_strict_cells,median_bare_minus_bare_strict}`, `top100.{...,n_sites_with_modis,pass_modis_median}`, `per_region.<region>.{top30,top100}`; per site `landcover_sensitivity/sites_top100.csv` (N82W031-01: `n_cells`, `strict_kept_cells`, `strict_largest_group`) |
 
 ## Rank uncertainty per site (J32)
