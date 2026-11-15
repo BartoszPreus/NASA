@@ -22,12 +22,13 @@ night had passed the Accept checks of its job.
 - **J11 drafts are on `main`** (issue 4, open): `README.md`, `docs/pitch/` (seven slides, pitch, Q&A, portal
   fields, `NUMBERS.md`). They wait for the two items below, for the demo link and for a person.
 - **J22 delivered, not closed** (issue 2): 30 rows in `data/sites/novelty_check.csv`, `docs/NOVELTY.md` rewritten.
-  The J20 rerun restored countries to all 200 ranking rows. The verdict `mentioned` for 27 top-30 sites rests on
-  pages that do not mention analogs, so it is UNVERIFIED.
-  `docs/NOVELTY.md` says the Putorana sites "mimic lunar maria", which nothing here measures (the target is the
-  south-pole highland regions), and names hollows at four sites whose depression share is zero.
+  The J20 rerun restored countries to all 200 ranking rows. The review findings of J22 are corrected (merged from
+  branch `claude/issue-2-j22-fixes`): verdicts rest only on opened pages (top 30: 24 unreported, 4 mentioned as
+  regional Mars analogs, 2 established), the mare and hollow wording is gone from `docs/NOVELTY.md`, and the
+  Pingualuit and El'gygytgyn rows of `known_analogs.csv` cite opened pages and are `analog_for = mars`.
 - **J20 correction ready for review** (issue 1): the same eligibility rule applies to both groups and the corrected
-  tile-recovery AUC is 0.550 (90% interval 0.418–0.682), consistent with chance. The ranking and both validations
+  tile-recovery AUC is 0.531 (90% interval 0.396–0.668, 14 known tiles), consistent with chance; it was
+  0.550 with 15 tiles before Pingualuit became a Mars-only analog in the J22 correction. The ranking and both validations
   were rebuilt with the updated `known_analogs.csv` and the Natural Earth country outlines. See `docs/VALIDATION.md`.
 - **J30 in progress** (issue 14, branch `t-pl2moon`, not merged): Polish lidar areas against lunar sites at 1 to
   2 m with a 3D viewer; scope extension agreed with the team owner.
@@ -215,7 +216,7 @@ Selection funnel behind `tiles_scanned.csv`: 26,450 GLO-30 tiles -> 18,836 with 
 - **Known analogs against random places**: 16 of 37 tested entries lie above the bare-cell base rate. Median
   enrichment was 0.91 for the known sites and 0.36 for matched random circles (5th to 95th percentile: 0.13 to
   0.73). Seven of 500 random repeats reached the observed median. An older run on 78 hand-picked tiles gave 1.80.
-- **Tile-scale recovery**: AUC 0.550 (90% interval 0.418–0.682), consistent with chance on 15 eligible known tiles.
+- **Tile-scale recovery**: AUC 0.531 (90% interval 0.396–0.668), consistent with chance on 14 eligible known tiles.
 - **The earlier J18 run compared two lunar targets**: 0.91 (15 of 35) for the seven candidate regions pooled and
   0.97 (16 of 35) for the 160 km polar window. The pooled target is a choice of definition. See `docs/sources/j18.md`.
 - **Sand seas**: without the dune-field flag they hold the top ranks under every target; with it they are outside

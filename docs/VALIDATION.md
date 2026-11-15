@@ -8,7 +8,7 @@ The final ranking uses the pooled lunar target `base_regions`, the Copernicus el
 | PDS versus PGDA LOLA grids | Median elevation offset **+0.191 m**, RMS difference **1.709 m**. Both grids come from LOLA. |
 | NASADEM + MODIS versus Copernicus + WorldCover | On **618** common tiles, per-tile candidate shares gave Spearman **0.637**, with **21 of the top 50** shared. Slope at the shorter baseline gave Pearson **0.999**, while closed-depression share gave **0.758**. |
 | Enrichment around known analog sites | **16 of 37** above the scan-wide rate. Median **0.91×** versus **0.36×** for matched random circles. The typical known site's circle still falls below the scan-wide rate. |
-| Tile recovery | **AUC 0.550** (bootstrap 90% CI **0.418–0.682**), consistent with chance. Median known tile percentile **56.5**. Both groups required at least **100** bare cells: **15** known tiles and **1,464** background tiles. |
+| Tile recovery | **AUC 0.531** (bootstrap 90% CI **0.396–0.668**), consistent with chance. Median known tile percentile **54.2**. Both groups required at least **100** bare cells: **14** known tiles and **1,465** background tiles. |
 | Negative controls | With land cover, **zero candidate cells and sites** in all four controls. Terrain alone passed **33 cells and 2 sites** in Tatry/Podhale and **3 cells and 0 sites** in the Alps; the other controls stayed at zero. |
 | ICESat-2 laser profiles | Across **8** sites, laser slopes at **240 m** were **0.43–1.16×** the grid slopes, median **0.87×**. Transects and gridded sites cover different footprints. |
 

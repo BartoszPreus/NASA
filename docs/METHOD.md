@@ -50,7 +50,7 @@ replaces total area because total area rewarded sheer size: with it, sand seas h
 - Around the catalogued sites, median enrichment was 0.91, versus 0.36 for random circles (5th to 95th percentile:
   0.13 to 0.73). Seven of 500 random repeats reached the observed median. The typical known site had less
   lunar-like ground than the scan-wide bare-cell baseline. At one-degree tile scale, the corrected recovery
-  AUC of 0.550 was consistent with chance. [Validation](VALIDATION.md)
+  AUC of 0.531 was consistent with chance. [Validation](VALIDATION.md)
 - Laser profiles of ICESat-2 over eight sites give 0.43 to 1.16 times the grid slope at 240 m (median 0.87);
   the three lowest are lava fields, and the laser samples a 20 km box, not the site outline.
 - The dune-field flag removes the sand seas from the top 50 and also flags part of Devon Island, a real analog.
