@@ -1,43 +1,43 @@
-# Zgłoszenie projektu (Project Submission Guide), checklista
-Źródło: https://www.spaceappschallenge.org/resources/project-submission-guide/ (stan na 13.11.2026)
+# Project submission (Project Submission Guide), checklist
+Source: https://www.spaceappschallenge.org/resources/project-submission-guide/ (as of 13 Nov 2026). Team notes, translated from Polish on 15 Nov 2026.
 
-## Terminy
-- Zgłoszenia otwarte: **sob 14.11, 9:00** (czas lokalnego eventu).
-- Globalny deadline: **ndz 15.11, 23:59**.
-- ⚠️ **W Poznaniu lokalny deadline to ndz 15.11, 13:30** („Firm Deadline”: zgłoszenie w portalu globalnym plus slajdy na info desk). Trzymamy się 13:30.
+## Dates
+- Submissions open: **Sat 14 Nov, 9:00** (local event time).
+- Global deadline: **Sun 15 Nov, 23:59**.
+- **In Poznań the local deadline is Sun 15 Nov, 13:30** ("Firm Deadline": submission in the global portal plus slides at the info desk). We keep to 13:30.
 
-## Gdzie edytować
-Ikona profilu → **My Team** → zakładka **Project** (widoczna od 14.11, 9:00) → **Edit** → często klikać **Save Progress**.
-- Włączcie **Lock**, żeby dwie osoby nie nadpisywały sobie zmian.
-- Obrazy (JPG/PNG/GIF do 10 MB) można wgrać. **Wideo i dokumentów nie**: tylko publiczne linki (YouTube, Drive, GitHub…) bez logowania. Sprawdźcie je w trybie incognito.
-- Własna strona? Warto zgłosić ją do klasyfikacji FortiGuard Web Filter (Company Name: „N/A”), żeby sędziowie mieli do niej dostęp.
+## Where to edit
+Profile icon → **My Team** → tab **Project** (visible from 14 Nov, 9:00) → **Edit** → click **Save Progress** often.
+- Turn on **Lock** so that two people do not overwrite each other's changes.
+- Images (JPG/PNG/GIF up to 10 MB) can be uploaded. **Videos and documents cannot**: only public links (YouTube, Drive, GitHub...) that need no login. Check them in an incognito window.
+- Own website? Worth submitting it for FortiGuard Web Filter classification (Company Name: "N/A") so that judges can open it.
 
-## Pola formularza (wszystko **po angielsku**)
+## Form fields (all **in English**)
 1. **Project Name**
-2. **High-Level Project Summary**: co zrobiliście, jak to odpowiada na wyzwanie, dlaczego to ważne.
-3. **Link to Project Demo**: **maks. 7 slajdów** (z tytułowym i wstępem) **albo wideo ≤ 30 s**. Po przekroczeniu limitu odpadacie z Global Judging.
-4. **Link to Final Project**: strona, repo itp., publicznie.
-5. **Detailed Project Description**: co robi, jak działa, korzyści, cel, narzędzia i języki.
-6. **Use of Super Intelligence (SI)**: jak używaliście SI (tak w USA nazywają teraz AI). Sędziowie nie widzą tej odpowiedzi, ale widzą znaczniki w projekcie:
-   - obrazy i wideo z SI muszą mieć **widoczny watermark**,
-   - kod, dane i audio: adnotacja w opisie i metadanych,
-   - SI nie może wymyślić samego pomysłu rozwiązania,
-   - treści z SI nie mogą używać brandingu NASA (logo, flagi, oznaczenia misji).
-7. **NASA Data**: **wymagane co najmniej 1 źródło danych NASA**, żeby mieć szansę na nagrodę globalną.
-8. **Space Agency Partner Data and Other References**: wszystkie dane, kod, obrazy i narzędzia. Mile widziane dane partnerów (m.in. **ESA**, CSA, JAXA, ISRO, ASI, UK Space Agency, CONAE, KASA…).
+2. **High-Level Project Summary**: what you made, how it answers the challenge, why it matters.
+3. **Link to Project Demo**: **at most 7 slides** (including the title and introduction) **or a video of at most 30 s**. Exceeding the limit removes you from Global Judging.
+4. **Link to Final Project**: website, repository etc., public.
+5. **Detailed Project Description**: what it does, how it works, benefits, purpose, tools and languages.
+6. **Use of Super Intelligence (SI)**: how you used SI (the US name for AI now). Judges do not see this answer, but they see the markers in the project:
+   - images and videos made with SI must carry a **visible watermark**,
+   - code, data and audio: a note in the description and metadata,
+   - SI must not come up with the idea of the solution itself,
+   - SI-generated content must not use NASA branding (logo, flags, mission insignia).
+7. **NASA Data**: **at least 1 NASA data source is required** to be eligible for a global award.
+8. **Space Agency Partner Data and Other References**: all data, code, images and tools. Partner data are welcome (among others **ESA**, CSA, JAXA, ISRO, ASI, UK Space Agency, CONAE, KASA...).
 
 ## Demo: format
-- **Wideo ≤ 30 s:** [0:00] kim jesteście → [0:02] wyzwanie i inspiracja → [0:05] nazwa plus tagline → [0:10] jak działa (obraz/prototyp, UX, dane NASA) → [0:20–0:30] wizja przyszłości. Mówić można po polsku, ale **z angielskimi napisami**.
-- **Slajdy ≤ 7:** czytelna czcionka, mało tekstu, mocne wizualizacje: obraz projektu, doświadczenie użytkownika, jak dane NASA i agencji to umożliwiają. Na slajdach: **nazwa zespołu, imiona członków, wybrane wyzwanie**.
-- Wyznaczcie jedną osobę odpowiedzialną za demo.
+- **Video of at most 30 s:** [0:00] who you are → [0:02] challenge and inspiration → [0:05] name plus tagline → [0:10] how it works (image/prototype, UX, NASA data) → [0:20-0:30] vision of the future. Speaking Polish is allowed, but **with English subtitles**.
+- **At most 7 slides:** readable font, little text, strong visuals: picture of the project, user experience, how NASA and agency data make it possible. On the slides: **team name, members' names, chosen challenge**.
+- Name one person responsible for the demo.
 
-## Ocena (5 kryteriów)
-**Impact, Creativity, Validity, Relevance, Presentation**. Szczegóły w pliku `Ocena-i-nagrody.md`.
+## Judging (5 criteria)
+**Impact, Creativity, Validity, Relevance, Presentation**. Details in `Ocena-i-nagrody.md`.
 
-## Wysłanie
-- [ ] Wszyscy członkowie potwierdzeni w **tym samym** Local Event (Poznań).
-- [ ] Wszystkie wymagane pola wypełnione, po angielsku.
-- [ ] Brak wizerunku osób poniżej 18 lat.
-- [ ] Zaznaczone „Terms and Conditions” i „Confirm All Work is Original”.
-- [ ] **Submit for Judging**. Pojawi się baner z potwierdzeniem. Można poprawiać i wysyłać ponownie do deadline'u, liczy się ostatnia wersja.
-- [ ] Po wysłaniu: certyfikat w Profile → Participant Information (PDF, format Letter).
+## Submitting
+- [ ] All members confirmed in **the same** Local Event (Poznań).
+- [ ] All required fields filled in, in English.
+- [ ] No images of people under 18.
+- [ ] "Terms and Conditions" and "Confirm All Work is Original" ticked.
+- [ ] **Submit for Judging**. A confirmation banner appears. You can correct and resubmit until the deadline; the last version counts.
+- [ ] After submitting: certificate in Profile → Participant Information (PDF, Letter format).

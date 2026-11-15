@@ -1,27 +1,27 @@
-# FAQ i terminy (Participant FAQs)
-Źródło: https://www.spaceappschallenge.org/resources/participant-faqs/ (stan na 13.11.2026)
+# FAQ and dates (Participant FAQs)
+Source: https://www.spaceappschallenge.org/resources/participant-faqs/ (as of 13 Nov 2026). Team notes, translated from Polish on 15 Nov 2026.
 
-## Terminy 2026
-- 26.08: start rejestracji
-- 17.09: streszczenia wyzwań plus tworzenie drużyn
-- 28.10: pełne treści wyzwań
-- 03.11: start Space Apps Connect
-- 13.11: Global Offers (darmowe narzędzia od partnerów), zasoby do wyzwań, przewodniki Submission i Judging
-- **14–15.11: hackathon**
-- 03.12: Global Nominees · 17.12: Global Finalists i Honorable Mentions · 26.01.2027: Global Winners
+## Dates 2026
+- 26 Aug: registration opens
+- 17 Sep: challenge summaries and team forming
+- 28 Oct: full challenge texts
+- 03 Nov: Space Apps Connect opens
+- 13 Nov: Global Offers (free tools from partners), challenge resources, Submission and Judging guides
+- **14-15 Nov: hackathon**
+- 03 Dec: Global Nominees · 17 Dec: Global Finalists and Honorable Mentions · 26 Jan 2027: Global Winners
 
-## Zasady w pigułce
-- Udział jest darmowy. Jeśli ktoś każe płacić, zgłoś to na info@spaceappschallenge.org.
-- Drużyna Local Event: 1–6 osób, wszyscy w tym samym evencie. Jedna osoba może być tylko w jednej drużynie, a drużyna wybiera jedno wyzwanie.
-- **Nie wolno zaczynać prac przed hackathonem.**
-- Osoby poniżej 18 lat: tylko z opiekunem, bez ich wizerunku w projekcie.
-- Wyzwania piszą eksperci NASA i agencji partnerskich (w tym ESA).
-- **Super Intelligence (SI):** od rozporządzenia USA z 29.09.2026 tak nazywa się AI. Można używać (LLM, generatory kodu i obrazów), ale trzeba opisać jak. SI nie może wymyślić samego pomysłu.
-- Każdy, kto zgłosi projekt, dostaje certyfikat uczestnictwa.
-- Problemy z zachowaniem uczestników: Local Lead albo conduct@spaceappschallenge.org.
+## Rules in a nutshell
+- Participation is free. If anyone asks you to pay, report it to info@spaceappschallenge.org.
+- Local Event team: 1-6 people, all in the same event. A person can be in only one team, and a team chooses one challenge.
+- **Work must not start before the hackathon.**
+- Participants under 18: only with a guardian, and no images of them in the project.
+- Challenges are written by experts of NASA and partner agencies (including ESA).
+- **Super Intelligence (SI):** since the US executive order of 29 Sep 2026 this is the name for AI. It may be used (LLMs, code and image generators), but its use must be described. SI must not come up with the idea itself.
+- Everyone who submits a project gets a participation certificate.
+- Problems with participants' behaviour: the Local Lead or conduct@spaceappschallenge.org.
 
-## Agencje partnerskie 2026 (warto użyć ich danych)
-Angola, Bahrain, Brazylia (AEB), **CSA** (Kanada), **ESA**, **ISRO**, **ASI** (Włochy), **JAXA**, **KASA** (Korea), MBRSC (ZEA), **CONAE** (Argentyna), Nigeria (NASRDA), Paragwaj, Senegal, Hiszpania, Turcja, **UK Space Agency**.
+## Partner agencies 2026 (worth using their data)
+Angola, Bahrain, Brazil (AEB), **CSA** (Canada), **ESA**, **ISRO**, **ASI** (Italy), **JAXA**, **KASA** (Korea), MBRSC (UAE), **CONAE** (Argentina), Nigeria (NASRDA), Paraguay, Senegal, Spain, Turkey, **UK Space Agency**.
 
 ## Space Apps Connect
-Forum dla uczestników, Local Leadów, ekspertów (SME) i Global Organizing Team. Działa do końca hackathonu. Przyda się do pytań do autorów wyzwań.
+Forum for participants, Local Leads, subject-matter experts (SME) and the Global Organizing Team. Open until the end of the hackathon. Useful for questions to the challenge authors.

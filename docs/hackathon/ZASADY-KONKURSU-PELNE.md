@@ -1,138 +1,137 @@
-# NASA Space Apps Challenge 2026: pełne zasady + czego chce jury
-**Oparte wyłącznie na oficjalnych stronach spaceappschallenge.org** (odczyt: sob 14.11.2026, ok. 13:20).
-Oznaczenia: **[FAKT]** = treść ze strony (tłumaczenie/streszczenie), **[WNIOSEK]** = nasza interpretacja tych faktów.
+# NASA Space Apps Challenge 2026: full rules + what the jury wants
+**Based only on the official pages of spaceappschallenge.org** (read: Sat 14 Nov 2026, about 13:20). Team notes, translated from Polish on 15 Nov 2026. The official English texts at the URLs below are authoritative.
+Markers: **[FACT]** = content of the page (translation/summary), **[INFERENCE]** = our interpretation of these facts.
 
-### Przeczytane źródła
-| Dokument | URL | Wersja |
+### Sources read
+| Document | URL | Version |
 |---|---|---|
-| Participant Terms & Conditions | https://www.spaceappschallenge.org/legal/ | 7.08.2026 |
-| Participant FAQs | https://www.spaceappschallenge.org/resources/participant-faqs/ | 13.11.2026 |
-| Team Formation Guide | https://www.spaceappschallenge.org/resources/team-formation-guide/ | 23.09.2026 |
-| Project Submission Guide | https://www.spaceappschallenge.org/resources/project-submission-guide/ | 13.11.2026 |
-| Judging & Awards Guide | https://www.spaceappschallenge.org/resources/judging-awards-guide/ | 13.11.2026 |
-| Awards | https://www.spaceappschallenge.org/awards/ | — |
-| 2025 Global Winners | https://www.spaceappschallenge.org/2025/awards/global-winners/ | — |
-| Event Poznań (Details + Schedule) | https://www.spaceappschallenge.org/2026/local-events/poznan/ | — |
-| Drużyna Zodiak | https://www.spaceappschallenge.org/2026/find-a-team/zodiak/ | — |
-| Wyzwanie: Earth Analogs Moon/Mars | https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/ | — |
+| Participant Terms & Conditions | https://www.spaceappschallenge.org/legal/ | 7 Aug 2026 |
+| Participant FAQs | https://www.spaceappschallenge.org/resources/participant-faqs/ | 13 Nov 2026 |
+| Team Formation Guide | https://www.spaceappschallenge.org/resources/team-formation-guide/ | 23 Sep 2026 |
+| Project Submission Guide | https://www.spaceappschallenge.org/resources/project-submission-guide/ | 13 Nov 2026 |
+| Judging & Awards Guide | https://www.spaceappschallenge.org/resources/judging-awards-guide/ | 13 Nov 2026 |
+| Awards | https://www.spaceappschallenge.org/awards/ | - |
+| 2025 Global Winners | https://www.spaceappschallenge.org/2025/awards/global-winners/ | - |
+| Event Poznań (Details + Schedule) | https://www.spaceappschallenge.org/2026/local-events/poznan/ | - |
+| Team Zodiak | https://www.spaceappschallenge.org/2026/find-a-team/zodiak/ | - |
+| Challenge: Earth Analogs Moon/Mars | https://www.spaceappschallenge.org/2026/challenges/permanent-moon-base-locations-and-mars/ | - |
 
 ---
 
-## 1. Nasz status (ze strony drużyny)
-- **Drużyna Zodiak:** 4 osoby. **Team Owner: Bartosz Preus**, Hubert Włodzimierz Woźniak, Wiktor Witczak, Oliwier Gołembiewski.
-- **Local Event:** Poznań. **Wybrane wyzwanie:** *Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars* (przełączenie na stronie Space Apps robi Team Owner).
-- Kontakt drużyny: Messenger/Instagram.
-- [FAKT] Idealna wielkość zespołu to 4–5 osób. Limit to 6, a członków można dodawać do 15.11, 23:59. Zespół może pracować tylko nad **jednym** wyzwaniem. Zmienić je może Team Owner (About → Edit Details).
+## 1. Our status (from the team page)
+- **Team Zodiak:** 4 people. **Team Owner: Bartosz Preus**, Hubert Włodzimierz Woźniak, Wiktor Witczak, Oliwier Gołembiewski.
+- **Local Event:** Poznań. **Chosen challenge:** *Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars* (the Team Owner switches it on the Space Apps website).
+- [FACT] The ideal team size is 4-5 people. The limit is 6, and members can be added until 15 Nov, 23:59. A team can work on only **one** challenge. The Team Owner can change it (About → Edit Details).
 
-## 2. Terminy
-| Kiedy | Co [FAKT] |
+## 2. Dates
+| When | What [FACT] |
 |---|---|
-| sob 14.11, 9:00 | Otwiera się zakładka **Project** (zgłoszenie) |
-| **ndz 15.11, 13:30** | **Poznań: twardy deadline.** Zgłoszenie na portalu globalnym plus slajdy na info desk |
-| ndz 15.11, 14:30 | Poznań: pitche na scenie, **3 min pitch + 2 min Q&A** przed jury |
-| ndz 15.11, 18:00 | Poznań: ogłoszenie zwycięzców lokalnych, nagród sponsorów i **Global Nominees NASA** |
-| ndz 15.11, 23:59 | Globalny deadline „Submit for Judging” |
-| 3.12.2026 | Global Nominees (oficjalnie) |
-| 17.12.2026 | Global Finalists + Honorable Mentions |
-| 26.01.2027 | Global Winners, potem wirtualna gala |
+| Sat 14 Nov, 9:00 | The **Project** tab (submission) opens |
+| **Sun 15 Nov, 13:30** | **Poznań: firm deadline.** Submission in the global portal plus slides at the info desk |
+| Sun 15 Nov, 14:30 | Poznań: pitches on stage, **3 min pitch + 2 min Q&A** before the jury |
+| Sun 15 Nov, 18:00 | Poznań: announcement of local winners, sponsor awards and **NASA Global Nominees** |
+| Sun 15 Nov, 23:59 | Global "Submit for Judging" deadline |
+| 3 Dec 2026 | Global Nominees (official) |
+| 17 Dec 2026 | Global Finalists + Honorable Mentions |
+| 26 Jan 2027 | Global Winners, then a virtual gala |
 
-[FAKT] Nie wolno było zaczynać pracy przed 14.11, 9:00. [FAKT] NASA pisze, że **nie oczekuje w pełni rozwiniętego projektu** po dwóch dniach.
+[FACT] Work was not allowed to start before 14 Nov, 9:00. [FACT] NASA writes that it **does not expect a fully developed project** after two days.
 
-## 3. Regulamin (Terms & Conditions): rzeczy, które mogą nas zdyskwalifikować
-[FAKT]
-- Rozwiązanie musi **bezpośrednio odpowiadać na wyzwanie**.
-- **Niedozwolone w zgłoszeniu:** groźby, obelgi, ataki osobiste, mowa nienawiści, treści seksualne lub łamiące prawo, **promocja komercyjnych usług lub produktów**, poufne informacje firmowe, cudza własność intelektualna, **dane osobowe** (adresy, telefony, daty urodzenia), wizerunek, imię lub głos osób poniżej 18 lat.
-- **Licencja:** cała nasza oryginalna treść ma być swobodnie dostępna albo na licencji open source (OSI). **Bez wskazania licencji NASA publikuje ją na Apache 2.0.**
-- **Materiały spoza NASA** (dane, kod) muszą być publicznie i bez ograniczeń dostępne albo open source, **a ich licencje muszą być opisane w dokumentacji**. Bez tego NASA nie przyjmie projektu.
-- **Trzeba cytować KAŻDE źródło**, także open source. **NASA może odebrać nominację, nagrodę albo status zwycięzcy, jeśli źródła nie są zacytowane.**
-- Żadnych informacji objętych kontrolą eksportu (ITAR/EAR).
-- Brak powiązań, współpracy ani koordynacji z Chinami lub chińskimi podmiotami (w tym uczelniami) w związku z udziałem.
-- Zgoda na publikację: NASA może pokazywać rozwiązanie, nasze imiona, miasto, zdjęcia i nagrania. Wideo musi być naszym oryginalnym dziełem bez naruszeń praw.
-- Spotkania na żywo odbywają się na własne ryzyko. Za nagrody lokalne odpowiada lokalny organizator.
+## 3. Terms & Conditions: things that can disqualify us
+[FACT]
+- The solution must **directly answer the challenge**.
+- **Not allowed in a submission:** threats, insults, personal attacks, hate speech, sexual or unlawful content, **promotion of commercial services or products**, confidential company information, other people's intellectual property, **personal data** (addresses, phone numbers, dates of birth), the image, name or voice of persons under 18.
+- **Licence:** all our original content must be freely available or under an open-source (OSI) licence. **Without a stated licence NASA publishes it under Apache 2.0.**
+- **Non-NASA material** (data, code) must be publicly and freely available or open source, **and its licences must be described in the documentation**. Without that NASA will not accept the project.
+- **EVERY source must be cited**, including open source. **NASA may revoke a nomination, award or winner status if sources are not cited.**
+- No information subject to export control (ITAR/EAR).
+- No ties, collaboration or coordination with China or Chinese entities (including universities) in connection with participation.
+- Consent to publication: NASA may show the solution, our names, city, photos and recordings. A video must be our original work without infringements.
+- In-person meetings are at one's own risk. The local organiser is responsible for local awards.
 
-[WNIOSEK] W README repo: licencja (np. Apache-2.0), sekcja „Data & licenses” (dane NASA i każda biblioteka) i bez nazw firm w roli reklamy.
+[INFERENCE] In the repository README: a licence (e.g. Apache-2.0), a "Data & licenses" section (NASA data and every library) and no company names used as advertising.
 
-## 4. Zgłoszenie: wymagania formalne
-[FAKT]
-- Wszystko **po angielsku**, także podlinkowane materiały. Wyjątek: wideo może być w innym języku, ale **z angielskimi napisami**.
-- **Demo jest obowiązkowe:** **≤ 7 slajdów** (z tytułowym i wstępem) **albo wideo ≤ 30 s**. Przekroczenie limitu oznacza brak oceny globalnej.
-- Na slajdach: **nazwa zespołu, imiona członków, wybrane wyzwanie**.
-- Pola formularza: Project Name · High-Level Summary · Link do demo · Link do projektu · Detailed Description · Use of SI · NASA Data · Partner Data & References.
-- **Co najmniej 1 źródło danych lub zasób NASA**, żeby mieć szansę na nagrodę globalną.
-- Linki publiczne, bez logowania. Sprawdzić w trybie incognito. Na stronie projektu można wgrać tylko obrazy do 10 MB.
-- **SI (= AI):** dozwolone jako przyspieszenie, ale **SI nie może wymyślić samego pomysłu na rozwiązanie**. Obrazy i wideo z SI muszą mieć **widoczny watermark**, a kod, dane i audio z SI adnotację w opisie i metadanych. Bez brandingu NASA w treściach z SI. Odpowiedź w polu „Use of SI” nie trafia do jury, ale jury **widzi znaczniki SI w projekcie**.
-- Dwa checkboxy (Terms + oryginalność i komplet referencji), potem **Submit for Judging**. Można poprawiać do deadline'u, liczy się ostatnia zapisana wersja.
-- Mile widziane dane agencji partnerskich. Lista partnerów 2026 obejmuje m.in. **ESA**, CSA, JAXA, ISRO, ASI, UK Space Agency i CONAE (autor naszego wyzwania).
+## 4. Submission: formal requirements
+[FACT]
+- Everything **in English**, including linked material. Exception: a video may be in another language, but **with English subtitles**.
+- **A demo is mandatory:** **at most 7 slides** (including the title and introduction) **or a video of at most 30 s**. Exceeding the limit means no global judging.
+- On the slides: **team name, members' names, chosen challenge**.
+- Form fields: Project Name · High-Level Summary · Link to demo · Link to project · Detailed Description · Use of SI · NASA Data · Partner Data & References.
+- **At least 1 NASA data source or resource** to be eligible for a global award.
+- Public links, no login. Check in an incognito window. Only images up to 10 MB can be uploaded to the project page.
+- **SI (= AI):** allowed as an accelerator, but **SI must not come up with the idea of the solution itself**. Images and videos made with SI must carry a **visible watermark**, and code, data and audio made with SI a note in the description and metadata. No NASA branding in SI-generated content. The answer in the "Use of SI" field does not go to the jury, but the jury **sees the SI markers in the project**.
+- Two checkboxes (Terms + originality and complete references), then **Submit for Judging**. Corrections are possible until the deadline; the last saved version counts.
+- Partner agency data are welcome. The 2026 partner list includes, among others, **ESA**, CSA, JAXA, ISRO, ASI, UK Space Agency and CONAE (author of our challenge).
 
-## 5. Ocena: oficjalne kryteria
-[FAKT] Na **każdym** etapie (lokalnym, globalnym, wykonawczym) każde kryterium dostaje **1–5 pkt**:
+## 5. Judging: official criteria
+[FACT] At **every** stage (local, global, executive) each criterion gets **1-5 points**:
 
-| Kryterium | Opis oficjalny (streszczenie) | Na „5” trzeba… |
+| Criterion | Official description (summary) | A "5" needs... |
 |---|---|---|
-| **Impact** | Jak duży problem rozwiązuje projekt i ilu ludziom pomaga lub kogo inspiruje | …istotnego problemu, szerokiego zasięgu, inspiracji, potencjału „zmiany świata”. Jakość ma zdecydowanie przekraczać oczekiwania i wyznaczać standard |
-| **Creativity** | Oryginalność, nowość albo znaczące ulepszenie istniejących idei | …przełomowego podejścia, którego nikt nie próbował, łamiącego konwencje |
-| **Validity** | Oparcie w nauce, wykonalność techniczna i logiczna, szansa działania w realnym świecie, kompletność, **użyteczność i przyjazność** | …rozwiązania naukowo poprawnego, w pełni rozwiniętego, gotowego do wdrożenia, łatwego w użyciu |
-| **Relevance** | Pełne i bezpośrednie odpowiedzenie na wyzwanie. **Dane NASA jako kluczowy składnik, a nie dodatek** | …głębokiego związku z celami wyzwania. Dane NASA są integralne i napędzają innowację |
-| **Presentation** | Jasne przekazanie wyzwania, rozwiązania i jego znaczenia. Angażujący, uporządkowany storytelling. Ocenia się **demo + cały projekt** | …dopracowanej, porywającej opowieści, po której widz w pełni rozumie wagę i wpływ projektu |
+| **Impact** | How big a problem the project solves and how many people it helps or whom it inspires | ...an important problem, wide reach, inspiration, potential to "change the world". Quality must clearly exceed expectations and set the standard |
+| **Creativity** | Originality, novelty or a significant improvement of existing ideas | ...a breakthrough approach nobody has tried, breaking conventions |
+| **Validity** | Grounding in science, technical and logical feasibility, chance of working in the real world, completeness, **usefulness and user-friendliness** | ...a scientifically correct, fully developed, deployable, easy-to-use solution |
+| **Relevance** | Fully and directly answering the challenge. **NASA data as a key component, not an add-on** | ...a deep link to the goals of the challenge. NASA data are integral and drive the innovation |
+| **Presentation** | Clear communication of the challenge, the solution and its importance. Engaging, structured storytelling. **Demo + the whole project** are judged | ...a polished, gripping story after which the viewer fully understands the weight and impact of the project |
 
-[FAKT, cytat-parafraza z Judging Guide] Wiele zespołów dopracowuje pierwsze 4 kryteria, ale **równą uwagę trzeba dać prezentacji**: poświęcić czas i zasoby na pitch i historię, mieć w zespole kogoś od storytellingu i designu.
+[FACT, quote-paraphrase of the Judging Guide] Many teams polish the first 4 criteria, but **equal attention must be given to the presentation**: spend time and resources on the pitch and the story, have someone for storytelling and design in the team.
 
-## 6. Etapy oceny i nagrody
-[FAKT]
-1. **Lokalnie (Poznań):** projekty ocenia panel **Local Judges** zorganizowany przez Local Leada według **kryteriów NASA**. Wybiera on **Global Nominees**. Local Lead i jury **mogą** przyznać też **nagrody lokalne**, osobne od globalnych. Do oceny globalnej idą tylko oficjalnie zgłoszeni Global Nominees.
-2. **Global Finalists:** eksperci NASA i agencji partnerskich (SME) wybierają finalistów i Honorable Mentions.
-3. **Global Winners:** komitet wykonawczy NASA i agencji wybiera **10 zwycięzców**, po jednym na nagrodę:
+## 6. Judging stages and awards
+[FACT]
+1. **Locally (Poznań):** projects are judged by a panel of **Local Judges** organised by the Local Lead according to the **NASA criteria**. It selects the **Global Nominees**. The Local Lead and the jury **may** also give **local awards**, separate from the global ones. Only officially submitted Global Nominees go to global judging.
+2. **Global Finalists:** experts of NASA and partner agencies (SME) select the finalists and Honorable Mentions.
+3. **Global Winners:** the executive committee of NASA and the agencies selects **10 winners**, one per award:
 
-| Nagroda | Definicja (strona Awards) |
+| Award | Definition (Awards page) |
 |---|---|
-| Best Use of Science | najlepsze i najbardziej poprawne użycie nauki lub metody naukowej |
-| Best Use of Data | najlepiej udostępnia dane kosmiczne albo wykorzystuje je w unikalnym zastosowaniu |
-| Best Use of Technology | najbardziej innowacyjne użycie technologii |
-| Galactic Impact | największy potencjał poprawy życia na Ziemi lub we wszechświecie |
-| Best Mission Concept | najbardziej wiarygodna koncepcja i projekt |
-| Most Inspirational | „captures our hearts” |
-| Best Use of Storytelling | najbardziej kreatywnie opowiada o potencjale otwartych danych |
-| Global Connection | najlepiej łączy ludzi na świecie przez technologię |
-| Art & Technology | najlepiej łączy umiejętności techniczne i twórcze |
-| **Local Impact** | **największy potencjał wpływu lokalnego** |
+| Best Use of Science | the best and most correct use of science or the scientific method |
+| Best Use of Data | best makes space data accessible or uses them in a unique application |
+| Best Use of Technology | the most innovative use of technology |
+| Galactic Impact | the greatest potential to improve life on Earth or in the universe |
+| Best Mission Concept | the most credible concept and design |
+| Most Inspirational | "captures our hearts" |
+| Best Use of Storytelling | tells the most creative story about the potential of open data |
+| Global Connection | best connects people around the world through technology |
+| Art & Technology | best combines technical and creative skills |
+| **Local Impact** | **the greatest potential for local impact** |
 
-[FAKT] W 2025 było **ponad 11 500 zgłoszonych projektów**. **Local Impact 2025** wygrał zespół **QUEÑARIS (Arequipa, Peru)** z wyzwaniem obserwacji Ziemi (BloomWatch, fenologia kwitnienia). Projekt dotyczył monitoringu lokalnych lasów Polylepis pod system zalesiania.
-[WNIOSEK] Wzorzec zwycięzcy Local Impact: **globalne dane NASA zastosowane do konkretnego, lokalnego ekosystemu i problemu**.
+[FACT] In 2025 there were **more than 11,500 submitted projects**. **Local Impact 2025** was won by team **QUEÑARIS (Arequipa, Peru)** with an Earth-observation challenge (BloomWatch, flowering phenology). The project was about monitoring local Polylepis forests for a reforestation system.
+[INFERENCE] Pattern of a Local Impact winner: **global NASA data applied to a concrete, local ecosystem and problem**.
 
 ---
 
-## 7. Czego wymaga jury przy porównywaniu danych (analogi Księżyca/Marsa)
-Z treści wyzwania [FAKT]:
-- Użyć **otwartych danych NASA o Ziemi + danych o Księżycu i Marsie** (także innych agencji).
-- **Zidentyfikować i scharakteryzować** miejsca na Ziemi będące analogami **kandydatów na stałą bazę księżycową albo miejsc lądowania i eksploracji na Marsie**.
-- **Wyjaśnić, co jest analogiczne, jak bardzo i gdzie analogia się łamie.** Analog nie musi pasować we wszystkim.
-- Myśleć **poza podobieństwem wizualnym**: geologia, teren, temperatura, woda i lód, pył, biologia, podziemia, warunki operacyjne. Liczą się też **procesy**, nie tylko miejsca.
-- **Nie odkrywać na nowo znanych miejsc** (Antarktyda, Atacama, Islandia, Hawaje są już badane). Szukać nowych, w odpowiedniej skali (konkretny krater lub dolina, a nie cała pustynia).
-- Pamiętać o granicach Ziemi: brak niskiej grawitacji, próżni, cienkiej atmosfery Marsa i środowiska radiacyjnego.
-- Dowolna forma: raport, mapa, aplikacja, **metryki podobieństwa, ML**, GIS. „**Surprise us**.”
+## 7. What the jury requires when comparing data (Moon/Mars analogs)
+From the challenge text [FACT]:
+- Use **open NASA Earth data + data about the Moon and Mars** (also from other agencies).
+- **Identify and characterise** places on Earth that are analogs of **candidate permanent lunar base locations or Mars landing and exploration sites**.
+- **Explain what is analogous, how much, and where the analogy breaks down.** An analog does not have to match in everything.
+- Think **beyond visual similarity**: geology, terrain, temperature, water and ice, dust, biology, subsurface, operational conditions. **Processes** count too, not only places.
+- **Do not rediscover known sites** (Antarctica, Atacama, Iceland, Hawaii are already studied). Look for new ones, at the right scale (a specific crater or valley, not a whole desert).
+- Remember the limits of Earth: no low gravity, no vacuum, no thin Martian atmosphere and no radiation environment.
+- Any form: report, map, app, **similarity metrics, ML**, GIS. "**Surprise us**."
 
-[WNIOSEK] Tu Validity zależy od **jawnej, mierzalnej metryki podobieństwa** i uczciwego „gdzie się łamie”, a Creativity od **nieoczywistego miejsca**.
+[INFERENCE] Here Validity depends on an **explicit, measurable similarity metric** and an honest "where it breaks down", and Creativity on a **non-obvious site**.
 
-## 8. Co jest kluczowe przy pitchu
-[FAKT] z Judging Guide i Submission Guide:
-- Jasno przekazać **wyzwanie → rozwiązanie → dlaczego to ważne**. Storytelling ma być angażujący i uporządkowany.
-- Mówić tak, żeby zrozumiała to osoba **bez kontekstu, bez wiedzy technicznej i bez znajomości tematu**.
-- **Mocne wizualizacje i czytelność.** Pokazać obraz projektu, **doświadczenie użytkownika** i **to, jak dane NASA i agencji umożliwiają rozwiązanie**.
-- Wyznaczyć jedną osobę odpowiedzialną za demo i od początku zdecydować, „jaką historię chcemy opowiedzieć”.
-- Struktura wideo z przewodnika (30 s): kim jesteśmy → wyzwanie i inspiracja → nazwa i tagline → jak działa (prototyp, UX, dane NASA) → wizja przyszłości.
-- Poznań: **3 min pitch + 2 min Q&A**, slajdy oddać do 13:30, wcześniej **Pitch Doctors o 10:30** (coaching, przegląd slajdów, próby).
+## 8. What matters in the pitch
+[FACT] from the Judging Guide and the Submission Guide:
+- Clearly communicate **challenge → solution → why it matters**. The storytelling should be engaging and structured.
+- Speak so that a person **without context, without technical knowledge and without knowledge of the topic** understands it.
+- **Strong visuals and clarity.** Show a picture of the project, the **user experience** and **how NASA and agency data make the solution possible**.
+- Name one person responsible for the demo and decide from the start "what story we want to tell".
+- Video structure from the guide (30 s): who we are → challenge and inspiration → name and tagline → how it works (prototype, UX, NASA data) → vision of the future.
+- Poznań: **3 min pitch + 2 min Q&A**, slides due by 13:30, before that **Pitch Doctors at 10:30** (coaching, slide review, rehearsals).
 
-[WNIOSEK] Na scenie: demo na żywo na polskim przykładzie i jeden slajd „przed i po harmonizacji”. Na Q&A trzeba mieć gotowe odpowiedzi: jak liczymy przelicznik, jak walidujemy, czego nie umiemy.
+[INFERENCE] On stage: a live demo on a Polish example and one "before and after harmonization" slide. For the Q&A, have answers ready: how we compute the conversion factor, how we validate, what we cannot do. (Historical: written while a different challenge, MODIS/VIIRS hot-spot harmonization, was still on the shortlist.)
 
-## 9. Jak zdobyć nagrodę lokalną (Poznań)
-[FAKT]
-- Lokalne jury ocenia **według tych samych 5 kryteriów NASA** i wybiera Global Nominees.
-- Nagrody lokalne i sponsorskie są **opcjonalne i zależą od Local Leada**. Strona Poznania zapowiada ogłoszenie „local award winners, sponsor prizes, and official NASA Global Nominees” w niedzielę o 18:00.
-- **Strona nie podaje osobnych kryteriów nagród lokalnych ani sponsorskich.**
+## 9. How to win a local award (Poznań)
+[FACT]
+- The local jury judges **by the same 5 NASA criteria** and selects the Global Nominees.
+- Local and sponsor awards are **optional and up to the Local Lead**. The Poznań page announces "local award winners, sponsor prizes, and official NASA Global Nominees" on Sunday at 18:00.
+- **The page gives no separate criteria for local or sponsor awards.**
 
-[WNIOSEK] Co robić:
-1. **Zapytać Local Leada** (Rahaf Zorba, kontakt na stronie eventu) albo organizatorów na miejscu: jakie są nagrody lokalne i sponsorskie, i czy sponsorzy mają własne kryteria.
-2. Maksymalizować **5 kryteriów NASA**, bo to na nich opiera się ocena lokalna.
-3. Grać **lokalnym kontekstem** (Polska, Wielkopolska). To naturalnie trafia do lokalnego jury i jest wprost nagradzane globalnie (Local Impact).
-4. Wykorzystać **mentoring (sob 15:00)** i **Pitch Doctors (ndz 10:30)**, bo to ludzie blisko lokalnej oceny.
-5. Oddać wszystko **przed 13:30** w komplecie: demo, linki, referencje, licencje. Brak źródeł może oznaczać utratę nominacji.
+[INFERENCE] What to do:
+1. **Ask the Local Lead** (contact on the event page) or the organisers on site: what the local and sponsor awards are, and whether sponsors have their own criteria.
+2. Maximise the **5 NASA criteria**, since local judging is based on them.
+3. Play the **local context** (Poland, Wielkopolska). It naturally appeals to the local jury and is explicitly rewarded globally (Local Impact).
+4. Use the **mentoring (Sat 15:00)** and **Pitch Doctors (Sun 10:30)**, since these are people close to local judging.
+5. Hand in everything **before 13:30**, complete: demo, links, references, licences. Missing sources can mean losing the nomination.

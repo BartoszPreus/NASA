@@ -1,26 +1,29 @@
-# docs/: research i zasady NASA Space Apps 2026 (drużyna Zodiak, Poznań)
-Materiały przygotowane 14.11.2026 z oficjalnych stron spaceappschallenge.org i researchu. Kod projektu jest poza tym folderem.
+# docs/: research and NASA Space Apps 2026 rules (team Zodiak, Poznań)
+Material prepared on 14 Nov 2026 from the official spaceappschallenge.org pages and from research. The project code is outside this folder. (Translated from Polish on 15 Nov 2026.)
 
-**➡️ Które dane ze strony wyzwania faktycznie wykorzystujemy (audyt 11 linków, lista dla co-worka): `moon-analogs/AUDYT-ZRODEL-DANYCH.md`**
+**➡️ Which data from the challenge page we actually use (audit of 11 links): `moon-analogs/AUDYT-ZRODEL-DANYCH.md`**
 
-**➡️ Aktualny stan prac i instrukcja przejęcia po wyczyszczeniu kontekstu: `HANDOFF.md`** (po angielsku, dla agentów).
+**➡️ Current state of the work and how to take over after a context reset: `HANDOFF.md`** (for agents).
 
-**➡️ Metoda w dziesięciu krokach ze źródłem danych każdego kroku: `METHOD.md`** (po angielsku).
+**➡️ The method in ten steps with the data source of each step: `METHOD.md`**.
 
-**➡️ Specyfikacje zadań: `TASKS.md` i `TASKS-PARTNER-DATA.md`**; otwarte zadania są w GitHub Issues repozytorium (tablica: przypięte issue nr 13).
+**➡️ Task specifications: `TASKS.md` and `TASKS-PARTNER-DATA.md`**; open jobs are GitHub issues of this repository (board: pinned issue #13).
 
-**➡️ Pełny raport w PDF: `RAPORT-ANALOGI-KSIEZYCA-ZODIAK.pdf`** (walidacja pomysłu, ranking 19 kryteriów, test skuteczności wyszukiwania; sob 14.11 ok. 17:15).
+**➡️ Full report as PDF: `RAPORT-ANALOGI-KSIEZYCA-ZODIAK.pdf`** (validation of the idea, ranking of 19 criteria, test of the search; Sat 14 Nov about 17:15). **Historical working report in Polish**, written before the final pipeline; its numbers are superseded by `METHOD.md`, `VALIDATION.md` and `pitch/NUMBERS.md`.
 
-**➡️ Co sprawdziliśmy na danych przed startem: `PODSUMOWANIE-KIERUNKOW.md`** (sob 14.11 ok. 15:45; skrypty w `/analysis`).
+**➡️ What we checked on the data before starting: `PODSUMOWANIE-KIERUNKOW.md`** (Sat 14 Nov about 15:45; scripts in `/analysis`).
 
-| Folder | Co jest w środku |
+| Folder | What is inside |
 |---|---|
-| `hackathon/` | **Start tutaj** (`00-START-TUTAJ.md`), harmonogram Poznania (deadline **ndz 13:30**, pitch 3+2 min), **pełne zasady konkursu** (`ZASADY-KONKURSU-PELNE.md`), checklista zgłoszenia, kryteria oceny i nagrody, FAQ, maile |
-| `moon-analogs/` | **Ścieżka „Księżyc”**: analogi Księżyca/Marsa z LiDAR-em, czyli research, gotowe algorytmy, dane, plan MVP (`ANALOGI-LIDAR-RESEARCH-I-PLAN.md`) + wszystkie linki z wyzwania + **pełna treść wyzwania i wybór kryteriów** (`WYZWANIE-PELNA-TRESC-I-WYBOR-KRYTERIOW.md`) + **katalog kryteriów ze źródłami** (`KRYTERIA-DEEP-RESEARCH.md`) + surowe notatki z przeglądu źródeł po angielsku (`research-notes/`) |
-| `challenges/` | Wszystkie 14 wyzwań 2026 (zweryfikowane) + szczegóły wybranych |
-| `harness/` | Przewodnik po harnessie agentów (/kickoff, /plan, /build…) i zapis tego, jak wybieraliśmy narzędzie do koordynacji |
+| `hackathon/` | Poznań schedule (deadline **Sun 13:30**, pitch 3+2 min), **full contest rules** (`ZASADY-KONKURSU-PELNE.md`), submission checklist, judging criteria and awards, FAQ |
+| `moon-analogs/` | **The "Moon" track**: Moon/Mars analogs with LiDAR, i.e. research, ready algorithms, data, MVP plan (`ANALOGI-LIDAR-RESEARCH-I-PLAN.md`) + all links of the challenge + **full challenge text and choice of criteria** (`WYZWANIE-PELNA-TRESC-I-WYBOR-KRYTERIOW.md`) + **catalogue of criteria with sources** (`KRYTERIA-DEEP-RESEARCH.md`) + raw notes from the source review (`research-notes/`) |
+| `pitch/` | Slides, script, numbers with their files and keys, submission fields |
+| `sources/` | One note per job: what was downloaded, from where, and what was found |
+| `figures/` | Plots and contact sheets made from the data |
 
-## Dla agenta (Claude Code)
-- Zasady jury i zgłoszenia: `hackathon/ZASADY-KONKURSU-PELNE.md`. Przestrzegaj ich (angielski w zgłoszeniu, cytowanie wszystkich źródeł, licencje open source, oznaczanie treści z SI).
-- Projekt (analogi Księżyca): zacznij od `HANDOFF.md` i `METHOD.md`; tło i research w `moon-analogs/`.
-- Koordynacja z resztą zespołu przez GitHub Issues (patrz `/CLAUDE.md`).
+Removed before the repository became public (15 Nov 2026, issue #27): notes on the 13 challenges the team did not choose (`challenges/`), notes on the agent tooling (`harness/`), the team's start page and a summary of a team member's mailbox (`hackathon/`). They remain in the git history.
+
+## For an agent (Claude Code)
+- Jury and submission rules: `hackathon/ZASADY-KONKURSU-PELNE.md`. Follow them (English in the submission, cite every source, open-source licences, mark SI-generated content).
+- Project (Moon analogs): start with `HANDOFF.md` and `METHOD.md`; background and research in `moon-analogs/`.
+- Coordination with the rest of the team through GitHub issues (see `/CLAUDE.md`).
