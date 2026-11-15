@@ -1,59 +1,57 @@
 # HANDOFF — state of the Moon-analog build (for the next conductor session)
 
-Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 06:35, by the opus worker of the conductor session (Claude Code) on Wiktor's machine.
+Written Sat 14 Nov 2026, 18:10 Europe/Warsaw; last update Sun 15 Nov, 08:35, by the opus worker of the conductor session (Claude Code) on Wiktor's machine.
 Purpose: a fresh session with an empty context can continue from here. **Read this file, then `docs/TASKS.md`.**
 Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 
 **Scope.** Zodiak searches Earth for terrain analogs of candidate base regions at the lunar south pole: the ranking reference is `base_regions`, the seven lunar south-pole candidate regions pooled (`pipeline/score.py`, `data/moon/reference.json`). Mars is a separate research direction, outside the ranking and its validation; the official contest title names both. (Decision of issue #16.)
 
-## 0. START HERE (state at 06:35, Sun 15 Nov)
+## 0. START HERE (state at 08:35, Sun 15 Nov)
 
 Updated by the opus worker of the conductor session (Claude Code) on Wiktor's machine. Board: pinned issue #13.
-**Team decisions are collected in one comment on #11, "Decisions for the team on Sunday morning"** (headline
-ranking; accept #19; four proposed known-analog rows; ranks 13 and 28 and the six Ngari rows; hosting and demo
-link; Polish files and private material before going public; app data budget).
+**Every decision and human check is in ONE comment on #11, "Decisions and human checks before submission
+(state at 08:15)"**: headline ranking; git history before going public (#27 options A/B/C, conductor recommends a
+squashed copy as a new repository); the Polish PDF; literature verdicts (Hazen keep/revert, Peary Land sampling
+sites, six Ngari rows, four proposed known-analog rows of #26); strict ranks 13 and 28 and the HKU and PolarTREC
+pages; a Russian reader for #21; accept #19; hosting, demo link, site package, phone check; the form and slides.
 
-**State of the result** (story order and wording: section 9; every number with file and key:
-`docs/pitch/NUMBERS.md`).
+**State of the result** (story order: measured -> default -> strict -> validation -> literature -> no discovery;
+every number with file and key: `docs/pitch/NUMBERS.md`, all recomputed from their data files on #4 at 08:10).
 - Method: terrain shape between about 200 m and 1.6 km in 2 km cells, the same code on LOLA (seven south-pole
   base regions pooled, `base_regions`) and on Copernicus; 1,758,778 valid cells in 2,060 tiles; 3,175 sites.
 - Default ranking `data/sites/ranking.csv`: top 30 mostly Arctic moss-and-lichen tundra (16 Putorana sites),
-  because the default mask counts WorldCover class 100 as bare. Unchanged before the freeze (conductor's decision).
+  because the default mask counts WorldCover class 100 as bare. Literature: 2 established, 10 mentioned, 18 not
+  found; rank 1, southern Peary Land, is named a Mars analog in a 2025 thesis (J35 #21), so it is not new.
 - Strict ranking `data/validation/landcover_sensitivity/ranking_bare_strict.csv` (class 60 only, J33 #19):
   3 of the default top 30 remain; Atacama/Puna 13, western Tibet incl. Ladakh 8, southern Peru/Arica 4, Hazen
-  Plateau 3, Mauna Loa 1, other 1. Shown as the conservative reading. Its `novelty` column is now written by
-  `pipeline/sites.py` from `novelty_check_strict.csv` (J40 #26): top 30 9 established, 12 mentioned, 9 not found (J35 #21).
+  Plateau 3, Mauna Loa 1, other 1. Warmer, not closer to lunar temperatures (day 296 K against 261 K; night about
+  150 K above the Diviner mean in both, `context_comparison.json`, J42 #28). Literature 9 / 12 / 9. Shown as the
+  conservative reading; in the app behind the strict-mask switch, cards complete for ranks 1 to 100.
 - Validation: tile AUC 0.531 (chance); enrichment 1.02 vs 0.39 on 22 lunar analogs, borderline (2.8% of random
-  runs); ranks stable to the lunar sample, sensitive to the feature set (J32 #18).
-- `breaks` now uses the 12-month NASA MODIS night mean unless JAXA SGLI has all 12 months (rank 1: 144 K warmer
-  at night, before 157 K from 7 months).
+  runs); only 4 of 44 lunar analogs chosen for terrain, too few to test (J31 #17); ranks stable to the lunar
+  sample, sensitive to the feature set (J32).
+- Nothing is called a discovery; Putorana "not found" is a negative without Scholar, ADS or a Russian reader.
 
-**Since 01:30** (all on `main`): #16 and #18 closed; J33 full run (#19), J38 front-end spec (#24), J39 app data
-export (#25), J40 review of the strict top 30 (#26) delivered and open for review; texts refreshed (#4,
-349a359); defects fixed (8341591, 6319944, 0f483e6, 997eb75, f098a5b): VALIDATION J33 paragraph, METHOD 77
-known analogs, strict novelty fill, 12-month temperature in `breaks`, six LRO/PGDA sources marked used,
-`partner_checks.json` producer, app data rebuilt (23.81 MB).
+**This morning (all on `main`):** reviews of #19/#24/#25/#26; #22 J36 page, #17 J31, #24, #25 closed; #27 J41
+audit (private material removed from the tree, NOTICE, history clean-up left to a person); #28 J42; #21 J35.
+Then (opus worker, 08:00-08:35): strict card complete (shares, region scores, best window; 7526228; screenshot
+`docs/figures/app_strict_card.png`); `pipeline/nasa_context.py` deletes images no longer in `index.csv`
+(c437ce2, with a test); TASKS/HANDOFF housekeeping (6110bb7); consistency pass over every juror text (c7adfc1,
+result on #4). `app/data/` is 24.82 MB (limit 25 MB in `app/build_data.py`).
 
-**Freeze (#8): PASS at 7b58f91** (fresh clone, Python 3.12.10, every command of `docs/FREEZE.md` exits 0; only
-run metadata changes: run log, commit hash in `app/data/meta.json`, `generated` of `nasadem_vs_copdem.json`).
-Three reproducibility defects of the first run were fixed (1dfa9a5, 315b44b, 7b58f91). No tag; repository
-still private. After the freeze: only text fixes and the demo link, with a person's approval.
+**Freeze (#8):** first run PASS at 7b58f91 (06:31); **second run PASS at c7adfc1 (08:28)** (`docs/FREEZE.md`, section "Second
+run"). No tag; repository still private. After the freeze: only text fixes and the demo link, with a person's
+approval.
 
-**Open issues:** #4 texts (a person approves), #11 people (#8 freeze closed after the PASS), #12 backlog, #14 J30 (branch
-`t-pl2moon`), #17 J31, #19 J33 (accept), #20 J34 (drop first), #21 J35, #22 J36 app, #24 J38 (review),
-#25 J39 (review), #26 J40 (review, decisions in #11).
-
-**People still owe** (issue #11): the seven decisions; switch the team's challenge on the Space Apps website;
-read and approve `README.md` and `docs/pitch/`; the demo link (`DEMO LINK PLACEHOLDER`); look at the strict
-contact sheets `docs/figures/top30_strict_sheet_1..3.png` and the sites of `docs/NOVELTY.md` section 5; before
-the repository becomes public, deal with the Polish files in `docs/moon-analogs/` and the private material in
-`docs/hackathon/` (a private e-mail address of the Local Lead and a summary of Wiktor's mailbox). Making the
-repository public and any `submission` tag are a person's steps.
+**Open issues:** #4 texts (a person approves), #11 people, #12 backlog, #14 J30 (branch `t-pl2moon`, not for
+this submission), #19 J33 (accept), #20 J34 (dropped), #21 J35 (Russian reader, Hazen), #26 J40 (ranks 13 and
+28, known-analog rows), #27 J41 (history, going public), #28 J42 (review).
 
 **Rules.** No `Claude-Session:` line or any session link in a commit; no keys, tokens or private e-mail addresses
 in the repo, commit messages or issues. Jobs are GitHub issues; Axis is not used (`CLAUDE.md`). Before DONE: the
 five checks of `CLAUDE.md` / `AGENTS.md`. Wiktor presents; he wants a film of the app later: do not prepare it
-until he asks. Older state of this section: the git history of this file (`git log -p docs/HANDOFF.md`).
+until he asks. The runner repository named in section 8 is private. Older state of this section: the git history
+of this file (`git log -p docs/HANDOFF.md`).
 
 ## 1. Where things stand
 
