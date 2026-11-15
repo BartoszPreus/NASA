@@ -9,7 +9,7 @@ import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 const out = mkdtempSync(join(tmpdir(), "zodiak-journey-test-"));
 const web = fileURLToPath(new URL("../", import.meta.url));
-execFileSync(join(web, "node_modules/.bin/tsc"), ["--ignoreConfig", "--module", "commonjs", "--target", "es2022", "--outDir", out, join(web, "src/lib/discovery.ts")]);
+execFileSync(process.execPath, [join(web, "node_modules/typescript/bin/tsc"), "--ignoreConfig", "--module", "commonjs", "--target", "es2022", "--outDir", out, join(web, "src/lib/discovery.ts")]);
 const require = createRequire(import.meta.url);
 const { readPrefs, writePrefs, missionPrefs, MISSIONS } = require(join(out, "discovery.js"));
 const { criteriaFor } = require(join(out, "criteria.js"));
