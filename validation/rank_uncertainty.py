@@ -337,8 +337,10 @@ def summarise(res):
                                "share and depth of closed depressions deeper than 3 m. Features smaller than about "
                                "100 m, including boulders, small craters and the slopes a rover or astronaut meets, "
                                "are not measured."},
-        "seconds": res["seconds"],
     }
+    # run time is machine-dependent: printed here and recorded by python -m pipeline.run in data/run_log.csv,
+    # not stored in the JSON, so a rerun on another machine leaves the file unchanged (freeze review, issue #8)
+    print("rank uncertainty computed in %.1f s" % res["seconds"], flush=True)
     return table, summary
 
 

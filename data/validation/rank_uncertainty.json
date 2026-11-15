@@ -362,6 +362,5 @@
     ],
     "cell_m_median": 1979.0,
     "statement": "Similarity refers to the shape of the terrain inside cells of about 2 km: slopes over 240 m and 570 m baselines, roughness over 200 m to 1.6 km windows, and the share and depth of closed depressions deeper than 3 m. Features smaller than about 100 m, including boulders, small craters and the slopes a rover or astronaut meets, are not measured."
-  },
-  "seconds": 226.8
+  }
 }
