@@ -123,7 +123,8 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | J20 | validation on the full scan | **correction ready for review** (issue 1): shared eligibility rule, AUC 0.550 (consistent with chance), and enrichment rerun after J22 changed `known_analogs.csv`. See `docs/VALIDATION.md`. |
 | J22 | novelty check of the final ranking | delivered (`docs/NOVELTY.md`, commit af51fbd); **not closed**: the `country` column of `ranking.csv` came out empty, the `mentioned` verdicts rest on pages that do not mention analogs, wording to correct (issue 2) |
 | J11 | README, pitch, submission texts | drafts on `main` (commit 9f37db3): `README.md`, `docs/pitch/`; final numbers after J20, wording after J22, demo link, a person approves (issue 4) |
-| J7, J23 | see section 5 | **to do**; `app/` is still uncommitted |
+| J7 | web app | **in progress, not in git**: the data layer (`app/build_data.py`, `app/data/`, `app/criteria.json`) is built on one laptop; the page still reads the pilot files and cannot load. Plan in order of importance with times: section 5, J7 (issue 3) |
+| J23 | fresh-clone check and freeze | **to do**, Sun 08:30 to 09:30 |
 | J24 | partner-agency data per site (JAXA, ESA Open Science Catalog, NASA MODIS temperature) | **done**; `docs/sources/j24.md` |
 | J26 | the dune-field flag against temperature and moisture | **done** (commit 2b7e9fa, issue 6 closed): 978 sites; the temperature contrasts do not separate flagged from unflagged sites and flagged sites are wetter, so the flag is not confirmed as a sand detector (`docs/sources/j26.md`) |
 | J25, J27-J29 | use of the partner data, CSA RADARSAT, a third elevation model | **to do**; specs in `docs/TASKS-PARTNER-DATA.md` |
@@ -242,32 +243,83 @@ Python: `.venv\Scripts\python.exe` from the repo root (Windows). All locations: 
 
 **Accept.** Every one of the 15 sites has a verdict and at least one URL marked as opened. `python -m pipeline.sites` run afterwards shows the verdicts in the `novelty` column of `ranking.csv`. The report lists the five sites a person must check, with the URLs to open.
 
-### J7 — Web app  (high; can start now on the current data, final data after J19; 3-4 h)
-**Why.** The demo the jury sees, and the subject of the film. Wiktor presents; the prototype in `app/` is his and may be taken over.
+### J7 — Web app  (high; plan of Sun 15 Nov, 01:40: steps in order of importance, each with its latest finishing time)
+**Why.** The app is what the jury sees working and where the slides get their screenshots. Its message, after what the validation found: **a transparent screening tool. It shows where the ground on Earth has the shape of the candidate base regions at the lunar south pole, with the evidence, and where the analogy breaks.** It does not say "we found analogs": the score does not separate known analog sites from other bare ground at the scale of tiles, and the literature verdicts are not verified.
 
-**State.** `app/` is NOT in git yet: `index.html`, `app.js`, `style.css`, `build_data.py`, `data/`. It shows the old slope-only pilot (tiles, ranking, cells of a tile, a site card) and reads `scratch/pilot_cells.npy`.
+**Until when.** Code changes until **Sun 09:30** (the team's own feature freeze: it leaves four hours for the fresh-clone check, slides, the form and the walk to the info desk). After 09:30 only typos, texts and screenshots. Hard limits of the event: form filled 12:30, submitted and slides at the desk **13:30**. Cut line: at **07:30** everything of priority 1 that does not work is dropped; at **08:45** everything of priority 2. If step A2 does not work by 06:00, the slides use `docs/pitch/ranking-map.png` and the app is shown as work in progress.
 
-**Do.**
-1. First commit `app/` unchanged ("app: prototype by Wiktor"), so its history starts from his version.
-2. `app/build_data.py`: read everything through `pipeline.paths` and write small JSON files into `app/data/`:
-   - `sites.json`: the top 300 sites of `sites.geojson` (id, lat, lon, country, place, rank, the ranking-key value, score, area_km2, is_known, nearest_known, nearest_known_km, novelty, artefact_flag, medians of s240, s570, r200, r1600, dep_frac, f_le5, f_le8, f_le15, the `breaks` list, the NASA POWER values from `nasa_context.csv`, the image file name) plus the polygon simplified to at most 60 vertices;
-   - `tiles.json`: `tile_summary.csv` (tile, south-west corner, bare cells, candidate share, sites);
-   - `moon.json`: per lunar region from `data/moon/reference.json` (id, name, lat, lon, medians, p10, p90 of the features) and from `data/moon/instruments/*.json` (Diviner annual mean and maximum temperature, ice-stable share, permanent-shadow share, sun and Earth visibility, Mini-RF CPR), with the file names of the hillshade and of the LROC quicklook;
-   - `validation.json`: the headline numbers of `data/validation/*.json`; `sources.json`: the rows of `data/sources.csv` whose status is used;
-   - copies of the images in `app/data/img/`. Total size of `app/data/` under 15 MB.
-3. The page (plain HTML, CSS and JavaScript; Leaflet from a CDN; no build step):
-   - world map: 1-degree tiles shaded by candidate share (the stable unit, see `docs/VALIDATION.md`), site markers on top, a toggle "hide known analogs" and a toggle "hide flagged artefacts";
-   - ranking list (top 50) with badges: known, mentioned, not found in catalogues, artefact;
-   - site card: the NASA Worldview image; for s240, s570, r200, r1600 and dep_frac a bar showing the site value against the lunar median and 10-90% range of the selected region; landing and mobility shares (f_le5, f_le8, f_le15) next to the lunar ones; climate from NASA POWER next to the Diviner temperature of the selected region, under the heading "Where the analogy breaks" together with the `breaks` list; nearest known analog and distance; links to NASA Worldview and OpenStreetMap at the site;
-   - lunar target selector (the regions of `moon.json`) showing the LROC quicklook, the hillshade and the instrument numbers; changing the target changes the bars;
-   - a "Method and sources" page: the ten steps of `docs/METHOD.md`, the validation headline table, every source with agency and link.
-4. Constraints: all text in English; footer "Built with SI assistance (Claude Code). Data: NASA LRO (LOLA, Diviner, LROC, Mini-RF, LEND, LAMP), NASA POWER, NASA GIBS/Worldview, NASADEM, ESA Copernicus DEM, ESA WorldCover."; no NASA logo or insignia; colour scales readable for colour-blind viewers (viridis or cividis); usable at 1366 x 768 and on a projector.
+**State (Sun 01:40).**
+- Done, on one laptop, **not in git**: `app/build_data.py` writes `app/data/` from the final outputs of the pipeline (commit 7118bb2): `sites.json` (top 300 sites, none flagged), `sites_flagged.json` (the 100 best flagged sites), `tiles.json` (2,060 tiles), `moon.json` (9 lunar targets with features, instrument values, hillshade and LROC image), `validation.json` (70 numbers with file and key), `sources.json` (31 sources), `method.json` (10 steps), `meta.json`, `img/` (60 site images, 8 hillshades, 8 LROC quicklooks); about 6 MB. Every key is described in `app/data/SCHEMA.md`: read it first. `app/criteria.json` with `app/CRITERIA-NOTES.md`: 38 comparison criteria, each with a status (5 scored, 1 mask, 11 context, 5 validation, 2 rejected, 9 not built, 5 not reproducible on Earth).
+- Not done: the page. `app/index.html`, `app/app.js` and `app/style.css` are still the pilot: `app.js` fetches `data/index.json` and `data/cells/<tile>.json`, which no longer exist, and the "How it works" text describes three slopes on hand-picked tiles. So the page cannot load data at the moment.
+- The measured surface values of job J25 (JAXA and NASA temperature, soil moisture, permafrost) are already in the site records (`partner`, 79 sites), so the card block of J25 is step A3 here.
 
-**Outputs.** Everything under `app/`, `docs/sources/j7.md`, three screenshots `docs/figures/app_map.png`, `app_site_card.png`, `app_moon_target.png`.
+**Rules of the page (apply to every step).** Plain HTML, CSS and JavaScript, Leaflet from a CDN, no build step; everything is read from `app/data/*.json`, no number is typed into HTML or JavaScript; a value that is `null` is shown as "not measured", never as 0; English only; no NASA logo or insignia; colour scales readable for colour-blind viewers (viridis or cividis) and never colour alone (a badge has text); usable at 1366 x 768 and on a projector; if a JSON file fails to load the page says which one, it does not stay blank.
 
-**Accept.** `python app/build_data.py` exits 0 and prints the size of `app/data/`. `python -m http.server 8000 --directory app` serves a page that loads with no error in the browser console (check with a headless browser if one is available; otherwise say that it was checked by hand); selecting a site opens its card; changing the lunar target changes the bars; both toggles work. No number is typed into the HTML by hand: every number on the page comes from `app/data/*.json`.
+#### Priority 0: without these there is no app
+**A1. Put `app/` into git.** Latest: **02:00** (15 min).
+Everything exists on one laptop only. Commit `app/` as it is (code, `criteria.json`, `CRITERIA-NOTES.md`, `data/`), message "app: data layer and prototype (work in progress)". Check first that no file holds a key, an e-mail address or a local path (`C:\Users\...`) and that `__pycache__` is not included. From then on commit after every step.
+Done when: `git ls-files app | wc -l` is above 80 and a second clone has the folder.
 
-**Needs a person.** Where to host it: the team repository is private, so GitHub Pages needs a public repository or another host. Ask Wiktor; publish nothing publicly without his word.
+**A2. Map and ranking on the new data.** Latest: **04:00** (90 min).
+- Load `meta.json`, `sites.json`, `sites_flagged.json`, `tiles.json`. Remove the pilot code paths (`data/index.json`, `data/cells/`), the filter chips "Candidates / Known analogs / Controls" and the three sort options of the pilot.
+- Header numbers from `meta.counts`: tiles scanned (`tiles`), candidate patches (`sites_total`), of them with the dune-like signature (`sites_flagged_total`), shown in the list (`sites`).
+- Map layer 1: one rectangle per tile (`lat0`, `lon0`, one degree), filled by `candidate_share` on a scale from 0 to `candidate_share_max`; tiles with `candidate_share = null` (no bare ground, 75 tiles) in a neutral grey with the tooltip "no bare ground". Tooltip: tile id, bare cells, candidate cells, sites.
+- Map layer 2: a marker per site at `lat`, `lon`; on zoom or selection the outline from `polygon`. Every ring is a separate outer boundary: `L.polygon(site.polygon.map(function (ring) { return [ring]; }))` (see SCHEMA.md; passing the list directly turns rings into holes).
+- List: the top 50 by `rank` with: rank, `country`, `place` when present, `best_window_km2` (the ranking key, labelled "best 15 x 15 km window, similarity-weighted km2"), `score`, badges (step A6).
+- Two toggles: "Hide known analog sites" (`is_known`) and "Show dune-like terrain" (adds the 100 records of `sites_flagged.json`; their ranks are 2655 to 2754, say so).
+- Search by site id, country and place. Legend with the colour scale and its unit.
+Done when: `python -m http.server 8000 --directory app` serves a page with no error in the browser console; 2,060 tiles and 300 markers are drawn; both toggles change the map and the list; clicking a marker or a list row selects the site.
+
+**A3. Site card.** Latest: **05:30** (90 min). This is the centre of the app and of slide 5.
+- Head: rank, id, country, place, coordinates, area (`area_km2`, `n_cells`), elevation.
+- Image: `img/<image>` with `image_date`, `image_layer` and the credit "NASA Worldview / GIBS"; for sites without an image (rank above 60) the text "no image stored" and no broken picture.
+- Shape, the core comparison: for `s240`, `s570`, `r200`, `r1600`, `dep_frac` one bar each: the site value against the median and the 10 to 90% range of the selected lunar target (`moon.regions[target].features[key]`), label and unit from `feature_info`. A value outside the range is marked.
+- Landing and mobility: `f_le5`, `f_le8`, `f_le15` of the site next to the same keys of the lunar target (`shares`).
+- Which region it matches: the nine values of `region_scores` as a small bar list, `best_region` marked.
+- **"Where the analogy breaks"**, a block that is never collapsed: the `breaks` sentences; then measured numbers next to the lunar ones: NASA POWER skin temperature (`power.ts_min_c` to `ts_max_c`, annual mean) and, when `partner` is present, the coldest monthly night mean (`partner.nasa_modis.night_min_k`, `partner.jaxa_sgli.night_min_k`), day minus night difference, soil moisture, permafrost share and ground temperature, each with its `source`; beside them the lunar target's `headline.temp_avg_k` and `temp_max_k` (for the pooled target the range from `headline_range`). `power` is null for ranks 151 to 300 and `partner` for most sites: show "not measured".
+- Review (ranks 1 to 30): `review.what_it_is`, `looks_like_artefact`, `reason`, under the line "Judged from satellite images by an SI model; a person has not confirmed it".
+- Nearest known analog: `nearest_known`, `nearest_known_km`.
+Done when: the card opens for rank 1, for a site without image, for a site without `power` and for a flagged site without errors; every number in it is traceable to a key of the site record or of `moon.json`.
+
+#### Priority 1: what earns points (dropped at 07:30 if not working)
+**A4. Lunar target selector.** Latest: **06:30** (60 min). This is where NASA's lunar data are visibly at the centre.
+- A selector with the nine targets of `moon.json` (`display_name`; default `base_regions`). Panel: lunar coordinates, window size, hillshade and LROC quicklook from `img/` with credits (NASA LRO LOLA; NASA LROC), and the ten `headline` values with label and unit from `headline_info`; for `base_regions` the min to max of `headline_range` and the list of its seven `members`.
+- Changing the target redraws the bars of the open card and shows `region_scores[target]` in the list.
+- Say on the page what does not change: "The ranking is computed against the pooled target of seven regions; choosing one region changes the comparison, not the order." An optional second sort "by score against this target" may use `region_scores[target]`.
+Done when: switching between `base_regions`, `haworth` and `connecting_ridge` changes the bars of the card and the panel; `base_regions` shows ranges instead of single values and no broken image.
+
+**A5. "Method and sources" page.** Latest: **07:15** (45 min). The contest rules require every source to be cited; the data for this page are ready.
+- The ten steps of `method.json`.
+- Validation: the items of `validation.json` grouped by `groups`, each with label, value, unit, and source file with key as a tooltip. Above the table four plain sentences: the lunar slope check (median absolute difference 0.042 deg); no candidate in four control tiles; known analog sites lie in more lunar-like ground than random places and below the average bare cell; at the scale of one-degree tiles the score does not separate known analog tiles from the rest; the ranking depends on the elevation model. Take every number from `validation.json`, none typed.
+- Sources: `sources.json` grouped by agency, NASA first, then ESA, JAXA, others: name, link, citation or licence, what it is used for. Then Leaflet, the typefaces and the basemaps.
+- Footer on every view: "Built with SI assistance (Claude Code). Data: NASA LRO (LOLA, Diviner, LROC, Mini-RF, LEND, LAMP), NASA POWER, NASA GIBS/Worldview, NASADEM, ESA Copernicus DEM, ESA WorldCover, JAXA G-Portal, ESA CCI Permafrost."
+Done when: the page shows 10 steps, 70 validation items and 31 sources, and the old "How it works" text is gone.
+
+**A6. Wording pass.** Latest: **07:30** (20 min). Check every visible string.
+- "terrain match" or "candidate patch"; never "analog found", "discovered", "new", "unknown".
+- Literature badge from `novelty`: `mentioned` is shown as **"literature check: not verified"** (the review of issue 2 found that the opened pages do not mention analogs; change the label only when that issue is closed); `unreported` as "not found in the catalogues and searches listed"; `unchecked` gets no badge; `is_known` as "known analog site".
+- The flag: "dune-like relief (terrain rule)", never "sand" or "artefact": temperature and moisture data did not confirm that it marks sand (J26).
+- "bare ground" carries the note that the land-cover class "moss and lichen" counts as bare, so Arctic sites are partly tundra.
+Done when: a search of `app/index.html` and `app/app.js` for "discover", "unknown", "new analog", "sand sea" and "artefact" finds nothing in visible text.
+
+#### Priority 2: only if the above works (dropped at 08:45)
+**A7. Criteria table.** (45 min) From `app/criteria.json`: the 38 criteria in their four groups, filter by the seven `statuses` (labels from the file), per row `name`, `plain`, status and `status_note`. One link to it from the card ("what is compared and what is not"). A table, not a main view.
+**A8. Links and robustness.** (30 min) Address of the form `#site=<id>&target=<id>` so a slide or a judge can open one card directly; keyboard focus order; a check at 1366 x 768.
+**A9. Link to the 3D viewer** of the Poland-to-Moon job (issue 14), if it is merged. (5 min)
+
+#### Freeze and handover
+**A10. Final data, screenshots, sources.** Latest: **09:15** (30 min).
+- `python app/build_data.py` once more on the final `main` (it must exit 0 and print the size of `app/data/`, under 15 MB); `meta.commit` equals the commit of the data.
+- Three screenshots for the slides: `docs/figures/app_map.png`, `app_site_card.png`, `app_moon_target.png`. Slides 3 and 5 of `docs/pitch/SLIDES-7.md` are the places for them, and Pitch Doctors is at 10:30.
+- `docs/sources/j7.md` (Leaflet, typefaces, basemaps, every data source of the page, the layout idea) and `app/README.md` rewritten (it still describes the pilot and a file in `scratch/`).
+**A11. 09:30: freeze.** After it only typos, texts and screenshots.
+**A12. Hosting: a person decides, latest 09:30; published by 11:00; the link opened in a private window by 12:00.** The repository is private, so GitHub Pages works only after the repository is public (checklist issue 11); the alternative is another static host. The form takes the app as "link to final project"; the "demo" field takes at most seven slides or a video of at most 30 seconds, so the app is shown live in the pitch and through its screenshots. Nothing is published without the presenter's word. The film he wants later is not part of this job.
+
+**Not in this job.** A layer of single 2 km cells for every tile; a search over the whole globe; Mars; the 3D viewer (issue 14); accounts, a server or a database.
+
+**Outputs.** Everything under `app/`, `docs/sources/j7.md`, `docs/figures/app_map.png`, `app_site_card.png`, `app_moon_target.png`.
+
+**Accept.** `python app/build_data.py` exits 0 and prints the size of `app/data/`. `python -m http.server 8000 --directory app` serves a page that loads with no error in the browser console (say whether a headless browser or a hand check was used). Selecting a site opens its card; changing the lunar target changes the bars; both toggles work; the "Method and sources" page lists every source of `sources.json`. No number is typed into the page. The three screenshots exist. `app/` is in git.
 
 ### J11 — README, pitch and submission texts  (high; human-led; start now, final numbers after J19 and J20)
 **Why.** Presentation is one of five judging criteria, and missing citations can cost the award. Wiktor presents. He wants a film of the app made with "hyper frames" later: do NOT prepare it.
@@ -305,7 +357,12 @@ J7 (starts now, final data after J19) ─┘
 |---|---|
 | Sat 21:30 | J17 and J18 finished (stopped at 19:55 with the code committed; the conductor's estimate is about 45 minutes of work left in each); J19 started |
 | Sat 23:00 | J19 done: the final ranking is in the repo; J7 shows it; J20, J21, J22 running or done |
-| Sun 08:30 | J20 and J22 done; a person has opened the evidence for the top five sites; J7 complete; J11 drafts complete |
+| Sun 02:00 | J7 step A1: `app/` is in git |
+| Sun 04:00 | J7 step A2: map and ranking on the final data |
+| Sun 05:30 | J7 step A3: site card with "where the analogy breaks" |
+| Sun 07:30 | J7 steps A4 to A6: lunar target selector, method and sources page, wording pass; what does not work is dropped |
+| Sun 08:30 | J20 and J22 done; a person has opened the evidence for the top five sites; J11 drafts complete |
+| Sun 09:15 | J7 step A10: final data build, three screenshots, `docs/sources/j7.md` |
 | Sun 09:30 | J23: freeze. After this only texts and slides change |
 | Sun 10:30 | Pitch Doctors |
 | Sun 12:30 | portal form filled, links tested in a private window |

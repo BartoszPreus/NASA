@@ -31,7 +31,15 @@ night had passed the Accept checks of its job.
   were rebuilt with the updated `known_analogs.csv` and the Natural Earth country outlines. See `docs/VALIDATION.md`.
 - **J30 in progress** (issue 14, branch `t-pl2moon`, not merged): Polish lidar areas against lunar sites at 1 to
   2 m with a 3D viewer; scope extension agreed with the team owner.
-- Not started: J7 web app (`app/` still uncommitted), J25, J27. The repository is still private.
+- **J7 web app: data layer built, page not yet, nothing in git** (issue 3). `app/build_data.py` writes `app/data/`
+  (300 sites, 2,060 tiles, 9 lunar targets, validation, sources, method, 76 images; keys in
+  `app/data/SCHEMA.md`) and `app/criteria.json` lists 38 comparison criteria with their status. The page still
+  reads the pilot files, which no longer exist. The plan in order of importance, with the latest time of each
+  step, is `docs/TASKS.md` section 5, J7: A1 commit `app/` (02:00), A2 map and ranking (04:00), A3 site card
+  (05:30), A4 lunar target, A5 method and sources, A6 wording (07:30), then the criteria table if time is left;
+  final build and screenshots 09:15; code freeze 09:30; hosting is a person's decision.
+- Not started: J25 (its card block is step A3 of J7; registry and citations remain), J27. The repository is
+  still private.
 
 Everything below describes the state at 23:20 and still holds, except where this list says otherwise.
 
