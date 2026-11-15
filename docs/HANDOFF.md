@@ -22,7 +22,7 @@ link; Polish files and private material before going public; app data budget).
 - Strict ranking `data/validation/landcover_sensitivity/ranking_bare_strict.csv` (class 60 only, J33 #19):
   3 of the default top 30 remain; Atacama/Puna 13, western Tibet incl. Ladakh 8, southern Peru/Arica 4, Hazen
   Plateau 3, Mauna Loa 1, other 1. Shown as the conservative reading. Its `novelty` column is now written by
-  `pipeline/sites.py` from `novelty_check_strict.csv` (J40 #26): top 30 9 established, 15 mentioned, 6 not found.
+  `pipeline/sites.py` from `novelty_check_strict.csv` (J40 #26): top 30 9 established, 9 mentioned, 12 not found.
 - Validation: tile AUC 0.531 (chance); enrichment 1.02 vs 0.39 on 22 lunar analogs, borderline (2.8% of random
   runs); ranks stable to the lunar sample, sensitive to the feature set (J32 #18).
 - `breaks` now uses the 12-month NASA MODIS night mean unless JAXA SGLI has all 12 months (rank 1: 144 K warmer
@@ -186,8 +186,8 @@ order; the README, slides, pitch and Q&A follow it.
    the J26 temperature and moisture check (978 sites) does not confirm that it marks dry sand; it stays a terrain
    rule.
 5. **Literature** (`docs/NOVELTY.md` sections 3, 6, 7). Default top 30: 2 established, 4 mentioned, 24 not found.
-   Strict top 30: 9 established, 15 mentioned, 6 not found (3 Hazen Plateau, Aksai Chin, Acarí, Marcona). Every
-   "mentioned" is a Mars-analog statement, none a Moon analog; six Ngari rows rest on a general geography page.
+   Strict top 30: 9 established, 9 mentioned, 12 not found (3 Hazen Plateau, 6 Ngari, Aksai Chin, Acarí, Marcona).
+   Every "mentioned" is a Mars-analog statement, none a Moon analog; the six Ngari rows are "not found" since review #26.
    Use "not found in the analog catalogues and searches listed here", never "unknown", "new" or "discovered".
    Image review of the strict top 30: 28 no, 2 unsure (ranks 13 and 28), 0 artefacts. All verdicts are an SI
    model's; a person has not checked them.

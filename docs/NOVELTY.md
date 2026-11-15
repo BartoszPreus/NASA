@@ -98,7 +98,7 @@ Same method as section 2: one question per region; `established` = inside a radi
 | 6 | `S27W069-01` | Volcanic plateau of the southern Puna, Antofagasta de la Sierra, Catamarca | mentioned | no |
 | 7 | `S26W069-02` | Volcanic plain with a small volcano, Puna de Atacama, Antofagasta Region, Chile | established | no |
 | 8 | `S27W068-01` | Pale wind-mantled volcanic terrain with bedrock ridges about 40 km east of Campo de Piedra Pómez, Catamarca | mentioned | no |
-| 9 | `N34E084-01` | Gravel plain of the Chang Tang, Gerze County, Ngari, Tibet | mentioned | no |
+| 9 | `N34E084-01` | Gravel plain of the Chang Tang, Gerze County, Ngari, Tibet | unreported | no |
 | 10 | `N35E080-01` | Alluvial slopes north-east of a large lake, Hotan County (Aksai Chin) | unreported | no |
 | 11 | `S26W069-03` | Volcanic field of the southern Puna, Antofagasta de la Sierra, Catamarca | established | no |
 | 12 | `S26W069-04` | Volcanic field of the southern Puna, Antofagasta de la Sierra, Catamarca | established | no |
@@ -106,21 +106,21 @@ Same method as section 2: one question per region; `established` = inside a radi
 | 14 | `S16W075-01` | Sand-mantled coastal desert piedmont near Acarí, Arequipa, Peru | unreported | no |
 | 15 | `N70W087-01` | Arctic coastal lowland with ponds, Qikiqtaaluk Region, Nunavut (western Baffin Island coast: UNVERIFIED) | mentioned | no |
 | 16 | `N81W074-01` | Hazen Plateau south-west of Lake Hazen, northern Ellesmere Island | unreported | no |
-| 17 | `N34E084-02` | Gravel plain of the Chang Tang, Gerze County, Ngari, Tibet | mentioned | no |
-| 18 | `N35E080-02` | Plain and low hills south of an ice cap, Rutog County, Ngari (Aksai Chin area) | mentioned | no |
+| 17 | `N34E084-02` | Gravel plain of the Chang Tang, Gerze County, Ngari, Tibet | unreported | no |
+| 18 | `N35E080-02` | Plain and low hills south of an ice cap, Rutog County, Ngari (Aksai Chin area) | unreported | no |
 | 19 | `S25W069-01` | Flank of a large snow-capped volcano (Llullaillaco: UNVERIFIED), Tolar Grande, Salta | established | no |
 | 20 | `N81W073-01` | Hazen Plateau, northern Ellesmere Island | unreported | no |
 | 21 | `S18W072-01` | Coastal desert hills east of Ilo, Moquegua, Peru | mentioned | no |
-| 22 | `N35E080-03` | Plain south of a large ice cap, Rutog County, Ngari (Aksai Chin area) | mentioned | no |
+| 22 | `N35E080-03` | Plain south of a large ice cap, Rutog County, Ngari (Aksai Chin area) | unreported | no |
 | 23 | `S26W068-01` | Volcanic plain of the southern Puna, Antofagasta de la Sierra, Catamarca | mentioned | no |
-| 24 | `N33E084-01` | Low hills of the Chang Tang, Gerze County, Ngari, Tibet | mentioned | no |
+| 24 | `N33E084-01` | Low hills of the Chang Tang, Gerze County, Ngari, Tibet | unreported | no |
 | 25 | `S28W069-01` | High Andes about 50 km south-west of Ojos del Salado, Copiapó, Atacama Region, Chile | mentioned | no |
 | 26 | `S25W071-01` | Coastal Cordillera plain south of Antofagasta, Chile | established | no |
 | 27 | `S19W071-01` | Coastal desert pampa south of Tacna, Peru | mentioned | no |
 | 28 | `S16W076-01` | Sand-mantled coastal desert inland of Marcona, Ica, Peru | unreported | unsure |
 | 29 | `S26W071-01` | Coastal desert hills north of Taltal, Chile | established | no |
-| 30 | `N34E082-01` | Rolling plain of the Chang Tang, Rutog County, Ngari, Tibet | mentioned | no |
+| 30 | `N34E082-01` | Rolling plain of the Chang Tang, Rutog County, Ngari, Tibet | unreported | no |
 
-**Counts, strict top 30** (from the table): literature 9 established, 15 mentioned, 6 unreported; image review 28 no, 2 unsure (ranks 13 and 28), 0 yes. By region: Atacama and Puna 13 (8 established, 5 mentioned: the Argentine Puna by Radebaugh et al. 2022 and the Chilean Puna de Atacama by Tavernier et al. 2021); western Tibetan Plateau and Ladakh 8 (7 mentioned: Ladakh by ISRO's HOPE analog mission at Tso Kar and Pandey et al. 2020, Ngari only by a general geography web page without a source, the weakest hit of the table; 1 unreported: Aksai Chin, Hotan County); coastal desert of southern Peru 4 (2 mentioned near Ilo and Tacna by the Pampas de La Joya Mars-soil analog, Valdivia-Silva et al. 2011; 2 unreported near Acarí and Marcona); Hazen Plateau 3 unreported; Arctic coast of Nunavut 1 mentioned (the Up Here statement on the high Arctic around Baffin Island, as in section 3); Mauna Loa 1 established.
+**Counts, strict top 30** (from the table): literature 9 established, 9 mentioned, 12 unreported; image review 28 no, 2 unsure (ranks 13 and 28), 0 yes. By region: Atacama and Puna 13 (8 established, 5 mentioned: the Argentine Puna by Radebaugh et al. 2022 and the Chilean Puna de Atacama by Tavernier et al. 2021); western Tibetan Plateau and Ladakh 8 (1 mentioned: Ladakh by ISRO's HOPE analog mission at Tso Kar and Pandey et al. 2020; 7 unreported: Aksai Chin, Hotan County, and the 6 Chang Tang sites in Ngari, whose only hit is a general geography web page with no named author and no source, not counted as evidence since review #26); coastal desert of southern Peru 4 (2 mentioned near Ilo and Tacna by the Pampas de La Joya Mars-soil analog, Valdivia-Silva et al. 2011; 2 unreported near Acarí and Marcona); Hazen Plateau 3 unreported; Arctic coast of Nunavut 1 mentioned (the Up Here statement on the high Arctic around Baffin Island, as in section 3); Mauna Loa 1 established.
 
-**What this means.** The strict top 30 is mostly ground the analog literature already uses: 24 of 30 sites are established or lie in a region an opened page names as a Mars analog. Every "mentioned" is about Mars, and none of the opened pages calls these regions a Moon analog. The 6 unreported sites (3 Hazen Plateau, Aksai Chin, Acarí, Marcona) are "not found in the analog catalogues and searches listed here"; two of them (Marcona, rank 28) and one established site (rank 13, between two salt flats) need a sharper image before they are shown. No site of the strict top 30 sits on a salt flat, dune field, lake bed or glacier in the images looked at; the salt flats, lakes and ice caps near ranks 3, 7, 13, 18, 22, 23 and 25 lie beside the footprints, not under them (ranks 3 and 23 touch a salt crust at one edge).
+**What this means.** Much of the strict top 30 is ground the analog literature already uses: 18 of 30 sites are established or lie in a region an opened page names as a Mars analog. Every "mentioned" is about Mars, and none of the opened pages calls these regions a Moon analog. The 12 unreported sites (3 Hazen Plateau, 6 Chang Tang in Ngari, Aksai Chin, Acarí, Marcona) are "not found in the analog catalogues and searches listed here"; two of them (Marcona, rank 28) and one established site (rank 13, between two salt flats) need a sharper image before they are shown. No site of the strict top 30 sits on a salt flat, dune field, lake bed or glacier in the images looked at; the salt flats, lakes and ice caps near ranks 3, 7, 13, 18, 22, 23 and 25 lie beside the footprints, not under them (ranks 3 and 23 touch a salt crust at one edge).
