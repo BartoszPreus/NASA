@@ -121,9 +121,10 @@ export function certaintyBlock(site, ctx) {
     ['Rank without slopes', number(ru.rank_no_slopes, 0)],
     ['Rank without roughness', number(ru.rank_no_roughness, 0)],
     ['Rank without depressions', number(ru.rank_no_depressions, 0)],
-    ['Rank with NASADEM', ru.nasadem_tile ? number(ru.rank_nasadem, 0) : 'Not measured (tile not in the NASADEM comparison)'],
+    ['Rank with NASADEM', ru.nasadem_tile ? number(ru.rank_nasadem, 0) : 'nasadem_tile' in ru ?
+      'Not measured (tile not in the NASADEM comparison)' : 'Not measured (no NASADEM variant for this ranking)'],
   ]));
-  block.append(sourceNote('data/sites/rank_uncertainty.csv · ' + ru.site_id ));
+  block.append(sourceNote((ctx.rankSource || 'data/sites/rank_uncertainty.csv') + ' · ' + ru.site_id));
   return block;
 }
 

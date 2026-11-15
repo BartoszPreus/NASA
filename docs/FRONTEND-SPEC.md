@@ -181,7 +181,7 @@ collapsed on mobile. Missing data follow W-07.
 | S04.15 | Dune-like relief explanation | `artefact_flag`, `artefact_share`, `artefact_reason` (`sites.geojson`; NEW KEYS) | share of cells, % | shown only for flagged sites | -> S08 step 8 | W-04 |
 | S04.16 | Radar look (NEW) | `radarsat1_index.csv` row by `site_id` (37 rows): `status`, `n_scenes`, `date`, `beam`, `product`, `incidence_deg`, `pass_direction`, `nominal_pixel_m`, `valid_share`, `cv_dn`, `power_share_200m_2km`, `image`, `rejected` | deg, m, shares | E "No RADARSAT-1 scene covers the site centre" (`no_scene_centre`) or "No scene had 90% usable pixels" (`no_usable_window`) | -> S15 | uncalibrated C-band DN, not comparable with Mini-RF values |
 | S04.17 | Moss-and-lichen check (top 100, NEW) | `data/validation/landcover_sensitivity/sites_top100.csv` row by `site_id`: `region`, `n_cells`, `bare_med`, `bare_strict_med`, `moss_lichen_med`, `strict_passes_median`, `strict_kept_cells`, `strict_largest_group`, `strict_passes_cells`, `modis_bare_med`, `modis_passes_median`, `modis_passes_cells`; e.g. rank 1: `bare_strict_med` 0.0312, `strict_passes_cells` False | shares as %; pass / fail as words "keeps a 4-cell core without moss and lichen" / "does not" | E for ranks above 100: "not checked"; MODIS columns empty for 87 of 100 sites (MODIS covers 56 S to 60 N only): "not covered" | -> S09 V14 | the new rank of a surviving site is not computed (`landcover_sensitivity.json · cannot_show`) |
-| S04.18 | Planned context | Sentinel-1 backscatter (issue #20, `data/sites/radar_context.csv`); full-scan strict-mask ranking (issue #19 full version; produced after `0ba6399`: `data/validation/landcover_sensitivity/ranking_bare_strict.csv`, not joined to the default sites by id) | - | Sentinel-1 hidden until its file exists | - | Sentinel-1 text: "C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio" (issue #20 Accept) |
+| S04.18 | Planned context | Sentinel-1 backscatter (issue #20, `data/sites/radar_context.csv`); full-scan strict-mask ranking (issue #19 full version; produced after `0ba6399`: `data/validation/landcover_sensitivity/ranking_bare_strict.csv`, not joined to the default sites by id; J36: shown behind the mask switch on list and map, ranks 1 to 100 with the full card from `app/data/strict_ranking.json` (J42, #28), ranks 101 to 200 in a reduced card) | - | Sentinel-1 hidden until its file exists | - | Sentinel-1 text: "C-band linear polarisation; not comparable with the Mini-RF circular polarisation ratio" (issue #20 Accept) |
 | S04.19 | Actions | - | - | - | "Compare side by side" -> S05; "Download site package" (F-40); "What is compared and what is not" -> S13 | - |
 
 ### S05 Side by side Earth / Moon (issue #22)
@@ -366,25 +366,25 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 - **F-02** A null value renders "Not measured"; a site outside a product's sample renders "Not sampled"; no null renders as 0 or empty. Data: `sites.json · power`, `partner`, `image`, every numeric key. PARTIAL (`views.js · number()` returns "Not measured"; "Not sampled" only in the partner block; POWER for ranks 151 to 300 shows "Not measured" instead of "Not sampled"). **J36 (#22): EXISTS (POWER without a row says "Not sampled", `views.js · analogyBreaks`).**
 - **F-03** The footer names the data agencies and the SI tools. Data: `data/sources.csv` (`status = used`). PARTIAL (static text; it says "Codex" only).
 - **F-04** Header counters show tiles, candidate patches, dune-like patches and ranked patches. Data: `meta.json · counts.tiles`, `sites_total`, `sites_flagged_total`, `sites`. EXISTS.
-- **F-05** Deep link `#view=<id>&site=<id>&target=<id>` opens the screen, the card and the target; an unknown id falls back to rank 1 and `base_regions`. Data: `sites.json`, `sites_flagged.json`, `moon.json · regions`. PARTIAL (`site` and `target` exist; `view` is NEW).
-- **F-06** Usable at 1366 x 768 and at 390 px width; every control reachable by keyboard with a visible focus. Data: none. PARTIAL (layout responsive in `style.css`; no check recorded).
-- **F-07** Colours are colour-blind safe (cividis for sequential, Okabe-Ito for categories) and no information is carried by colour alone. Data: none. EXISTS for the tile scale (`app.js · stops` is cividis) and badges (text); NEW for the new layers.
+- **F-05** Deep link `#view=<id>&site=<id>&target=<id>` opens the screen, the card and the target; an unknown id falls back to rank 1 and `base_regions`. Data: `sites.json`, `sites_flagged.json`, `moon.json · regions`. PARTIAL (`site` and `target` exist; `view` is NEW). **Marks of 15 Nov (J36): PARTIAL (`site`, `target`, `mask=strict` and `layers=` exist; `view` is NEW).**
+- **F-06** Usable at 1366 x 768 and at 390 px width; every control reachable by keyboard with a visible focus. Data: none. PARTIAL (layout responsive in `style.css`; no check recorded). **Marks of 15 Nov (J36): EXISTS for the checked views (headless Edge at 1366 x 768 and in a 390 px iframe: no horizontal scroll).**
+- **F-07** Colours are colour-blind safe (cividis for sequential, Okabe-Ito for categories) and no information is carried by colour alone. Data: none. EXISTS for the tile scale (`app.js · stops` is cividis) and badges (text); NEW for the new layers. **Marks of 15 Nov (J36): EXISTS (the J36 layers use Okabe-Ito colours plus a dash pattern each).**
 
 ### S01 Overview
 
-- **F-08** The landing shows planned tiles, scanned tiles, valid cells and bare cells. Data: `effectiveness.json · scan.n_planned_tiles`, `scan.n_tiles`, `scan.n_valid`, `scan.n_bare`. NEW, KEY `meta.scan`.
+- **F-08** The landing shows planned tiles, scanned tiles, valid cells and bare cells. Data: `effectiveness.json · scan.n_planned_tiles`, `scan.n_tiles`, `scan.n_valid`, `scan.n_bare`. NEW, KEY `meta.scan`. **Marks of 15 Nov (J36): NEW on the page; the key `meta.json · scan` is exported (#25).**
 - **F-09** The landing shows the validation verdict with AUC, interval, enrichment and controls, each with file and key on hover. Data: `validation.json · items` (keys `recovery.auc`, `recovery.auc_ci90.0`, `recovery.auc_ci90.1`, `median_enrichment`, `random.median_enrichment_median`), `validation.json · summary.masked_control_cells`. PARTIAL (the sentences exist in S09 only).
 - **F-10** The landing names the regions of the top 30, not single sites. Data: `sites.json · rank`, `country`, `place`; `docs/NOVELTY.md` section 3. NEW.
 
 ### S02 Earth map
 
 - **F-11** One rectangle per scanned tile (2,060), filled by `candidate_share` on cividis from 0 to `meta.candidate_share_max`; 75 null tiles grey with "no bare ground". Data: `tiles.json`. EXISTS.
-- **F-12** A tile click opens a tile panel with all 15 columns of `tile_summary.csv` and the plan columns of `tiles_scanned.csv`. Data: `tile_summary.csv`, `tiles_scanned.csv`. NEW, KEY `tiles.json` adds `n_valid`, `n_terrain_pass`, `n_candidate_flagged`, `median_p_bare`, `weighted_area_km2`, `best_window_km2_max`, `lat_c`, `lon_c`, `dem`, `region`, `prio`, `reason`, `status`.
+- **F-12** A tile click opens a tile panel with all 15 columns of `tile_summary.csv` and the plan columns of `tiles_scanned.csv`. Data: `tile_summary.csv`, `tiles_scanned.csv`. NEW, KEY `tiles.json` adds `n_valid`, `n_terrain_pass`, `n_candidate_flagged`, `median_p_bare`, `weighted_area_km2`, `best_window_km2_max`, `lat_c`, `lon_c`, `dem`, `region`, `prio`, `reason`, `status`. **Marks of 15 Nov (J36): NEW on the page; the `tiles.json` keys are exported (#25).**
 - **F-13** A marker per listed site; on selection its outline is drawn with every ring as an outer boundary. Data: `sites.json · lat`, `lon`, `polygon`. EXISTS.
 - **F-14** Toggle "Show dune-like relief (terrain rule)" adds the flagged records and says "100 of 521 shown". Data: `sites_flagged.json`, `meta.counts.sites_flagged`, `sites_flagged_total`. PARTIAL (toggle exists; the "100 of 521" text is NEW). **J36 (#22): EXISTS (toggle label "(100 of 521 shown)" from `meta.counts`).**
 - **F-15** Known analog layer: 77 circles of `radius_km`, styled and labelled by `analog_for`, toggles per `analog_for`. Data: `data/reference/known_analogs.csv`. NEW, KEY `known_analogs.json`. **J36 (#22): EXISTS (`app.js · knownLayers`, one toggle per tag, Okabe-Ito colour plus dash pattern).**
 - **F-16** Control and pilot tiles layer with the with-mask and without-mask results. Data: `pilot_tiles.csv`, `effectiveness.json · controls`. NEW, KEY `controls.json` (or `validation.json · controls`). **J36 (#22): EXISTS (`app.js · controlLayer`, tooltip with result and `result_key`).**
-- **F-17** Scan coverage layer: 2,101 planned tiles coloured by `region` or `prio`; the 41 planned tiles without a summary row hatched "scanned, no summary row". Data: `tiles_scanned.csv`, `tile_summary.csv`. NEW, KEY `scan_plan.json`.
+- **F-17** Scan coverage layer: 2,101 planned tiles coloured by `region` or `prio`; the 41 planned tiles without a summary row hatched "scanned, no summary row". Data: `tiles_scanned.csv`, `tile_summary.csv`. NEW, KEY `scan_plan.json`. **Marks of 15 Nov (J36): NEW on the page; `scan_plan.json` is exported (#25).**
 - **F-18** Legend with units, scale ends and every active layer. Data: `meta.candidate_share_max`. PARTIAL (tiles and patches only). **J36 (#22): PARTIAL (layer toggles carry the swatches; the map legend itself lists tiles and patches only).**
 - **F-19** Selecting a site on the map selects it in the list and opens the card, and the reverse. Data: `sites.json`. EXISTS.
 
@@ -403,10 +403,10 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 - **F-27** Head with rank, id, country, place, coordinates and badges. Data: `sites.json · rank`, `site_id`, `country`, `place`, `lat`, `lon`. EXISTS.
 - **F-28** Badges follow W-02, W-04, W-09; `mentioned` reads "region named in an opened source (Mars analog, regional); site not named". Data: `sites.json · is_known`, `dune_like`, `novelty`. EXISTS (since `8edaad7`, `mentioned` reads "Region named as a Mars analog in general terms").
 - **F-29** "Known analog site" badge names the matched known site and its `analog_for` (today a page caption explains that every tag counts, `app/index.html`). Data: `known_analogs.csv` (`name`, `lat`, `lon`, `radius_km`, `analog_for`), site `lat`, `lon`. NEW, KEY `known_match` = {name, analog_for, radius_km, distance_km} computed with the same rule as `pipeline/sites.py` (centroid inside `radius_km`; rows of type `operational` excluded, per its docstring). **J36 (#22): EXISTS (`known_match` named in the Earth patch block).**
-- **F-30** Satellite image with credit "NASA Worldview / GIBS", date and layer; "No image stored" otherwise; a scale bar from the image extent. Data: `sites.json · image`, `image_date`, `image_layer`; `images/index.csv · bbox`. PARTIAL (scale bar NEW, KEY `image_bbox`).
+- **F-30** Satellite image with credit "NASA Worldview / GIBS", date and layer; "No image stored" otherwise; a scale bar from the image extent. Data: `sites.json · image`, `image_date`, `image_layer`; `images/index.csv · bbox`. PARTIAL (scale bar NEW, KEY `image_bbox`). **Marks of 15 Nov (J36): PARTIAL (`image_bbox` exported; the scale bar is in the side-by-side view, not on the card image).**
 - **F-31** Patch facts: area, cells, elevation, ranking key, weighted area (plain and capped), best window centre, tile. Data: `sites.geojson · area_km2`, `n_cells`, `elev_med`, `best_window_km2`, `weighted_area_km2`, `weighted_area_capped_km2`, `window_lat`, `window_lon`, `tile`. PARTIAL, KEY `weighted_area_km2`, `weighted_area_capped_km2`, `window`. **J36 (#22): EXISTS (`card.js · scoreBlock`).**
 - **F-32** Five terrain bars: site value against the lunar median and p10–p90 of the selected target, label and unit from `feature_info`, "Earth outside range" in text. Data: `sites.json · features`, `moon.json · regions[target].features`, `feature_info`. EXISTS.
-- **F-33** Landing and mobility shares, site against lunar median and p10–p90. Data: `sites.json · shares`; `reference.json · regions.*.p10`, `p90` (`f_le5`, `f_le8`, `f_le15`). PARTIAL (lunar median only), KEY `moon.json · regions.*.shares.{median,p10,p90}`.
+- **F-33** Landing and mobility shares, site against lunar median and p10–p90. Data: `sites.json · shares`; `reference.json · regions.*.p10`, `p90` (`f_le5`, `f_le8`, `f_le15`). PARTIAL (lunar median only), KEY `moon.json · regions.*.shares.{median,p10,p90}`. **Marks of 15 Nov (J36): PARTIAL (`moon.json · regions.*.shares_range` exported (#25); the bars still show the lunar median only).**
 - **F-34** Score and its two parts. Data: `sites.geojson · score`, `score_amp`, `score_dep`. PARTIAL (`score` only), KEY `score_amp`, `score_dep`. **J36 (#22): EXISTS (`card.js · scoreBlock`).**
 - **F-35** Score against each of the 9 targets with the best match marked in text. Data: `sites.json · region_scores`, `best_region`, `moon.json · regions.*.display_name`. EXISTS.
 - **F-36** Changing the target redraws S04.5, S04.6, S04.8 and S04.11 and keeps the ranking order. Data: `moon.json · regions`. EXISTS.
@@ -415,12 +415,12 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 - **F-39** Literature record for the 44 checked sites with links. Data: `novelty_check.csv` (12 columns). NEW, KEY `novelty_record`. **J36 (#22): EXISTS (`card.js · literatureBlock`, wording from `novelty.json · wording`).**
 - **F-40** "Download site package": one JSON with id, coordinates, polygon, rank, feature values, the lunar region compared, `breaks`, the novelty verdict with its sources, links to the elevation tiles and the image, each with source and licence. Data: `sites.json` record, `moon.json · regions[target]`, `novelty_check.csv`, `sources.json`. NEW (issue #22), KEY `novelty_record`, `sources.json · licence_or_citation` (exists). **J36 (#22): EXISTS (`card.js · sitePackage`, built in the browser; Copernicus tile URL from the rule in `pipeline/io_earth.py`).**
 - **F-41** Image review block for ranks 1 to 30 with the SI label. Data: `sites.json · review`. EXISTS. **J36 (#22): EXISTS (`card.js · reviewBlock`).**
-- **F-42** Nearest known analog with distance and `analog_for`, and the nearest lunar analog when the nearest one is Mars-only, linking to S12. Data: `sites.json · nearest_known`, `nearest_known_km`, `nearest_known_for`, `nearest_lunar_known`, `nearest_lunar_known_km`; `known_analogs.csv · type`, `source_url`. PARTIAL (tag and lunar analog EXIST since `8edaad7`; link to S12 NEW), KEY `nearest_known_type`, `nearest_known_url`.
+- **F-42** Nearest known analog with distance and `analog_for`, and the nearest lunar analog when the nearest one is Mars-only, linking to S12. Data: `sites.json · nearest_known`, `nearest_known_km`, `nearest_known_for`, `nearest_lunar_known`, `nearest_lunar_known_km`; `known_analogs.csv · type`, `source_url`. PARTIAL (tag and lunar analog EXIST since `8edaad7`; link to S12 NEW), KEY `nearest_known_type`, `nearest_known_url`. **Marks of 15 Nov (J36): PARTIAL (`nearest_known_type`, `nearest_known_url` exported (#25); the link to S12 is NEW).**
 - **F-43** Dune-like explanation for flagged sites: share of flagged cells and the reason sentence. Data: `sites.geojson · artefact_share`, `artefact_reason`. NEW, KEY `artefact_share`, `artefact_reason`. **J36 (#22): EXISTS (`card.js · scoreBlock` for flagged sites).**
 - **F-44** Radar block for the 37 sites of the RADARSAT-1 index, with the status sentence for the 28 without a window. Data: `radarsat1_index.csv`, `data/sites/radarsat1/*.png`. NEW, KEY `radar` and `img/` copies. **J36 (#22): EXISTS (`card.js · radarBlock`; status sentence from `radar.json · status_meaning`).**
 - **F-45** Rank certainty block when `data/sites/rank_uncertainty.csv` exists; hidden otherwise. Data: issue #18 outputs. NEW (the file and the export key `rank_uncertainty` exist since #18 and #25). **J36 (#22): EXISTS (`card.js · certaintyBlock`, hidden without `rank_uncertainty`).**
 - **F-46** Moss-and-lichen check for ranks 1 to 100 ("keeps a 4-cell core without moss and lichen" or not, with `bare_strict_med`); "not checked" above rank 100; Sentinel-1 line only when its file exists. Data: `data/validation/landcover_sensitivity/sites_top100.csv`; issue #20 outputs. NEW, KEY `landcover_strict` per site (Sentinel-1 part blocked by #20). **J36 (#22): EXISTS (`card.js · mossBlock`; strict-ranking match by `landcover_sensitivity.json · full_run.match_km`; Sentinel-1 part still blocked).**
-- **F-47** Every number in the card shows its file and key on hover. Data: as above. PARTIAL (validation items only).
+- **F-47** Every number in the card shows its file and key on hover. Data: as above. PARTIAL (validation items only). **Marks of 15 Nov (J36): PARTIAL (validation items show file and key; each J36 card block names its source file).**
 
 ### S05 Side by side
 
@@ -432,7 +432,7 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 
 - **F-51** Selector with the 9 targets, default `base_regions`. Data: `moon.json · regions`. EXISTS.
 - **F-52** Panel with coordinates, window, hillshade and LROC quicklook with credits, and the 10 headline values; for `base_regions` the min to max and the 7 members. Data: `moon.json · regions.*`, `headline_info`. EXISTS.
-- **F-53** South-pole map with the 8 footprints; click selects the target. Data: `data/moon/regions.geojson`. NEW, KEY `moon.json · footprints`.
+- **F-53** South-pole map with the 8 footprints; click selects the target. Data: `data/moon/regions.geojson`. NEW, KEY `moon.json · footprints`. **Marks of 15 Nov (J36): NEW on the page; `moon.json · footprints` is exported (#25).**
 - **F-54** Coordinate provenance per region. Data: `reference.json · regions.*.coord_source`, `coord_status`, `notes`. NEW, KEY. **J36 (#22): EXISTS (`sections.js · showMoon`).**
 - **F-55** Full terrain statistics (14 features with median, p10, p90, and `mean_dep_frac`). Data: `reference.json · regions.*.medians`, `p10`, `p90`, `mean_dep_frac`. PARTIAL (5 features), KEY. **J36 (#22): EXISTS (`sections.js · featureTable`).**
 - **F-56** Full instrument table per region with units, citation, caveats. Data: `data/moon/instruments/*_regions.json`, `registry.json`. NEW, KEY `moon.json · regions.*.instruments`, `instrument_info` (as in the prototype `SCHEMA.md`). **J36 (#22): EXISTS (`sections.js · instrumentTable`).**
@@ -441,8 +441,8 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 
 ### S07 Target comparison
 
-- **F-59** Table of the 9 targets with candidate cells, sites, tiles with sites and the 10 reference-tile ranks, tile names from `docs/sources/j18.md`. Data: `target_comparison.csv`. NEW, KEY `target_comparison.json`.
-- **F-60** Top 25 tiles per target, click opens the tile on S02. Data: `target_comparison_top_tiles.csv`. NEW, KEY.
+- **F-59** Table of the 9 targets with candidate cells, sites, tiles with sites and the 10 reference-tile ranks, tile names from `docs/sources/j18.md`. Data: `target_comparison.csv`. NEW, KEY `target_comparison.json`. **Marks of 15 Nov (J36): NEW on the page; `target_comparison.json` is exported (#25).**
+- **F-60** Top 25 tiles per target, click opens the tile on S02. Data: `target_comparison_top_tiles.csv`. NEW, KEY. **Marks of 15 Nov (J36): NEW on the page; exported in `target_comparison.json · top_tiles` (#25).**
 
 ### S08 Method
 
@@ -457,23 +457,23 @@ Each line: requirement (testable), data it needs, status, KEY if `app/build_data
 
 ### S10 to S13
 
-- **F-66** Literature table of 44 rows with filter by verdict and country, the counters and the wording banner. Data: `novelty_check.csv`, `ranking.csv · novelty`. NEW, KEY `novelty.json`.
-- **F-67** Top-30 review table and the three contact sheets. Data: `top30_review.csv`, `docs/figures/top30_sheet_1..3.png`. NEW (per-site review EXISTS in S04), KEY figure copies.
-- **F-68** Known analog table of 77 rows with filters `analog_for`, `type`, `verified`; scope note of issue #16. Data: `known_analogs.csv`. NEW, KEY `known_analogs.json`.
+- **F-66** Literature table of 44 rows with filter by verdict and country, the counters and the wording banner. Data: `novelty_check.csv`, `ranking.csv · novelty`. NEW, KEY `novelty.json`. **Marks of 15 Nov (J36): NEW on the page; `novelty.json` is exported (#25) and the per-site record is in the card (F-39).**
+- **F-67** Top-30 review table and the three contact sheets. Data: `top30_review.csv`, `docs/figures/top30_sheet_1..3.png`. NEW (per-site review EXISTS in S04), KEY figure copies. **Marks of 15 Nov (J36): PARTIAL (contact sheets under "Other figures" in S09; no review table).**
+- **F-68** Known analog table of 77 rows with filters `analog_for`, `type`, `verified`; scope note of issue #16. Data: `known_analogs.csv`. NEW, KEY `known_analogs.json`. **Marks of 15 Nov (J36): PARTIAL (`known_analogs.json` exported (#25); shown as map layers by tag, no table).**
 - **F-69** Criteria table with filters by status (EXISTS), group and dimension (NEW). Data: `app/criteria.json`; dimension from the prototype. PARTIAL.
 - **F-70** Criterion detail with definition, Moon data, Earth data, comparability, evidence, sources, and links from `site_fields` / `moon_fields` to the card and the lunar panel. Data: prototype `criteria.json · criteria[]`. NEW (the committed `app/criteria.json` must gain these fields).
 
 ### S14 to S17
 
-- **F-71** Surface conditions page with layers, group medians, lunar reference, POWER summary, partner checks and the cold-and-dry shortlist. Data: `partner_context_summary.json`, `nasa_context_summary.json`, `partner_checks.json`. NEW, KEY `surface.json`.
-- **F-72** Radar page with the coverage summary, the 37-row table, 9 quicklooks, Mini-RF maps, the figure and the RCM note. Data: `radarsat1_index.csv`, `data/sites/radarsat1/*.png`, `minirf_regions.json`, `docs/figures/radar_earth_vs_moon.png`. NEW, KEY `radar.json`.
-- **F-73** Crater page with the crater table, what 30 m loses, Morasko, the laser profiles and the figures. Data: `crater_profiles.json`, `icesat2.json`. NEW, KEY in `validation.json` or `craters.json`.
+- **F-71** Surface conditions page with layers, group medians, lunar reference, POWER summary, partner checks and the cold-and-dry shortlist. Data: `partner_context_summary.json`, `nasa_context_summary.json`, `partner_checks.json`. NEW, KEY `surface.json`. **Marks of 15 Nov (J36): NEW on the page; `surface.json` is exported (#25).**
+- **F-72** Radar page with the coverage summary, the 37-row table, 9 quicklooks, Mini-RF maps, the figure and the RCM note. Data: `radarsat1_index.csv`, `data/sites/radarsat1/*.png`, `minirf_regions.json`, `docs/figures/radar_earth_vs_moon.png`. NEW, KEY `radar.json`. **Marks of 15 Nov (J36): PARTIAL (`radar.json` exported (#25); per-site radar block in the card (F-44) and the figure under "Other figures"; no radar page).**
+- **F-73** Crater page with the crater table, what 30 m loses, Morasko, the laser profiles and the figures. Data: `crater_profiles.json`, `icesat2.json`. NEW, KEY in `validation.json` or `craters.json`. **Marks of 15 Nov (J36): PARTIAL (`validation/crater_profiles.json` and `icesat2.json` exported (#25) and shown as S09 groups with figures; no crater page).**
 - **F-74** Poland vs Moon card and link to the 3D viewer, only when `pl2moon/` is on `main`. Data: `pl2moon/web/public/data/index.json`. NEW (blocked by #14).
 
 ### S18 and S19
 
 - **F-75** Sources grouped by agency with name, link(s), licence or citation, status, use; filter by status and by challenge link number; tools and libraries. Data: `sources.json`; `sources.csv · challenge_link_no`, `needs_login`. PARTIAL (no filter, no challenge number), KEY `challenge_link_no`, `needs_login`, `urls`. **J36 (#22): EXISTS (table with challenge link number, status, licence, use; filters by status and challenge link).**
-- **F-76** About page shows the data commit, the run log, the data catalogue and the rebuild commands. Data: `meta.json · commit`, `data/run_log.csv`, `data/catalog.csv`. NEW, KEY `run_log.json`, `catalog.json`.
+- **F-76** About page shows the data commit, the run log, the data catalogue and the rebuild commands. Data: `meta.json · commit`, `data/run_log.csv`, `data/catalog.csv`. NEW, KEY `run_log.json`, `catalog.json`. **Marks of 15 Nov (J36): NEW on the page; `run_log.json` and `catalog.json` are exported (#25).**
 
 ---
 
@@ -494,7 +494,7 @@ are listed in 5.7 and are not counted.
 | `data/earth/cells/pilot.parquet` | 1 | not shown: cell table of the 37 pilot tiles; summarised by S02 layer 5 and S09 V4 | not shown |
 | `data/earth/cells/scan_s*of20.parquet` | 20 | not shown: scan shards, summarised by `tile_summary.csv` | not shown |
 | `data/earth/cells_nasadem/nasadem_s*of10.parquet` | 10 | not shown: NASA-input rescan, summarised by `nasadem_vs_copdem.json` (S09 V8) | not shown |
-| `data/earth/tiles/SCAN_STATUS.md` | 1 | not shown: stale ("Scan tiles finished: 5 of 2023", 14 Nov 18:41); `tiles_scanned.csv` replaces it | not shown |
+| `data/earth/tiles/SCAN_STATUS.md` | 0 | removed in J41 (`c62fe3c`, issue #27): it was stale; `tiles_scanned.csv` replaces it | not shown |
 | `data/earth/tiles/tile_summary.csv` | 1 | S02 layer 1 and tile panel | yes |
 | `data/earth/tiles/tiles_scanned.csv` | 1 | S02 layer 6 and tile panel; S01 planned tiles | yes |
 | `data/moon/cells.parquet` | 1 | not shown: 8,464 lunar cells; summarised by `reference.json` p10/p50/p90 | not shown |
@@ -534,7 +534,7 @@ are listed in 5.7 and are not counted.
 | `data/sites/radarsat1/*.png` | 9 | S15 Earth quicklooks; S04.16 | yes |
 | `data/sites/images/index.csv` | 1 | S04.3 credit, date, layer, extent | yes |
 | `data/sites/images/*.jpg` named in `index.csv` | 60 | S04.3; S05 Earth panel | yes |
-| 59 files of `data/sites/images/*.jpg` not named in `index.csv` | 59 | not shown: images of earlier rankings (51 of them are sites of `sites.geojson` outside ranks 1 to 60); no date or layer row, so no credit can be shown | not shown |
+| `data/sites/images/*.jpg` not named in `index.csv` | 0 | removed in J41 (`c62fe3c`, issue #27); the folder now holds the 60 images of `index.csv` only | not shown |
 | `data/validation/aw3d30_comparison.json` | 1 | S09 V9 | yes |
 | `data/validation/crater_profiles.json` | 1 | S16; S09 V11 | yes |
 | `data/validation/effectiveness.json` | 1 | S09 V3 to V5, V7; S01; S02 layer 5; S07 | yes |

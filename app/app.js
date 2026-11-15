@@ -2,7 +2,7 @@
 // Leaflet 1.9.4: https://leafletjs.com/install.html
 import {element, number, badges, showSite, showCriteria} from './views.js';
 import {showMoon, showEvidence} from './sections.js';
-import {strictSites, strictSiteCard} from './strict.js';
+import {strictSites, strictSiteCard, strictAbout} from './strict.js';
 
 const byId = (id) => document.getElementById(id);
 const atlas = byId('atlas');
@@ -164,7 +164,7 @@ function init(L, data) {
     option.value = key;
     selector.append(option);
   }
-  const strict = strictSites(data.strict, data.strictReview, data.strictNovelty);
+  const strict = strictSites(data.strictFull, data.strict, data.strictReview, data.strictNovelty, data.strictImages);
   const matchKm = data.landcover?.full_run?.match_km;
   const ctx = {
     meta, novelty: data.novelty, radar: data.radar, siteInfo: data.siteInfo, landcover: data.landcover,
@@ -260,7 +260,13 @@ function init(L, data) {
   function selectSite(site, reveal = false) {
     active = site;
     const link = permalink();
-    if (mode === 'strict') strictSiteCard(byId('site-card'), site, target, moon, sources, link, ctx, strict);
+    if (mode === 'strict' && site.full) {
+      const files = data.strictFull.source_files || {};
+      showSite(byId('site-card'), site, target, moon, sources, link, {...ctx, strictMatch: null,
+        siteInfo: {sources: {novelty_record: [files.novelty_record].flat().filter(Boolean).join(' or '), review: files.review}},
+        rankConfig: data.strictFull.stability?.configuration, rankSource: files.rank_uncertainty});
+      byId('site-card').querySelector('.details-layout').prepend(strictAbout(site, ctx, strict));
+    } else if (mode === 'strict') strictSiteCard(byId('site-card'), site, target, moon, sources, link, ctx, strict);
     else showSite(byId('site-card'), site, target, moon, sources, link, ctx);
     drawOutline();
     for (const row of byId('ranking-list').querySelectorAll('button[data-site]')) {
@@ -355,22 +361,24 @@ try {
     ...['method', 'validation', 'sources'].map((file) => json(`data/${file}.json`)),
   ]);
   // The strict ranking: data/strict_ranking.json when the export lists it, else the J33 file under validation/.
-  const strictPath = meta.files?.includes('strict_ranking.json') ? 'data/strict_ranking.json' :
-    'data/validation/landcover_sensitivity/ranking_bare_strict.json';
+  // The strict-mask ranking: strict_ranking.json (J42, ranks 1 to 100 with full context) when the export lists it,
+  // and the J33 file under validation/ for the ranks beyond it (reduced view).
+  const strictFullPath = meta.files?.includes('strict_ranking.json') ? 'data/strict_ranking.json' : null;
   const extra = await optional(['data/novelty.json', 'data/radar.json', 'data/site_info.json', 'data/known_analogs.json',
     'data/controls.json', 'data/method_sections.json', 'data/validation/landcover_sensitivity.json',
-    'data/validation/rank_uncertainty.json', strictPath,
+    'data/validation/rank_uncertainty.json', 'data/validation/landcover_sensitivity/ranking_bare_strict.json',
     'data/validation/landcover_sensitivity/top30_strict_review.json',
-    'data/validation/landcover_sensitivity/novelty_check_strict.json']);
+    'data/validation/landcover_sensitivity/novelty_check_strict.json',
+    'data/validation/landcover_sensitivity/images/index.json', ...(strictFullPath ? [strictFullPath] : [])]);
   const [novelty, radar, siteInfo, known, controls, methodSections, landcover, rankUncertainty, strict, strictReview,
-    strictNovelty] = extra.values;
+    strictNovelty, strictImages, strictFull] = extra.values;
   if (extra.failed.length) {
     const notice = byId('partial-status');
     notice.textContent = 'Some data could not load; the blocks that need them say so. ' + extra.failed.join(' · ');
     notice.hidden = false;
   }
   init(L, {meta, ranked, flagged, tiles, moon, land, method, evidence, sources, novelty, radar, siteInfo, known, controls,
-    methodSections, landcover, rankUncertainty, strict, strictReview, strictNovelty});
+    methodSections, landcover, rankUncertainty, strict, strictReview, strictNovelty, strictImages, strictFull});
 } catch (error) {
   status.textContent = `The atlas could not load. ${error.message}`;
   status.hidden = false;

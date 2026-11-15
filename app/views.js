@@ -230,7 +230,7 @@ export function showSite(container, site, target, moon, sources, permalink, ctx 
   const titles = element('div');
   const title = element('h3', [site.country, site.site_id].filter(Boolean).join(' · '));
   title.tabIndex = -1;
-  titles.append(element('p', (site.dune_like ? 'Dune-like group · rank ' : 'Rank ') + number(site.rank, 0), 'eyebrow'), title);
+  titles.append(element('p', (site.strict ? 'Strict mask · rank ' : site.dune_like ? 'Dune-like group · rank ' : 'Rank ') + number(site.rank, 0), 'eyebrow'), title);
   if (site.place) titles.append(element('p', site.place));
   titles.append(element('p', withUnit(site.lat, '°', 4) + ' / ' + withUnit(site.lon, '°', 4), 'small'));
   titles.append(badges(site));
@@ -250,10 +250,10 @@ export function showSite(container, site, target, moon, sources, permalink, ctx 
   ]));
   const analogTag = {moon: 'lunar analog', mars: 'Mars analog', both: 'lunar and Mars analog'};
   if (site.known_match) overview.append(element('p', 'Known analog site · inside ' + site.known_match.name + ' (' +
-    (analogTag[site.known_match.analog_for] || 'tag unknown') + ', ' + withUnit(site.known_match.distance_km, 'km') +
+    (analogTag[site.known_match.analog_for] || 'tag not exported') + ', ' + withUnit(site.known_match.distance_km, 'km') +
     ' from its centre)', 'small'));
   if (site.nearest_known) overview.append(element('p',
-    'Nearest listed analog · ' + site.nearest_known + ' (' + (analogTag[site.nearest_known_for] || 'tag unknown') +
+    'Nearest listed analog · ' + site.nearest_known + ' (' + (analogTag[site.nearest_known_for] || 'tag not exported') +
     ') · ' + withUnit(site.nearest_known_km, 'km'), 'small'));
   if (site.nearest_lunar_known && site.nearest_known_for !== 'moon' && site.nearest_known_for !== 'both') {
     overview.append(element('p', 'Nearest listed lunar analog (tagged lunar or both) · ' + site.nearest_lunar_known +
@@ -263,10 +263,11 @@ export function showSite(container, site, target, moon, sources, permalink, ctx 
   const criteriaLink = link('See which criteria enter the comparison', '#criteria');
   criteriaLink.addEventListener('click', () => { document.getElementById('criteria').open = true; });
   shape.append(criteriaLink);
-  layout.append(overview, shape, sideBySide(site, target, moon), scoreBlock(site), regionalScores(site, moon.regions));
+  layout.append(overview, shape, sideBySide(site, target, moon), scoreBlock(site));
+  if (site.region_scores) layout.append(regionalScores(site, moon.regions));
   const certainty = certaintyBlock(site, ctx);
   if (certainty) layout.append(certainty);
-  layout.append(mossBlock(site, ctx));
+  if (!site.strict) layout.append(mossBlock(site, ctx));
   if (site.review) layout.append(reviewBlock(site.review, ctx.siteInfo?.sources?.review));
   const radar = radarBlock(site, ctx);
   if (radar) layout.append(radar);

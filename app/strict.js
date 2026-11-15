@@ -32,20 +32,62 @@ function record(row, review, novelty) {
   };
 }
 
-export function strictSites(data, review, novelty) {
-  const rows = Array.isArray(data) ? data : data?.rows || data?.sites;
-  if (!rows?.length) return null;
+// The image extent of a strict-run image: images/index.json of the strict run, same id, same centre and same date.
+function imageBbox(site, images) {
+  const row = images?.rows?.find((r) => r.site_id === site.site_id && r.lat === site.lat && r.lon === site.lon &&
+    r.date === site.image_date);
+  const box = row?.bbox?.split(',').map(Number);
+  return box?.length === 4 && box.every(Number.isFinite) ? box : null;
+}
+
+// full: app/data/strict_ranking.json (J42, ranks 1 to 100 with context); j33: the J33 ranking (ranks 1 to 200, reduced).
+// Both come from the same strict sites run, so their rows are matched by site id and rank; never with sites.json.
+export function strictSites(full, j33, review, novelty, images) {
+  const j33Rows = j33?.rows || [];
+  const fullRows = full?.sites || [];
+  if (!j33Rows.length && !fullRows.length) return null;
   const reviews = review?.rows || [];
   const literature = novelty?.rows || [];
+  const reduced = j33Rows.map((row) => record(row,
+    reviews.find((r) => r.site_id === row.site_id && (r.rank == null || r.rank === row.rank)),
+    literature.find((r) => r.site_id === row.site_id)));
+  const complete = fullRows.map((row) => {
+    const base = reduced.find((r) => r.site_id === row.site_id && r.rank === row.rank) || {};
+    const filled = Object.fromEntries(Object.entries(row).filter(([, value]) => value != null));
+    const site = {...base, ...filled, review: row.review ?? null, novelty_record: row.novelty_record ?? null,
+      power: row.power ?? null, partner: row.partner ?? null, rank_uncertainty: row.rank_uncertainty ?? null,
+      image: row.image ?? null, shares: base.shares || {}, ranking_label: 'strict mask (WorldCover class 60 only)',
+      strict: true, full: true};
+    if (site.novelty_record && !site.novelty_record.evidence_url_list) {
+      site.novelty_record = {...site.novelty_record, evidence_url_list: (site.novelty_record.evidence_urls || '').split(' ; ').filter(Boolean)};
+    }
+    site.image_bbox = site.image ? imageBbox(site, images) : null;
+    return site;
+  });
+  const fullRanks = new Set(complete.map((s) => s.rank));
+  const rows = complete.concat(reduced.filter((r) => !fullRanks.has(r.rank))).sort((a, b) => a.rank - b.rank);
   return {
-    source: data.source_file || 'app/data/strict_ranking.json',
-    note: data.note || '',
+    source: full ? 'app/data/strict_ranking.json' : j33.source_file,
+    reducedSource: j33?.source_file,
+    note: full?.note || j33?.note || '',
+    nFull: complete.length,
     reviewSource: review?.source_file,
     noveltySource: novelty?.source_file,
-    rows: rows.map((row) => record(row,
-      reviews.find((r) => r.site_id === row.site_id && (r.rank == null || r.rank === row.rank)),
-      literature.find((r) => r.site_id === row.site_id))),
+    rows,
   };
+}
+
+// Head panel of a full strict card: what the ranking is and the nearest default site by distance.
+export function strictAbout(site, ctx, strict) {
+  const about = panel('Strict-mask ranking', 'wide');
+  about.append(element('p', 'Moss and lichen do not count as bare ground in this ranking. ' + strict.note, 'small'));
+  const match = ctx.defaultMatch?.(site);
+  if (match) about.append(element('p', match.site ? 'In the default ranking a site within ' + number(match.km, 1) + ' km (match rule ' +
+    number(match.rule, 1) + ' km) is rank ' + number(match.site.rank, 0) + ' (' + match.site.site_id + ').' :
+    'No site of the default ranking (' + number(match.n, 0) + ' exported sites) lies within ' + number(match.rule, 1) + ' km of this site centre.', 'small'));
+  about.append(element('p', 'Source · ' + strict.source + ' · rank ' + number(site.rank, 0) +
+    (site.image && !site.image_bbox ? ' · image extent not found in the strict image index: no side-by-side image' : ''), 'small source-note'));
+  return about;
 }
 
 function shapeTable(site, target, moon) {
@@ -87,8 +129,8 @@ export function strictSiteCard(container, site, target, moon, sources, permalink
   if (match) about.append(element('p', match.site ? 'In the default ranking a site within ' + number(match.km, 1) + ' km (match rule ' +
     number(match.rule, 1) + ' km) is rank ' + number(match.site.rank, 0) + ' (' + match.site.site_id + ').' :
     'No site of the default ranking (' + number(match.n, 0) + ' exported sites) lies within ' + number(match.rule, 1) + ' km of this site centre.', 'small'));
-  about.append(element('p', 'This record has no outline and no stored satellite image: the side-by-side view, surface conditions and radar look exist for the default ranking only.', 'small'));
-  about.append(element('p', 'Source · ' + strict.source + ' · rank ' + number(site.rank, 0), 'small source-note'));
+  about.append(element('p', 'Reduced view: ' + (strict.nFull ? 'the full strict context (outline, image, surface data, rank certainty) is exported for ranks 1 to ' + number(strict.nFull, 0) + ' only.' : 'the full strict context is not exported.'), 'small'));
+  about.append(element('p', 'Source · ' + (strict.reducedSource || strict.source) + ' · rank ' + number(site.rank, 0), 'small source-note'));
   const facts = panel('Earth patch');
   facts.append(statList([
     ['Latitude / longitude', withUnit(site.lat, '°', 4) + ' / ' + withUnit(site.lon, '°', 4)],
