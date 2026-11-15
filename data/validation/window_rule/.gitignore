@@ -1,0 +1,4 @@
+# J43: the large variant outputs are rebuilt by `python -m pipeline.run window-rule`;
+# only the two rankings and window_rule.json are committed
+*.geojson
+tile_summary_*.csv

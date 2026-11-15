@@ -375,11 +375,11 @@
   },
   "regions_top100": {
    "default": {
-    "Putorana Plateau": 37,
+    "Putorana Plateau": 38,
     "others": 23,
-    "Hazen Plateau / northern Ellesmere": 10,
-    "southern Peary Land": 7,
+    "Hazen Plateau / northern Ellesmere": 9,
     "Atacama / Puna": 7,
+    "southern Peary Land": 7,
     "northern Baffin Island": 4,
     "western Tibetan Plateau (incl. Ladakh)": 4,
     "Chukotka": 3,
@@ -429,8 +429,8 @@
   "countries_top30": {
    "default": {
     "Russia": 18,
-    "Greenland": 5,
     "Canada": 5,
+    "Greenland": 5,
     "Chile": 1,
     "United States of America": 1
    },
@@ -446,8 +446,8 @@
   },
   "countries_top100": {
    "default": {
-    "Russia": 48,
-    "Canada": 32,
+    "Russia": 49,
+    "Canada": 31,
     "Greenland": 7,
     "Argentina": 5,
     "Chile": 2,
@@ -595,14 +595,6 @@
   "default_top30_strict_rank": [
    {
     "default_rank": 1,
-    "site_id": "N82W026-01",
-    "region": "southern Peary Land",
-    "strict_rank": null,
-    "strict_site_id": null,
-    "km": 43.88
-   },
-   {
-    "default_rank": 2,
     "site_id": "N69E093-01",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -610,23 +602,7 @@
     "km": 92.66
    },
    {
-    "default_rank": 3,
-    "site_id": "N82W028-01",
-    "region": "southern Peary Land",
-    "strict_rank": null,
-    "strict_site_id": null,
-    "km": 14.47
-   },
-   {
-    "default_rank": 4,
-    "site_id": "N82W027-01",
-    "region": "southern Peary Land",
-    "strict_rank": null,
-    "strict_site_id": null,
-    "km": 27.02
-   },
-   {
-    "default_rank": 5,
+    "default_rank": 2,
     "site_id": "N68E093-01",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -634,7 +610,7 @@
     "km": 130.78
    },
    {
-    "default_rank": 6,
+    "default_rank": 3,
     "site_id": "N68E095-01",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -642,7 +618,7 @@
     "km": 216.2
    },
    {
-    "default_rank": 7,
+    "default_rank": 4,
     "site_id": "N69E093-02",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -650,7 +626,7 @@
     "km": 60.78
    },
    {
-    "default_rank": 8,
+    "default_rank": 5,
     "site_id": "S21W070-01",
     "region": "Atacama / Puna",
     "strict_rank": 1,
@@ -658,7 +634,7 @@
     "km": 0.0
    },
    {
-    "default_rank": 9,
+    "default_rank": 6,
     "site_id": "N68E094-01",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -666,7 +642,7 @@
     "km": 197.13
    },
    {
-    "default_rank": 10,
+    "default_rank": 7,
     "site_id": "N68E093-02",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -674,15 +650,7 @@
     "km": 119.76
    },
    {
-    "default_rank": 11,
-    "site_id": "N82W031-01",
-    "region": "southern Peary Land",
-    "strict_rank": null,
-    "strict_site_id": null,
-    "km": 5.39
-   },
-   {
-    "default_rank": 12,
+    "default_rank": 8,
     "site_id": "N65W172-01",
     "region": "Chukotka",
     "strict_rank": null,
@@ -690,7 +658,7 @@
     "km": 2218.32
    },
    {
-    "default_rank": 13,
+    "default_rank": 9,
     "site_id": "N68E094-02",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -698,7 +666,7 @@
     "km": 195.93
    },
    {
-    "default_rank": 14,
+    "default_rank": 10,
     "site_id": "N62W074-01",
     "region": "northern Ungava",
     "strict_rank": null,
@@ -706,7 +674,7 @@
     "km": 22.73
    },
    {
-    "default_rank": 15,
+    "default_rank": 11,
     "site_id": "N68E094-03",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -714,7 +682,7 @@
     "km": 146.19
    },
    {
-    "default_rank": 16,
+    "default_rank": 12,
     "site_id": "N69E092-01",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -722,15 +690,7 @@
     "km": 43.78
    },
    {
-    "default_rank": 17,
-    "site_id": "N82W029-01",
-    "region": "southern Peary Land",
-    "strict_rank": 554,
-    "strict_site_id": "N82W029-02",
-    "km": 2.56
-   },
-   {
-    "default_rank": 18,
+    "default_rank": 13,
     "site_id": "N81W072-01",
     "region": "Hazen Plateau / northern Ellesmere",
     "strict_rank": 4,
@@ -738,7 +698,15 @@
     "km": 0.88
    },
    {
-    "default_rank": 19,
+    "default_rank": 14,
+    "site_id": "N82W026-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 43.88
+   },
+   {
+    "default_rank": 15,
     "site_id": "N69E092-02",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -746,7 +714,23 @@
     "km": 78.21
    },
    {
-    "default_rank": 20,
+    "default_rank": 16,
+    "site_id": "N82W028-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 14.47
+   },
+   {
+    "default_rank": 17,
+    "site_id": "N82W031-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 5.39
+   },
+   {
+    "default_rank": 18,
     "site_id": "N68E093-03",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -754,7 +738,7 @@
     "km": 185.07
    },
    {
-    "default_rank": 21,
+    "default_rank": 19,
     "site_id": "N69E094-01",
     "region": "Putorana Plateau",
     "strict_rank": null,
@@ -762,7 +746,15 @@
     "km": 105.51
    },
    {
-    "default_rank": 22,
+    "default_rank": 20,
+    "site_id": "N82W027-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 27.02
+   },
+   {
+    "default_rank": 21,
     "site_id": "N71W078-01",
     "region": "northern Baffin Island",
     "strict_rank": null,
@@ -770,12 +762,20 @@
     "km": 4.88
    },
    {
-    "default_rank": 23,
+    "default_rank": 22,
     "site_id": "N69E096-01",
     "region": "Putorana Plateau",
     "strict_rank": null,
     "strict_site_id": null,
     "km": 191.06
+   },
+   {
+    "default_rank": 23,
+    "site_id": "N82W029-01",
+    "region": "southern Peary Land",
+    "strict_rank": 554,
+    "strict_site_id": "N82W029-02",
+    "km": 2.56
    },
    {
     "default_rank": 24,

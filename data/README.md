@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 63 rows, 8.3 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 69 rows, 9.2 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -53,7 +53,7 @@ data/
 | `reference/radarsat1_footprints.parquet` | scene metadata and WGS84 footprint hulls encoded as hex WKB, 22456 rows, 5.8 MB | `python -m pipeline.radarsat1 index (job J27)` | csa_radarsat1 |
 | `sample/*.parquet` | small fixture tables (3 Earth tiles, a 30 km lunar window) for tests and the app | `python -m pipeline.fixtures --raw-dir data/raw` | copernicus_dem, esa_worldcover, pgda90_lola_20m |
 | `sites/nasa_context.csv` | NASA POWER skin temperature, precipitation and wind per site, 150 rows, 42.3 kB | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power, data/sites/ranking.csv |
-| `sites/nasa_context_summary.json` | range of annual mean skin temperature over the sites, 731 B | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power |
+| `sites/nasa_context_summary.json` | range of annual mean skin temperature over the sites, 730 B | `python -m pipeline.nasa_context --top 150 --images 60` | nasa_power |
 | `sites/novelty_check.csv` | literature verdict for the top new sites, 44 rows, 90.5 kB | `hand-curated by job J9 (agent literature and map search, no script)` | osm, wikipedia, analog_literature, data/sites/ranking.csv |
 | `sites/partner_context.csv` | per site: measured day and night surface temperature (JAXA, NASA), soil moisture, permafrost fraction and ground temperature, 118 rows, 15.6 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/sites/ranking.csv, data/sites/sites.geojson |
 | `sites/partner_context_summary.json` | layers, medians by site group, the Diviner temperatures of the lunar regions, caveats, 12.2 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/moon/instruments/diviner_regions.json |
@@ -77,7 +77,7 @@ data/
 | `validation/nasadem_vs_copdem.json` | NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile, 14.2 kB | `python validation/nasadem_vs_copdem.py (job J17)` | data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json |
 | `validation/partner_checks.json` | dune-field flag and known analogs against measured surface temperature and soil moisture, 606.4 kB | `python validation/partner_checks.py (job J26)` | data/sites/partner_context.csv, data/sites/sites.geojson, data/sites/ranking.csv |
 | `validation/pds_lola.json` | PDS LOLA gridded DEM against the PGDA DEM, 5.9 kB | `python validation/pds_products.py --part lola` | pds_lola_gdr, pgda90_lola_20m |
-| `validation/rank_uncertainty.json` | rank intervals of the top sites: lunar reference bootstrap, NASADEM variant, one feature group left out; the scale the similarity refers to, 9.5 kB | `python validation/rank_uncertainty.py (job J32)` | data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, data/moon/reference.json, data/sites/ranking.csv |
+| `validation/rank_uncertainty.json` | rank intervals of the top sites: lunar reference bootstrap, NASADEM variant, one feature group left out; the scale the similarity refers to, 9.4 kB | `python validation/rank_uncertainty.py (job J32)` | data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, data/moon/reference.json, data/sites/ranking.csv |
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
 | `validation/landcover_sensitivity/cells_bare_strict.parquet` | bare_strict (WorldCover class 60 only, without 100 moss and lichen) for every scanned cell, key tile/row/col, 1758778 rows, 1.6 MB | `python -m validation.landcover_strict_cells (job J33, full run)` | data/earth/cells/*.parquet, esa_worldcover |
 | `validation/landcover_sensitivity/cells_top*.parquet` | one row per cell of a top site: stored bare, recomputed bare, bare_strict, MODIS Barren | `python -m validation.landcover_sensitivity (job J33)` | data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
@@ -98,6 +98,19 @@ data/
 | `validation/landcover_sensitivity/images/index.csv` | bbox, date, layer and cloud share of the MODIS/VIIRS image of every strict top-30 site, 30 rows, 6.0 kB | `python -m pipeline.review_strict (job J40)` | worldview_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
 | `validation/landcover_sensitivity/images/hls/*.jpg` | HLS 30 m true-colour image, about 26 km square, around one strict top-30 site (NASA imagery, re-encoded only) | `python -m pipeline.review_strict --zoom (job J40)` | hls_gibs |
 | `validation/landcover_sensitivity/images/hls/index.csv` | bbox, date, layer and cloud share of the 30 m HLS image of every strict top-30 site, 30 rows, 6.1 kB | `python -m pipeline.review_strict --zoom (job J40)` | hls_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
+| `validation/window_rule/.gitignore` | ?, 174 B | `UNKNOWN` |  |
+| `validation/window_rule/ranking_bare_strict_legacy_window.csv` | VARIANT: the strict-mask ranking before J43 (identical to the current one), 200 rows, 175.4 kB | `python -m pipeline.sites --bare-col bare_strict --window-rule legacy --out-dir data/validation/window_rule (job J43)` | data/earth/cells/*.parquet, data/validation/landcover_sensitivity/cells_bare_strict.parquet, natural_earth |
+| `validation/window_rule/ranking_legacy_window.csv` | VARIANT: the default ranking before J43 (whole-site key on tiles narrower than the 8-cell window), 200 rows, 182.2 kB | `python -m pipeline.sites --window-rule legacy --out-dir data/validation/window_rule (job J43)` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, natural_earth |
+| `validation/window_rule/ranking_physical_window.csv` | VARIANT: the default ranking with a 15 x 15 km window from the actual cell height and width (alternative not chosen), 200 rows, 182.2 kB | `python -m pipeline.sites --window-rule physical --out-dir data/validation/window_rule (job J43)` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, natural_earth |
+| `validation/window_rule/sites_bare_strict_legacy_window.geojson` | ?, 1561 rows, 5.4 MB | `UNKNOWN` |  |
+| `validation/window_rule/sites_legacy_window.geojson` | ?, 3175 rows, 10.5 MB | `UNKNOWN` |  |
+| `validation/window_rule/sites_physical_window.geojson` | ?, 3175 rows, 10.5 MB | `UNKNOWN` |  |
+| `validation/window_rule/tile_summary_bare_strict_legacy_window.csv` | ?, 2060 rows, 159.4 kB | `UNKNOWN` |  |
+| `validation/window_rule/tile_summary_legacy_window.csv` | ?, 2060 rows, 167.7 kB | `UNKNOWN` |  |
+| `validation/window_rule/tile_summary_physical_window.csv` | ?, 2060 rows, 167.7 kB | `UNKNOWN` |  |
+| `validation/window_rule/window_rule.json` | narrow tiles, sites keyed by the whole-site fallback, old vs new ranks of the top 30, top-10/30/100 overlap, 70.8 kB | `python validation/window_rule.py (job J43)` | data/earth/cells/*.parquet, data/sites/sites.geojson, data/validation/window_rule/ranking_*.csv |
+
+Files without a known producer (add them to `FILE_MAP` in `pipeline/catalog.py`): `data/validation/window_rule/.gitignore`, `data/validation/window_rule/sites_bare_strict_legacy_window.geojson`, `data/validation/window_rule/sites_legacy_window.geojson`, `data/validation/window_rule/sites_physical_window.geojson`, `data/validation/window_rule/tile_summary_bare_strict_legacy_window.csv`, `data/validation/window_rule/tile_summary_legacy_window.csv`, `data/validation/window_rule/tile_summary_physical_window.csv`
 
 ## External sources by agency
 

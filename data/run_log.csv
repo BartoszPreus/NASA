@@ -63,3 +63,9 @@ catalog,python.exe -m pipeline.catalog,2026-11-15 07:49:56,2.1,0,96d8814,data/ra
 sites,python.exe -m pipeline.sites,2026-11-15 07:56:11,81.0,0,d765520,data/raw/run_logs/sites_20261115_075611.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 07:58:24,1.7,0,d765520,data/raw/run_logs/catalog_20261115_075824.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 08:50:31,1.8,0,9299fe3,data/raw/run_logs/catalog_20261115_085031.log
+sites,python.exe -m pipeline.sites,2026-11-15 11:10:44,115.9,0,cbcaee4,data/raw/run_logs/sites_20261115_111044.log
+validate-enrichment,python.exe validation/enrichment.py,2026-11-15 11:13:58,7.9,0,cbcaee4,data/raw/run_logs/validate-enrichment_20261115_111358.log
+validate-effectiveness,python.exe validation/effectiveness.py all,2026-11-15 11:14:06,31.2,0,cbcaee4,data/raw/run_logs/validate-effectiveness_20261115_111406.log
+rank-uncertainty,python.exe validation/rank_uncertainty.py,2026-11-15 11:14:37,6.4,1,cbcaee4,data/raw/run_logs/rank-uncertainty_20261115_111437.log
+rank-uncertainty,python.exe validation/rank_uncertainty.py,2026-11-15 11:16:26,249.1,0,cbcaee4,data/raw/run_logs/rank-uncertainty_20261115_111626.log
+catalog,python.exe -m pipeline.catalog,2026-11-15 11:21:59,2.3,0,cbcaee4,data/raw/run_logs/catalog_20261115_112159.log

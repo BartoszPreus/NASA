@@ -1,27 +1,27 @@
 site_id,rank,country,what_it_is,looks_like_artefact,reason
-N82W026-01,1,Greenland,"Ice-free dissected upland in southern Peary Land, a polar desert; valley network, snow patches on ridges",no,"Bare brown ground with valleys on the 2025-08-15 image; the image now stored (2023-08-15) is veiled by thin cloud. No ice cap, lake, salt flat or dune field on the site; land cover gives 0% ice."
-N69E093-01,2,Russia,Putorana Plateau: flat-topped basalt tableland cut by deep valleys,no,"Clear image: brown plateau tops, dark green valleys, a long narrow lake in one valley floor away from the site. The plateau tops carry tundra and lichen, which the land-cover map counts as bare."
-N82W028-01,3,Greenland,Ice-free dissected plateau in southern Peary Land with a dendritic valley network,no,"Clear image: grey-brown bare ground and incised valleys; small ice patches lie north-west of the site, not on it."
-N82W027-01,4,Greenland,"Same dissected plateau as rank 3, the tile to the east",no,Bare dissected ground on the 2025-08-15 image; the image now stored is veiled by thin cloud. No ice on the site.
-N68E093-01,5,Russia,Putorana Plateau: tableland between forested valleys,no,"Clear image: brown plateau tops, green valleys. Tundra and lichen on the tops, counted as bare."
-N68E095-01,6,Russia,"Putorana Plateau, eastern part: tableland with a dendritic valley network",no,"Clear image: brown plateau tops, green valleys, small snow patches."
-N69E093-02,7,Russia,"Putorana Plateau, northern part: tableland with shallow valleys and a few small lakes",no,"Clear image: a handful of small dark lakes on the plateau, each a few pixels; they are not the bulk of the site. Tundra on the tops."
-S21W070-01,8,Chile,"Atacama Desert, piedmont east of the Pampa del Tamarugal: bare alluvial slopes",no,"Clear image: tan bare ground, no white salt crust and no dune pattern at this scale. Inside a known analog region."
-N68E094-01,9,Russia,Putorana Plateau: tableland with a dense valley network,no,"Clear image: brown plateau tops, green valleys."
-N68E093-02,10,Russia,Putorana Plateau: tableland; a valley lake to the north-east,no,Clear image: the lake lies in a valley floor outside the plateau surface that forms the site.
-N82W031-01,11,Greenland,"Ice-free rugged ground in southern Peary Land, south of a small ice cap",no,"The ice cap and an outlet glacier fill the north-west quarter of the image, about 15 to 20 km from the site centre; the site itself is bare ground (2025-08-15 image), land cover 0% ice. Partly under cloud on the stored image."
-N65W172-01,12,Russia,"Chukotka Peninsula: a rocky ridge in hilly tundra, lagoons and a lake nearby",no,"Clear image: the site is the ridge, not the water bodies. The ground around it is red-brown autumn tundra, which the land-cover map counts as bare: vegetation is under-reported here."
-N68E094-02,13,Russia,Putorana Plateau: tableland with deep forested valleys,no,Clear image.
-N62W074-01,14,Canada,"Northern Ungava Peninsula, near Hudson Strait: rocky tundra plateau",unsure,"Every candidate date is hazy; the ground cannot be judged. The Canadian Shield here has many small lakes: what the surface between them is (rock, tundra, water) has to be checked on a clear image or a map before the site is shown. Its closed-depression share is zero in the median cell, so lake basins are not what makes it a candidate."
-N68E094-03,15,Russia,Putorana Plateau: tableland; a valley lake to the north-west,no,Clear image: the lake is in a valley outside the site.
-N69E092-01,16,Russia,"Putorana Plateau, western part: tableland with small lakes in shallow valleys",no,"Clear image: a few small lakes within the image, none large; snow patches on the plateau."
-N82W029-01,17,Greenland,Ice-free dissected ground in southern Peary Land with small ice patches,no,Partly under cloud; where visible the ground is bare and dissected. The ice patches are small and lie outside the site centre.
-N81W072-01,18,Canada,"Hazen Plateau, northern Ellesmere Island: bare, finely dissected polar desert south of Lake Hazen",no,"Clear image (2023-08-15): tan bare ridges and gullies; the lake is at the edge of the image, small ice patches to the south."
-N69E092-02,19,Russia,"Putorana Plateau, western part: broad tableland with snow patches",no,Clear image.
-N68E093-03,20,Russia,Putorana Plateau: tableland cut by a valley with a long lake,no,Clear image: the lake fills a valley floor; the site is the plateau around it.
-N69E094-01,21,Russia,Putorana Plateau: tableland with a valley lake,no,Clear image.
-N71W078-01,22,Canada,Northern Baffin Island: upland,unsure,Mostly under cloud on every candidate date; brown ground shows through in places.
-N69E096-01,23,Russia,"Putorana Plateau, north-eastern part: gently dissected tableland",no,Clear image.
+N69E093-01,1,Russia,Putorana Plateau: flat-topped basalt tableland cut by deep valleys,no,"Clear image: brown plateau tops, dark green valleys, a long narrow lake in one valley floor away from the site. The plateau tops carry tundra and lichen, which the land-cover map counts as bare."
+N68E093-01,2,Russia,Putorana Plateau: tableland between forested valleys,no,"Clear image: brown plateau tops, green valleys. Tundra and lichen on the tops, counted as bare."
+N68E095-01,3,Russia,"Putorana Plateau, eastern part: tableland with a dendritic valley network",no,"Clear image: brown plateau tops, green valleys, small snow patches."
+N69E093-02,4,Russia,"Putorana Plateau, northern part: tableland with shallow valleys and a few small lakes",no,"Clear image: a handful of small dark lakes on the plateau, each a few pixels; they are not the bulk of the site. Tundra on the tops."
+S21W070-01,5,Chile,"Atacama Desert, piedmont east of the Pampa del Tamarugal: bare alluvial slopes",no,"Clear image: tan bare ground, no white salt crust and no dune pattern at this scale. Inside a known analog region."
+N68E094-01,6,Russia,Putorana Plateau: tableland with a dense valley network,no,"Clear image: brown plateau tops, green valleys."
+N68E093-02,7,Russia,Putorana Plateau: tableland; a valley lake to the north-east,no,Clear image: the lake lies in a valley floor outside the plateau surface that forms the site.
+N65W172-01,8,Russia,"Chukotka Peninsula: a rocky ridge in hilly tundra, lagoons and a lake nearby",no,"Clear image: the site is the ridge, not the water bodies. The ground around it is red-brown autumn tundra, which the land-cover map counts as bare: vegetation is under-reported here."
+N68E094-02,9,Russia,Putorana Plateau: tableland with deep forested valleys,no,Clear image.
+N62W074-01,10,Canada,"Northern Ungava Peninsula, near Hudson Strait: rocky tundra plateau",unsure,"Every candidate date is hazy; the ground cannot be judged. The Canadian Shield here has many small lakes: what the surface between them is (rock, tundra, water) has to be checked on a clear image or a map before the site is shown. Its closed-depression share is zero in the median cell, so lake basins are not what makes it a candidate."
+N68E094-03,11,Russia,Putorana Plateau: tableland; a valley lake to the north-west,no,Clear image: the lake is in a valley outside the site.
+N69E092-01,12,Russia,"Putorana Plateau, western part: tableland with small lakes in shallow valleys",no,"Clear image: a few small lakes within the image, none large; snow patches on the plateau."
+N81W072-01,13,Canada,"Hazen Plateau, northern Ellesmere Island: bare, finely dissected polar desert south of Lake Hazen",no,"Clear image (2023-08-15): tan bare ridges and gullies; the lake is at the edge of the image, small ice patches to the south."
+N82W026-01,14,Greenland,"Ice-free dissected upland in southern Peary Land, a polar desert; valley network, snow patches on ridges",no,"Bare brown ground with valleys on the 2025-08-15 image; the image now stored (2023-08-15) is veiled by thin cloud. No ice cap, lake, salt flat or dune field on the site; land cover gives 0% ice."
+N69E092-02,15,Russia,"Putorana Plateau, western part: broad tableland with snow patches",no,Clear image.
+N82W028-01,16,Greenland,Ice-free dissected plateau in southern Peary Land with a dendritic valley network,no,"Clear image: grey-brown bare ground and incised valleys; small ice patches lie north-west of the site, not on it."
+N82W031-01,17,Greenland,"Ice-free rugged ground in southern Peary Land, south of a small ice cap",no,"The ice cap and an outlet glacier fill the north-west quarter of the image, about 15 to 20 km from the site centre; the site itself is bare ground (2025-08-15 image), land cover 0% ice. Partly under cloud on the stored image."
+N68E093-03,18,Russia,Putorana Plateau: tableland cut by a valley with a long lake,no,Clear image: the lake fills a valley floor; the site is the plateau around it.
+N69E094-01,19,Russia,Putorana Plateau: tableland with a valley lake,no,Clear image.
+N82W027-01,20,Greenland,"Same dissected plateau as rank 3, the tile to the east",no,Bare dissected ground on the 2025-08-15 image; the image now stored is veiled by thin cloud. No ice on the site.
+N71W078-01,21,Canada,Northern Baffin Island: upland,unsure,Mostly under cloud on every candidate date; brown ground shows through in places.
+N69E096-01,22,Russia,"Putorana Plateau, north-eastern part: gently dissected tableland",no,Clear image.
+N82W029-01,23,Greenland,Ice-free dissected ground in southern Peary Land with small ice patches,no,Partly under cloud; where visible the ground is bare and dissected. The ice patches are small and lie outside the site centre.
 N19W156-01,24,United States of America,"Mauna Loa, Island of Hawaii: lava flows on the upper flanks",no,Clear image: dark lava flow fields. A known analog.
 N69E093-03,25,Russia,Putorana Plateau: tableland with a valley lake,no,Clear image.
 N68E093-04,26,Russia,Putorana Plateau: tableland with a dense forested valley network,no,Clear image.

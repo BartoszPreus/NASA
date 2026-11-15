@@ -226,6 +226,54 @@ def best_window(P, side):
     return float(S[r, c]), (r + h0, c + h0)
 
 
+def best_window_rect(P, rows, cols):
+    """Job J43: like best_window, but for a rows x cols window clipped to the grid (rows <= R, cols <= C), so a
+    grid narrower than the window uses all its columns (or rows) and never the whole site by default."""
+    from scipy.ndimage import uniform_filter
+    R, C = P.shape
+    rows, cols = max(1, min(int(rows), R)), max(1, min(int(cols), C))
+    S = uniform_filter(P.astype(np.float64), size=(rows, cols), mode="constant") * rows * cols
+    hr, hc = rows // 2, cols // 2
+    S = S[hr:R - (rows - 1 - hr), hc:C - (cols - 1 - hc)]
+    i = int(np.argmax(S))
+    r, c = divmod(i, S.shape[1])
+    return float(S[r, c]), (r + hr, c + hc)
+
+
+# Job J43 (docs/VALIDATION.md "Ranking key on narrow polar tiles"). clip (default since J43) = the J18 window of
+# side x side cells (side = round(15 km / cell_m) = 8 at 1,979 m), clipped to the tile grid: min(side, R) x
+# min(side, C); on a tile wide enough for the window it is exactly the J18 key. legacy = the J18 rule before J43: the
+# WHOLE site when the tile grid has fewer rows or columns than side (one-degree tiles north of about 82 N have 7
+# columns), which keyed the southern Peary Land sites by their whole area. physical = a 15 x 15 km window from the
+# actual cell height (dlat) and width (dlon * cos(lat)), clipped to the tile; it also flips some tiles with cells
+# 2.00 km wide from 8 to 7 columns by rounding (data/validation/window_rule/window_rule.json).
+WINDOW_RULES = ("clip", "legacy", "physical")
+DEFAULT_WINDOW_RULE = "clip"
+
+
+def grid_step(v, idx):
+    """Degrees per grid step from the span of the coordinate over the span of the row (or column) index, robust to
+    missing rows that make the median spacing of _spacing a multiple of the step. None when the span is zero."""
+    v, idx = np.asarray(v, float), np.asarray(idx, float)
+    d = float(idx.max() - idx.min()) if len(idx) else 0.0
+    return abs(float(v.max() - v.min())) / d if d > 0 else None
+
+
+def window_shape(rule, side, R, C, dlat, dlon, lat):
+    """(rows, cols) of the ranking window for a tile, or None for the legacy rule (best_window with its fallback)."""
+    if rule == "legacy":
+        return None
+    if rule == "clip":
+        return min(side, R), min(side, C)
+    if rule == "physical":
+        h_km = float(dlat) * 111.32
+        w_km = float(dlon) * 111.32 * math.cos(math.radians(float(lat)))
+        rows = max(1, int(round(BASE_REGION_KM / h_km)))
+        cols = max(1, int(round(BASE_REGION_KM / w_km)))
+        return min(rows, R), min(cols, C)
+    raise ValueError("unknown window rule %r" % rule)
+
+
 def window_side(cell_m):
     return max(1, int(round(BASE_REGION_KM * 1000.0 / float(cell_m))))
 
@@ -236,7 +284,8 @@ def site_name_region(reg_scores):
     return max(pool, key=pool.get)
 
 
-def find_sites(scored, regions, min_cells=MIN_CELLS, target=None, geometry=True, rank_key=DEFAULT_RANK_KEY):
+def find_sites(scored, regions, min_cells=MIN_CELLS, target=None, geometry=True, rank_key=DEFAULT_RANK_KEY,
+               window_rule=DEFAULT_WINDOW_RULE):
     """Return (sites list of dicts, per-row site_id array). `target`: region whose p is in p_all (regions[0])."""
     target = target or regions[0]
     key = RANK_KEYS[rank_key]
@@ -258,6 +307,11 @@ def find_sites(scored, regions, min_cells=MIN_CELLS, target=None, geometry=True,
         comp = lab[cand["row"].to_numpy(int), cand["col"].to_numpy(int)]
         cell_km2 = float(t["cell_m"].iloc[0]) ** 2 / 1e6
         side = window_side(t["cell_m"].iloc[0])
+        wshape = window_shape(
+            window_rule, side, R, C, grid_step(t["lat"], t["row"]) or dlat, grid_step(t["lon"], t["col"]) or dlon,
+            t["lat"].mean())
+        if wshape == (side, side):
+            wshape = None  # the window fits the tile: the J18 computation, so the key is bit-identical
         tile_sites = []
         for k in range(1, n + 1):
             c = cand[comp == k]
@@ -266,7 +320,7 @@ def find_sites(scored, regions, min_cells=MIN_CELLS, target=None, geometry=True,
             reg_scores = {r: float(np.median(c[p_col(r, target)])) for r in regions if p_col(r, target) in c}
             P = np.zeros((R, C))
             P[c["row"].to_numpy(int), c["col"].to_numpy(int)] = c["p_all"].to_numpy(float)
-            bw, (wr, wc) = best_window(P, side)
+            bw, (wr, wc) = best_window(P, side) if wshape is None else best_window_rect(P, *wshape)
             wa = float(c["p_all"].sum()) * cell_km2
             s = {"tile": tile, "lat": float(c["lat"].mean()), "lon": float(c["lon"].mean()),
                  "n_cells": int(len(c)),
@@ -574,6 +628,12 @@ def main(argv=None):
     ap.add_argument("--rank-key", default=DEFAULT_RANK_KEY, choices=sorted(RANK_KEYS),
                     help="best_window = similarity-weighted area of the best 15 x 15 km window of the site "
                          "(default); capped_area = weighted area capped at 225 km2; weighted_area = before J18")
+    ap.add_argument("--window-rule", default=DEFAULT_WINDOW_RULE, choices=list(WINDOW_RULES),
+                    help="window of best_window_km2 (job J43): clip = side x side cells (15 km / cell_m) clipped to "
+                         "the tile grid (default); legacy = the same window but the whole site when the tile grid is "
+                         "narrower (J18 before J43); physical = 15 x 15 km from the actual cell height and width, "
+                         "clipped to the tile. Non-default rules are variants: they need --out-dir outside "
+                         "data/sites/, file names get the suffix _<rule>_window")
     ap.add_argument("--flagged", default="last", choices=["last", "keep"],
                     help="sites with artefact_flag: ranked after all unflagged sites (default) or ignored")
     ap.add_argument("--compare-targets", nargs="*", default=None,
@@ -593,7 +653,11 @@ def main(argv=None):
     variant = a.bare_col != "bare"
     if variant and os.path.abspath(a.out_dir) == os.path.abspath(paths.SITES):
         raise SystemExit("--bare-col %s is a variant: give --out-dir outside %s" % (a.bare_col, paths.rel(paths.SITES)))
-    sfx = "_" + a.bare_col if variant else ""
+    if a.window_rule != DEFAULT_WINDOW_RULE and os.path.abspath(a.out_dir) == os.path.abspath(paths.SITES):
+        raise SystemExit("--window-rule %s is a variant: give --out-dir outside %s"
+                         % (a.window_rule, paths.rel(paths.SITES)))
+    sfx = ("_" + a.bare_col if variant else "") + (
+        "_%s_window" % a.window_rule if a.window_rule != DEFAULT_WINDOW_RULE else "")
 
     def out_name(p):
         b, e = os.path.splitext(os.path.basename(p))
@@ -632,7 +696,8 @@ def main(argv=None):
           "0.10: %d), never candidates" % (int(scored["candidate"].sum()), int((scored["candidate"] & flags).sum()),
                                           nolc, nolc_p))
 
-    sites, site_of_row = find_sites(scored, regions, a.min_cells, target=a.target, rank_key=a.rank_key)
+    sites, site_of_row = find_sites(scored, regions, a.min_cells, target=a.target, rank_key=a.rank_key,
+                                    window_rule=a.window_rule)
     for s in sites:
         s["target"], s["rank_key"] = a.target, RANK_KEYS[a.rank_key]
         s.setdefault("artefact_flag", False)
@@ -663,7 +728,7 @@ def main(argv=None):
     pq.write_table(tbl, os.path.join(a.raw_dir, out_name(paths.SCORED_FULL)))
     compact = scored[scored["candidate"] | (scored["p_all"] >= 0.05)]
     # a variant's compact table (as large as the default one) stays in the git-ignored raw folder
-    compact[keep].to_parquet(os.path.join(a.raw_dir if variant else a.out_dir, out_name(paths.SCORED_COMPACT)),
+    compact[keep].to_parquet(os.path.join(a.raw_dir if sfx else a.out_dir, out_name(paths.SCORED_COMPACT)),
                              index=False)
     # Per-tile summary: the unit that stays stable when the grid is shifted or resized (docs/VALIDATION.md).
     ok = scored["valid"]

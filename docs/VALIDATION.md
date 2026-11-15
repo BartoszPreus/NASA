@@ -103,6 +103,28 @@ What the numbers say: the strict leaders are high, dry, mid-latitude deserts (At
 
 What the shortened run alone cannot show (the full run above answers it): which sites outside the default top 100 move up into the top 30 under the strict mask, and the new rank of a surviving site (survivors shrink, e.g. N82W031-01 from 47 to 6 cells).
 
+The shortened run and its table above were made on the top 100 before J43 (next section); J43 changed one member of the default top 100 (N82W066-01 out, N68E096-03 in), and the shortened run was not repeated. The full run (`full_run` of `landcover_sensitivity.json`) was rerun after J43.
+
+## Ranking key on narrow polar tiles (J43)
+
+The ranking key `best_window_km2` is the similarity-weighted area of the best window of 8 x 8 cells (15 km / 1,979 m, rounded) inside a site. Until J43 (issue #30) `pipeline.sites.best_window` returned the weighted area of the **whole site** when the tile's grid had fewer than 8 rows or columns. One-degree tiles near 82 N have 7 columns of 1.99 km, so the southern Peary Land sites there were ranked by their whole area while every other site was capped at one window. Since J43 the default (`--window-rule clip`) clips the window to the tile (8 x 7 cells on those tiles); on every tile with at least 8 rows and columns the key is unchanged. The old rule stays available as `--window-rule legacy` and reproduces the former ranking byte for byte (`cmp` against the committed file before J43). Data: `data/validation/window_rule/window_rule.json` (`python -m pipeline.run window-rule`); old rankings `data/validation/window_rule/ranking_legacy_window.csv` and `ranking_bare_strict_legacy_window.csv`.
+
+| What | Value | File and key |
+|---|---|---|
+| Tiles with fewer than 8 rows or columns | 140 of 2,060 | `window_rule.json`, `tiles_narrow`, `tiles` |
+| Sites on such tiles: default / strict mask | 62 of 3,175 / 17 of 1,561 | `masks.default.sites_on_narrow_tiles`, `masks.bare_strict.sites_on_narrow_tiles` |
+| Sites keyed by the whole-site fallback (key falls when clipped): default / strict | **10** (all at 82.2-82.7 N) / **0** | `masks.default.sites_keyed_by_fallback`, `masks.bare_strict.sites_keyed_by_fallback`, list in `masks.default.fallback_sites` |
+| N82W026-01: key, rank | 86.17 -> 46.90 km², 1 -> 14 | `masks.default.old_top30_new_rank`, row `N82W026-01` |
+| N82W028-01: key, rank | 75.54 -> 46.35 km², 3 -> 16 | same, row `N82W028-01` |
+| N82W027-01: key, rank | 68.77 -> 43.77 km², 4 -> 20 | same, row `N82W027-01` |
+| New rank 1 | N69E093-01 (Putorana Plateau), 81.48 km², rank 2 before | `masks.default.new_top10` |
+| Default top 10 / 30 / 100 kept | 7 / **30** / 99 | `masks.default.overlap` |
+| Default top 30 / top 100 sites whose rank changed | 23 / 53 | `data/sites/ranking.csv` against `data/validation/window_rule/ranking_legacy_window.csv`, column `rank` |
+| Strict ranking | no key and no rank changed | `masks.bare_strict.sites_changing_key` = 0, `overlap` 10 / 30 / 100 |
+| Alternative not chosen: 15 x 15 km from the actual cell width | same keys on all narrow tiles, plus 6 sites on wide tiles where 15 / 2.00 km rounds to 7 columns | `masks.default_physical_alternative.sites_changing_key_elsewhere` |
+
+The three southern Peary Land sites at ranks 1, 3 and 4 held those ranks only because of the fallback. The set of the default top 30 does not change (so its region split, Putorana 16, southern Peary Land 5, northern Ungava 2, northern Baffin 2, Polar Urals 1, Chukotka 1, Hazen Plateau 1, Atacama / Puna 1, Mauna Loa 1, and the literature counts 2 / 10 / 18 stay); only the order inside it does.
+
 ## Limits
 
 The metric compares terrain shape. A high score gives no evidence of matching regolith, temperatures, or conditions for a lunar base. The ROC uses catalogued point analogs and the scanned background, which can contain unrecorded analogs. Nearby tiles can share landforms, so the interval describes the tile bootstrap and does not account for spatial dependence.
@@ -129,11 +151,11 @@ How far the rank of each of the top 100 sites moves when its inputs change (`val
 
 | Variant (what changes) | Published top 10 still in top 10 | Published top 30 still in top 30 | Key in `rank_uncertainty.json` |
 |---|---|---|---|
-| Lunar reference bootstrap: the 1,575 lunar cells resampled 200 times, seed 20261115 | 5-95% rank interval at most **3** places wide (median **2.5**) | **29** of 30 in the top 30 in at least half of the runs, **25** in at least 90%; median run keeps **28** | `bootstrap.top10_interval_width_max`, `bootstrap.top10_interval_width_median`, `bootstrap.top30_sites_in_top30_in_at_least_half_of_runs`, `bootstrap.top30_sites_in_top30_in_at_least_90pct_of_runs`, `bootstrap.top30_kept_per_run_median` |
+| Lunar reference bootstrap: the 1,575 lunar cells resampled 200 times, seed 20261115 | 5-95% rank interval at most **4** places wide for ranks 1-9, **22** for rank 10 (N62W074-01, 9 to 31); median **2** | **29** of 30 in the top 30 in at least half of the runs, **25** in at least 90%; median run keeps **28** | `bootstrap.top10_interval_width_max`, `bootstrap.top10_interval_width_median`, `bootstrap.top30_sites_in_top30_in_at_least_half_of_runs`, `bootstrap.top30_sites_in_top30_in_at_least_90pct_of_runs`, `bootstrap.top30_kept_per_run_median` |
 | Control: reference rebuilt from all lunar cells, no resampling | **10** | **29** | `variants.control.top10_kept`, `variants.control.top30_kept` |
-| NASADEM + MODIS where NASADEM exists (56 S-60 N) | **9** | **28**; only **2** of the top 30 lie in NASADEM tiles, and neither stays (rank 8, Chile, has no candidate cell; Mauna Loa goes from 24 to 57) | `variants.nasadem.top10_kept`, `variants.nasadem.top30_kept`, `variants.nasadem.top30_in_nasadem_tiles`, `variants.nasadem.top30_kept_of_nasadem_tiles` |
-| Slopes left out (s240, s570) | **3** | **13** | `variants.no_slopes.top10_kept`, `variants.no_slopes.top30_kept` |
-| Roughness left out (r200-r1600) | **3** | **8** | `variants.no_roughness.top10_kept`, `variants.no_roughness.top30_kept` |
-| Depressions left out (dep_frac, dep_depth) | **6** | **21** | `variants.no_depressions.top10_kept`, `variants.no_depressions.top30_kept` |
+| NASADEM + MODIS where NASADEM exists (56 S-60 N) | **9** | **28**; only **2** of the top 30 lie in NASADEM tiles, and neither stays (rank 5, Chile, has no candidate cell; Mauna Loa goes from 24 to 57) | `variants.nasadem.top10_kept`, `variants.nasadem.top30_kept`, `variants.nasadem.top30_in_nasadem_tiles`, `variants.nasadem.top30_kept_of_nasadem_tiles` |
+| Slopes left out (s240, s570) | **2** | **11** | `variants.no_slopes.top10_kept`, `variants.no_slopes.top30_kept` |
+| Roughness left out (r200-r1600) | **0** | **5** | `variants.no_roughness.top10_kept`, `variants.no_roughness.top30_kept` |
+| Depressions left out (dep_frac, dep_depth) | **6** | **20** | `variants.no_depressions.top10_kept`, `variants.no_depressions.top30_kept` |
 
-The rank is robust to the size of the lunar sample: the bootstrap moves the top 10 by a few places. It is not robust to which features are used: without roughness only 8 of the top 30 stay, so the ranking is a statement about the eight features together, not about any one of them. The NASADEM row tests almost nothing at the top, because 28 of the top 30 sites lie north of 60 N where only Copernicus exists. The grid-shift variant was not repeated per site: it needs the elevation tiles, which are not in git; the historical pilot result is in `effectiveness.json` `stability.legacy_grid`.
+The rank is robust to the size of the lunar sample: the bootstrap moves the top 10 by a few places. It is not robust to which features are used: without roughness only 5 of the top 30 stay, so the ranking is a statement about the eight features together, not about any one of them. The NASADEM row tests almost nothing at the top, because 28 of the top 30 sites lie north of 60 N where only Copernicus exists. The grid-shift variant was not repeated per site: it needs the elevation tiles, which are not in git; the historical pilot result is in `effectiveness.json` `stability.legacy_grid`.

@@ -15,13 +15,22 @@ squashed copy as a new repository); the Polish PDF; literature verdicts (Hazen k
 sites, six Ngari rows, four proposed known-analog rows of #26); strict ranks 13 and 28 and the HKU and PolarTREC
 pages; a Russian reader for #21; accept #19; hosting, demo link, site package, phone check; the form and slides.
 
+**J43 (#30, 11:30): the default ranking changed.** The ranking window no longer falls back to the whole site on
+tiles with fewer than 8 columns (`--window-rule clip`, default; `--window-rule legacy` reproduces the old
+ranking, kept as `data/validation/window_rule/ranking_legacy_window.csv`). Rank 1 is now N69E093-01 (Putorana,
+81.48 km2); the southern Peary Land sites at old ranks 1, 3, 4 are 14, 16, 20. The top-30 set, its regions and
+the literature counts 2 / 10 / 18 are unchanged; the strict ranking is unchanged; rank stability numbers changed
+(no slopes 11, no roughness 5, no depressions 20 of 30; `data/validation/rank_uncertainty.json`).
+
 **State of the result** (story order: measured -> default -> strict -> validation -> literature -> no discovery;
 every number with file and key: `docs/pitch/NUMBERS.md`, all recomputed from their data files on #4 at 08:10).
 - Method: terrain shape between about 200 m and 1.6 km in 2 km cells, the same code on LOLA (seven south-pole
   base regions pooled, `base_regions`) and on Copernicus; 1,758,778 valid cells in 2,060 tiles; 3,175 sites.
 - Default ranking `data/sites/ranking.csv`: top 30 mostly Arctic moss-and-lichen tundra (16 Putorana sites),
   because the default mask counts WorldCover class 100 as bare. Literature: 2 established, 10 mentioned, 18 not
-  found; rank 1, southern Peary Land, is named a Mars analog in a 2025 thesis (J35 #21), so it is not new.
+  found; southern Peary Land (ranks 14, 16, 17, 20, 23) is named a Mars analog in a 2025 thesis (J35 #21), so it
+  is not new. Rank 1 is Putorana N69E093-01 since J43 (#30): Peary Land held ranks 1, 3, 4 only because the
+  ranking window fell back to the whole site on 7-column tiles (`data/validation/window_rule/window_rule.json`).
 - Strict ranking `data/validation/landcover_sensitivity/ranking_bare_strict.csv` (class 60 only, J33 #19):
   3 of the default top 30 remain; Atacama/Puna 13, western Tibet incl. Ladakh 8, southern Peru/Arica 4, Hazen
   Plateau 3, Mauna Loa 1, other 1. Warmer, not closer to lunar temperatures (day 296 K against 261 K; night about
@@ -179,8 +188,9 @@ order; the README, slides, pitch and Q&A follow it.
 4. **Validation.** Slope code against NASA's lunar map: 0.042 deg. Tile recovery AUC 0.531 (0.396-0.668),
    consistent with chance. Enrichment around 22 known lunar analogs: median 1.02 against 0.39 for random circles,
    11 of 22 above the rate (= random 95th percentile), 2.8% of random runs reach the median: borderline, say so.
-   Ranks stable to the lunar sample (top 10 at most 3 places, a typical run keeps 28 of 30), sensitive to the
-   feature set (top 30 kept: 13 without slopes, 8 without roughness, 21 without depressions). Elevation model:
+   Ranks stable to the lunar sample (ranks 1-9 at most 4 places, rank 10 spans 9-31, a typical run keeps 28 of
+   30), sensitive to the feature set (top 30 kept: 11 without slopes, 5 without roughness, 20 without
+   depressions; after J43 #30). Elevation model:
    NASADEM and Copernicus agree on slopes, not on depressions (Spearman 0.637, 21 of 50 tiles). Dune-field flag:
    the J26 temperature and moisture check (978 sites) does not confirm that it marks dry sand; it stays a terrain
    rule.

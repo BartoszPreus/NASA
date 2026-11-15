@@ -144,8 +144,8 @@ class Earth:
 
 def _best_window(P, side):
     R, C = P.shape
-    if R < side or C < side:
-        return float(P.sum()), None
+    if R < side or C < side:  # J43 default window rule (clip): the window clipped to the tile, never the whole site
+        return sites.best_window_rect(P, min(side, R), min(side, C))[0], None
     S = uniform_filter(P.astype(np.float64), size=side, mode="constant") * side * side
     h0 = side // 2
     return float(S[h0:R - (side - 1 - h0), h0:C - (side - 1 - h0)].max()), None
