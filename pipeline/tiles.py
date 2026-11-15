@@ -16,12 +16,14 @@ Steps of --select (all remote reads are small, overview-level COG reads over HTT
     baseline (2 overview pixels), x and y pooled, in degrees; pixels at exactly 0 m (sea) are ignored.
  4. Keep coarse_slope >= MIN_COARSE_SLOPE, rank by |ln(s570_pred / 4.96)| where s570_pred is the fine
     570 m slope predicted from the coarse slope (calibrated on the pilot tiles, see CALIB) and 4.96 deg is
-    the lunar median s570 of the polar reference; take the top N_TOP.
+    the lunar median s570 of the polar reference. Selected from this step: every non-polar tile (|lat| < 60)
+    that passes the bare, ice and slope thresholds, whatever its rank. N_TOP does not limit the selection:
+    it only adds the reason "rank" to the tiles ranked 1 to N_TOP (polar tiles are added by step 5).
  5. Always add: the pilot tiles, the tiles of data/reference/known_analogs.csv (rows that parse), and polar land
     (|lat| >= 60) that passes the bare and ice thresholds regardless of step 4.
 
-Output order = scan priority (pilot and known tiles, then the top N_TOP by rank, then the remaining polar
-tiles: those with coarse slope >= MIN_COARSE_SLOPE by rank, then the flatter ones), so `earth_scan --shard i/N` (index mod N)
+Output order = scan priority (pilot and known tiles, then every non-polar tile that passes step 4 by rank,
+then the polar tiles: those with coarse slope >= MIN_COARSE_SLOPE by rank, then the flatter ones), so `earth_scan --shard i/N` (index mod N)
 splits the work evenly and the best tiles are done first.
 
 Data: Copernicus DEM GLO-30 https://copernicus-dem-30m.s3.amazonaws.com/ (tileList.txt, COG tiles),
