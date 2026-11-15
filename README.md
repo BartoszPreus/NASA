@@ -121,6 +121,10 @@ The temperature and moisture checks leave the dune-field flag's ability to ident
 
 A literature check identified the shortlisted places. Whether they appear in analog literature remains unverified. [Literature check](docs/NOVELTY.md)
 
+## Next steps
+
+RADARSAT Constellation Mission compact polarimetry (circular transmit, linear receive, the design of LRO Mini-RF) would give the circular polarisation ratio on Earth defined as on the Moon, but on 15 Nov 2026 we found no RCM scene we could use: the open RCM CEOS-ARD collection had no item over Devon Island (Haughton) or over the Canadian top sites, and a public EODMS account may download only detected GRD/GCD products of scenes entirely inside Canadian land borders, which does not give the complex data the ratio needs. A vetted RCM account (Canadian Space Agency) or a tasked acquisition would be needed; see [docs/sources/j28.md](docs/sources/j28.md).
+
 ## Team, SI and licence
 
 **Team Zodiak** · Bartosz Preus, Hubert Włodzimierz Woźniak, Wiktor Witczak and Oliwier Gołembiewski · NASA Space Apps Poznań.
