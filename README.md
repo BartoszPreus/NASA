@@ -15,7 +15,7 @@ Zodiak maps Earth terrain that resembles candidate lunar south-pole base regions
 5. Scan selected Earth tiles with Copernicus elevation. Check a common subset against NASADEM.
 6. Mask Earth cells using WorldCover bare-ground, ice and water fractions. Use MODIS land cover for the NASADEM comparison.
 7. Score each cell by how far its feature vector lies from the distribution of lunar reference cells.
-8. Join neighbouring candidates into sites and rank their best 15 × 15 km windows. Keep likely dune fields visible and put them last in the ranking.
+8. Join neighbouring candidates into sites and rank their best 15 × 15 km windows. A terrain rule puts patches with dune-like relief last and keeps them visible.
 9. Attach imagery, climate and surface conditions for context alongside the lunar instrument products.
 10. Compare with control tiles, known analogs, independent laser profiles and lidar. Review the leading regions against imagery and literature.
 
@@ -74,6 +74,8 @@ We acknowledge imagery from NASA's Global Imagery Browse Services (GIBS), part o
 | JAXA | GCOM-W / AMSR2 soil moisture · [source](https://data.earth.jaxa.jp/stac/cog/v1/catalog.json) | Measured surface moisture context from the Earth API monthly normals. | Credit: GCOM-W/AMSR2 Level-3 soil moisture content (JAXA). [Source monthly product DOI](https://doi.org/10.57746/EO.01gs73b17zekqwyj4hh9xpqgy7). |
 | ESA | ESA WorldCover 2021 v200 · [source](https://esa-worldcover.org) · [archive / access](https://registry.opendata.aws/esa-worldcover-vito/) | Primary bare-ground, ice and water mask. | [CC BY 4.0 and map credit](https://esa-worldcover.org/en/data-access); Zanaga et al. (2022), [DOI](https://doi.org/10.5281/zenodo.7254221). |
 
+We reviewed the three Canadian Space Agency challenge resources and left them out because the terrain comparison uses elevation grids and does not process Earth radar imagery. [RADARSAT Constellation Mission](https://www.asc-csa.gc.ca/eng/satellites/radarsat/access-to-data/about.asp) · [RADARSAT-1](https://www.asc-csa.gc.ca/eng/satellites/radarsat1/data-access.asp) · [Synthetic aperture radar tutorial](https://github.com/asc-csa/Synthetic_Aperture_Radar_Tutorial) · [Source register](data/sources.csv)
+
 This data was obtained using JAXA Earth API.
 
 Copernicus attribution: produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. [Provider terms](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM)
@@ -108,11 +110,15 @@ The pipeline uses [Python](https://www.python.org/), [NumPy](https://numpy.org/)
 | Negative controls | No candidates survived the land-cover mask in the four control tiles. |
 | ICESat-2 | Across eight sites, laser slopes at **240 m** were **0.43–1.16×** their grid counterparts, median **0.87×**. Track and grid footprints differ. |
 
-The tile-recovery ROC is under revision in [issue #1](https://github.com/BartoszPreus/NASA/issues/1). See the [full validation report](docs/VALIDATION.md) for scope, evidence keys and caveats.
+At the scale of one-degree tiles, the score does not separate known analog sites from the rest of the scanned land. [Full validation report](docs/VALIDATION.md)
 
 ## Limits
 
-The scan favours selected, mostly bare land and cannot certify global coverage. Tundra lichen, river erosion, thaw basins and dunes can resemble lunar relief in a grid. Rankings depend on the elevation model and cell grid. Terrain similarity alone cannot establish regolith, thermal conditions, illumination, access or permission to conduct field work. The lunar analysis covers the south-pole targets; Mars remains a separate calibration task. The [final literature review](docs/NOVELTY.md) records established, mentioned and unreported sites, with checks the team should open before presenting an individual candidate.
+The scan favours selected, mostly bare land and cannot certify global coverage. Tundra lichen, river erosion, thaw basins and dunes can resemble lunar relief in a grid. Rankings depend on the elevation model and cell grid. Terrain similarity alone cannot establish regolith, thermal conditions, illumination, access or permission to conduct field work. The lunar analysis covers the south-pole targets. Mars remains a separate calibration task.
+
+The temperature and moisture checks leave the dune-field flag's ability to identify dry sand unverified. [Surface-data validation](docs/sources/j26.md)
+
+A literature check identified the shortlisted places. Whether they appear in analog literature remains unverified. [Literature check](docs/NOVELTY.md)
 
 ## Team, SI and licence
 

@@ -22,9 +22,9 @@ https://github.com/BartoszPreus/NASA
 
 ## Detailed Project Description
 
-Zodiak applies the same slope, roughness and closed-depression measurements to NASA LOLA lunar elevation and Copernicus Earth elevation. The default reference pools seven candidate lunar base regions. ESA WorldCover filters Earth cells by bare ground, ice and water. The pipeline combines connected cells into patches, ranks their best 15 × 15 km windows, and marks dune-like terrain. NASADEM and MODIS provide an alternative Earth input for comparison. NASA Worldview, POWER, Diviner and partner data help explain why a similar landform can still differ sharply in operating conditions.
+Zodiak applies the same slope, roughness and closed-depression measurements to NASA LOLA lunar elevation and Copernicus Earth elevation. The default reference pools seven candidate lunar base regions. ESA WorldCover filters Earth cells by bare ground, ice and water. The pipeline combines connected cells into patches, ranks their best 15 × 15 km windows, and uses a terrain rule to put dune-like relief last. NASADEM and MODIS provide an alternative Earth input for comparison. NASA Worldview, POWER, Diviner and partner data help explain why a similar landform can still differ sharply in operating conditions.
 
-The scanned data yielded 3,175 candidate terrain patches. Our checks include NASA's published lunar slope map, independent ICESat-2 laser tracks, negative controls, and a comparison of known sites with random circles. The method screens terrain for further study. It cannot determine regolith, environmental equivalence, or whether a site is suitable or accessible for a field trial. For the Moon-to-Earth comparison we deliver a reproducible Python pipeline, downloadable results, a ranking map, and a source and validation report.
+The scanned data yielded 3,175 candidate terrain patches. Our checks include NASA's published lunar slope map, independent ICESat-2 laser tracks, negative controls, and a comparison of known sites with random circles. At the scale of one-degree tiles, the score does not separate known analog sites from the rest of the scanned land. The method screens terrain for further study. It cannot determine regolith, environmental equivalence, or whether a site is suitable or accessible for a field trial. For the Moon-to-Earth comparison we deliver a reproducible Python pipeline, downloadable results, a ranking map, and a source and validation report.
 
 ## Use of Super Intelligence (SI)
 
@@ -37,3 +37,5 @@ NASA LRO LOLA elevation from Goddard PGDA drives the lunar reference. NASA LOLA 
 ## Space Agency Partner Data and Other References
 
 We use ESA/Copernicus elevation and ESA WorldCover for Earth terrain and land cover. The ESA Open Science Catalog points to the ESA CCI permafrost cube sampled for context. JAXA G-Portal products accessed through the JAXA Earth API provide GCOM-C/SGLI surface temperature and GCOM-W/AMSR2 soil moisture. USGS 3DEP and Polish GUGiK lidar illustrate scale and resolution. Natural Earth supplies map outlines, and terrain names and known analogs have recorded sources. The [partner and reference tables](https://github.com/BartoszPreus/NASA#partner-agency-data) give provider links, credits and product-specific terms.
+
+We reviewed RADARSAT Constellation Mission, RADARSAT-1 and the Canadian Space Agency radar tutorial and left them out because the terrain comparison uses elevation grids and does not process Earth radar imagery.
