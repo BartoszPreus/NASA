@@ -77,7 +77,7 @@ Until job J16 (Sat 14 Nov evening) all outputs sat flat in `data/out/`; the old 
 | `data/moon/regions.geojson`, `data/moon/hillshade/<region>.png` [`moon_regions.geojson`, `moon_hillshade/`] | J2 | region footprints (lunar lat/lon) and a hillshade per region |
 | `data/moon/instruments/diviner_regions.json` [`moon_diviner_regions.json`] | J13 | Diviner temperatures and ice-stability depths per lunar region |
 | `data/earth/cells/pilot.parquet`, `known.parquet`, `scan_s<NN>of20.parquet` [`earth_cells_pilot.parquet`, `earth_cells_known.parquet`] | J3 | `tile, row, col, lat, lon, cell_m` + features + `bare, veg, ice, water, built, lc_source, valid`; every `*.parquet` here is read by `pipeline.score.load_cells()` |
-| `data/earth/tiles/tiles_scanned.csv`, `SCAN_STATUS.md` [same names] | J3 | `tile, status, n_cells, bare_frac, coarse_slope, seconds, error`; scan status |
+| `data/earth/tiles/tiles_scanned.csv` [same name] | J3 | `tile, status, n_cells, bare_frac, coarse_slope, seconds, error`; scan status (the former `SCAN_STATUS.md` was stale and was removed in J41, issue #27) |
 | `data/earth/tiles/tile_summary.csv` [`tile_summary.csv`] | J4 | per-tile counts of valid, bare and candidate cells, weighted area |
 | `data/sites/scored_compact.parquet` [`earth_scored.parquet`] | J4 | cell keys + `d2_all, p_all, p_amp, p_dep, candidate, site_id` per reference region (cells with `p_all >= 0.05` or candidate; the full table is `data/raw/earth_scored_full.parquet`) |
 | `data/sites/sites.geojson`, `data/sites/ranking.csv` [same names] | J4 | one feature per site, see below |

@@ -146,6 +146,7 @@ until he asks. Older state of this section: the git history of this file (`git l
 
 **The local scan was stopped at 18:52**: the venue network gave 0.26 MB/s for all downloads together, so 28 GB would have taken about 30 hours. With Wiktor's approval the scan now runs on GitHub Actions in a private repository on his account.
 
+- **The runner repository is private**: the repository and run links below open only for its owner, not for readers of this public repository. The scan outputs the results use are committed here (the cell tables in `data/earth/cells/`, the per-tile status in `data/earth/tiles/tiles_scanned.csv`); the runner only executed a copy of the same `pipeline/` scan code.
 - Repository: `witczakw/moon-scan-runner` (private; copy of `pipeline/` scan code, `tiles.txt` with the 2,023 remaining tiles in priority order, workflow `.github/workflows/earth-scan.yml`). Local copy: `scratch/runner/`.
 - Run: https://github.com/witczakw/moon-scan-runner/actions/runs/43623650020 (20 shards in parallel, 3 worker processes each). Check with `gh run view 43623650020 -R witczakw/moon-scan-runner`.
 - Each shard uploads an artifact `cells-<i>` holding `earth_cells_scan_s<NN>of20.parquet` (valid cells, water < 0.5, bare >= 0.5 or no land cover) and its log CSV. Artifacts are kept 30 days. A shard that fails uploads its per-tile caches as `rescue-<i>`.
