@@ -670,7 +670,8 @@ def scan_plan_data(plan, tiles):
     return {"source_file": "data/earth/tiles/tiles_scanned.csv", "n": len(rows),
             "n_without_summary": sum(not row["has_summary"] for row in rows),
             "note": "Tiles with has_summary false were planned and scanned but have no row in "
-                    "data/earth/tiles/tile_summary.csv; neither file records why.",
+                    "data/earth/tiles/tile_summary.csv: none of their cells passed the validity and land "
+                    "filters of the scan (docs/VALIDATION.md, first paragraph).",
             "counts": {"region": count("region"), "status": count("status"), "prio": count("prio")},
             "columns": {name: [row[name] for row in rows] for name in names}}
 

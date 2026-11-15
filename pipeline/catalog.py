@@ -35,8 +35,10 @@ PGDA90_CITE = ("Barker et al. (2023), PSJ 4, 183, doi:10.3847/PSJ/acf3e1; data d
                "NASA public data, the product page asks to cite the paper")
 COP_DEM = ("Copernicus DEM licence, free use with attribution: 'produced using Copernicus WorldDEM-30 (c) DLR e.V. "
            "2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union "
-           "and ESA; all rights reserved' (quoted in docs/sources/j6.md, j10.md; j1.md and j3.md mark the "
-           "attribution sentence UNVERIFIED)")
+           "and ESA; all rights reserved' (read 15 Nov 2026 on https://dataspace.copernicus.eu/explore-data/"
+           "data-collections/copernicus-contributing-missions/collections-description/COP-DEM: 'The GLO-30 and GLO-90 "
+           "datasets are available worldwide with a free license'; AWS registry: cite as 'Copernicus Digital "
+           "Elevation Model (DEM) was accessed on DATE from https://registry.opendata.aws/copernicus-dem')")
 
 # ------------------------------------------------------------------------------------------- external sources
 SOURCES = [
@@ -49,14 +51,18 @@ SOURCES = [
       "https://wvs.earthdata.nasa.gov/ ; https://worldview.earthdata.nasa.gov/",
       "GIBS acknowledgement requested: 'We acknowledge the use of imagery provided by services from NASA's Global "
       "Imagery Browse Services (GIBS), part of NASA's Earth Science Data and Information System (ESDIS).' "
-      "Worldview-specific citation UNVERIFIED (page returned HTTP 403)", "no", "used", "pipeline/nasa_context.py",
+      "(https://nasa-gibs.github.io/gibs-api-docs/, read 15 Nov 2026: NASA 'promotes full and open sharing of data'). "
+      "Worldview-specific citation UNVERIFIED (https://worldview.earthdata.nasa.gov/ returned HTTP 403, again on 15 Nov)", "no", "used", "pipeline/nasa_context.py",
       "data/raw/nasa_context/wvs/"),
     S("hls_gibs", "NASA", "Harmonized Landsat Sentinel-2 (HLS) v2.0 true colour, layers "
       "HLS_S30_Nadir_BRDF_Adjusted_Reflectance and HLS_L30_Nadir_BRDF_Adjusted_Reflectance, 30 m, read through the "
       "Worldview Snapshots API (job J40)", 2,
       "https://wvs.earthdata.nasa.gov/ ; https://www.earthdata.nasa.gov/data/catalog/lpcloud-hlss30-2.0",
-      "GIBS acknowledgement as for worldview_gibs; HLS product citation and DOI UNVERIFIED (Earthdata page returned "
-      "HTTP 403 on 15 Nov 2026); NASA Earth Science Data and Information Policy (open data)", "no", "used",
+      "GIBS acknowledgement as for worldview_gibs; citation from the NASA CMR collection records (read 15 Nov 2026; "
+      "the Earthdata page returned HTTP 403): Neigh, C. et al. (2021), HLS Sentinel-2 Multi-spectral Instrument Surface "
+      "Reflectance Daily Global 30m v2.0, doi:10.5067/HLS/HLSS30.002, and HLS Operational Land Imager Surface "
+      "Reflectance and TOA Brightness Daily Global 30m v2.0, doi:10.5067/HLS/HLSL30.002; licence: NASA Earthdata "
+      "Data Use Policy (https://earthdata.nasa.gov/earth-observation-data/data-use-policy, named in the CMR record)", "no", "used",
       "pipeline/review_strict.py", "data/raw/nasa_context/wvs/"),
     S("pds", "NASA", "NASA Planetary Data System (archive; the PDS products are the rows pds_lola_gdr, "
       "diviner_prp, diviner_pcp, minirf, lend, lamp, lroc)", 3, "https://pds.nasa.gov/",
@@ -169,7 +175,8 @@ SOURCES = [
       "https://power.larc.nasa.gov/api/temporal/climatology/point ; https://power.larc.nasa.gov/docs/referencing/",
       "'The data was obtained from National Aeronautics and Space Administration (NASA) Langley Research Center's "
       "Prediction Of Worldwide Energy Resources (POWER) project funded through the NASA Earth Science Division.' "
-      "Licence UNVERIFIED for POWER specifically (NASA open data policy)", "no", "used", "pipeline/nasa_context.py",
+      "Licence UNVERIFIED for POWER specifically: https://power.larc.nasa.gov/docs/referencing/ and "
+      "https://power.larc.nasa.gov/docs/ (opened 15 Nov 2026) state no licence; NASA open data policy assumed", "no", "used", "pipeline/nasa_context.py",
       "data/raw/nasa_context/power/"),
     S("icesat2_atl06", "NASA", "ICESat-2 ATL06 v7 land ice height, subset through SlideRule (NSIDC DAAC)", 1,
       "https://nsidc.org/data/atl06 ; doi:10.5067/ATLAS/ATL06.007",
@@ -184,8 +191,9 @@ SOURCES = [
       "doi:10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001 (LP DAAC page not opened)",
       "OpenTopography terms (opened): data 'free of all copyright restrictions', attribute the source and "
       "OpenTopography; citation on its page: NASADEM Merged DEM Global 1 arc second V001, 2020, distributed by "
-      "NASA EOSDIS LP DAAC, doi:10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001. LP DAAC's own page UNVERIFIED (HTTP "
-      "403, docs/sources/j17.md)", "no (OpenTopography public mirror; LP DAAC itself needs Earthdata login)",
+      "NASA EOSDIS LP DAAC, doi:10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001. NASA CMR collection record (read 15 Nov "
+      "2026; the LP DAAC and Earthdata pages returned HTTP 403): creator Sean Buckley, release 2020-02-13, licence "
+      "NASA Earthdata Data Use Policy (https://earthdata.nasa.gov/earth-observation-data/data-use-policy)", "no (OpenTopography public mirror; LP DAAC itself needs Earthdata login)",
       "used", "cross-check of the ranking, not its input: pipeline/io_earth.py (dem='nasadem'), "
       "cloud/earth-scan-nasa.yml, validation/nasadem_vs_copdem.py, pipeline.score.dem_policy_from_rule (jobs J17, "
       "J17b, J19)", "data/raw/nasadem/"),
@@ -194,7 +202,9 @@ SOURCES = [
       "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi ; "
       "https://gibs.earthdata.nasa.gov/colormaps/v1.3/MODIS_IGBP_Land_Cover_Type.xml",
       "GIBS acknowledgement as for worldview_gibs (read on nasa-gibs.github.io/gibs-api-docs); MCD12Q1 citation "
-      "UNVERIFIED (LP DAAC page answered HTTP 403, docs/sources/j17.md)", "no", "used",
+      "from the NASA CMR collection record (read 15 Nov 2026; the Earthdata page returned HTTP 403): Friedl, M., "
+      "Sulla-Menashe, D. (2022), MODIS/Terra+Aqua Land Cover Type Yearly L3 Global 500m SIN Grid V061, NASA LP DAAC, "
+      "doi:10.5067/MODIS/MCD12Q1.061; NASA Earth Science Data and Information Policy (open data)", "no", "used",
       "land-cover mask of the NASA variant in the cross-check: pipeline/landcover.py (landcover='modis'), "
       "cloud/earth-scan-nasa.yml, validation/nasadem_vs_copdem.py (jobs J17, J17b)", "data/raw/modis_igbp/"),
     S("modis_lst", "NASA", "MODIS/Terra land surface temperature MOD11C1 v061, 0.05 deg, monthly normals 2012-2021, "
@@ -213,8 +223,9 @@ SOURCES = [
     # --- other agencies and services
     S("esa_worldcover", "ESA", "ESA WorldCover 10 m 2021 v200", "",
       "https://esa-worldcover.org ; https://registry.opendata.aws/esa-worldcover-vito/",
-      "CC BY 4.0 (UNVERIFIED in docs/sources/j1.md, j3.md); citation Zanaga et al. (2022), "
-      "doi:10.5281/zenodo.7254221 (UNVERIFIED)", "no", "used",
+      "CC BY 4.0 (https://esa-worldcover.org/en/data-access, read 15 Nov 2026: 'provided free of charge, without "
+      "restriction of use', full licence CC BY 4.0); citation Zanaga, D. et al. (2022), ESA WorldCover 10 m 2021 "
+      "v200, doi:10.5281/zenodo.7254221", "no", "used",
       "pipeline/landcover.py, pipeline/earth_scan.py, pipeline/tiles.py, validation/effectiveness.py, "
       "validation/landcover_sensitivity.py, validation/landcover_strict_cells.py (job J33)",
       "data/raw/tiles_cache/, data/raw/validation/, data/raw/worldcover/"),
@@ -333,8 +344,6 @@ FILE_MAP = [
      "scan plan in priority order with the status of every tile"),
     ("data/earth/tiles/tile_summary.csv", "python -m pipeline.sites", "data/earth/cells/*.parquet, "
      "data/moon/reference.json", "per tile: valid, bare, terrain-pass and candidate cells, sites, weighted area"),
-    ("data/earth/tiles/SCAN_STATUS.md", "python -m pipeline.checkpoint", "data/earth/tiles/tiles_scanned.csv",
-     "human-readable status of the Earth scan (local loop; paths inside predate layout v2)"),
     ("data/sites/sites.geojson", "python -m pipeline.sites", "data/earth/cells/*.parquet, data/moon/reference.json, "
      "data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet",
      "candidate sites: outline and properties (contract in docs/TASKS.md section 3)"),

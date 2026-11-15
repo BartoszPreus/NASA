@@ -1,6 +1,6 @@
 # Validation of the full Moon analog scan
 
-The final ranking uses the pooled lunar target `base_regions`, the Copernicus elevation policy `copdem`, and the `best_window_km2` ranking key. The committed scan contains **1,758,778 valid cells across 2,060 tiles**. The scan plan contains 2,101 tiles.
+The final ranking uses the pooled lunar target `base_regions`, the Copernicus elevation policy `copdem`, and the `best_window_km2` ranking key. The committed scan contains **1,758,778 valid cells across 2,060 tiles**. The scan plan contains 2,101 tiles. The other 41 tiles (marked `done` in `data/earth/tiles/tiles_scanned.csv`, 39,088 cells) have no row in `tile_summary.csv` because none of their cells reached the committed cell tables: the scan logs give 0 to 5 valid cells per tile (25 in all; `valid` = at least 99% finite pixels and slope at 240 m above 0.02 deg, `pipeline/cells.py`), and `pipeline/earth_scan.py` (`merge_cells`) keeps only valid cells with water under 0.5 and bare at least 0.5, while `tile_summary.csv` is aggregated from the kept cells (`pipeline/sites.py`). 37 of them are Arctic tiles and 4 lie elsewhere (two South Georgia tiles, one tile in French Polynesia, one in the Red Sea); which of the two conditions failed per cell is not recorded, because the per-tile caches are not in git. Details in `docs/sources/j41.md`.
 
 | Check | Result |
 |---|---|
