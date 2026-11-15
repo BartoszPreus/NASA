@@ -6,30 +6,30 @@
  "n_bare_cells": 1305454,
  "base_rate": 0.050043892775999764,
  "min_cells_in_radius": 20,
- "n_known_rows_read": 66,
- "n_sites_tested": 35,
- "sites_with_enrichment_above_1": 15,
+ "n_known_rows_read": 68,
+ "n_sites_tested": 37,
+ "sites_with_enrichment_above_1": 16,
  "median_enrichment": 0.9052076234966342,
  "median_enrichment_point_sites_only": 0.8863187144176218,
- "n_point_sites": 25,
+ "n_point_sites": 27,
  "random": {
   "n_repeats": 500,
-  "median_enrichment_median": 0.3507262922460823,
+  "median_enrichment_median": 0.35769646476337075,
   "median_enrichment_p05_p95": [
-   0.13462738023153567,
-   0.7371596415587448
+   0.13087520666143576,
+   0.727200815049369
   ],
-  "above_1_median": 11.0,
+  "above_1_median": 12.0,
   "above_1_p05_p95": [
    7.0,
-   15.0
+   16.0
   ],
-  "share_of_random_runs_with_median_at_least_ours": 0.02
+  "share_of_random_runs_with_median_at_least_ours": 0.014
  },
  "by_type_median": {
   "cave": 0.9082935585767363,
   "desert": 1.0234293617766044,
-  "impact": 0.8215010629794037,
+  "impact": 0.9325147201387827,
   "polar": 0.9052076234966342,
   "region": 1.063465062353902,
   "volcanic": 0.6595941318235823
@@ -61,6 +61,15 @@
    "bare_cells": 15206,
    "share_lunar_like": 0.1282,
    "enrichment": 2.5612
+  },
+  {
+   "name": "El'gygytgyn impact crater (Chukotka; impact crater in igneous rocks Mars analogue)",
+   "type": "impact",
+   "analog_for": "mars",
+   "radius_km": 20.0,
+   "bare_cells": 167,
+   "share_lunar_like": 0.1257,
+   "enrichment": 2.5128
   },
   {
    "name": "Mauna Kea (PISCES ISRU field tests)",
@@ -270,6 +279,15 @@
    "enrichment": 0.2958
   },
   {
+   "name": "Pingualuit impact crater (Ungava; cold-region impact and crater lake analogue)",
+   "type": "impact",
+   "analog_for": "both",
+   "radius_km": 15.0,
+   "bare_cells": 90,
+   "share_lunar_like": 0.0111,
+   "enrichment": 0.222
+  },
+  {
    "name": "Danakil Depression (Dallol - Erta Ale range; Europlanet field analogue)",
    "type": "region",
    "analog_for": "mars",
@@ -297,11 +315,11 @@
    "enrichment": 0.0
   },
   {
-   "name": "Potrillo volcanic field",
-   "type": "volcanic",
-   "analog_for": "moon",
-   "radius_km": 25.0,
-   "bare_cells": 77,
+   "name": "Makgadikgadi Salt Pans",
+   "type": "desert",
+   "analog_for": "mars",
+   "radius_km": 100.0,
+   "bare_cells": 681,
    "share_lunar_like": 0.0,
    "enrichment": 0.0
   },
@@ -311,6 +329,15 @@
    "analog_for": "both",
    "radius_km": 25.0,
    "bare_cells": 75,
+   "share_lunar_like": 0.0,
+   "enrichment": 0.0
+  },
+  {
+   "name": "Potrillo volcanic field",
+   "type": "volcanic",
+   "analog_for": "moon",
+   "radius_km": 25.0,
+   "bare_cells": 77,
    "share_lunar_like": 0.0,
    "enrichment": 0.0
   },
@@ -329,15 +356,6 @@
    "analog_for": "moon",
    "radius_km": 10.0,
    "bare_cells": 48,
-   "share_lunar_like": 0.0,
-   "enrichment": 0.0
-  },
-  {
-   "name": "Makgadikgadi Salt Pans",
-   "type": "desert",
-   "analog_for": "mars",
-   "radius_km": 100.0,
-   "bare_cells": 681,
    "share_lunar_like": 0.0,
    "enrichment": 0.0
   },

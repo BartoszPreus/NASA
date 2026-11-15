@@ -3,7 +3,8 @@
 Run from the repository root: python validation/effectiveness.py all.
 The controls reuse the pipeline's scoring and connected-site rules. The ablation
 changes only the features in the lunar reference. Recovery uses the published
-tile table. Stability scores the same cells against the named lunar regions.
+tile table, with one bare-cell minimum for both groups and a background outside
+the catalogued analog regions. Stability scores the same cells against the named lunar regions.
 
 Data and licenses: see data/sources.csv and docs/sources/j6.md.
 Copernicus GLO-30: https://registry.opendata.aws/copernicus-dem/
@@ -33,7 +34,7 @@ from pipeline.io_earth import tile_id  # noqa: E402
 ANALYSES = ("controls", "ablation", "recovery", "stability")
 N_BOOTSTRAP = 2000
 BOOTSTRAP_SEED = 20261114
-MIN_BACKGROUND_BARE = 100
+MIN_BARE = 100
 JOB = "J20 full-scan validation"
 OUT = Path(paths.VALIDATION_EFFECTIVENESS)
 
@@ -106,21 +107,7 @@ def midranks(values, background):
     return (low + high) / (2 * len(background))
 
 
-def recovery(config):
-    summary = pd.read_csv(paths.TILE_SUMMARY).set_index("tile")
-    if not summary.index.is_unique:
-        raise ValueError("The published tile summary has duplicate tile IDs.")
-    allowed_sources = {"copdem"} if config["dem_policy"] == "copdem" else {"copdem", "nasadem"}
-    if set(summary["target"]) != {config["target"]} or not set(summary["dem_source"]) <= allowed_sources:
-        raise ValueError("The tile summary does not match the current target and DEM policy. Run the sites stage.")
-    known = pd.read_csv(paths.KNOWN_ANALOGS).dropna(subset=["lat", "lon"])
-    known = known.loc[known["analog_for"].str.strip().str.lower().isin(["moon", "both"])
-                      & ~known["type"].str.strip().str.lower().isin(["operational", "region"])]
-    known_tiles = {tile_id(row.lat, row.lon) for row in known.itertuples()}
-    positive = summary.loc[summary.index.isin(known_tiles), "candidate_share_of_bare"]
-    positive_scores = positive.dropna().to_numpy()
-    background = summary.loc[~summary.index.isin(known_tiles) & summary["n_bare"].ge(MIN_BACKGROUND_BARE),
-                             "candidate_share_of_bare"].dropna().to_numpy()
+def recovery_metrics(positive_scores, background):
     if not len(positive_scores) or not len(background):
         raise ValueError("ROC recovery needs scored known tiles and eligible background tiles.")
 
@@ -145,14 +132,54 @@ def recovery(config):
         "median_positive_percentile": float(np.median(percentiles) * 100),
         "n_positive_tiles": len(positive_scores),
         "n_background_tiles": len(background),
-        "min_background_bare": MIN_BACKGROUND_BARE,
-        "known_tiles_outside_scan": sorted(known_tiles - set(positive.index)),
-        "known_tiles_without_bare": positive.index[positive.isna()].tolist(),
         "roc": {
             "fpr": np.r_[0, np.cumsum(~ranked)[ends] / len(background)].tolist(),
             "tpr": np.r_[0, np.cumsum(ranked)[ends] / len(positive_scores)].tolist(),
         },
     }
+
+
+def recovery(config):
+    summary = pd.read_csv(paths.TILE_SUMMARY).set_index("tile")
+    if not summary.index.is_unique:
+        raise ValueError("The published tile summary has duplicate tile IDs.")
+    allowed_sources = {"copdem"} if config["dem_policy"] == "copdem" else {"copdem", "nasadem"}
+    if set(summary["target"]) != {config["target"]} or not set(summary["dem_source"]) <= allowed_sources:
+        raise ValueError("The tile summary does not match the current target and DEM policy. Run the sites stage.")
+    known = sites.load_known(paths.KNOWN_ANALOGS)
+    known = known.loc[known["analog_for"].str.strip().str.lower().isin(["moon", "both"])]
+    is_region = known["type"].str.strip().str.lower().eq("region")
+    regions = known.loc[is_region]
+    known_tiles = {tile_id(row.lat, row.lon) for row in known.loc[~is_region].itertuples()}
+
+    is_known = summary.index.isin(known_tiles)
+    eligible = summary["n_bare"].ge(MIN_BARE)
+    positive = summary.loc[is_known & eligible]
+    background = summary.loc[~is_known & eligible]
+    distance = sites.haversine_km(background["lat"].to_numpy()[:, None], background["lon"].to_numpy()[:, None],
+                                 regions["lat"].to_numpy(), regions["lon"].to_numpy())
+    inside_region = (distance <= regions["radius_km"].to_numpy()).any(axis=1)
+    excluded = sorted(background.index[inside_region])
+    background = background.loc[~inside_region]
+
+    def candidate_shares(tiles):
+        return (tiles["n_candidate"] - tiles["n_candidate_flagged"]) / tiles["n_bare"]
+
+    results = recovery_metrics(candidate_shares(positive).to_numpy(), candidate_shares(background).to_numpy())
+    results.update(
+        statistic="(n_candidate - n_candidate_flagged) / n_bare",
+        min_bare=MIN_BARE,
+        known_tiles_outside_scan=sorted(known_tiles - set(summary.index)),
+        known_tiles_without_bare=sorted(summary.index[is_known & summary["n_bare"].eq(0)]),
+        known_tiles_below_min_bare=summary.loc[is_known & summary["n_bare"].between(1, MIN_BARE - 1),
+                                              "n_bare"].sort_index().to_dict(),
+        known_tiles_scored=positive[["n_bare", "n_candidate", "n_candidate_flagged"]].sort_index().to_dict("index"),
+        n_background_tiles_excluded_known_regions=len(excluded),
+        background_tiles_excluded_known_regions=excluded,
+        all_candidates=recovery_metrics((positive["n_candidate"] / positive["n_bare"]).to_numpy(),
+                                        (background["n_candidate"] / background["n_bare"]).to_numpy()),
+    )
+    return results
 
 
 def legacy_grid(previous):

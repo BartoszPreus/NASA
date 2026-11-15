@@ -104,7 +104,7 @@ The pipeline uses [Python](https://www.python.org/), [NumPy](https://numpy.org/)
 | Published NASA LOLA slope map | Median absolute error **0.042°** on the native DEM and **0.064°** after resampling for the plane-fit check. The ranking uses two-point slopes. |
 | PDS and PGDA elevation grids | Median offset **+0.191 m**, RMS difference **1.709 m** between grids derived from LOLA. |
 | Earth elevation sensitivity | Spearman **0.637** across **618** common tiles, with **21 of the top 50** shared. The comparison did not satisfy the rule for replacing Copernicus with NASADEM. |
-| Known-site enrichment | Median **0.91×** the bare-cell baseline around known sites versus **0.35×** around matched random circles. Known-site circles beat the random circles while their median remains below the scan-wide bare-cell rate. |
+| Known-site enrichment | Median **0.91×** the bare-cell baseline around known sites versus **0.36×** around matched random circles. Known-site circles beat the random circles while their median remains below the scan-wide bare-cell rate. |
 | Negative controls | No candidates survived the land-cover mask in the four control tiles. |
 | ICESat-2 | Across eight sites, laser slopes at **240 m** were **0.43–1.16×** their grid counterparts, median **0.87×**. Track and grid footprints differ. |
 

@@ -123,6 +123,11 @@ SOURCES = [
       "night (collections JAXA.G-Portal_GCOM-W.AMSR2_standard.L3-SMC.<daytime|nighttime>.v3_global_monthly-normal)",
       11, "https://data.earth.jaxa.jp/stac/cog/v1/catalog.json", "as jaxa_gportal; no DOI in the catalogue entry",
       "no", "used", "pipeline/partner_context.py (job J24)", "data/raw/partner_context/"),
+    S("jaxa_aw3d30", "JAXA", "ALOS World 3D - 30m (AW3D30) Global DSM v4.1, April 2024, original PRISM optical "
+      "pixels", "", "https://doi.org/10.57746/EO.01kkfx0ejw8r5ndc9bg5nt13ws",
+      "ALOS World 3D - 30m (AW3D30) Global DSM (JAXA). This data was obtained using JAXA Earth API. See "
+      "https://earth.jaxa.jp/en/data/policy/", "no", "used",
+      "pipeline/io_earth.py, validation/nasadem_vs_copdem.py (job J29)", "data/raw/aw3d30_v41_optical/"),
     # --- NASA, not on the challenge page
     S("pgda90_lola_20m", "NASA", "LOLA south-pole 20 m DEM LDEM_80S_20MPP_ADJ.TIF and its EFFRES layer (NASA PGDA "
       "product 90)", "", "https://pgda.gsfc.nasa.gov/products/90", PGDA90_CITE, "no", "used",
@@ -347,14 +352,17 @@ FILE_MAP = [
      "pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes", "our slope/roughness estimator against the NASA "
      "product"),
     ("data/validation/effectiveness.json", "python validation/effectiveness.py all",
-     "data/earth/cells/pilot.parquet, data/sites/ranking.csv, data/reference/known_analogs.csv, copernicus_dem, "
-     "esa_worldcover, pgda90_lola_20m", "hidden-known test, negative controls, ablation, stability"),
+     "data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, copernicus_dem, "
+     "esa_worldcover, pgda90_lola_20m", "known analog tile recovery, negative controls, ablation, stability"),
     ("data/validation/enrichment.json", "python validation/enrichment.py (after python -m pipeline.sites)",
      "data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv",
      "enrichment of lunar-like terrain around known analog sites"),
     ("data/validation/nasadem_vs_copdem.json", "python validation/nasadem_vs_copdem.py (job J17)",
      "data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json",
      "NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile"),
+    ("data/validation/aw3d30_comparison.json", "python validation/nasadem_vs_copdem.py --aw3d30-comparison (job J29)",
+     "jaxa_aw3d30, data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet",
+     "terrain feature agreement across Copernicus, NASADEM and optical AW3D30 on ten reference tiles"),
     ("data/validation/pds_lola.json", "python validation/pds_products.py --part lola",
      "pds_lola_gdr, pgda90_lola_20m", "PDS LOLA gridded DEM against the PGDA DEM"),
     ("data/validation/crater_profiles.json", "python lidar/crater_profiles.py --part all",

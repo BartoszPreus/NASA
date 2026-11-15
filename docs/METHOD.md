@@ -35,8 +35,8 @@ everywhere). Through the depression features the list of candidate cells depends
 33,911 candidate cells with Copernicus, 2,996 with NASADEM, 2,237 in common.
 
 **Which lunar target and which ranking key.** Default target: the seven candidate regions pooled; ranking key:
-best 15 km window. The numbers do not choose between the pooled target and the 160 km polar window: known
-analog sites are recovered equally (15 of 35 above the base rate with a median enrichment of 0.91, against 16
+best 15 km window. The J18 comparison did not distinguish the pooled target from the 160 km polar window: known
+analog sites were recovered similarly (15 of 35 above the base rate with a median enrichment of 0.91, against 16
 of 35 and 0.97), and six well-known reference tiles rank somewhat worse under the pooled target (Atacama core
 40th against 18th of about 2,060 tiles, Mauna Loa 49th against 48th). The pooled target is kept because the
 challenge asks for analogs of the base locations, and those regions are steeper than the polar average (median
@@ -47,10 +47,10 @@ replaces total area because total area rewarded sheer size: with it, sand seas h
 ## What the validation says
 
 - The estimator reproduces NASA's lunar slope map (step 4).
-- Known analog sites lie in terrain that is more lunar-like than random places: median enrichment 0.91 against
-  0.35 for random circles (5 to 95%: 0.13 to 0.74); 2% of 500 random repeats reach 0.91. But 0.91 is below 1:
-  the typical known analog has slightly less lunar-like ground than the average bare cell of the scanned
-  tiles. The score finds terrain of a certain shape; it is not a detector of the sites people chose.
+- Around the catalogued sites, median enrichment was 0.91, versus 0.36 for random circles (5th to 95th percentile:
+  0.13 to 0.73). Seven of 500 random repeats reached the observed median. The typical known site had less
+  lunar-like ground than the scan-wide bare-cell baseline. At one-degree tile scale, the corrected recovery
+  AUC of 0.550 was consistent with chance. [Validation](VALIDATION.md)
 - Laser profiles of ICESat-2 over eight sites give 0.43 to 1.16 times the grid slope at 240 m (median 0.87);
   the three lowest are lava fields, and the laser samples a 20 km box, not the site outline.
 - The dune-field flag removes the sand seas from the top 50 and also flags part of Devon Island, a real analog.

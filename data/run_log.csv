@@ -18,3 +18,7 @@ validate-dem,python.exe validation/nasadem_vs_copdem.py,2026-11-14 23:16:25,25.3
 catalog,python.exe -m pipeline.catalog,2026-11-14 23:17:57,1.5,0,123f9f3,data/raw/run_logs/catalog_20261114_231757.log
 catalog,python.exe -m pipeline.catalog,2026-11-14 23:18:26,2.3,0,123f9f3,data/raw/run_logs/catalog_20261114_231826.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 00:01:18,1.5,0,59277b0,data/raw/run_logs/catalog_20261115_000118.log
+sites,python.exe -m pipeline.sites,2026-11-15 01:11:18,42.2,0,533c2ee,data/raw/run_logs/sites_20261115_011118.log
+validate-enrichment,python.exe validation/enrichment.py,2026-11-15 01:12:01,3.4,0,533c2ee,data/raw/run_logs/validate-enrichment_20261115_011201.log
+validate-effectiveness,python.exe validation/effectiveness.py all,2026-11-15 01:12:04,15.9,0,533c2ee,data/raw/run_logs/validate-effectiveness_20261115_011204.log
+catalog,python.exe -m pipeline.catalog,2026-11-15 01:12:20,1.4,0,533c2ee,data/raw/run_logs/catalog_20261115_011220.log

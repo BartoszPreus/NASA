@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 18 rows, 2.4 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 22 rows, 2.9 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -55,7 +55,7 @@ data/
 | `sites/novelty_check.csv` | literature verdict for the top new sites, 42 rows, 38.4 kB | `hand-curated by job J9 (agent literature and map search, no script)` | osm, wikipedia, analog_literature, data/sites/ranking.csv |
 | `sites/partner_context.csv` | per site: measured day and night surface temperature (JAXA, NASA), soil moisture, permafrost fraction and ground temperature, 118 rows, 15.6 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/sites/ranking.csv, data/sites/sites.geojson |
 | `sites/partner_context_summary.json` | layers, medians by site group, the Diviner temperatures of the lunar regions, caveats, 12.1 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/moon/instruments/diviner_regions.json |
-| `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 162.0 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
+| `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 163.3 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
 | `sites/scored_compact.parquet` | scored cells with p_all >= 0.05 or candidate (full table: data/raw/earth_scored_full.parquet), 213668 rows, 16.9 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `sites/sites.geojson` | candidate sites: outline and properties (contract in docs/TASKS.md section 3), 3175 rows, 10.5 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet |
 | `sites/target_comparison.csv` | per lunar target: candidate cells, sites and the tile ranks of reference and sand-sea tiles, 9 rows, 752 B | `python -m pipeline.sites --compare-targets (job J18)` | data/earth/cells/*.parquet, data/moon/reference.json |
@@ -63,13 +63,17 @@ data/
 | `sites/top30_review.csv` | what each of the top 30 sites is and whether it looks like an artefact of the method, 30 rows, 5.8 kB | `python -m pipeline.review; the verdict columns are filled in by a reviewer (job J19)` | data/sites/ranking.csv, data/sites/images/*.jpg, worldview_gibs |
 | `sites/images/*.jpg` | MODIS or VIIRS true-colour image around one site (NASA imagery, unmodified) | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
 | `sites/images/index.csv` | bbox, date, layer and cloud share of every site image, 60 rows, 10.2 kB | `python -m pipeline.nasa_context --top 150 --images 60` | worldview_gibs |
+| `validation/aw3d30_comparison.json` | terrain feature agreement across Copernicus, NASADEM and optical AW3D30 on ten reference tiles, 79.5 kB | `python validation/nasadem_vs_copdem.py --aw3d30-comparison (job J29)` | jaxa_aw3d30, data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet |
 | `validation/crater_profiles.json` | crater measurements: Earth lidar, 30 m DEM and the lunar DEM, 11.9 kB | `python lidar/crater_profiles.py --part all` | usgs_3dep, usgs_tnm_api, copernicus_dem, pgda90_lola_20m, gugik_nmt |
-| `validation/effectiveness.json` | hidden-known test, negative controls, ablation, stability, 431.0 kB | `python validation/effectiveness.py all` | data/earth/cells/pilot.parquet, data/sites/ranking.csv, data/reference/known_analogs.csv, copernicus_dem, esa_worldcover, pgda90_lola_20m |
-| `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 9.0 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
+| `validation/effectiveness.json` | known analog tile recovery, negative controls, ablation, stability, 528.4 kB | `python validation/effectiveness.py all` | data/earth/cells/*.parquet, data/earth/tiles/tile_summary.csv, data/reference/known_analogs.csv, copernicus_dem, esa_worldcover, pgda90_lola_20m |
+| `validation/enrichment.json` | enrichment of lunar-like terrain around known analog sites, 9.5 kB | `python validation/enrichment.py (after python -m pipeline.sites)` | data/raw/earth_scored_full.parquet, data/reference/known_analogs.csv |
 | `validation/icesat2.json` | ICESat-2 along-track slopes against grid slopes and the Moon, 16.9 kB | `python validation/icesat2_profiles.py (job J21)` | icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json |
 | `validation/nasadem_vs_copdem.json` | NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile, 14.2 kB | `python validation/nasadem_vs_copdem.py (job J17)` | data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json |
+| `validation/partner_checks.json` | ?, 606.4 kB | `UNKNOWN` |  |
 | `validation/pds_lola.json` | PDS LOLA gridded DEM against the PGDA DEM, 5.9 kB | `python validation/pds_products.py --part lola` | pds_lola_gdr, pgda90_lola_20m |
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
+
+Files without a known producer (add them to `FILE_MAP` in `pipeline/catalog.py`): `data/validation/partner_checks.json`
 
 ## External sources by agency
 
@@ -114,6 +118,7 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 - `jaxa_gportal` (link 11): JAXA G-Portal (the portal itself needs an account; its products are read through the JAXA Earth API, rows jaxa_gportal_sgli_lst and jaxa_gportal_amsr2_smc). *used*. https://gportal.jaxa.jp/gpr/index/index
 - `jaxa_gportal_sgli_lst` (link 11): GCOM-C/SGLI L3 land surface temperature, monthly, day and night, 1/24 deg (collections JAXA.G-Portal_GCOM-C.SGLI_standard.L3-LST.<daytime|nighttime>.v3_global_monthly), year 2021. *used*. https://data.earth.jaxa.jp/stac/cog/v1/catalog.json
 - `jaxa_gportal_amsr2_smc` (link 11): GCOM-W/AMSR2 L3 soil moisture content, monthly normals 2012-2021, day and night (collections JAXA.G-Portal_GCOM-W.AMSR2_standard.L3-SMC.<daytime|nighttime>.v3_global_monthly-normal). *used*. https://data.earth.jaxa.jp/stac/cog/v1/catalog.json
+- `jaxa_aw3d30`: ALOS World 3D - 30m (AW3D30) Global DSM v4.1, April 2024, original PRISM optical pixels. *used*. https://doi.org/10.57746/EO.01kkfx0ejw8r5ndc9bg5nt13ws
 
 **USGS**
 - `usgs_3dep`: USGS 3DEP 1 m lidar DEM, tile USGS_1M_12_x49y388_AZ_NorthEast_D23 (Meteor Crater). *used*. https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/AZ_NorthEast_D23/TIFF/USGS_1M_12_x49y388_AZ_NorthEast_D23.tif
@@ -165,5 +170,6 @@ Tests: `python -m pytest tests -q`.
 
 Git-ignored. One folder per source; every script recreates what it needs, so the folder is safe to delete (rebuilding needs the network, about 0.3 MB/s at the venue). Folders present now:
 
+- `raw/naturalearth/`: country outlines
 
 Written with SI assistance (Claude Code).

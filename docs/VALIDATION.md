@@ -7,8 +7,8 @@ The final ranking uses the pooled lunar target `base_regions`, the Copernicus el
 | NASA LOLA slope map (T1) | Median absolute plane-fit slope error **0.042°** from the native DEM and **0.064°** from the resampled DEM. The scoring pipeline uses two-point slopes. |
 | PDS versus PGDA LOLA grids | Median elevation offset **+0.191 m**, RMS difference **1.709 m**. Both grids come from LOLA. |
 | NASADEM + MODIS versus Copernicus + WorldCover | On **618** common tiles, per-tile candidate shares gave Spearman **0.637**, with **21 of the top 50** shared. Slope at the shorter baseline gave Pearson **0.999**, while closed-depression share gave **0.758**. |
-| Enrichment around known analog sites | **15 of 35** above the scan-wide rate. Median **0.91×** versus **0.35×** for matched random circles. The typical known site's circle still falls below the scan-wide rate. |
-| Tile recovery | **AUC 0.407** (bootstrap 90% CI **0.289–0.521**); median known tile percentile **35.7** relative to background. Compared **20** known tiles with a score against **1,497** background tiles with at least **100** bare cells. |
+| Enrichment around known analog sites | **16 of 37** above the scan-wide rate. Median **0.91×** versus **0.36×** for matched random circles. The typical known site's circle still falls below the scan-wide rate. |
+| Tile recovery | **AUC 0.550** (bootstrap 90% CI **0.418–0.682**), consistent with chance. Median known tile percentile **56.5**. Both groups required at least **100** bare cells: **15** known tiles and **1,464** background tiles. |
 | Negative controls | With land cover, **zero candidate cells and sites** in all four controls. Terrain alone passed **33 cells and 2 sites** in Tatry/Podhale and **3 cells and 0 sites** in the Alps; the other controls stayed at zero. |
 | ICESat-2 laser profiles | Across **8** sites, laser slopes at **240 m** were **0.43–1.16×** the grid slopes, median **0.87×**. Transects and gridded sites cover different footprints. |
 
@@ -19,7 +19,8 @@ With slopes and roughness alone, **9.83%** of valid cells passed the terrain thr
 ## What does not hold up
 
 - **Exact site ranks move with the grid.** In the older 78-tile study, the grid check used the **37 pilot tiles** and the old polar target. Shifting by half a cell retained **6 of the top 10**. Both alternate cell sizes retained **4 of the top 10**. These grid variants were carried forward from J6.
-- **Elevation input changes which cells qualify.** The comparison found **33,911** Copernicus/WorldCover candidates and **2,996** NASADEM/MODIS candidates, with **2,237** in common. Depressions and the land-cover mask both affect the result.
+- **Tile scores do not distinguish known analogs from the scanned background.** Nine known tiles in the scan had no bare cells, and six had 1–99. The test excluded 32 otherwise eligible background tiles whose recorded centres fell inside catalogued analog regions. It counted only candidates without the dune-field flag. At one-degree tile scale, a crater can occupy a small part of the tile: Meteor Crater's tile had two candidates among 700 bare cells, one of them flagged. The enrichment row measures terrain around the catalogued sites at their own radii.
+- **Elevation input changes which cells qualify.** With WorldCover held fixed, switching from Copernicus to NASADEM reduced the candidate count from **33,911** to **4,886**. Switching from WorldCover to MODIS reduced it further to **2,996**. Copernicus/WorldCover and NASADEM/MODIS shared **2,237** candidates.
 - **Sand seas can score highly.** The ranking pushes sites with the dune-field flag down. That flag can also affect real analogs, including parts of Devon Island. Missing land cover or vegetation can exclude known sites. WorldCover does not provide a mask north of **82.75° N** or in Antarctica.
 
 ## Limits
@@ -34,6 +35,6 @@ Files below are under [`data/validation/`](../data/validation/). Data and licens
 |---|---|
 | Scope and ablation | `effectiveness.json` · `configuration`, `scan`, `ablation.share6`, `ablation.share8` |
 | T1 / PDS | `t1_reproduce_nasa.json` · `step3_native20m.slope_deg.median_abs_diff`, `step4_dem30m.exact_area_average.slope_deg.median_abs_diff`; `pds_lola.json` · `difference_pds_minus_pgda.{median_m,rms_m}` |
-| DEM comparison | `nasadem_vs_copdem.json` · `ranking_nasa_vs_esa.{n_tiles,spearman_tile_share,top50_overlap}`, `features.{s240,dep_frac}.pearson`, `candidates.{esa,nasa}`, `candidate_cells_shared_esa_nasa` |
+| DEM comparison | `nasadem_vs_copdem.json` · `ranking_nasa_vs_esa.{n_tiles,spearman_tile_share,top50_overlap}`, `features.{s240,dep_frac}.pearson`, `candidates.{esa,dem_only,nasa}`, `candidate_cells_shared_esa_nasa` |
 | Enrichment / laser | `enrichment.json` · `n_sites_tested`, `sites_with_enrichment_above_1`, `median_enrichment`, `random.median_enrichment_median`; `icesat2.json` · `sites.*.ratios.laser240_over_grid240` (range and median) |
 | Controls, recovery and stability | `effectiveness.json` · `controls`, `recovery`, `stability.named_regions_spearman`, `stability.legacy_grid`, `scan.land_cover_limit` |

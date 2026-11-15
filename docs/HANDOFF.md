@@ -12,17 +12,13 @@ Deadline: Sun 15 Nov 13:30. Feature freeze Sun 09:30.
 - **J11 drafts are on `main`** (issue 4, open): `README.md`, `docs/pitch/` (seven slides, pitch, Q&A, portal
   fields, `NUMBERS.md`). They wait for the two items below, for the demo link and for a person.
 - **J22 delivered, not closed** (issue 2): 30 rows in `data/sites/novelty_check.csv`, `docs/NOVELTY.md` rewritten.
-  The review found: (1) **the `country` column of `ranking.csv` is empty in all 200 rows** (the Natural Earth
-  file under `data/raw/` was missing on that machine and `pipeline/sites.py` does not complain); (2) the verdict
-  `mentioned` of 27 top-30 sites rests on pages that do not mention analogs, so it is UNVERIFIED; (3)
+  The J20 rerun restored countries to all 200 ranking rows. The verdict `mentioned` for 27 top-30 sites rests on
+  pages that do not mention analogs, so it is UNVERIFIED.
   `docs/NOVELTY.md` says the Putorana sites "mimic lunar maria", which nothing here measures (the target is the
   south-pole highland regions), and names hollows at four sites whose depression share is zero.
-- **J20 correction not taken by anyone** (issue 1): the tile-recovery AUC of 0.407 compares two groups under
-  different rules; with one rule it is about 0.5. J22 also appended two rows to `known_analogs.csv` without
-  rerunning the validation, so `enrichment.json` and `effectiveness.json` are older than the list they test.
-  **One run fixes both this and the empty `country` column**, on a machine that has
-  `data/raw/naturalearth/ne_50m_admin_0_countries.geojson` (Wiktor's has it): correct `recovery()` as the review
-  on issue 1 says, then `python -m pipeline.run sites validate-enrichment validate-effectiveness catalog`.
+- **J20 correction ready for review** (issue 1): the same eligibility rule applies to both groups and the corrected
+  tile-recovery AUC is 0.550 (90% interval 0.418–0.682), consistent with chance. The ranking and both validations
+  were rebuilt with the updated `known_analogs.csv` and the Natural Earth country outlines. See `docs/VALIDATION.md`.
 - **J30 in progress** (issue 14, branch `t-pl2moon`, not merged): Polish lidar areas against lunar sites at 1 to
   2 m with a 3D viewer; scope extension agreed with the team owner.
 - Not started: J7 web app (`app/` still uncommitted), J25, J27. The repository is still private.
@@ -62,7 +58,7 @@ the data source of each, the two decisions, the limits): it is the text the READ
 
 **What is left** (every job is a GitHub issue with its full spec; the board is the pinned issue 13; the same
 specs are in `docs/TASKS.md` section 5 and `docs/TASKS-PARTNER-DATA.md`):
-J20 correction and reruns (about 30 min, blocks the final numbers) ·
+J20 review of the correction ·
 J22 fixes: verify or withdraw the `mentioned` verdicts, correct the wording, then a person opens the evidence ·
 J7 web app (`app/` is Wiktor's prototype, still uncommitted on his machine) ·
 J11 final texts after J20 and J22, demo link, a person approves · J25 show the measured surface data in the
@@ -71,7 +67,7 @@ J28, J29 optional · J23 fresh-clone check and freeze, Sun 08:30 (a fresh clone 
 
 **How to talk about the result** (details in section 9): the method finds terrain of a lunar shape; it is not a
 detector of the sites people chose. Known analogs lie in more lunar-like ground than random places (median
-enrichment 0.91 against 0.35) but below the average bare cell (0.91 is under 1). The top of the ranking is
+enrichment 0.91 against 0.36) but below the average bare cell (0.91 is under 1). The top of the ranking is
 Arctic plateau terrain whose "bare ground" is partly tundra. The coldest site is still about 94 K warmer than
 the warmest lunar region. Nothing is called a discovery, and "mentioned in analog literature" is not verified
 (issue 2). The dune-field flag is a terrain rule, not a confirmed sand detector (J26).
@@ -98,7 +94,7 @@ into `docs/pitch/SUBMISSION-FIELDS.md`. The full list is issue 11. Confirm on an
 | J9 novelty check | done for the old 78-tile ranking only; replaced by J22 |
 | J14 ICESat-2 on Windows | blocked; replaced by J21 (done) |
 | J26 dune-field flag against temperature and moisture | **done** (15 Nov, issue 6 closed): the flag is not confirmed as a sand detector; `docs/sources/j26.md` |
-| J20 validation on the full scan | delivered (`docs/VALIDATION.md`); **correction open and not taken**: tile-recovery AUC, reruns after the change of `known_analogs.csv` (issue 1) |
+| J20 validation on the full scan | **correction ready for review** (issue 1): corrected tile-recovery AUC and refreshed enrichment in `docs/VALIDATION.md` |
 | J22 novelty check of the final ranking | delivered (`docs/NOVELTY.md`); **not closed**: empty `country` column, unverified `mentioned` verdicts, wording (issue 2) |
 | J11 README, pitch, submission texts | drafts on `main`; final numbers and wording open (issue 4) |
 | J30 Poland against the Moon at 1 to 2 m | in progress on branch `t-pl2moon` (issue 14) |
@@ -197,15 +193,13 @@ Selection funnel behind `tiles_scanned.csv`: 26,450 GLO-30 tiles -> 18,836 with 
 
 ## 9. What the validation says, and how to talk about it (read before writing the pitch)
 
-**Full scan, final method (14 Nov, 23:20; `data/validation/enrichment.json`, `docs/sources/j18.md`, `j19.md`).
-These numbers replace the 78-tile ones below wherever both exist.**
-- **Known analogs against random places**: 35 known sites could be tested; 15 lie above the base rate; median
-  enrichment 0.91. Random circles of the same radii: 0.35 (5 to 95%: 0.13 to 0.74); 2% of 500 repeats reach 0.91.
-  So known analogs sit in more lunar-like ground than random places, and still slightly below the average bare
-  cell of the scanned tiles. On 78 hand-picked tiles the same test gave 1.80: that number was optimistic and
-  must not be quoted for the full scan.
-- **The two lunar targets cannot be told apart by this test**: 0.91 (15 of 35) for the seven candidate regions
-  pooled, 0.97 (16 of 35) for the 160 km polar window. The pooled target is a choice of definition.
+**Full scan, final method.** See `docs/VALIDATION.md` and `data/validation/enrichment.json` for the corrected checks.
+- **Known analogs against random places**: 16 of 37 tested entries lie above the bare-cell base rate. Median
+  enrichment was 0.91 for the known sites and 0.36 for matched random circles (5th to 95th percentile: 0.13 to
+  0.73). Seven of 500 random repeats reached the observed median. An older run on 78 hand-picked tiles gave 1.80.
+- **Tile-scale recovery**: AUC 0.550 (90% interval 0.418–0.682), consistent with chance on 15 eligible known tiles.
+- **The earlier J18 run compared two lunar targets**: 0.91 (15 of 35) for the seven candidate regions pooled and
+  0.97 (16 of 35) for the 160 km polar window. The pooled target is a choice of definition. See `docs/sources/j18.md`.
 - **Sand seas**: without the dune-field flag they hold the top ranks under every target; with it they are outside
   the top 50. The flag also catches part of Devon Island, a real analog (rank 1,486 to 2,820 for tile N75W090).
 - **Laser against grid** (ICESat-2, 8 sites): the laser slope at 240 m is 0.43 to 1.16 times the grid slope,
