@@ -25,7 +25,7 @@ data/
 
 | File | What it is | Produced by | Inputs |
 |---|---|---|---|
-| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 44 rows, 5.9 kB | `python -m pipeline.run (one row appended per stage run)` |  |
+| `run_log.csv` | log of the pipeline stages: command, start time, seconds, exit code, commit, 45 rows, 6.0 kB | `python -m pipeline.run (one row appended per stage run)` |  |
 | `earth/cells/known.parquet` | Earth cells of the tiles holding known analog sites, 71244 rows, 4.0 MB | `python -m pipeline.earth_scan (job J3, tiles of the known analog sites)` | copernicus_dem, esa_worldcover, data/reference/known_analogs.csv |
 | `earth/cells/pilot.parquet` | Earth cells of the 37 pilot tiles with features and land cover, 76574 rows, 4.6 MB | `python -m pipeline.earth_scan --tiles data/reference/pilot_tiles.csv (job J3, milestone 1)` | copernicus_dem, esa_worldcover |
 | `earth/cells/scan_s*of*.parquet` | Earth cells of one scan shard (valid, water < 0.5, bare >= 0.5 or no land cover) | `python -m pipeline.earth_scan --shard i/20 on the cloud runner (docs/HANDOFF.md, section 8)` | copernicus_dem, esa_worldcover, data/earth/tiles/tiles_scanned.csv |
@@ -59,7 +59,7 @@ data/
 | `sites/partner_context_summary.json` | layers, medians by site group, the Diviner temperatures of the lunar regions, caveats, 12.2 kB | `python -m pipeline.partner_context (job J24)` | jaxa_gportal_sgli_lst, jaxa_gportal_amsr2_smc, modis_lst, esa_osc_permafrost, data/moon/instruments/diviner_regions.json |
 | `sites/radarsat1_index.csv` | site coverage, chosen scene and two uncalibrated Earth texture statistics, 37 rows, 6.8 kB | `python -m pipeline.radarsat1 find and quicklook (job J27)` | data/reference/radarsat1_footprints.parquet, data/sites/ranking.csv, data/sites/sites.geojson, nasa_erg_oriental |
 | `sites/rank_uncertainty.csv` | per top-100 site: bootstrap rank p05 / median / p95, share of runs in the top 30, rank in the NASADEM and leave-one-feature-group-out variants, 100 rows, 9.1 kB | `python validation/rank_uncertainty.py (job J32)` | data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, data/moon/reference.json, data/sites/ranking.csv |
-| `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 179.7 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
+| `sites/ranking.csv` | top sites by similarity-weighted area, 200 rows, 182.2 kB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth |
 | `sites/scored_compact.parquet` | scored cells with p_all >= 0.05 or candidate (full table: data/raw/earth_scored_full.parquet), 213668 rows, 16.9 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json |
 | `sites/sites.geojson` | candidate sites: outline and properties (contract in docs/TASKS.md section 3), 3175 rows, 10.5 MB | `python -m pipeline.sites` | data/earth/cells/*.parquet, data/moon/reference.json, data/reference/known_analogs.csv, data/sites/novelty_check.csv, natural_earth, nasa_moon_factsheet |
 | `sites/target_comparison.csv` | per lunar target: candidate cells, sites and the tile ranks of reference and sand-sea tiles, 9 rows, 752 B | `python -m pipeline.sites --compare-targets (job J18)` | data/earth/cells/*.parquet, data/moon/reference.json |
@@ -75,14 +75,14 @@ data/
 | `validation/icesat2.json` | ICESat-2 along-track slopes against grid slopes and the Moon, 16.9 kB | `python validation/icesat2_profiles.py (job J21)` | icesat2_atl06, sliderule, pgda70_lola_slopes, data/sites/ranking.csv, data/moon/reference.json |
 | `validation/landcover_sensitivity.json` | moss and lichen sensitivity: top-100 sites under bare = WorldCover class 60 only and under MODIS Barren, 20.9 kB | `python -m validation.landcover_sensitivity (job J33, shortened); key full_run: python -m validation.landcover_strict_ranking` | data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
 | `validation/nasadem_vs_copdem.json` | NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile, 14.2 kB | `python validation/nasadem_vs_copdem.py (job J17)` | data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json |
-| `validation/partner_checks.json` | ?, 606.4 kB | `UNKNOWN` |  |
+| `validation/partner_checks.json` | dune-field flag and known analogs against measured surface temperature and soil moisture, 606.4 kB | `python validation/partner_checks.py (job J26)` | data/sites/partner_context.csv, data/sites/sites.geojson, data/sites/ranking.csv |
 | `validation/pds_lola.json` | PDS LOLA gridded DEM against the PGDA DEM, 5.9 kB | `python validation/pds_products.py --part lola` | pds_lola_gdr, pgda90_lola_20m |
 | `validation/rank_uncertainty.json` | rank intervals of the top sites: lunar reference bootstrap, NASADEM variant, one feature group left out; the scale the similarity refers to, 9.5 kB | `python validation/rank_uncertainty.py (job J32)` | data/earth/cells/*.parquet, data/earth/cells_nasadem/*.parquet, data/moon/cells.parquet, data/moon/reference.json, data/sites/ranking.csv |
 | `validation/t1_reproduce_nasa.json` | our slope/roughness estimator against the NASA product, 10.3 kB | `python validation/t1_reproduce.py` | pgda90_lola_20m, pgda90_slope_rough, pgda70_lola_slopes |
 | `validation/landcover_sensitivity/cells_bare_strict.parquet` | bare_strict (WorldCover class 60 only, without 100 moss and lichen) for every scanned cell, key tile/row/col, 1758778 rows, 1.6 MB | `python -m validation.landcover_strict_cells (job J33, full run)` | data/earth/cells/*.parquet, esa_worldcover |
 | `validation/landcover_sensitivity/cells_top*.parquet` | one row per cell of a top site: stored bare, recomputed bare, bare_strict, MODIS Barren | `python -m validation.landcover_sensitivity (job J33)` | data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
 | `validation/landcover_sensitivity/novelty_check_strict.csv` | literature verdict for the strict top-30 sites outside a known analog radius (columns of data/sites/novelty_check.csv), 21 rows, 27.8 kB | `hand-curated by job J40 (SI-model literature and map search, no script)` | osm, analog_literature, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
-| `validation/landcover_sensitivity/ranking_bare_strict.csv` | VARIANT ranking (top 200) under the strict mask: same columns as data/sites/ranking.csv; bare_share = bare_strict, 200 rows, 164.4 kB | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)` | data/earth/cells/*.parquet, data/validation/landcover_sensitivity/cells_bare_strict.parquet, data/moon/reference.json, data/reference/known_analogs.csv, natural_earth |
+| `validation/landcover_sensitivity/ranking_bare_strict.csv` | VARIANT ranking (top 200) under the strict mask: same columns as data/sites/ranking.csv; bare_share = bare_strict, 200 rows, 165.5 kB | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)` | data/earth/cells/*.parquet, data/validation/landcover_sensitivity/cells_bare_strict.parquet, data/moon/reference.json, data/reference/known_analogs.csv, natural_earth |
 | `validation/landcover_sensitivity/sites_bare_strict.geojson` | VARIANT: every site under the strict mask (properties as data/sites/sites.geojson), 1561 rows, 5.4 MB | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)` | as ranking_bare_strict.csv |
 | `validation/landcover_sensitivity/sites_top*.csv` | one row per top site: median bare, bare_strict (class 60 only), MODIS Barren, pass or fail under each | `python -m validation.landcover_sensitivity (job J33)` | data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover |
 | `validation/landcover_sensitivity/tile_summary_bare_strict.csv` | VARIANT: per-tile counts under the strict mask (as data/earth/tiles/tile_summary.csv), 2060 rows, 159.4 kB | `python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)` | as ranking_bare_strict.csv |
@@ -91,8 +91,6 @@ data/
 | `validation/landcover_sensitivity/images/index.csv` | bbox, date, layer and cloud share of the MODIS/VIIRS image of every strict top-30 site, 30 rows, 6.0 kB | `python -m pipeline.review_strict (job J40)` | worldview_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
 | `validation/landcover_sensitivity/images/hls/*.jpg` | HLS 30 m true-colour image, about 26 km square, around one strict top-30 site (NASA imagery, re-encoded only) | `python -m pipeline.review_strict --zoom (job J40)` | hls_gibs |
 | `validation/landcover_sensitivity/images/hls/index.csv` | bbox, date, layer and cloud share of the 30 m HLS image of every strict top-30 site, 30 rows, 6.1 kB | `python -m pipeline.review_strict --zoom (job J40)` | hls_gibs, data/validation/landcover_sensitivity/ranking_bare_strict.csv |
-
-Files without a known producer (add them to `FILE_MAP` in `pipeline/catalog.py`): `data/validation/partner_checks.json`
 
 ## External sources by agency
 
@@ -104,18 +102,18 @@ Status: used | being added | needs login, not downloaded | looked at, not used. 
 - `hls_gibs` (link 2): Harmonized Landsat Sentinel-2 (HLS) v2.0 true colour, layers HLS_S30_Nadir_BRDF_Adjusted_Reflectance and HLS_L30_Nadir_BRDF_Adjusted_Reflectance, 30 m, read through the Worldview Snapshots API (job J40). *used*. https://wvs.earthdata.nasa.gov/
 - `pds` (link 3): NASA Planetary Data System (archive; the PDS products are the rows pds_lola_gdr, diviner_prp, diviner_pcp, minirf, lend, lamp, lroc). *used*. https://pds.nasa.gov/
 - `pds_lola_gdr` (link 4): LRO LOLA polar gridded DEM LDEM_80S_80M.IMG (LRO-L-LOLA-4-GDR-V1.0). *used*. https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/ldem_80s_80m.img
-- `minirf` (link 4): LRO Mini-RF south-pole SAR mosaics (CPR, S1). *being added*. https://pds-geosciences.wustl.edu/lro/lro-l-mrflro-4-cdr-v1/lromrf_0005/data/sar/mosaics/
-- `lend` (link 4): LRO LEND neutron counts (RDR ALD). *being added*. https://pds-geosciences.wustl.edu/lro/lro-l-lend-2-edr-v1/lrolen_0xxx/
-- `lroc` (link 4): LROC WAC south-pole RDR browse images. *being added*. https://pds.lroc.im-ldi.com/data/LRO-L-LROC-5-RDR-V1.0/LROLRC_2001/
+- `minirf` (link 4): LRO Mini-RF south-pole SAR mosaics (CPR, S1). *used*. https://pds-geosciences.wustl.edu/lro/lro-l-mrflro-4-cdr-v1/lromrf_0005/data/sar/mosaics/
+- `lend` (link 4): LRO LEND neutron counts (RDR ALD). *used*. https://pds-geosciences.wustl.edu/lro/lro-l-lend-2-edr-v1/lrolen_0xxx/
+- `lroc` (link 4): LROC WAC south-pole RDR browse images. *used*. https://pds.lroc.im-ldi.com/data/LRO-L-LROC-5-RDR-V1.0/LROLRC_2001/
 - `diviner_prp` (link 5): LRO Diviner Polar Resource Product, south (LRO-L-DLRE-5-PRP-V2.0, DLRE_PRP_SOUTH.TAB). *used*. https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_prp/dlre_prp_south.tab
-- `diviner_pcp` (link 5): LRO Diviner Polar Cold Patch / polar temperature product (PCP). *being added*. https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_pcp/
+- `diviner_pcp` (link 5): LRO Diviner Polar Cold Patch / polar temperature product (PCP). *used*. https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_pcp/
 - `diviner_rock_ti` (link 5): LRO Diviner rock abundance and thermal inertia maps. *looked at, not used*. https://pds-geosciences.wustl.edu/missions/lro/diviner.htm
 - `nasa_erg_oriental`: Earth Observatory: Star Dunes in Algeria. *used*. https://science.nasa.gov/earth/earth-observatory/star-dunes-in-algeria-81996/
 - `pgda90_lola_20m`: LOLA south-pole 20 m DEM LDEM_80S_20MPP_ADJ.TIF and its EFFRES layer (NASA PGDA product 90). *used*. https://pgda.gsfc.nasa.gov/products/90
 - `pgda90_slope_rough`: LOLA 200 m slope and roughness maps LDRM_80S_50MPP_ADJ_SLP_200M / _ROUGH_200M (PGDA product 90). *used*. https://pgda.gsfc.nasa.gov/products/90
 - `pgda70_lola_slopes`: LOLA along-track median slope maps MAS_57M/225M/560M_16 (PGDA product 70). *used*. https://pgda.gsfc.nasa.gov/products/70
-- `pgda69_illumination`: LOLA south-pole illumination and Earth visibility (PGDA product 69). *being added*. https://pgda.gsfc.nasa.gov/products/69
-- `lamp` (link 3): LRO LAMP Lyman-alpha albedo GDR (PDS Imaging Node). *being added*. https://planetarydata.jpl.nasa.gov/img/data/lro/lamp/gdr/LROLAM_2001/
+- `pgda69_illumination`: LOLA south-pole illumination and Earth visibility (PGDA product 69). *used*. https://pgda.gsfc.nasa.gov/products/69
+- `lamp` (link 3): LRO LAMP Lyman-alpha albedo GDR (PDS Imaging Node). *used*. https://planetarydata.jpl.nasa.gov/img/data/lro/lamp/gdr/LROLAM_2001/
 - `nasa_power`: NASA POWER climatology API v2 (MERRA-2): skin temperature, precipitation, wind. *used*. https://power.larc.nasa.gov/api/temporal/climatology/point
 - `icesat2_atl06` (link 1): ICESat-2 ATL06 v7 land ice height, subset through SlideRule (NSIDC DAAC). *used*. https://nsidc.org/data/atl06
 - `icesat2_atl03` (link 1): ICESat-2 ATL03 v7 geolocated photons (SlideRule atl03x). *looked at, not used*. https://nsidc.org/data/atl03
