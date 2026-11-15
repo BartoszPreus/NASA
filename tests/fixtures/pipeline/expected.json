@@ -1,0 +1,16 @@
+{
+  "target": "base_regions",
+  "input_cells": 5208,
+  "tile_ids": ["N35W112", "N52E016", "N75W090"],
+  "candidate_cells": 45,
+  "ranks": [
+    {"site_id": "N75W090-02", "country": "Canada", "n_cells": 4, "best_window_km2": 2.69, "flagged": false},
+    {"site_id": "N75W090-01", "country": "Canada", "n_cells": 7, "best_window_km2": 4.72, "flagged": true}
+  ],
+  "area_tolerance_km2": 0.01,
+  "water_rejections": [
+    {"tile": "N75W090", "row": 18, "col": 10},
+    {"tile": "N75W090", "row": 23, "col": 1},
+    {"tile": "N75W090", "row": 28, "col": 0}
+  ]
+}

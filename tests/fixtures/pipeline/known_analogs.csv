@@ -1,0 +1,4 @@
+name,lat,lon,radius_km,analog_for,type,source_url,verified
+Moon control,75.45,-89.8,35,moon,polar,,synthetic
+Mars-only control,75.55,-89.3,35,mars,polar,,synthetic
+Operational control,75.50,-89.55,35,both,operational,,synthetic
