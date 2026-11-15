@@ -878,7 +878,9 @@ def method_sections():
                 paragraphs.extend(items)
             else:
                 paragraphs.append(" ".join(lines))
-        sections.append({"title": head.strip(), "paragraphs": [p.replace("`", "").replace("**", "")
+        # Markdown links read as their text on the page (the page shows plain text, not markdown).
+        sections.append({"title": head.strip(), "paragraphs": [re.sub(r"\[([^\]]+)\]\([^)\s]+\)", r"\1",
+                                                                      p.replace("`", "").replace("**", ""))
                                                                for p in paragraphs],
                          "is_list": is_list, "urls": urls(rest)})
     titles = [s["title"] for s in sections]
