@@ -44,6 +44,8 @@ strict-context or app data value changed. Nothing unexpected; nothing had to be 
 raster services, and `partner_context` failed raster reads in a fresh Windows environment before (TLS
 certificate chain, see point 3 below). Their committed CSVs feed steps 10 and 12, which reproduce exactly.
 
+**Changes after the second run (independent review, 15 Nov ~09:00):** 43d8ee1 (NOVELTY.md / j35.md text, no verdict changed), 3de2d53 (`pipeline/catalog.py` licence text of `worldview_gibs` and `nasa_power`, README source rows; `pipeline.run catalog` rerun), c385491 (`app/build_data.py`: markdown links in the METHOD.md sections exported as plain text, so `method_sections.json` changes besides `meta.json`). `python -m pytest tests -q`: 81 passed; `python app/build_data.py` exit 0, 24.82 MB; no ranking, validation or site value changed.
+
 ## Reproduction (first run)
 
 New `git clone` of `main` into an empty folder outside the working checkout (under the system temporary
