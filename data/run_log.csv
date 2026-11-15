@@ -34,3 +34,5 @@ catalog,python.exe -m pipeline.catalog,2026-11-15 02:22:31,1.0,0,d1d554f,data/ra
 partner-context,python.exe -m pipeline.partner_context,2026-11-15 02:25:40,14.0,0,d1d554f,data/raw/run_logs/partner-context_20261115_022540.log
 sites,python.exe -m pipeline.sites,2026-11-15 02:25:54,32.4,0,d1d554f,data/raw/run_logs/sites_20261115_022554.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 02:26:26,1.0,0,d1d554f,data/raw/run_logs/catalog_20261115_022626.log
+partner-context,python.exe -m pipeline.partner_context,2026-11-15 03:56:56,6.0,0,1060f0b,data/raw/run_logs/partner-context_20261115_035656.log
+partner-context,python.exe -m pipeline.partner_context,2026-11-15 04:05:14,161.3,0,dbdc33f,data/raw/run_logs/partner-context_20261115_040514.log
