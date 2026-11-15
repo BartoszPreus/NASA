@@ -16,6 +16,20 @@ npm run preview
 
 The build uses relative paths and hash routes (`#/explore?site=N82W026-01&target=haworth`), so `web/dist` can be served from any static folder.
 
+## Production
+
+Live app: https://zodiak-atlas.vercel.app/ (Vercel project `zodiak-atlas`, workspace `put-hack`).
+
+The production deployment is a static build from the committed repository. Deploy only `web/dist`, not the source tree; Vite copies the linked atlas export and static assets into it. Current publishing is via CLI, not an automatic Git integration:
+
+```console
+npm run build --prefix web
+node --test web/tests/discovery.test.mjs
+npx vercel deploy web/dist --project zodiak-atlas --scope put-hack --prod --yes
+```
+
+The custom hash routes need no server rewrites. Live satellite imagery and terrain tiles require their upstream services; locally packaged data and textures are served by Vercel.
+
 ## Pages
 
 - **Overview**: what was compared, how, where the patches are and what the result does not claim.

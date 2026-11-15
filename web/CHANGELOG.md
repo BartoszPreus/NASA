@@ -2,6 +2,12 @@
 
 Issues #29 and #32. Newest first. Written with SI assistance (Claude Code, OpenAI Codex).
 
+## 2026-11-15, production publication (#32)
+
+- Published the frontend directly on `main`, without a pull request. Existing main history was retained.
+- Built from a clean git export, passed the production build and all four mission-state regression tests, and deployed the static output to https://zodiak-atlas.vercel.app/ in the `put-hack` Vercel workspace.
+- Browser checks covered the wizard, editable result criteria, satellite thumbnails, 390 px mobile layout and bidirectional 3D orbit/zoom synchronization.
+
 ## 2026-11-15, visual mission journey and linked terrain views (#32)
 
 - Added **Plan a mission**: lunar destination cards and clickable globe markers, four field-story presets, then criterion choices before opening results. Forward/back navigation and links retain the target, mission, dataset, criterion preferences and threshold. The landing CTA enters the wizard; the map remains directly accessible.
