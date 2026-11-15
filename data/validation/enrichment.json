@@ -63,7 +63,7 @@
    "enrichment": 2.5612
   },
   {
-   "name": "El'gygytgyn impact crater (Chukotka; impact crater in igneous rocks Mars analogue)",
+   "name": "El'gygytgyn impact crater (Chukotka; impact into igneous target rocks relevant to cratering on Mars)",
    "type": "impact",
    "analog_for": "mars",
    "radius_km": 20.0,
@@ -279,9 +279,9 @@
    "enrichment": 0.2958
   },
   {
-   "name": "Pingualuit impact crater (Ungava; cold-region impact and crater lake analogue)",
+   "name": "Pingualuit impact crater (Ungava; cold impact crater lake as analogue of ancient Martian crater lakes)",
    "type": "impact",
-   "analog_for": "both",
+   "analog_for": "mars",
    "radius_km": 15.0,
    "bare_cells": 90,
    "share_lunar_like": 0.0111,
