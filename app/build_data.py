@@ -103,6 +103,37 @@ def partner_values(row):
     }
 
 
+def known_analogs():
+    """Rows of data/reference/known_analogs.csv as pipeline/sites.py reads them (operational rows excluded)."""
+    rows = [row for row in read_csv("data/reference/known_analogs.csv")
+            if row["type"].strip().lower() != "operational" and row["lat"] and row["lon"]]
+    for row in rows:
+        row["analog_for"] = row["analog_for"].strip().lower()
+        if row["analog_for"] not in ("moon", "mars", "both"):
+            raise ValueError(f"known_analogs.csv: analog_for {row['analog_for']!r} for {row['name']!r}")
+    return rows
+
+
+def distance_km(lat1, lon1, lat2, lon2):
+    """Great-circle distance, same formula and Earth radius as pipeline/sites.py haversine_km."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    a = (math.sin((p2 - p1) / 2) ** 2
+         + math.cos(p1) * math.cos(p2) * math.sin(math.radians(lon2 - lon1) / 2) ** 2)
+    return 2 * 6371.0 * math.asin(math.sqrt(min(1.0, max(0.0, a))))
+
+
+def analog_context(site, known):
+    """Tag of the nearest listed analog and the nearest lunar (moon or both) analog with its distance (#16)."""
+    tags = {row["name"]: row["analog_for"] for row in known}
+    if site["nearest_known"] is not None and site["nearest_known"] not in tags:
+        raise ValueError(f"nearest_known {site['nearest_known']!r} of {site['site_id']} not in known_analogs.csv")
+    lunar = [(distance_km(site["lat"], site["lon"], float(row["lat"]), float(row["lon"])), row["name"])
+             for row in known if row["analog_for"] in ("moon", "both")]
+    km, name = min(lunar) if lunar else (None, None)
+    return {"nearest_known_for": tags.get(site["nearest_known"]),
+            "nearest_lunar_known": name, "nearest_lunar_known_km": None if km is None else round(km, 1)}
+
+
 def site_data(out):
     features = read_json("data/sites/sites.geojson")["features"]
     csv_rank = by_id("data/sites/ranking.csv")
@@ -110,6 +141,7 @@ def site_data(out):
     partner = by_id("data/sites/partner_context.csv")
     images = by_id("data/sites/images/index.csv")
     reviews = by_id("data/sites/top30_review.csv")
+    known = known_analogs()
 
     def rank_key(feature):
         p = feature["properties"]
@@ -140,6 +172,7 @@ def site_data(out):
                 "nearest_known", "nearest_known_km", "breaks")
         group.append({
             **{key: p[key] for key in keys},
+            **analog_context(p, known),
             "rank": rank,
             "dune_like": p["artefact_flag"],
             "polygon": boundary,

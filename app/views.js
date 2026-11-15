@@ -52,7 +52,7 @@ export function badges(site) {
   const wrap = element('span', null, 'badges');
   if (site.is_known) wrap.append(element('span', 'Known analog site', 'badge'));
   if (site.dune_like) wrap.append(element('span', 'Dune-like relief (terrain rule)', 'badge flag'));
-  if (site.novelty === 'mentioned') wrap.append(element('span', 'Literature check: not verified', 'badge'));
+  if (site.novelty === 'mentioned') wrap.append(element('span', 'Region named as a Mars analog in general terms', 'badge'));
   if (site.novelty === 'unreported') wrap.append(element('span', 'Not found in the catalogues and searches listed', 'badge'));
   return wrap;
 }
@@ -234,8 +234,14 @@ export function showSite(container, site, target, moon, sources, permalink) {
     ['Median elevation', withUnit(site.elev_med, 'm')],
     ['Similarity-weighted window', withUnit(site.best_window_km2, 'km²')],
   ]));
+  const analogTag = {moon: 'lunar analog', mars: 'Mars analog', both: 'lunar and Mars analog'};
   if (site.nearest_known) overview.append(element('p',
-    'Nearest listed analog · ' + site.nearest_known + ' · ' + withUnit(site.nearest_known_km, 'km'), 'small'));
+    'Nearest listed analog · ' + site.nearest_known + ' (' + (analogTag[site.nearest_known_for] || 'tag unknown') +
+    ') · ' + withUnit(site.nearest_known_km, 'km'), 'small'));
+  if (site.nearest_lunar_known && site.nearest_known_for !== 'moon' && site.nearest_known_for !== 'both') {
+    overview.append(element('p', 'Nearest listed lunar analog (tagged lunar or both) · ' + site.nearest_lunar_known +
+      ' · ' + withUnit(site.nearest_lunar_known_km, 'km'), 'small'));
+  }
   const shape = compareShape(site, lunar, moon.feature_info, moon.share_info);
   const criteriaLink = link('See which criteria enter the comparison', '#criteria');
   criteriaLink.addEventListener('click', () => { document.getElementById('criteria').open = true; });
