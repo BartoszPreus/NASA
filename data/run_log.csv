@@ -24,3 +24,5 @@ validate-effectiveness,python.exe validation/effectiveness.py all,2026-11-15 01:
 catalog,python.exe -m pipeline.catalog,2026-11-15 01:12:20,1.4,0,533c2ee,data/raw/run_logs/catalog_20261115_011220.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 01:26:59,1.2,0,7118bb2,data/raw/run_logs/catalog_20261115_012659.log
 catalog,python.exe -m pipeline.catalog,2026-11-15 01:27:26,1.2,0,7118bb2,data/raw/run_logs/catalog_20261115_012726.log
+partner-context,python.exe -m pipeline.partner_context,2026-11-15 03:56:56,6.0,0,1060f0b,data/raw/run_logs/partner-context_20261115_035656.log
+partner-context,python.exe -m pipeline.partner_context,2026-11-15 04:05:14,161.3,0,dbdc33f,data/raw/run_logs/partner-context_20261115_040514.log

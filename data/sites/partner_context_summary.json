@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-14T23:02:52",
+ "generated": "2026-11-15T04:07:55",
  "job": "J24",
  "sampling": "the one pixel that holds the site centre; no averaging over the site",
  "sites": 118,
@@ -116,10 +116,12 @@
    "PFR": "PFR permafrost area fraction",
    "T2m": "T2m solid earth subsurface temperature"
   },
-  "ground_temp_chunks_wanted": 4,
-  "ground_temp_chunks_read": 4
+  "ground_temp_chunks_wanted": 8,
+  "ground_temp_chunks_read": 8,
+  "ground_temp_sites_not_read": 0
  },
  "failed_reads": [],
+ "allow_missing": [],
  "by_group": {
   "flagged": {
    "n_sites": 30,
@@ -415,7 +417,7 @@
   "Satellite land surface temperature is a clear-sky skin temperature. The day mean, the night mean and their difference use only the months that have both values (*_diff_months): in polar regions these are spring and autumn only, so they are not annual means there.",
   "SGLI is one year (2021); MODIS and AMSR2 are 2012-2021 monthly normals.",
   "The day-night difference depends on the overpass times of each satellite; compare sites within one sensor, not across sensors.",
-  "ESA CCI Permafrost is a model product (MODIS surface temperature, ERA5, CryoGrid), north of about 16 N only; ground temperature is read for a limited number of chunks.",
+  "ESA CCI Permafrost is a model product (MODIS surface temperature, ERA5, CryoGrid), north of about 16 N only; ground temperature is read for every grid chunk that holds a ranked or known site unless --ground-temp-chunks limits it (see permafrost.ground_temp_sites_not_read).",
   "Nothing here enters the terrain score. The Moon has no air and no liquid water: these columns quantify where the analogy breaks and which sites are cold and dry, they do not close the gap.",
   "Licence labels in both catalogues are 'proprietary' with links to the providers' terms; the terms have to be read and cited before publication (job J25)."
  ]
