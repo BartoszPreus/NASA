@@ -19,7 +19,12 @@ least MIN_CELLS cells. Properties follow docs/TASKS.md, section 3 ("sites.geojso
                (90 - |lat| + 23.44 deg, Earth's obliquity; against about 1.5 deg at the lunar pole, the lunar
                spin axis being tilted 1.54 deg to the ecliptic normal), ambient pressure from elev_med with the
                standard-atmosphere barometric formula p = 1013.25 * (1 - 2.25577e-5 h)^5.25588 hPa
-               (https://en.wikipedia.org/wiki/Barometric_formula), snow or ice share
+               (https://en.wikipedia.org/wiki/Barometric_formula), snow or ice share; for a site with a row in
+               data/sites/partner_context.csv (job J24, matched by position within 3 km) one sentence with the
+               measured surface temperature (JAXA GCOM-C/SGLI L3 LST, doi:10.57746/EO.01gs73bfs5sbzhyxg4j9ytajsa;
+               NASA MODIS MOD11C1 v061, doi:10.5067/MODIS/MOD11C1.061) against the LRO Diviner median annual mean
+               temperature of the site's best_region (data/moon/instruments/diviner_regions.json; Paige et al.,
+               LRO-L-DLRE-5-PRP-V2.0, NASA PDS). Sites without a row keep the list above (job J25).
 Geometry: the dissolved outline (shapely.ops.unary_union) of the cell squares; cell edges are half the
 cell-centre spacing in lat and lon of the tile.
 
@@ -242,6 +247,9 @@ def find_sites(scored, regions, min_cells=MIN_CELLS, target=None, geometry=True,
 
 
 NOVELTY_CSV = paths.NOVELTY
+PARTNER_CSV = paths.PARTNER_CONTEXT
+DIVINER_JSON = paths.MOON_DIVINER
+DIVINER_FALLBACK = "polar_160km"   # Diviner region used when a site's best_region has no Diviner entry
 
 
 def load_novelty(path=NOVELTY_CSV):
@@ -249,7 +257,44 @@ def load_novelty(path=NOVELTY_CSV):
     return pd.read_csv(path) if os.path.exists(path) else None
 
 
-def add_context(sites, known, countries, novelty=None):
+def load_partner(path=PARTNER_CSV):
+    """Measured surface values of job J24 (one row per sampled site, with its lat and lon), or None."""
+    return pd.read_csv(path) if os.path.exists(path) else None
+
+
+def load_diviner(path=DIVINER_JSON):
+    """Diviner median annual mean and maximum temperature per lunar region (K), or None."""
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding="utf-8") as f:
+        regions = json.load(f)["regions"]
+    return {k: (v["temp_avg_K"]["median"], v["temp_max_K"]["median"]) for k, v in regions.items()}
+
+
+def partner_break(row, region, diviner):
+    """One sentence with the measured numbers of a partner_context.csv row against Diviner, or None.
+
+    Uses the JAXA SGLI means over the months that have both a day and a night value (*_diff_months), and the
+    NASA MODIS means where SGLI has none; a missing value is never written as a number."""
+    def num(c):
+        v = row.get(c)
+        return float(v) if v is not None and np.isfinite(float(v)) else None
+    if diviner is None:
+        return None
+    reg = region if region in diviner else DIVINER_FALLBACK
+    if reg not in diviner:
+        return None
+    moon_avg, _ = diviner[reg]
+    for sensor, pre in (("JAXA GCOM-C/SGLI", "jaxa_sgli_lst"), ("NASA MODIS MOD11C1", "nasa_modis_lst")):
+        day, night, n = num(pre + "_day_mean_k"), num(pre + "_night_mean_k"), num(pre + "_diff_months")
+        if day is not None and night is not None and n:
+            return ("Measured surface temperature %.0f K by day and %.0f K by night (%s, %d months with both) "
+                    "against a median annual mean of %.0f K 2 cm below the surface in the lunar region %s (LRO "
+                    "Diviner): %.0f K warmer at night" % (day, night, sensor, n, moon_avg, reg, night - moon_avg))
+    return None
+
+
+def add_context(sites, known, countries, novelty=None, partner=None, diviner=None):
     for s in sites:
         if known is not None and len(known):
             d = haversine_km(s["lat"], s["lon"], known["lat"].to_numpy(float), known["lon"].to_numpy(float))
@@ -267,6 +312,13 @@ def add_context(sites, known, countries, novelty=None):
             if dn[j] <= 3.0:
                 s["novelty"], s["place"] = str(novelty["verdict"].iloc[j]), str(novelty["place"].iloc[j])
         s["breaks"] = breaks_for(s["_veg"], s["_ice_mean"], s["lat"], s["elev_med"])
+        if partner is not None and len(partner):  # match by position, as for novelty
+            dp = haversine_km(s["lat"], s["lon"], partner["lat"].to_numpy(float), partner["lon"].to_numpy(float))
+            j = int(np.argmin(dp))
+            if dp[j] <= 3.0:
+                sentence = partner_break(partner.iloc[j].to_dict(), s.get("best_region"), diviner)
+                if sentence:
+                    s["breaks"].append(sentence)
     return sites
 
 
@@ -483,7 +535,7 @@ def main(argv=None):
     known = load_known(a.known)
     print("known analogs: %s" % ("%d entries (operational excluded)" % len(known) if known is not None
                                  else "file missing, novelty fields null"))
-    add_context(sites, known, CountryLookup(), load_novelty())
+    add_context(sites, known, CountryLookup(), load_novelty(), load_partner(), load_diviner())
     scored["site_id"] = site_of_row
     keep = ["tile", "row", "col", "lat", "lon", "d2_all", "p_all", "p_amp", "p_dep", "candidate", "site_id",
             "bare", "veg", "ice", "artefact_flag", "dem_source"] + [c for c in scored.columns if c.startswith(("p_all_", "d2_all_"))]
