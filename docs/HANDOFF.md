@@ -224,43 +224,34 @@ Selection funnel behind `tiles_scanned.csv`: 26,450 GLO-30 tiles -> 18,836 with 
 
 ## 9. What the validation says, and how to talk about it (read before writing the pitch)
 
-**Full scan, final method.** See `docs/VALIDATION.md` and `data/validation/enrichment.json` for the corrected checks.
-- **Known lunar analogs against random places** (issue #16: only entries tagged lunar or both): 11 of 22 tested
-  entries lie above the bare-cell base rate. Median enrichment was 1.02 for the known sites and 0.39 for matched
-  random circles (5th to 95th percentile: 0.12 to 0.91). Fourteen of 500 random repeats reached the observed
-  median. Before #16 the test also counted Mars-only entries: 16 of 37, 0.91 against 0.36. An older run on 78 hand-picked tiles gave 1.80.
-- **Tile-scale recovery**: AUC 0.531 (90% interval 0.396–0.668), consistent with chance on 14 eligible known tiles.
-- **The earlier J18 run compared two lunar targets**: 0.91 (15 of 35) for the seven candidate regions pooled and
-  0.97 (16 of 35) for the 160 km polar window. The pooled target is a choice of definition. See `docs/sources/j18.md`.
-- **Sand seas**: without the dune-field flag they hold the top ranks under every target; with it they are outside
-  the top 50. The flag also catches part of Devon Island, a real analog (rank 1,486 to 2,820 for tile N75W090).
-- **Laser against grid** (ICESat-2, 8 sites): the laser slope at 240 m is 0.43 to 1.16 times the grid slope,
-  median 0.87; the three lowest are lava fields. Footprints differ (a 20 km box against the site outline).
-- **Two elevation models** (618 tiles, 1.12 million common cells): slopes and roughness from 400 m up agree
-  (correlation 0.99 and above), closed depressions do not (0.76). Candidate cells: 33,911 with Copernicus,
-  2,996 with NASADEM, 2,237 in common; per-tile Spearman 0.637, 21 of the top 50 tiles shared. **The ranking
-  depends on the elevation model.** Say it: sites that are candidates under both models are the stronger claim.
-- **Top of the ranking**: Arctic plateaus (section 0). The closed-depression share of all top-30 sites is zero
-  in the median cell, so the lake artefact of the 78-tile ranking is not what puts them there; vegetation (tundra
-  counted as bare) is the weak point instead.
-- **How to talk about the top of the ranking (J33 full run).** Say: "Our default mask counts moss and lichen as
-  bare ground, so the Arctic plateaus at the top are mostly tundra. Under a strict mask (bare / sparse
-  vegetation only) only 3 of our top 30 remain, and the top 30 becomes the Atacama and Puna, the western Tibetan
-  Plateau, the coastal desert of southern Peru, northern Ellesmere and Mauna Loa. We show both; the strict
-  ranking is the conservative one." Do not say "bare rock" about Putorana, Peary Land, Ungava, Baffin, Chukotka
-  or the Polar Urals. The strict ranking has had no novelty check (27 of its top 30 are `unchecked`) and 9 of its
-  top 30 lie inside a known analog radius (`is_known`), against 2 in the default top 30. Keys:
-  `data/validation/landcover_sensitivity.json` `full_run.*`.
+State Sun 15 Nov 06:00. Every number with its file and key: `docs/pitch/NUMBERS.md`. Tell the story in this
+order; the README, slides, pitch and Q&A follow it.
 
-Holds up:
-- **Our code matches NASA's lunar slope map**: median absolute difference 0.042 deg (20 m) and 0.064 deg (30 m) for a plane-fit slope at 200 m. This validates the data handling and a plane-fit estimator written for the test, not the two-point slopes used for scoring.
-- **Negative controls are clean**: Wielkopolska, the Tatra, the Alps and a Sahara sand sea give 0 candidate cells and 0 sites.
-- **Known analog sites are enriched in lunar-like terrain** (78 tiles): 21 of 31 sites above the base rate, median 1.80 x; random circles of the same radii give 0.33 x (5-95%: 0.14-0.67), and none of 500 random repeats reaches 1.80. Strongest: Kilauea 13 x, Island of Hawaii 12 x, Devon Island 6.7 x, Mauna Kea 5.4 x, Yungay 5.2 x, Haughton 5.0 x. Not enriched: salt pans, hydrothermal fields, flat young lava (Craters of the Moon, Laki, Potrillo), the Lut desert.
-- **Closed depressions are the feature that matters**: without `dep_frac` only 2 of the top 10 sites survive.
+1. **What is measured.** Terrain shape between about 200 m and 1.6 km inside 2 km cells (slopes 240 m and 570 m,
+   roughness 200 m to 1.6 km, closed depressions). Nothing below about 100 m, nothing about rock, regolith,
+   temperature or light (`data/validation/rank_uncertainty.json` `scale.*`).
+2. **The default ranking.** Its top 30 is mostly Arctic plateaus (16 on the Putorana Plateau) and that ground is
+   mostly moss-and-lichen tundra, because the default mask counts WorldCover class 100 as bare. Never say "bare
+   rock" about Putorana, Peary Land, Ungava, Baffin, Chukotka or the Polar Urals.
+3. **The strict ranking** (class 60 only): 3 of the default top 30 remain; strict top 30 = Atacama and Puna 13,
+   western Tibet incl. Ladakh 8, southern Peru and Arica 4, Hazen Plateau 3, Mauna Loa 1, other 1
+   (`data/validation/landcover_sensitivity.json` `full_run.*`). Both are shown, the strict one as the
+   conservative reading; which is the headline is a team decision (issue #11).
+4. **Validation.** Slope code against NASA's lunar map: 0.042 deg. Tile recovery AUC 0.531 (0.396-0.668),
+   consistent with chance. Enrichment around 22 known lunar analogs: median 1.02 against 0.39 for random circles,
+   11 of 22 above the rate (= random 95th percentile), 2.8% of random runs reach the median: borderline, say so.
+   Ranks stable to the lunar sample (top 10 at most 3 places, a typical run keeps 28 of 30), sensitive to the
+   feature set (top 30 kept: 13 without slopes, 8 without roughness, 21 without depressions). Elevation model:
+   NASADEM and Copernicus agree on slopes, not on depressions (Spearman 0.637, 21 of 50 tiles). Dune-field flag:
+   the J26 temperature and moisture check (978 sites) does not confirm that it marks dry sand; it stays a terrain
+   rule.
+5. **Literature** (`docs/NOVELTY.md` sections 3, 6, 7). Default top 30: 2 established, 4 mentioned, 24 not found.
+   Strict top 30: 9 established, 15 mentioned, 6 not found (3 Hazen Plateau, Aksai Chin, Acarí, Marcona). Every
+   "mentioned" is a Mars-analog statement, none a Moon analog; six Ngari rows rest on a general geography page.
+   Use "not found in the analog catalogues and searches listed here", never "unknown", "new" or "discovered".
+   Image review of the strict top 30: 28 no, 2 unsure (ranks 13 and 28), 0 artefacts. All verdicts are an SI
+   model's; a person has not checked them.
 
-Does not hold up, say it plainly:
-- **Exact top sites are not stable.** Top-10 overlap is 6 of 10 after a half-cell grid shift and 4 of 10 with 48 px or 96 px cells. Which tiles and regions score high is stable (Spearman 0.88-0.97). Present results as regions and areas, not as "the best 2 km patch".
-- **The first hidden-known test was uninformative**: the best cell near a known site is in the top 5% for 10 of 17 sites, and for 9 of 17 random points. The statistic saturates; the enrichment test replaced it.
-- **Nothing in the current top list can be called new.** Of the 12 unflagged top sites: 3 established analogs, 7 in regions that appear in analog work, 2 not found (northern Chang Tang, Tibet), and those two sit next to lakes, so their depressions are probably lake basins. The most defensible "not found in the catalogues and searches we list" candidates so far: the Harrat Khaybar lava field (Saudi Arabia), the Ikh Bogd piedmont (Gobi-Altai, Mongolia), the uplands of east-central Ellesmere Island. A wider scan is the only way to get better candidates.
-- **Six known analog sites cannot be evaluated at all** because the land-cover mask removes them (Meteor Crater, SP Crater, Sunset Crater, Cinder Lake are under sparse vegetation in WorldCover; the Dry Valleys have no WorldCover data).
-- **Earth artefacts of the depression feature**: lakes, playas, salt flats, yardang troughs, thermokarst. A water / salt mask or a manual look is needed before a site is shown as a candidate.
+Historical numbers that must not reappear as current: 0.91 and 0.36 as the known and random medians (with Mars-only entries, 16 of
+37; 0.91 is now only the random 95th percentile), 0.550 (tile AUC with 15 tiles), 1.80 (78-tile run), the 37 pilot tiles, "the strict ranking has no literature
+check".

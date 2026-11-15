@@ -12,6 +12,8 @@ The final ranking uses the pooled lunar target `base_regions`, the Copernicus el
 | Negative controls | With land cover, **zero candidate cells and sites** in all four controls. Terrain alone passed **33 cells and 2 sites** in Tatry/Podhale and **3 cells and 0 sites** in the Alps; the other controls stayed at zero. |
 | ICESat-2 laser profiles | Across **8** sites, laser slopes at **240 m** were **0.43–1.16×** the grid slopes, median **0.87×**. Transects and gridded sites cover different footprints. |
 
+**In one paragraph.** The estimator reproduces NASA's lunar slope map, and the masked controls give no candidates. As a detector of analogs the score is weak: at tile scale it is consistent with chance (AUC 0.531), and at site scale the known lunar analogs are borderline above random circles (median 1.02× against 0.39×; 11 of 22 above the rate, which is the 95th percentile of random runs; 2.8% of random runs reach the median, `random.share_of_random_runs_with_median_at_least_ours`). The ranks are stable to the lunar sample (bootstrap below) and sensitive to the feature set and to the land-cover mask (moss and lichen, below). The image review and literature check of both top-30 lists are SI-model verdicts that a person has not yet confirmed (`docs/NOVELTY.md`).
+
 With slopes and roughness alone, **9.83%** of valid cells passed the terrain threshold. Adding the depression features reduced this to **4.88%**. Spearman correlations of per-tile candidate shares between the pooled target and the individual regions span **0.724–0.960**.
 
 [Controls with and without land cover](figures/eff_j20_controls.png) · [Tile recovery ROC](figures/eff_j20_recovery.png) · [Enrichment against random circles](figures/eff_enrichment.png)
