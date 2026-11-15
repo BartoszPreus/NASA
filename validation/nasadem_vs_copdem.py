@@ -333,6 +333,34 @@ def aw3d30_figure(results, output):
     plt.close(fig)
 
 
+CACHE_ONLY_KEYS = ("one_tile_dem", "five_tiles_landcover", "bare_mask_all_cells_local_caches")
+
+
+def _missing(v):
+    """A cache-only diagnostic that could not be computed: absent, an error, or an error for every tile."""
+    if v is None or (isinstance(v, dict) and "error" in v):
+        return True
+    return isinstance(v, dict) and bool(v) and all(isinstance(x, dict) and "error" in x for x in v.values())
+
+
+def carry_cache_only(res, out):
+    """The three diagnostics need git-ignored local caches (data/raw/). In a fresh clone they cannot be computed;
+    then the value of the existing report is kept and listed under `carried_from_previous_run` with that report's
+    `generated` time, so a clean-clone rerun does not erase them silently (freeze review, issue #8)."""
+    if not os.path.exists(out):
+        return res
+    with open(out, encoding="utf-8") as f:
+        prev = json.load(f)
+    carried = [k for k in CACHE_ONLY_KEYS if _missing(res.get(k)) and not _missing(prev.get(k))]
+    for k in carried:
+        res[k] = prev[k]
+    if carried:
+        first = (prev.get("carried_from_previous_run") or {}).get("previous_generated") or prev.get("generated")
+        res["carried_from_previous_run"] = {"keys": carried, "previous_generated": first,
+                                            "reason": "local caches under data/raw/ absent in this run"}
+    return res
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--local-only", action="store_true")
@@ -398,6 +426,7 @@ def main(argv=None):
             res["other_targets"][score.DEFAULT_REGION] = other
         figure(common, shares, a.figure)
         res["figure"] = paths.rel(a.figure)
+    carry_cache_only(res, a.out)
     paths.ensure(os.path.dirname(a.out))
     with open(a.out, "w", encoding="utf-8") as f:
         json.dump(res, f, indent=1)
