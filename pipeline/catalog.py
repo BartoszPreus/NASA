@@ -110,7 +110,11 @@ SOURCES = [
       "and ground temperature, 927 m, north of about 16 N (product esa-cci-permafrost of the Open Science Catalog)",
       10, "https://esa-earthcode.github.io/open-science-catalog-metadata/products/esa-cci-permafrost/collection.json ; "
       "https://deep-esdl-public.s3.eu-central-1.amazonaws.com/esa-cci-permafrost-1x1151x1641-1.0.0.zarr/",
-      "UNVERIFIED: the catalogue label is 'proprietary'; the product's own terms were not opened (docs/sources/j24.md)",
+      "ESA CCI Permafrost terms (https://artefacts.ceda.ac.uk/licences/specific_licences/"
+      "esacci_permafrost_terms_and_conditions.pdf, read 15 Nov): may be used by any user for any purpose; "
+      "acknowledge the ESA Climate Change Initiative and the Permafrost CCI project and cite the dataset DOIs; IPR "
+      "with the producers; no warranty. Open Science Catalog collection DOI 10.83395/sb0d-ry12; which CCI release "
+      "the DeepESDL cube holds is not stated on the pages read (docs/sources/j25.md)",
       "no", "used", "pipeline/partner_context.py (job J24)", "data/raw/partner_context/"),
     S("jaxa_gportal", "JAXA", "JAXA G-Portal (the portal itself needs an account; its products are read through "
       "the JAXA Earth API, rows jaxa_gportal_sgli_lst and jaxa_gportal_amsr2_smc)", 11,
@@ -190,8 +194,10 @@ SOURCES = [
       "NASA.EOSDIS_Terra.MODIS_MOD11C1-LST.<daytime|nighttime>.v061_global_monthly-normal)", 1,
       "https://data.earth.jaxa.jp/stac/cog/v1/catalog.json ; doi:10.5067/MODIS/MOD11C1.061",
       "citation given by the catalogue: Wan, Z., Hook, S., Hulley, G. (2021), MODIS/Terra Land Surface "
-      "Temperature/Emissivity Daily L3 Global 0.05Deg CMG V061, NASA EOSDIS LP DAAC; LP DAAC's own citation page "
-      "not opened: UNVERIFIED", "no (JAXA-hosted copy; LP DAAC itself needs Earthdata login)", "used",
+      "Temperature/Emissivity Daily L3 Global 0.05Deg CMG V061, NASA EOSDIS LP DAAC. NASA Earthdata page "
+      "(https://www.earthdata.nasa.gov/data/catalog/lpcloud-mod11c1-061, read 15 Nov): openly shared without "
+      "restriction under the EOSDIS Data Use and Citation Guidance; citation Wan, Z., Hook, S., Hulley, G. (2021), "
+      "NASA Land Processes DAAC, doi:10.5067/MODIS/MOD11C1.061", "no (JAXA-hosted copy; LP DAAC itself needs Earthdata login)", "used",
       "pipeline/partner_context.py (job J24)", "data/raw/partner_context/"),
     S("nasa_moon_factsheet", "NASA", "NSSDC Moon fact sheet (Earth obliquity, lunar spin-axis tilt)", "",
       "https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html", "NASA public web page", "no", "used",
