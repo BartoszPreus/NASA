@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
-import type { Atlas, FeatureKey, MoonRegion, Site } from "../../lib/types";
+import type { Atlas, ContextField, FeatureKey, MoonRegion, Site } from "../../lib/types";
+import { LOW_SUN_DEG, lunarMaxSun, sunStats } from "../../lib/sunEarth";
+import { MOON_ALBEDO } from "../../lib/criteria";
 import type { Criterion, Dataset, Eval } from "../../lib/criteria";
 import { FEATURES } from "../../lib/criteria";
 import { img } from "../../lib/data";
@@ -108,6 +110,87 @@ function Outline({ s, spanKm }: { s: Site; spanKm: number }) {
   );
 }
 
+// Noon Sun elevation through the year at the site, against the highest Sun the lunar region ever sees.
+function SunChart({ s, region }: { s: Site; region: MoonRegion | undefined }) {
+  const st = sunStats(s.lat);
+  const moonMax = region?.lat != null ? lunarMaxSun(region.lat) : lunarMaxSun(-88);
+  const W = 400;
+  const H = 120;
+  const top = Math.max(90, st.maxNoon);
+  const y = (e: number) => H - 14 - (Math.max(-10, e) + 10) / (top + 10) * (H - 24);
+  const x = (i: number) => (i / (st.noonCurve.length - 1)) * W;
+  const d = st.noonCurve.map((e, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(e).toFixed(1)}`).join("");
+  return (
+    <>
+      <svg viewBox={`0 0 ${W} ${H}`} className="sun-chart" role="img" aria-label="Noon sun elevation through the year">
+        <rect x="0" y={y(moonMax)} width={W} height={y(0) - y(moonMax)} className="moonband" />
+        <line x1="0" x2={W} y1={y(0)} y2={y(0)} className="horizon" />
+        <line x1="0" x2={W} y1={y(LOW_SUN_DEG)} y2={y(LOW_SUN_DEG)} className="low" />
+        <path d={d} className="earth" />
+        <text x="4" y={y(moonMax) - 4} className="lbl moon">Moon, highest Sun {num(moonMax, 1)}°</text>
+        <text x={W - 4} y={y(LOW_SUN_DEG) - 4} className="lbl" textAnchor="end">10°</text>
+        <text x="4" y={H - 2} className="lbl">Jan</text>
+        <text x={W - 4} y={H - 2} className="lbl" textAnchor="end">Dec</text>
+      </svg>
+      <dl className="facts">
+        <div>
+          <dt>Noon Sun, summer</dt>
+          <dd className="mono tab">{num(st.maxNoon, 0)}°</dd>
+        </div>
+        <div>
+          <dt>Daylight below 10°</dt>
+          <dd className="mono tab">{pct(st.lowShare)}</dd>
+        </div>
+        <div>
+          <dt>Shadow of 1 m</dt>
+          <dd className="mono tab">{Number.isFinite(st.shadowAtMedian) ? `${num(st.shadowAtMedian, 1)} m` : "–"}</dd>
+        </div>
+      </dl>
+      <p className="fine">Noon Sun elevation over the year from latitude alone, against the band the Sun never leaves at the lunar region. Shadow length at the median daylight elevation. Terrain and weather are not included.</p>
+    </>
+  );
+}
+
+const CTX_ROWS: { key: string; label: string; fmt: (v: number | string) => string }[] = [
+  { key: "albedo", label: "Surface albedo", fmt: (v) => `${num(v as number, 2)}  (Moon ${MOON_ALBEDO})` },
+  { key: "ndvi_max", label: "Vegetation, highest NDVI", fmt: (v) => num(v as number, 2) },
+  { key: "aridity", label: "Aridity index", fmt: (v) => num(v as number, 3) },
+  { key: "precip_mm", label: "Precipitation", fmt: (v) => `${num(v as number, 0)} mm/yr` },
+  { key: "lith_name", label: "Rock", fmt: (v) => String(v) },
+  { key: "lith_class", label: "Rock class", fmt: (v) => String(v) },
+  { key: "crater_name", label: "Nearest impact structure", fmt: (v) => String(v) },
+  { key: "crater_km", label: "Distance to it", fmt: (v) => `${num(v as number, 0)} km` },
+  { key: "volcano_name", label: "Nearest Holocene volcano", fmt: (v) => String(v) },
+  { key: "volcano_km", label: "Distance to it", fmt: (v) => `${num(v as number, 0)} km` },
+  { key: "sand_pct", label: "Sand, topsoil", fmt: (v) => `${num(v as number, 0)}%` },
+  { key: "silt_pct", label: "Silt, topsoil", fmt: (v) => `${num(v as number, 0)}%` },
+  { key: "clay_pct", label: "Clay, topsoil", fmt: (v) => `${num(v as number, 0)}%` },
+  { key: "coarse_pct", label: "Coarse fragments", fmt: (v) => `${num(v as number, 0)}%` },
+  { key: "permafrost_pct", label: "Permafrost", fmt: (v) => `${num(v as number, 0)}%` },
+  { key: "ground_ice", label: "Ground ice", fmt: (v) => String(v) },
+];
+
+function ContextList({ s, fields }: { s: Site; fields: Record<string, ContextField> }) {
+  if (!s.ctx) return <p className="dim">Not sampled for this patch.</p>;
+  return (
+    <>
+      <dl className="ctx">
+        {CTX_ROWS.filter((r) => r.key in fields || s.ctx?.[r.key] != null).map((r) => {
+          const v = s.ctx?.[r.key];
+          const f = fields[r.key];
+          return (
+            <div key={r.key} title={f ? `${f.source ?? ""}${f.licence ? ` · ${f.licence}` : ""}${f.note ? ` · ${f.note}` : ""}` : undefined}>
+              <dt>{r.label}</dt>
+              <dd className={v == null ? "dim" : "mono tab"}>{v == null ? "not measured" : r.fmt(v)}</dd>
+            </div>
+          );
+        })}
+      </dl>
+      <p className="fine">Sampled at the patch outline and best window. Context only; the terrain ranking does not use these values.</p>
+    </>
+  );
+}
+
 export function SiteCard(p: {
   site: Site;
   atlas: Atlas;
@@ -118,6 +201,7 @@ export function SiteCard(p: {
   evals: Record<string, Eval> | null;
   activeIds: string[];
   onClose: () => void;
+  fields: Record<string, ContextField>;
 }) {
   const s = p.site;
   const moon = p.atlas.moon;
@@ -281,6 +365,14 @@ export function SiteCard(p: {
             ))}
           </div>
           <p className="fine">Share of 30 m pixels at or below the slope. Outer ring Earth, inner ring the lunar region median. Not a landing-safety assessment.</p>
+        </Block>
+
+        <Block title="Sun and shadows" src="computed from latitude (lib/sunEarth.ts); lunar maximum = 90° − |latitude| + 1.54°">
+          <SunChart s={s} region={region} />
+        </Block>
+
+        <Block title="Ground and surface" src="sites/context_climate_*.json, sites/context_geology_*.json">
+          <ContextList s={s} fields={p.fields} />
         </Block>
 
         <Block title="Surface conditions, Earth and Moon" src="sites.json · power, partner; moon.json · regions[target].headline">

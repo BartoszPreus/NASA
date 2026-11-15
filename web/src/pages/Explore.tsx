@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { loadPolygons, type Load } from "../lib/data";
+import { loadContext, loadPolygons, type Load, type SiteContext } from "../lib/data";
 import type { Atlas, Site } from "../lib/types";
 import { replaceParams } from "../lib/router";
 import { criteriaFor, evaluate, type Dataset, type Mode, type Thresholds } from "../lib/criteria";
@@ -86,10 +86,29 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
     });
   }, [dataset, target, active, mode, selId, allIds, sort, flip, atlas.moon.default_target]);
 
+  // per-patch context (climate, vegetation, geology); attached once it has loaded
+  const [context, setContext] = useState<SiteContext | null>(null);
+  useEffect(() => {
+    let dead = false;
+    setContext(null);
+    loadContext(dataset).then((c) => !dead && setContext(c));
+    return () => {
+      dead = true;
+    };
+  }, [dataset]);
+
   const pool: Site[] = useMemo(() => {
-    if (dataset === "strict") return extra.dune ? [...atlas.strict, ...atlas.strictFlagged] : atlas.strict;
-    return extra.dune ? [...atlas.sites, ...atlas.flagged] : atlas.sites;
-  }, [dataset, extra.dune, atlas]);
+    const base =
+      dataset === "strict"
+        ? extra.dune
+          ? [...atlas.strict, ...atlas.strictFlagged]
+          : atlas.strict
+        : extra.dune
+          ? [...atlas.sites, ...atlas.flagged]
+          : atlas.sites;
+    if (!context || !context.sites.size) return base;
+    return base.map((s) => ({ ...s, ctx: context.sites.get(s.site_id) ?? null }));
+  }, [dataset, extra.dune, atlas, context]);
 
   // outlines of all patches arrive after the first render (sites/<run>_polygons.json)
   const [polys, setPolys] = useState<Record<string, [number, number][][][]> | null>(null);
@@ -183,7 +202,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
 
   const all = useMemo(() => new Map([...atlas.sites, ...atlas.flagged].map((s) => [s.site_id, s])), [atlas]);
   const strictMap = useMemo(() => new Map([...atlas.strict, ...atlas.strictFlagged].map((s) => [s.site_id, s])), [atlas]);
-  const sel0 = selId ? ((dataset === "strict" ? strictMap.get(selId) : all.get(selId)) ?? null) : null;
+  const poolById = useMemo(() => new Map(pool.map((s) => [s.site_id, s])), [pool]);
+  const sel0 = selId ? (poolById.get(selId) ?? (dataset === "strict" ? strictMap.get(selId) : all.get(selId)) ?? null) : null;
   const selected = sel0 && !sel0.polygon && polys?.[sel0.site_id] ? { ...sel0, polygon: polys[sel0.site_id] } : sel0;
 
   const switchDataset = (d: Dataset) => {
@@ -298,6 +318,7 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
           evals={evals.get(selected.site_id) ?? null}
           activeIds={activeCrits.map((c) => c.id)}
           onClose={() => setSelId(null)}
+          fields={context?.fields ?? {}}
         />
       )}
     </div>

@@ -109,6 +109,17 @@ export interface Site {
   review: { what_it_is: string; looks_like_artefact: string; reason: string } | null;
   rank_uncertainty?: RankUncertainty | null;
   landcover_strict?: LandcoverStrict | null;
+  /** per-patch context of web/public/sites/context_*.json (climate, vegetation, geology, ground) */
+  ctx?: Record<string, number | string | null> | null;
+}
+
+export interface ContextField {
+  label: string;
+  unit?: string;
+  source?: string;
+  url?: string;
+  licence?: string;
+  note?: string;
 }
 
 export interface Range3 {

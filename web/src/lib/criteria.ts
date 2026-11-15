@@ -1,5 +1,10 @@
 import type { FeatureKey, Moon, Site } from "./types";
 import { num } from "./format";
+import { sunStats } from "./sunEarth";
+
+// NASA Moon fact sheet (nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html): geometric albedo 0.12.
+export const MOON_ALBEDO = 0.12;
+const num0 = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
 // Per-criterion screening. Each criterion ranks the patches of the current list on one property; a patch
 // "does well" on it when it is among the best X% (kind "pct") or reaches a value (kind "min"). The mode
@@ -7,7 +12,7 @@ import { num } from "./format";
 
 export type Dataset = "default" | "strict";
 export type Mode = "any" | "all";
-export type Group = "Terrain shape" | "Surface conditions" | "Size and stability";
+export type Group = "Terrain shape" | "Size and stability" | "Light and surface" | "Geology and ground";
 
 export interface Ctx {
   target: string;
@@ -156,40 +161,116 @@ export const CRITERIA: Criterion[] = [
     why: "Width of the 5–95% rank interval over bootstrap runs; narrower is steadier. Ranks 1 to 100 only.",
   },
   {
-    id: "cold",
-    label: "Cold surface",
-    group: "Surface conditions",
+    id: "lowsun",
+    label: "Low sun and long shadows",
+    group: "Light and surface",
     kind: "pct",
-    dir: -1,
-    value: (s) => s.power?.ts_mean_c ?? null,
-    fmt: (v) => `${num(v, 1)} °C`,
-    source: "sites.json · power.ts_mean_c (NASA POWER)",
+    dir: 1,
+    value: (s) => sunStats(s.lat).lowShare,
+    fmt: (v) => `${num(v * 100, 0)}% of daylight`,
+    source: "computed from latitude (web/src/lib/sunEarth.ts)",
     def: 20,
-    why: "Annual mean skin temperature from NASA POWER. Sampled for the top 150 default and top 100 strict patches.",
+    why: "Share of daylight hours over a year with the Sun below 10°. At the lunar south pole the Sun stays within a few degrees of the horizon all year.",
   },
   {
-    id: "nightcold",
-    label: "Cold nights",
-    group: "Surface conditions",
+    id: "albedo",
+    label: "Brightness close to the Moon's",
+    group: "Light and surface",
     kind: "pct",
     dir: -1,
-    value: (s) => s.partner?.nasa_modis?.night_min_k ?? null,
-    fmt: (v) => `${num(v, 0)} K`,
-    source: "sites.json · partner.nasa_modis.night_min_k (MODIS LST)",
+    value: (s) => (typeof s.ctx?.albedo === "number" ? Math.abs(s.ctx.albedo - MOON_ALBEDO) : null),
+    fmt: (v) => `±${num(v, 2)} from 0.12`,
+    source: "sites/context_climate_*.json · albedo (MODIS); Moon geometric albedo 0.12 (NASA Moon fact sheet)",
     def: 20,
-    why: "Coldest monthly night mean of the MODIS land-surface temperature.",
+    why: "Distance of the surface albedo from the Moon's geometric albedo of 0.12. Dark rock scores well, bright salt or sand does not.",
   },
   {
-    id: "dry",
+    id: "ndvi",
+    label: "No vegetation",
+    group: "Light and surface",
+    kind: "pct",
+    dir: -1,
+    value: (s) => num0(s.ctx?.ndvi_max),
+    fmt: (v) => `NDVI ${num(v, 2)}`,
+    source: "sites/context_climate_*.json · ndvi_max (MODIS NDVI)",
+    def: 20,
+    why: "Highest monthly NDVI of the year. The Moon has none; low values mean bare ground even in summer.",
+  },
+  {
+    id: "arid",
     label: "Dry climate",
-    group: "Surface conditions",
+    group: "Light and surface",
     kind: "pct",
     dir: -1,
-    value: (s) => s.power?.precip_mm_per_year ?? null,
-    fmt: (v) => `${num(v, 0)} mm/yr`,
-    source: "sites.json · power.precip_mm_per_year (NASA POWER)",
+    value: (s) => num0(s.ctx?.aridity),
+    fmt: (v) => `index ${num(v, 3)}`,
+    source: "sites/context_climate_*.json · aridity (NASA POWER, Hargreaves)",
     def: 20,
-    why: "Annual precipitation from NASA POWER.",
+    why: "Aridity index, annual precipitation over potential evapotranspiration. Below 0.05 is hyper-arid.",
+  },
+  {
+    id: "lith",
+    label: "Rock like the lunar crust",
+    group: "Geology and ground",
+    kind: "pct",
+    dir: 1,
+    value: (s) => num0(s.ctx?.lith_score),
+    fmt: (v) => `${num(v, 1)}`,
+    source: "sites/context_geology_*.json · lith_score (Macrostrat lithology)",
+    def: 20,
+    why: "1 for anorthosite or gabbro (lunar highland rock), 0.9 for basalt (mare rock), lower for other igneous, metamorphic and sedimentary rock.",
+  },
+  {
+    id: "crater",
+    label: "Near an impact structure",
+    group: "Geology and ground",
+    kind: "pct",
+    dir: -1,
+    value: (s) => num0(s.ctx?.crater_km),
+    fmt: (v) => `${num(v, 0)} km`,
+    source: "sites/context_geology_*.json · crater_km (Earth Impact Database)",
+    def: 10,
+    why: "Distance to the nearest confirmed impact structure. The lunar south pole is shaped by impacts.",
+  },
+  {
+    id: "volcano",
+    label: "Near volcanic terrain",
+    group: "Geology and ground",
+    kind: "pct",
+    dir: -1,
+    value: (s) => num0(s.ctx?.volcano_km),
+    fmt: (v) => `${num(v, 0)} km`,
+    source: "sites/context_geology_*.json · volcano_km (Smithsonian GVP)",
+    def: 10,
+    why: "Distance to the nearest Holocene volcano; basaltic volcanic ground is the usual Earth stand-in for lunar mare.",
+  },
+  {
+    id: "fines",
+    label: "Fine loose ground",
+    group: "Geology and ground",
+    kind: "pct",
+    dir: 1,
+    value: (s) => {
+      const a = num0(s.ctx?.sand_pct);
+      const b = num0(s.ctx?.silt_pct);
+      return a == null || b == null ? null : a + b;
+    },
+    fmt: (v) => `${num(v, 0)}% sand and silt`,
+    source: "sites/context_geology_*.json · sand_pct, silt_pct (SoilGrids 2.0, 0–5 cm)",
+    def: 20,
+    why: "Sand and silt share of the topsoil. Lunar regolith is a fine silty sand with almost no clay.",
+  },
+  {
+    id: "permafrost",
+    label: "Permafrost and ground ice",
+    group: "Geology and ground",
+    kind: "pct",
+    dir: 1,
+    value: (s) => num0(s.ctx?.permafrost_pct),
+    fmt: (v) => `${num(v, 0)}% permafrost`,
+    source: "sites/context_geology_*.json · permafrost_pct (ESA CCI Permafrost)",
+    def: 20,
+    why: "Share of permafrost. Ice is expected in the cold traps of the lunar south pole; frozen ground is the Earth stand-in for drilling tests.",
   },
 ];
 

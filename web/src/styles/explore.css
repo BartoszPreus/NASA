@@ -293,3 +293,15 @@
   .facts { grid-template-columns: repeat(2, 1fr); }
   .em { grid-template-columns: 1fr; gap: 10px; }
 }
+
+/* sun chart and context list in the site card */
+.sun-chart { width: 100%; height: auto; }
+.sun-chart .moonband { fill: rgba(201, 197, 188, 0.16); }
+.sun-chart .horizon { stroke: var(--line-2); }
+.sun-chart .low { stroke: rgba(242, 200, 121, 0.35); stroke-dasharray: 3 4; }
+.sun-chart .earth { fill: none; stroke: var(--earth); stroke-width: 1.6; }
+.sun-chart .lbl { fill: var(--dim); font: 10px var(--mono); }
+.sun-chart .lbl.moon { fill: var(--moon); }
+.ctx { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.ctx dt { font-size: 11px; color: var(--dim); }
+.ctx dd { margin: 2px 0 0; font-size: 13px; overflow-wrap: anywhere; }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Atlas, Meta, Moon, Site, Source } from "./types";
+import type { Atlas, ContextField, Meta, Moon, Site, Source } from "./types";
 
 // Everything is read from app/data/ (served as ./data/ through a symlink in public/).
 export const DATA = "./data/";
@@ -128,3 +128,31 @@ export const useSources = () => useLoad(() => json<Source[]>("sources.json"));
 
 export const img = (file: string) => `${DATA}img/${file}`;
 export const fig = (path: string) => DATA + path;
+
+// Per-patch context (web/scripts/build_context_*.py). Optional: a missing file leaves the fields null.
+export interface SiteContext {
+  fields: Record<string, ContextField>;
+  sites: Map<string, Record<string, number | string | null>>;
+}
+const ctxCache = new Map<string, Promise<SiteContext>>();
+export function loadContext(run: "default" | "strict"): Promise<SiteContext> {
+  let p = ctxCache.get(run);
+  if (!p) {
+    const one = (kind: string) =>
+      fetch(`${ROOT}sites/context_${kind}_${run}.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null) as Promise<{ fields: Record<string, ContextField>; sites: Record<string, Record<string, number | string | null>> } | null>;
+    p = Promise.all([one("climate"), one("geology")]).then((docs) => {
+      const fields: Record<string, ContextField> = {};
+      const sites = new Map<string, Record<string, number | string | null>>();
+      for (const d of docs) {
+        if (!d) continue;
+        Object.assign(fields, d.fields);
+        for (const [id, v] of Object.entries(d.sites)) sites.set(id, { ...(sites.get(id) ?? {}), ...v });
+      }
+      return { fields, sites };
+    });
+    ctxCache.set(run, p);
+  }
+  return p;
+}
