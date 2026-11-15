@@ -25,7 +25,13 @@ polar night; the number of months behind every mean is written next to it. The l
 catalogues are "proprietary" with links to the providers' terms: read them before publishing (job J25).
 
 Every sampled number is cached in data/raw/partner_context/samples.json, so reruns after a new ranking only
-fetch what is new.
+fetch what is new. Ground temperature is read from every Zarr chunk that holds a ranked or known site (about
+10 MB each), so a rerun from an empty cache gives the same table as a rerun from a full one.
+
+Failures stop the stage (job J37): a JAXA tile read that still fails after its retries, or a permafrost read that
+fails (for example "No module named 'numcodecs'"), makes the stage exit non-zero before any output is written.
+A partial table is written only with an explicit --allow-missing jaxa / --allow-missing permafrost, which is
+printed and recorded in the summary JSON.
 
     python -m pipeline.partner_context                      # top 60 ranked + 30 flagged + 30 known sites
     python -m pipeline.partner_context --top 200 --flagged 100 --known 100
@@ -304,9 +310,10 @@ class PermafrostGrid:
         self._chunks = {}
 
 
-def sample_permafrost(sites, cache, ground_temp_sites=(), ground_temp_chunks=4):
-    """Permafrost fraction for every site inside the grid; ground temperature at 2 m for the chunks that hold
-    most of `ground_temp_sites` (each such chunk is a download of about 10 MB)."""
+def sample_permafrost(sites, cache, ground_temp_sites=(), ground_temp_chunks=None):
+    """Permafrost fraction for every site inside the grid; ground temperature at 2 m for every chunk that holds
+    one of `ground_temp_sites` (each chunk is a download of about 10 MB). `ground_temp_chunks` limits the read to
+    that many chunks, those that hold most sites; the sites left out are counted in the returned info."""
     todo = [s for s in sites if Samples.key(PERMAFROST_ID + ":PFR", "last", *s) not in cache.d]
     gt_todo = [s for s in ground_temp_sites if Samples.key(PERMAFROST_ID + ":T2m", "last", *s) not in cache.d]
     info = {"product": PERMAFROST_ID, "catalogue_entry": OSC_PRODUCT, "store": PERMAFROST_ZARR}
@@ -329,8 +336,13 @@ def sample_permafrost(sites, cache, ground_temp_sites=(), ground_temp_chunks=4):
         if rc is not None:
             by_chunk.setdefault(g.chunk_of(*rc, var="T2m"), []).append((lat, lon, rc))
     order = sorted(by_chunk, key=lambda k: -len(by_chunk[k]))
-    info["ground_temp_chunks_wanted"], info["ground_temp_chunks_read"] = len(order), min(len(order), ground_temp_chunks)
-    for ck in order[:ground_temp_chunks]:
+    n_read = len(order) if not ground_temp_chunks else min(len(order), ground_temp_chunks)
+    info["ground_temp_chunks_wanted"], info["ground_temp_chunks_read"] = len(order), n_read
+    info["ground_temp_sites_not_read"] = int(sum(len(by_chunk[k]) for k in order[n_read:]))
+    if info["ground_temp_sites_not_read"]:
+        print("  permafrost: --ground-temp-chunks %d leaves %d sites without ground temperature"
+              % (ground_temp_chunks, info["ground_temp_sites_not_read"]), flush=True)
+    for ck in order[:n_read]:
         for lat, lon, rc in by_chunk[ck]:
             v = g.value("T2m", *rc)
             cache.d[Samples.key(PERMAFROST_ID + ":T2m", "last", lat, lon)] = None if not np.isfinite(v) else round(v, 2)
@@ -404,7 +416,7 @@ def lunar_side():
     return {"source": paths.rel(paths.MOON_DIVINER), "regions": out}
 
 
-def summarise(df, meta, failed, perma):
+def summarise(df, meta, failed, perma, allow_missing=()):
     cols = [c for c in df.columns if c not in ("site_id", "group", "lat", "lon") and not c.endswith("months")
             and not c.endswith("values")]
     by_group = {}
@@ -419,6 +431,7 @@ def summarise(df, meta, failed, perma):
             "sampling": "the one pixel that holds the site centre; no averaging over the site",
             "sites": int(len(df)), "groups": {k: int(v) for k, v in df["group"].value_counts().items()},
             "layers": meta, "jaxa_catalogue": JAXA_STAC, "permafrost": perma, "failed_reads": failed,
+            "allow_missing": sorted(allow_missing),
             "by_group": by_group, "moon_diviner": lunar_side(),
             "caveats": [
                 "Pixels of 2.6 km (SGLI), 5.6 km (MODIS) and about 11 km (AMSR2 grid; the footprint is larger) "
@@ -430,7 +443,8 @@ def summarise(df, meta, failed, perma):
                 "The day-night difference depends on the overpass times of each satellite; compare sites within "
                 "one sensor, not across sensors.",
                 "ESA CCI Permafrost is a model product (MODIS surface temperature, ERA5, CryoGrid), north of "
-                "about 16 N only; ground temperature is read for a limited number of chunks.",
+                "about 16 N only; ground temperature is read for every grid chunk that holds a ranked or known site "
+                "unless --ground-temp-chunks limits it (see permafrost.ground_temp_sites_not_read).",
                 "Nothing here enters the terrain score. The Moon has no air and no liquid water: these columns "
                 "quantify where the analogy breaks and which sites are cold and dry, they do not close the gap.",
                 "Licence labels in both catalogues are 'proprietary' with links to the providers' terms; the "
@@ -442,9 +456,13 @@ def main(argv=None):
     ap.add_argument("--top", type=int, default=60, help="highest-ranked sites of ranking.csv")
     ap.add_argument("--flagged", type=int, default=30, help="largest sites with the dune-field flag")
     ap.add_argument("--known", type=int, default=30, help="best unflagged sites that are known analogs")
-    ap.add_argument("--ground-temp-chunks", type=int, default=4,
-                    help="how many 10 MB chunks of permafrost ground temperature to download")
+    ap.add_argument("--ground-temp-chunks", type=int, default=0,
+                    help="read at most this many 10 MB chunks of permafrost ground temperature (0 = every chunk "
+                         "that holds a ranked or known site, the default)")
     ap.add_argument("--no-permafrost", action="store_true")
+    ap.add_argument("--allow-missing", action="append", default=[], choices=["jaxa", "permafrost"],
+                    help="write the table even though this layer failed (its columns stay empty); recorded in "
+                         "the summary. Without it a failed layer stops the stage with a non-zero exit code.")
     ap.add_argument("--workers", type=int, default=MAX_PARALLEL)
     a = ap.parse_args(argv)
     paths.ensure(CACHE, paths.SITES)
@@ -453,18 +471,31 @@ def main(argv=None):
     print("sites: %d (%s)" % (len(sel), sel["group"].value_counts().to_dict()), flush=True)
     cache = Samples()
     meta, failed = sample_jaxa(pts, cache, a.workers)
+    allow = set(a.allow_missing)
+    if failed:
+        msg = ("%d JAXA Earth API tile reads failed after retries (first: %s %s: %s)"
+               % (len(failed), failed[0]["collection"], failed[0]["date"], failed[0]["error"]))
+        if "jaxa" not in allow:
+            raise SystemExit(msg + "; nothing written. Rerun to retry (finished reads are cached), or pass "
+                                   "--allow-missing jaxa to write the table with these values empty.")
+        print("WARNING (--allow-missing jaxa): " + msg, flush=True)
     perma = {"skipped": True}
     if not a.no_permafrost:
         try:
             ranked = [(round(float(s.lat), 3), round(float(s.lon), 3)) for s in sel.itertuples() if s.group != "flagged"]
-            perma = sample_permafrost(pts, cache, ranked, a.ground_temp_chunks)
-        except Exception as exc:                       # the stage still writes the JAXA and NASA columns
-            perma = {"error": repr(exc)[:300]}
-            print("permafrost failed:", perma["error"], flush=True)
+            perma = sample_permafrost(pts, cache, ranked, a.ground_temp_chunks or None)
+        except Exception as exc:
+            err = repr(exc)[:300]
+            if "permafrost" not in allow:
+                raise SystemExit("permafrost failed: %s; nothing written. Install the requirements "
+                                 "(pip install -r requirements.txt) and rerun, or pass --allow-missing permafrost "
+                                 "to write the table with the permafrost columns empty." % err) from exc
+            perma = {"error": err}
+            print("WARNING (--allow-missing permafrost): permafrost failed:", err, flush=True)
     df = build_table(sel, cache)
     df.to_csv(paths.PARTNER_CONTEXT, index=False)
     with open(paths.PARTNER_CONTEXT_SUMMARY, "w", encoding="utf-8") as f:
-        json.dump(summarise(df, meta, failed, perma), f, indent=1)
+        json.dump(summarise(df, meta, failed, perma, allow), f, indent=1)
     print("wrote %s (%d sites) and %s; failed tile reads: %d" % (
         paths.rel(paths.PARTNER_CONTEXT), len(df), paths.rel(paths.PARTNER_CONTEXT_SUMMARY), len(failed)))
     show = ["site_id", "group", "jaxa_sgli_lst_day_mean_k", "jaxa_sgli_lst_night_mean_k",
