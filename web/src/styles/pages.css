@@ -7,7 +7,7 @@
 .pg-lead { max-width: 640px; color: var(--chrome); font-size: 16.5px; line-height: 1.6; margin-top: 22px; }
 .pg-h2 { font-size: clamp(26px, 3.2vw, 38px); line-height: 1.1; letter-spacing: -0.03em; margin: 96px 0 28px; font-weight: 450; }
 .pg-h3 { font-size: 17px; letter-spacing: -0.01em; font-weight: 500; }
-.pg .glass { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+.pg .glass { background: linear-gradient(var(--panel), var(--panel)), rgba(5, 6, 8, 0.94); border: 1px solid var(--line); border-radius: var(--radius); }
 .pg a.ext { color: var(--text); border-bottom: 1px solid var(--line-2); transition: border-color 0.2s, color 0.2s; }
 .pg a.ext:hover { border-color: var(--flare); color: #fff; }
 .pg code { font-family: var(--mono); font-size: 0.86em; color: var(--chrome); background: rgba(255, 255, 255, 0.05); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
@@ -16,9 +16,10 @@
 .pg .moon-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
 .pg .polar { position: relative; padding: 18px; }
 .pg .polar svg { width: 100%; height: auto; display: block; }
-.pg .polar .ring { fill: none; stroke: var(--line); }
-.pg .polar .spoke { stroke: rgba(255, 255, 255, 0.05); }
-.pg .polar .tick-t { fill: var(--dim); font: 10px var(--mono); letter-spacing: 0.06em; }
+.pg .polar .relief { opacity: 0.5; filter: brightness(0.85) contrast(1.1); }
+.pg .polar .ring { fill: none; stroke: rgba(255, 255, 255, 0.16); }
+.pg .polar .spoke { stroke: rgba(255, 255, 255, 0.09); }
+.pg .polar .tick-t { fill: var(--chrome); font: 10px var(--mono); letter-spacing: 0.06em; paint-order: stroke; stroke: var(--void); stroke-width: 3px; }
 .pg .polar .win { fill: rgba(255, 255, 255, 0.025); stroke: rgba(201, 197, 188, 0.45); stroke-width: 1; cursor: pointer; transition: fill 0.3s, stroke 0.3s; }
 .pg .polar .win:hover { fill: rgba(242, 200, 121, 0.08); stroke: var(--flare); }
 .pg .polar .win.on { fill: rgba(242, 200, 121, 0.14); stroke: var(--flare); stroke-width: 1.5; }

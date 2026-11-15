@@ -1,9 +1,9 @@
 .journey { position: relative; min-height: 560px; height: 100svh; padding-top: var(--nav-h); overflow: hidden; background: #07080a; }
 .journey-scene { position: absolute; inset: var(--nav-h) 0 0 450px; overflow: hidden; }
-.journey-orbit { position: absolute; inset: -6% -4% 12%; }
+.journey-orbit { position: absolute; inset: 0; }
 .journey-orbit .mg { width: 100%; height: 100%; }
-.journey-coordinate { position: absolute; top: 32px; left: 40px; right: 40px; display: flex; justify-content: space-between; gap: 20px; font-size: 11px; color: #93969b; }
-.journey-caption { position: absolute; left: 8%; bottom: 5%; max-width: 450px; padding: 22px 26px; background: rgba(7,8,10,.78); border-left: 1px solid #696c71; backdrop-filter: blur(8px); }
+.journey-coordinate { position: absolute; z-index: 2; pointer-events: none; text-shadow: 0 1px 6px #000; top: 32px; left: 40px; right: 40px; display: flex; justify-content: space-between; gap: 20px; font-size: 11px; color: #93969b; }
+.journey-caption { position: absolute; z-index: 2; left: 8%; bottom: 5%; max-width: 450px; padding: 22px 26px; background: rgba(7,8,10,.78); border-left: 1px solid #696c71; backdrop-filter: blur(8px); }
 .journey-kicker { font-size: 11px; color: #aaaeb4; }
 .journey-caption h2 { font-size: clamp(26px, 3vw, 40px); letter-spacing: -.04em; line-height: 1.1; margin: 10px 0 12px; }
 .journey-caption p { color: #a3a6ab; font-size: 13px; line-height: 1.6; }
@@ -96,3 +96,27 @@
 .ex-adjust[open] > summary > span:last-child { transform: rotate(45deg); }
 .ex-adjust .flt { padding: 0; }
 .ex-result-context { padding: 16px 20px 0; font-size: 11px; color: var(--chrome); }
+
+/* ---------------------------------------------------------------- mission Moon (drag, zoom, markers) */
+.mission-moon { cursor: grab; touch-action: none; user-select: none; }
+.mission-moon.grabbing { cursor: grabbing; }
+.mm-pins { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.mm-pin { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 8px; padding: 0; margin: 0; border: 0; background: none; color: #fff; cursor: pointer; transition: opacity .25s; will-change: transform; }
+.mm-pin i { position: relative; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #f4f1ea; border: 2px solid rgba(7, 8, 10, .85); box-shadow: 0 0 0 1px rgba(255, 255, 255, .55), 0 0 12px rgba(0, 0, 0, .6); flex: none; transition: transform .2s, background .2s; }
+.mm-pin span { margin-top: -7px; padding: 3px 8px; border-radius: 6px; font-size: 12px; white-space: nowrap; background: rgba(7, 8, 10, .82); border: 1px solid rgba(255, 255, 255, .14); opacity: 0; transform: translateX(-4px); transition: opacity .2s, transform .2s; pointer-events: none; }
+.mm-pin:hover i, .mm-pin:focus-visible i { transform: scale(1.25); }
+.mm-pin:hover span, .mm-pin:focus-visible span, .mm-pin.on span { opacity: 1; transform: none; }
+.mm-pin.lit i { background: var(--flare, #f2c879); }
+.mm-pin.on i { background: var(--flare, #f2c879); width: 18px; height: 18px; margin: -9px 0 0 -9px; }
+.mm-pin.on i::after { content: ""; position: absolute; inset: -9px; border-radius: 50%; border: 2px solid var(--flare, #f2c879); animation: mm-pulse 2.2s ease-out infinite; }
+.mm-pin.on span { margin-top: -9px; border-color: rgba(242, 200, 121, .5); }
+@keyframes mm-pulse { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.7); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .mm-pin.on i::after { animation: none; opacity: .6; } }
+.mm-tools { position: absolute; right: 24px; bottom: 24px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 2; }
+.mm-hint { font-size: 11px; color: #b4b7bc; letter-spacing: .02em; pointer-events: none; padding: 4px 9px; border-radius: 999px; background: rgba(7, 8, 10, .62); }
+.mm-reset { pointer-events: auto; font: inherit; font-size: 12px; color: var(--text, #eee); padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .2); background: rgba(7, 8, 10, .7); backdrop-filter: blur(6px); cursor: pointer; }
+.mm-reset:hover { border-color: var(--flare, #f2c879); }
+@media (max-width: 760px) { .mm-hint { display: none; } .mm-tools { right: 12px; bottom: 12px; } }
+
+.journey-coordinate > span { padding: 4px 9px; border-radius: 999px; background: rgba(7, 8, 10, .62); color: #c3c6cb; }
+@media (max-width: 1000px) { .journey-coordinate > span { align-self: flex-start; } }

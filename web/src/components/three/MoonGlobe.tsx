@@ -24,6 +24,12 @@ export interface MoonGlobeProps {
   onMarkerSelect?: (id: string) => void;
   /** stars behind the Moon (off when the page draws its own) */
   stars?: boolean;
+  /** ambient light intensity (fills the night side) */
+  ambient?: number;
+  /** sunlight intensity */
+  sun?: number;
+  /** renderer tone-mapping exposure */
+  exposure?: number;
   /** called once the texture is on screen */
   onReady?: () => void;
 }
@@ -38,6 +44,14 @@ function Fit({ fill }: { fill: number }) {
     cam.lookAt(0, 0, 0);
     cam.updateProjectionMatrix();
   }, [camera, size.width, size.height, fill]);
+  return null;
+}
+
+function Exposure({ value }: { value: number }) {
+  const gl = useThree((s) => s.gl);
+  useEffect(() => {
+    gl.toneMappingExposure = value;
+  }, [gl, value]);
   return null;
 }
 
@@ -87,7 +101,7 @@ function Body({ rpm, tilt, markers, reduced, onReady, selectedMarker, onMarkerSe
   );
 }
 
-export function MoonGlobe({ className = "", rpm = 0.6, light = [1, 0.35, 0.25], tilt = 0.35, fill = 0.98, markers, stars = false, onReady, selectedMarker, onMarkerSelect }: MoonGlobeProps) {
+export function MoonGlobe({ className = "", rpm = 0.6, light = [1, 0.35, 0.25], tilt = 0.35, fill = 0.98, markers, stars = false, onReady, selectedMarker, onMarkerSelect, ambient = 0.035, sun = 3.8, exposure = 1 }: MoonGlobeProps) {
   const wrap = useRef<HTMLDivElement>(null);
   const inView = useInView(wrap);
   const reduced = useReducedMotion();
@@ -102,8 +116,9 @@ export function MoonGlobe({ className = "", rpm = 0.6, light = [1, 0.35, 0.25], 
     <div ref={wrap} className={`mg ${className}`} aria-hidden>
       <Canvas dpr={[1, 2]} frameloop={inView ? "always" : "never"} camera={{ position: [0, 0, 4], fov: 30, near: 0.1, far: 300 }} gl={{ antialias: true, alpha: true }}>
         <Fit fill={fill} />
-        <ambientLight intensity={0.035} />
-        <directionalLight position={[light[0] * 10, light[1] * 10, light[2] * 10]} intensity={3.8} color="#fff6e8" />
+        <Exposure value={exposure} />
+        <ambientLight intensity={ambient} />
+        <directionalLight position={[light[0] * 10, light[1] * 10, light[2] * 10]} intensity={sun} color="#fff6e8" />
         {stars && <Stars count={1600} drift={reduced ? 0 : 0.002} />}
         <Body rpm={rpm} tilt={tilt} markers={markers} reduced={reduced} onReady={onReady} selectedMarker={selectedMarker} onMarkerSelect={onMarkerSelect} />
       </Canvas>

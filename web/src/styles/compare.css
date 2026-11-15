@@ -113,7 +113,7 @@
 .cmp .stage-note { padding: 0 16px 12px; font-size: 10.5px; }
 
 .cmp .cards { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; margin-top: 14px; align-items: start; }
-.cmp .ccard { border-radius: 16px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.022); padding: 20px 22px; display: grid; gap: 14px; align-content: start; }
+.cmp .ccard { border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0.022)), rgba(5, 6, 8, 0.94); padding: 20px 22px; display: grid; gap: 14px; align-content: start; }
 .cmp .ccard-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .cmp .ccard-h h3 { font-size: 17px; }
 .cmp .ccard-h .mono { font-size: 10.5px; }
@@ -144,14 +144,83 @@
 .cmp .st tr.pipe td { color: var(--dim); }
 .cmp .note { margin-top: 12px; }
 
-.cmp .surf { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 1040px; }
-.cmp .surf figure { margin: 0; display: grid; gap: 10px; }
-.cmp .sframe { position: relative; aspect-ratio: 1; border-radius: 16px; border: 1px solid var(--line); background: #08090c; overflow: hidden; display: grid; place-items: center; }
-.cmp .sframe .ftag { top: 12px; left: 12px; }
-.cmp .surf figure:last-child .pic canvas { filter: grayscale(1); }
-.cmp .surf figcaption { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; flex-wrap: wrap; }
-.cmp .surf figcaption b { font-weight: 500; }
-.cmp .surf figcaption .mono { font-size: 10.5px; }
+/* ------------------------------------------------ site profile: criteria, distribution, lunar targets, context */
+.cmp .cmp-credit { font-size: 10.5px; line-height: 1.5; margin: 0; }
+.cmp .pf-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.cmp .pf-grid + .pf-grid { margin-top: 14px; }
+.cmp .pf-grid.two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.cmp .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.cmp .pf-th { display: grid; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.cmp .pf-slider { display: flex; align-items: center; gap: 14px; }
+.cmp .pf-slider .mono { font-size: 12px; color: var(--flare); white-space: nowrap; width: 128px; flex: none; }
+.cmp .pf-slider .slider { flex: 1; min-width: 0; }
+.cmp .pf-sum { margin: 0; font-size: 13px; color: var(--chrome); line-height: 1.5; }
+.cmp .pf-sum b, .cmp .pf-sum .mono { color: var(--text); font-weight: 500; }
+.cmp .pf-rows { display: grid; gap: 1px; }
+.cmp .pf-row { position: relative; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(70px, 1fr) 118px; align-items: center; gap: 14px; padding: 7px 10px; margin: 0 -10px; border-radius: 8px; text-align: left; color: var(--chrome); font-size: 12.5px; transition: background 0.15s; }
+.cmp .pf-row:hover { background: rgba(255, 255, 255, 0.035); color: var(--text); }
+.cmp .pf-row.on { background: rgba(143, 180, 234, 0.08); color: var(--text); box-shadow: inset 2px 0 0 var(--earth); }
+.cmp .pf-row:focus-visible, .cmp .rs-row:focus-visible, .cmp .hist:focus-visible { outline: 1.5px solid var(--earth); outline-offset: 2px; }
+.cmp .pf-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmp .pf-track { position: relative; height: 14px; }
+.cmp .pf-track::before { content: ""; position: absolute; left: 0; right: 0; top: 6.5px; height: 1px; background: var(--line-2); }
+.cmp .pf-zone { position: absolute; top: 2px; bottom: 2px; right: 0; border-radius: 0 4px 4px 0; background: var(--flare-soft); border-left: 1px solid rgba(242, 200, 121, 0.55); }
+.cmp .pf-dot { position: absolute; top: 2px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--earth); box-shadow: 0 0 0 2px var(--void); }
+.cmp .pf-dot.out { background: var(--void); border: 1.5px solid var(--earth); }
+.cmp .pf-val { display: grid; justify-items: end; font-size: 11.5px; color: var(--text); text-align: right; white-space: nowrap; overflow: hidden; }
+.cmp .pf-sub { font-size: 10px; color: var(--dim); }
+.cmp .pf-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 10.5px; color: var(--dim); }
+.cmp .dot.hollow { background: transparent; border: 1.5px solid var(--earth); width: 8px; height: 8px; }
+.cmp .zone-k { display: inline-block; width: 16px; height: 9px; margin-right: 6px; vertical-align: -1px; border-radius: 0 3px 3px 0; background: var(--flare-soft); border-left: 1px solid rgba(242, 200, 121, 0.55); }
+.cmp .bar-k { display: inline-block; width: 16px; height: 6px; margin-right: 6px; vertical-align: 0; border-radius: 0 3px 3px 0; background: var(--earth); }
+.cmp .med-k { display: inline-block; width: 1.5px; height: 11px; margin: 0 7px 0 4px; vertical-align: -2px; background: var(--text); }
+.cmp .moon-k { display: inline-block; width: 0; height: 11px; margin: 0 7px 0 4px; vertical-align: -2px; border-left: 1.5px dashed var(--moon); }
+
+.cmp .pf-dist { position: sticky; top: calc(var(--nav-h) + 76px); }
+.cmp .pf-why { margin: -4px 0 0; }
+.cmp .hist { position: relative; height: 190px; padding-top: 22px; border-bottom: 1px solid var(--line-2); }
+.cmp .h-bars { position: relative; height: 100%; display: flex; align-items: stretch; gap: 2px; }
+.cmp .h-col { flex: 1; min-width: 0; display: flex; align-items: flex-end; cursor: crosshair; }
+.cmp .h-col i { display: block; width: 100%; border-radius: 3px 3px 0 0; background: rgba(236, 234, 229, 0.22); transition: height 0.45s var(--ease), background 0.15s; }
+.cmp .h-col i.pass { background: rgba(242, 200, 121, 0.62); }
+.cmp .h-col i.me { background: var(--earth); }
+.cmp .h-col.hov i { background: rgba(236, 234, 229, 0.55); }
+.cmp .h-col.hov i.pass { background: var(--flare); }
+.cmp .h-col.hov i.me { background: #b6cff2; }
+.cmp .h-pass { position: absolute; top: 22px; bottom: 0; background: rgba(242, 200, 121, 0.05); pointer-events: none; }
+.cmp .h-mark { position: absolute; top: 14px; bottom: 0; width: 0; pointer-events: none; }
+.cmp .h-mark.earth { border-left: 1.5px solid var(--earth); }
+.cmp .h-mark.earth.low { top: 34px; }
+.cmp .h-mark.moon { border-left: 1.5px dashed var(--moon); }
+.cmp .h-mark b { position: absolute; top: -14px; left: 0; transform: translateX(-50%); font-size: 10px; font-weight: 400; white-space: nowrap; color: var(--text); padding: 1px 5px; border-radius: 4px; background: rgba(5, 6, 8, 0.85); }
+.cmp .h-mark.moon b { color: var(--moon); }
+.cmp .h-mark.earth b { color: var(--earth); }
+.cmp .h-ax { display: flex; justify-content: space-between; font-size: 10px; color: var(--dim); margin-top: -6px; }
+.cmp .h-read { margin: 0; min-height: 34px; font-size: 11.5px; color: var(--chrome); line-height: 1.5; }
+.cmp .h-read b { color: var(--text); font-weight: 500; }
+
+.cmp .rs-rows { display: grid; gap: 1px; }
+.cmp .rs-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(70px, 1fr) 84px; align-items: center; gap: 14px; padding: 7px 10px; margin: 0 -10px; border-radius: 8px; text-align: left; font-size: 12.5px; color: var(--chrome); transition: background 0.15s; }
+.cmp .rs-row:not(:disabled):hover { background: rgba(255, 255, 255, 0.035); color: var(--text); }
+.cmp .rs-row:disabled { opacity: 0.5; cursor: default; }
+.cmp .rs-row.on { background: rgba(143, 180, 234, 0.08); color: var(--text); box-shadow: inset 2px 0 0 var(--earth); }
+.cmp .rs-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmp .rs-tag { margin-left: 8px; font-size: 9.5px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--text); vertical-align: 1px; }
+.cmp .rs-track { position: relative; height: 12px; }
+.cmp .rs-track::before { content: ""; position: absolute; left: 0; right: 0; top: 5.5px; height: 1px; background: var(--line); }
+.cmp .rs-bar { position: absolute; left: 0; top: 3px; height: 6px; border-radius: 0 3px 3px 0; background: var(--earth); opacity: 0.55; transition: width 0.45s var(--ease); }
+.cmp .rs-row.on .rs-bar, .cmp .rs-row:not(:disabled):hover .rs-bar { opacity: 1; }
+.cmp .rs-med { position: absolute; top: 0; width: 1.5px; height: 12px; margin-left: -0.75px; background: var(--text); box-shadow: 0 0 0 1px var(--void); }
+.cmp .rs-val { display: grid; justify-items: end; font-size: 11.5px; color: var(--text); white-space: nowrap; }
+
+.cmp .cx-rows { display: grid; gap: 14px; }
+.cmp .cx-row { display: grid; gap: 4px; }
+.cmp .cx-track { cursor: crosshair; height: 14px; }
+.cmp .cx-moon { position: absolute; top: -1px; height: 14px; width: 0; border-left: 1.5px dashed var(--moon); }
+.cmp .cx-hair { position: absolute; top: -2px; height: 16px; width: 1px; background: rgba(236, 234, 229, 0.6); pointer-events: none; }
+.cmp .cx-foot { position: relative; display: flex; justify-content: space-between; gap: 10px; font-size: 10px; min-height: 14px; }
+.cmp .cx-moon-l { position: absolute; top: 15px; transform: translateX(-50%); white-space: nowrap; }
+.cmp .cx-row:has(.cx-moon-l) { padding-bottom: 14px; }
 
 .cmp .limits { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 36px; max-width: 980px; }
 .cmp .limits li { font-size: 14px; }
@@ -168,6 +237,8 @@
   .cmp-hero { grid-template-columns: 1fr; }
   .cmp-score { position: static; }
   .cmp .cards { grid-template-columns: 1fr; }
+  .cmp .pf-grid, .cmp .pf-grid.two { grid-template-columns: minmax(0, 1fr); }
+  .cmp .pf-dist { position: static; }
 }
 @media (max-width: 760px) {
   .cmp-bar { flex-direction: column; align-items: stretch; padding: 10px 16px; position: static; }
@@ -178,7 +249,13 @@
   .cmp-quick { padding: 10px 16px; }
   .cmp-hero, .cmp-sec { padding-left: 16px; padding-right: 16px; }
   .cmp-sec { padding-top: 72px; }
-  .cmp .ss.side, .cmp .surf { grid-template-columns: 1fr; }
+  .cmp .ss.side { grid-template-columns: 1fr; }
+  .cmp .pf-row { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+  .cmp .pf-name, .cmp .rs-name { white-space: normal; }
+  .cmp .pf-row .pf-track { grid-column: 1 / -1; grid-row: 2; }
+  .cmp .rs-row { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+  .cmp .rs-row .rs-track { grid-column: 1 / -1; grid-row: 2; }
+  .cmp .pf-slider .mono { width: auto; }
   .cmp .stage .canvas { height: 380px; }
   .cmp .stage-tags { top: 12px; left: 12px; right: 12px; }
   .cmp .stage-tags .mono { display: none; }

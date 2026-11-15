@@ -20,6 +20,9 @@
   --strong: #7cc8a0;
   --partial: #e3b35e;
   --weak: #e47a63;
+  /* dithered pixel backgrounds (Dither.tsx): cool grey to faint lunar gold */
+  --px-cool: #474c55;
+  --px-warm: #a8956e;
 
   --sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
   --mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;

@@ -358,9 +358,36 @@ function PolarMap({ regions, target, onPick }: { regions: Record<string, RegionX
   // Nobile Rim 2 sits near the right edge: label under its window.
   const BELOW = new Set(["nobile_rim_2"]);
   const [bx, by] = P(-80, 80);
+  // Base relief: public/textures/moon_south_pole_lola.webp is LRO LOLA hillshade in south polar stereographic,
+  // square, from 80° S to the pole (half-width rho(10°) = 304 km), lon 0° up, 90° E right, the same frame as
+  // window_m. The sharper pipeline hillshade of polar_160km (±80 km, app/data/img) is laid over the centre.
+  const texHalf = rho(10);
+  const [tx0, ty0] = P(-texHalf, texHalf);
+  const disc = ext * 0.97 * k;
+  const centreShade = polar?.hillshade ?? null;
   return (
     <>
-      <svg viewBox={`0 0 ${S} ${S}`} role="img" aria-label="Map of the lunar south pole with the target windows">
+      <svg viewBox={`0 0 ${S} ${S}`} role="img" aria-label="Map of the lunar south pole with the target windows over LRO LOLA hillshade">
+        <defs>
+          <radialGradient id="polar-fade">
+            <stop offset="0.82" stopColor="#fff" />
+            <stop offset="1" stopColor="#000" />
+          </radialGradient>
+          <mask id="polar-disc" maskUnits="userSpaceOnUse" x="0" y="0" width={S} height={S}>
+            <circle cx={S / 2} cy={S / 2} r={disc} fill="url(#polar-fade)" />
+          </mask>
+          <radialGradient id="polar-core-fade">
+            <stop offset="0.6" stopColor="#fff" />
+            <stop offset="0.98" stopColor="#000" />
+          </radialGradient>
+          <mask id="polar-core" maskUnits="userSpaceOnUse" x={bx} y={by} width={160 * k} height={160 * k}>
+            <circle cx={S / 2} cy={S / 2} r={80 * k} fill="url(#polar-core-fade)" />
+          </mask>
+        </defs>
+        <g className="relief" mask="url(#polar-disc)" aria-hidden>
+          <image href="./textures/moon_south_pole_lola.webp" x={tx0} y={ty0} width={texHalf * 2 * k} height={texHalf * 2 * k} preserveAspectRatio="none" />
+          {centreShade && <image href={img(centreShade)} x={bx} y={by} width={160 * k} height={160 * k} preserveAspectRatio="none" mask="url(#polar-core)" />}
+        </g>
         {[85, 86, 87, 88, 89].map((lat) => {
           const rr = rho(90 - lat) * k;
           return (
@@ -430,7 +457,7 @@ function PolarMap({ regions, target, onPick }: { regions: Record<string, RegionX
         })}
       </svg>
       <div className="polar-cap">
-        <span>South polar stereographic</span>
+        <span>South polar stereographic · LRO LOLA hillshade</span>
         <span>{ext * 2} km across</span>
       </div>
     </>

@@ -2,6 +2,16 @@
 
 Issues #29 and #32. Newest first. Written with SI assistance (Claude Code, OpenAI Codex).
 
+## 2026-11-15, globe clustering, 2D map, site profile, dithered backgrounds
+
+- Explore: points that overlap on screen merge into one plain dot without a number; clicking it opens a menu beside the dot listing the places, each selectable. Zoomed in until Earth fills the view, the globe hands over to a 2D Leaflet map with Sentinel-2 cloudless 2020 tiles (EOX, CC BY 4.0), the same points and menu, the patch outline and the heat layer reprojected per tile; zooming out or "Back to globe" returns. Leaflet loads lazily (separate chunk).
+- Compare: "Surfaces at the same scale" repeated the imagery at the top of the page; it is replaced by "This site among all patches": criteria profile with a "Require best X%" slider, the distribution of a clicked criterion, similarity to each lunar target (click to switch the target) and Earth context strips. Every number carries its file and key.
+- Plan a mission: the Moon can be turned by dragging and zoomed with the wheel, spins slowly while idle, and flies to the region picked in the panel or on the globe (the pooled target flies to the pole). Markers are HTML dots with a dark outline and a label for the chosen one. The polar cap from 80 deg S shows the sharper LOLA hillshade.
+- Landing: brighter, larger hero Moon drawn above the pixel layer (the dots were drawn over the Moon); new ordered-dither pixel effect (original code, inspired by https://put-hack-ten.vercel.app/) on the landing and as a quiet background of Compare, Moon, Method and Sources. Panels on those pages are opaque so the pixels never run through text.
+- Moon page: the south polar stereographic map has the LOLA hillshade under its grid (orientation checked against the pipeline's `polar_160km` hillshade).
+- Data: `web/public/sites/*.json` rebuilt with `web/scripts/build_sites_all.py`; the compact export predated J43 (3edf885), so 95 of the 300 rich records had a different rank and fell back to compact records (rank 1 lost its rank certainty and MODIS values). Rows, columns and site ids unchanged; now 0 rank mismatches. The script writes POSIX paths in its metadata.
+- `tests/discovery.test.mjs` runs `tsc` through Node, so it also runs on Windows.
+
 ## 2026-11-15, production publication (#32)
 
 - Published the frontend directly on `main`, without a pull request. Existing main history was retained.

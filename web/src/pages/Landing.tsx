@@ -85,7 +85,7 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
         <PixelWaves />
         <MoonSphere texture={texture ? img(texture) : null} ready={moonReady}>
           <Suspense fallback={null}>
-            <MoonGlobe className="l-moon-3d" rpm={0.5} light={[1, 0.45, 0.2]} tilt={0.42} onReady={() => setMoonReady(true)} />
+            <MoonGlobe className="l-moon-3d" rpm={0.5} light={[1, 0.5, 0.65]} tilt={0.42} ambient={0.2} sun={4.6} exposure={1.25} onReady={() => setMoonReady(true)} />
           </Suspense>
         </MoonSphere>
         <div className="l-hero-inner">

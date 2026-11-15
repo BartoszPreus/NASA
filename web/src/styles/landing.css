@@ -26,19 +26,19 @@
   content: "";
   position: absolute;
   inset: auto 0 0;
-  height: 30%;
+  height: 16%;
   background: linear-gradient(to bottom, transparent, var(--void));
   z-index: -1;
   pointer-events: none;
 }
-.l-stars { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -3; }
+.l-stars { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -4; }
 
 .l-moon {
   position: absolute;
   z-index: -2;
-  width: min(56vw, 760px);
+  width: min(56vw, 800px);
   aspect-ratio: 1;
-  right: max(-8vw, -120px);
+  right: max(-7vw, -100px);
   top: 54%;
   transform: translateY(-50%);
   animation: moon-in 2.4s var(--ease) both;
@@ -47,13 +47,15 @@
 .l-orbit { position: absolute; inset: -16%; width: 132%; height: 132%; overflow: visible; }
 .l-orbit ellipse { fill: none; stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .l-orbit-dot { fill: var(--earth); }
+/* the Moon glows a little against the dithered sky */
+.l-moon::before { content: ""; position: absolute; inset: -6%; border-radius: 50%; background: radial-gradient(circle closest-side, rgba(236, 230, 214, 0.09) 84%, rgba(236, 230, 214, 0.03) 92%, transparent 100%); pointer-events: none; }
 .l-moon-body {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   overflow: hidden;
   /* low sun from the upper right; the limb behind the headline stays in shadow */
-  background: radial-gradient(circle at 70% 26%, #cfc9be 0%, #8d887f 20%, #45433f 42%, #18181b 62%, #08080a 80%);
+  background: radial-gradient(circle at 68% 30%, #e2ddd3 0%, #a9a49a 24%, #6c6962 48%, #34332f 70%, #1a1a1c 90%);
 }
 .l-moon-tex {
   position: absolute;
@@ -71,7 +73,7 @@
   border-radius: 50%;
   background:
     radial-gradient(circle at 74% 22%, rgba(242, 200, 121, 0.14), transparent 38%),
-    radial-gradient(circle at 18% 70%, rgba(5, 6, 8, 0.97) 22%, rgba(5, 6, 8, 0.7) 46%, transparent 72%);
+    radial-gradient(circle at 16% 72%, rgba(5, 6, 8, 0.7) 14%, rgba(5, 6, 8, 0.35) 40%, transparent 66%);
   box-shadow: inset 10px -6px 24px rgba(242, 200, 121, 0.06), inset -2px 2px 1px rgba(242, 220, 176, 0.18);
 }
 
@@ -215,11 +217,11 @@
   .l-sec { grid-template-columns: minmax(0, 1fr); }
   .l-text { position: static; }
   .l-flow, #how .l-figure, .l-world-wrap, .l-cards { grid-column: 1; }
-  .l-moon { width: min(84vw, 700px); right: -24vw; opacity: 0.85; }
+  .l-moon { width: min(84vw, 700px); right: -24vw; }
 }
 @media (max-width: 760px) {
   .l-hero { padding-top: calc(var(--nav-h) + 24px); }
-  .l-moon { width: 112vw; right: -46vw; top: 36%; opacity: 0.75; }
+  .l-moon { width: 100vw; right: -44vw; top: 32%; opacity: 0.85; }
   .l-counters { grid-template-columns: repeat(2, 1fr); }
   .l-counters > div { padding: 18px 0 22px; }
   .l-counters > div:nth-child(3) { padding-left: 0; border-left: 0; }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { href, type Page } from "../lib/router";
+import { Dither, type DitherProps } from "./Dither";
 
 export const Mark = () => (
   <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden>
@@ -19,6 +20,26 @@ const LINKS: { page: Page; label: string }[] = [
   { page: "sources", label: "Sources" },
 ];
 
+// Subtle dithered page background per route. It sits behind every element of the page and never takes
+// pointer events (pixels.css). The landing page and the mission planner draw their own; Explore is
+// covered edge to edge by its panels and globe, so it gets none.
+const BACKDROP: Partial<Record<Page, DitherProps>> = {
+  compare: { shape: "horizon", falloff: 2.4, opacity: 0.15, intensity: 0.8 },
+  moon: { shape: "orb", center: [0.92, 0.2], falloff: 2, opacity: 0.15, intensity: 0.8 },
+  method: { shape: "wave", falloff: 1.9, opacity: 0.12, intensity: 0.7 },
+  sources: { shape: "wave", falloff: 1.9, opacity: 0.12, intensity: 0.7 },
+};
+
+export function PageBackdrop({ page }: { page: Page }) {
+  const cfg = BACKDROP[page];
+  if (!cfg) return null;
+  return (
+    <div className="page-dither" aria-hidden>
+      <Dither key={page} pixel={4} {...cfg} />
+    </div>
+  );
+}
+
 export function Nav({ page }: { page: Page }) {
   const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
@@ -30,6 +51,8 @@ export function Nav({ page }: { page: Page }) {
   }, []);
   useEffect(() => setOpen(false), [page]);
   return (
+    <>
+    <PageBackdrop page={page} />
     <header className={`nav ${solid || page === "explore" ? "solid" : ""}`}>
       <a className="brand" href={href("home")} aria-label="Zodiak Terrain Atlas, overview">
         <Mark />
@@ -49,6 +72,7 @@ export function Nav({ page }: { page: Page }) {
         ))}
       </nav>
     </header>
+    </>
   );
 }
 
