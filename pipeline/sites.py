@@ -73,6 +73,39 @@ FIXED_BREAKS = ["Gravity is 1 g here, 1/6 g on the Moon",
                 "Features smaller than about 100 m are not resolved by the 30 m elevation model"]
 OBLIQUITY_DEG = 23.44
 LUNAR_POLE_SUN_DEG = 1.5
+BARE_COLS = ("bare", "bare_strict")  # --bare-col; bare_strict = WorldCover class 60 only (job J33, a variant)
+BARE_STRICT_TABLE = os.path.join(paths.VALIDATION, "landcover_sensitivity", "cells_bare_strict.parquet")
+
+
+def apply_bare_variant(df, bare_col="bare", table=None):
+    """Land-cover mask variant (job J33). bare_col == "bare": df unchanged (the default). Otherwise the column
+    `bare_col` (from df, or joined on (tile, row, col) from the parquet `table`) replaces `bare` for the mask, and
+    the default value is kept as `bare_default`. Raises when the column is missing, when a cell that has land
+    cover (bare not NaN) gets no value, or when the variant exceeds the default anywhere (a stricter group
+    must be a subset)."""
+    if bare_col == "bare":
+        return df
+    if bare_col not in BARE_COLS:
+        raise ValueError("bare_col must be one of %s, got %r" % (BARE_COLS, bare_col))
+    if bare_col not in df.columns:
+        if not table or not os.path.exists(table):
+            raise FileNotFoundError("column %s is not in the cells and its table %s does not exist (run python -m "
+                                    "validation.landcover_strict_cells)" % (bare_col, table))
+        t = pd.read_parquet(table, columns=["tile", "row", "col", bare_col])
+        if t.duplicated(["tile", "row", "col"]).any():
+            raise ValueError("duplicate (tile, row, col) in %s" % table)
+        df = df.merge(t, on=["tile", "row", "col"], how="left", validate="one_to_one")
+    miss = int((df["bare"].notna() & df[bare_col].isna()).sum())
+    if miss:
+        raise ValueError("%d cells with land cover have no %s" % (miss, bare_col))
+    over = int((df[bare_col] > df["bare"] + 1e-6).sum())
+    if over:
+        raise ValueError("%s > bare in %d cells: not a stricter group" % (bare_col, over))
+    df = df.copy()
+    df["bare_default"] = df["bare"]
+    df["bare"] = df[bare_col].astype(df["bare"].dtype)
+    return df
+
 
 
 # ---------------------------------------------------------------------------------------------- helpers
@@ -524,7 +557,22 @@ def main(argv=None):
     ap.add_argument("--dem-policy", default=None, choices=list(DEM_POLICIES),
                     help="elevation model per tile: copdem, or nasa-first (NASADEM where its cells exist). Default: "
                          "the outcome of the rule in pipeline.score.dem_policy_from_rule (job J19)")
+    ap.add_argument("--bare-col", default="bare", choices=list(BARE_COLS),
+                    help="land-cover group of the bare >= %.1f mask: bare = WorldCover 60 + 100 (default); "
+                         "bare_strict = class 60 only, without moss and lichen (job J33 variant: needs --out-dir "
+                         "outside data/sites/, file names get the suffix _bare_strict)" % BARE_MIN)
+    ap.add_argument("--bare-table", default=BARE_STRICT_TABLE,
+                    help="parquet with tile, row, col, <bare-col> when the cells lack that column (default %s)"
+                         % paths.rel(BARE_STRICT_TABLE))
     a = ap.parse_args(argv)
+    variant = a.bare_col != "bare"
+    if variant and os.path.abspath(a.out_dir) == os.path.abspath(paths.SITES):
+        raise SystemExit("--bare-col %s is a variant: give --out-dir outside %s" % (a.bare_col, paths.rel(paths.SITES)))
+    sfx = "_" + a.bare_col if variant else ""
+
+    def out_name(p):
+        b, e = os.path.splitext(os.path.basename(p))
+        return b + sfx + e
     countries = CountryLookup() if a.compare_targets is None else None
     rule_policy, rule = dem_policy_from_rule(target=a.target)
     dem_policy = a.dem_policy or rule_policy
@@ -532,6 +580,12 @@ def main(argv=None):
         dem_policy, "set on the command line" if a.dem_policy else rule["reason"], rule["rule"],
         rule.get("spearman_tile_share"), rule.get("top50_overlap")))
     df, path = load_cells(a.cells, dem_policy=dem_policy)
+    if variant:
+        df = apply_bare_variant(df, a.bare_col, a.bare_table)
+        print("land-cover mask VARIANT: bare >= %.1f applies to %s (cells with bare_default >= %.1f: %d, with %s >= "
+              "%.1f: %d); outputs get the suffix %s" % (BARE_MIN, a.bare_col, BARE_MIN,
+                                                      int((df["bare_default"] >= BARE_MIN).sum()), a.bare_col,
+                                                      BARE_MIN, int((df["bare"] >= BARE_MIN).sum()), sfx))
     scored, regions = score_all_regions(df, a.raw_dir, target=a.target)
     print("cells: %s  rows %d  valid %d  target %s  regions %s  rank key %s" % (
         path, len(df), int(df["valid"].sum()), a.target, regions, RANK_KEYS[a.rank_key]))
@@ -577,10 +631,13 @@ def main(argv=None):
     md = dict(tbl.schema.metadata or {})
     md[b"j18_target"] = a.target.encode()
     md[b"j19_dem_policy"] = dem_policy.encode()
+    md[b"j33_bare_col"] = a.bare_col.encode()
     tbl = tbl.replace_schema_metadata(md)
-    pq.write_table(tbl, os.path.join(a.raw_dir, os.path.basename(paths.SCORED_FULL)))
+    pq.write_table(tbl, os.path.join(a.raw_dir, out_name(paths.SCORED_FULL)))
     compact = scored[scored["candidate"] | (scored["p_all"] >= 0.05)]
-    compact[keep].to_parquet(os.path.join(a.out_dir, os.path.basename(paths.SCORED_COMPACT)), index=False)
+    # a variant's compact table (as large as the default one) stays in the git-ignored raw folder
+    compact[keep].to_parquet(os.path.join(a.raw_dir if variant else a.out_dir, out_name(paths.SCORED_COMPACT)),
+                             index=False)
     # Per-tile summary: the unit that stays stable when the grid is shifted or resized (docs/VALIDATION.md).
     ok = scored["valid"]
     barem = pd.Series(bare_mask(scored), index=scored.index)
@@ -601,12 +658,12 @@ def main(argv=None):
     ts["target"] = a.target
     ts["dem_source"] = ts["tile"].map(scored.groupby("tile")["dem_source"].first())
     tile_summary = (paths.TILE_SUMMARY if os.path.abspath(a.out_dir) == os.path.abspath(paths.SITES)
-                    else os.path.join(a.out_dir, os.path.basename(paths.TILE_SUMMARY)))
+                    else os.path.join(a.out_dir, out_name(paths.TILE_SUMMARY)))
     os.makedirs(os.path.dirname(tile_summary), exist_ok=True)
     ts.round({"lat": 3, "lon": 3, "median_p_bare": 4}).sort_values(
         [TILE_SORT[a.rank_key], "weighted_area_km2"], ascending=False).to_csv(tile_summary, index=False)
-    write_geojson(sites, os.path.join(a.out_dir, os.path.basename(paths.SITES_GEOJSON)))
-    ranked = write_ranking(sites, os.path.join(a.out_dir, os.path.basename(paths.RANKING)), rank_key=a.rank_key,
+    write_geojson(sites, os.path.join(a.out_dir, out_name(paths.SITES_GEOJSON)))
+    ranked = write_ranking(sites, os.path.join(a.out_dir, out_name(paths.RANKING)), rank_key=a.rank_key,
                            flagged=a.flagged)
     print("sites %d (>= %d cells; artefact-flagged %d), in ranking.csv %d, ranked by %s (target %s)"
           % (len(sites), a.min_cells, sum(bool(s["artefact_flag"]) for s in sites), len(ranked),

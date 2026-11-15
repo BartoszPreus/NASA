@@ -208,7 +208,7 @@ SOURCES = [
       "CC BY 4.0 (UNVERIFIED in docs/sources/j1.md, j3.md); citation Zanaga et al. (2022), "
       "doi:10.5281/zenodo.7254221 (UNVERIFIED)", "no", "used",
       "pipeline/landcover.py, pipeline/earth_scan.py, pipeline/tiles.py, validation/effectiveness.py, "
-      "validation/landcover_sensitivity.py (job J33)",
+      "validation/landcover_sensitivity.py, validation/landcover_strict_cells.py (job J33)",
       "data/raw/tiles_cache/, data/raw/validation/, data/raw/worldcover/"),
     S("usgs_3dep", "USGS", "USGS 3DEP 1 m lidar DEM, tile USGS_1M_12_x49y388_AZ_NorthEast_D23 (Meteor Crater)", "",
       "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/1m/Projects/AZ_NorthEast_D23/TIFF/"
@@ -390,7 +390,7 @@ FILE_MAP = [
     ("data/validation/nasadem_vs_copdem.json", "python validation/nasadem_vs_copdem.py (job J17)",
      "data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet, data/moon/reference.json",
      "NASADEM + MODIS against Copernicus + WorldCover: features, bare mask and result per tile"),
-    ("data/validation/landcover_sensitivity.json", "python -m validation.landcover_sensitivity (job J33, shortened)",
+    ("data/validation/landcover_sensitivity.json", "python -m validation.landcover_sensitivity (job J33, shortened); key full_run: python -m validation.landcover_strict_ranking",
      "data/sites/ranking.csv, data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover",
      "moss and lichen sensitivity: top-100 sites under bare = WorldCover class 60 only and under MODIS Barren"),
     ("data/validation/landcover_sensitivity/sites_top*.csv", "python -m validation.landcover_sensitivity (job J33)",
@@ -399,6 +399,20 @@ FILE_MAP = [
     ("data/validation/landcover_sensitivity/cells_top*.parquet", "python -m validation.landcover_sensitivity (job J33)",
      "data/sites/scored_compact.parquet, data/earth/cells_nasadem/*.parquet, esa_worldcover",
      "one row per cell of a top site: stored bare, recomputed bare, bare_strict, MODIS Barren"),
+    ("data/validation/landcover_sensitivity/cells_bare_strict.parquet",
+     "python -m validation.landcover_strict_cells (job J33, full run)", "data/earth/cells/*.parquet, esa_worldcover",
+     "bare_strict (WorldCover class 60 only, without 100 moss and lichen) for every scanned cell, key tile/row/col"),
+    ("data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+     "python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)",
+     "data/earth/cells/*.parquet, data/validation/landcover_sensitivity/cells_bare_strict.parquet, "
+     "data/moon/reference.json, data/reference/known_analogs.csv, natural_earth",
+     "VARIANT ranking (top 200) under the strict mask: same columns as data/sites/ranking.csv; bare_share = bare_strict"),
+    ("data/validation/landcover_sensitivity/sites_bare_strict.geojson",
+     "python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)",
+     "as ranking_bare_strict.csv", "VARIANT: every site under the strict mask (properties as data/sites/sites.geojson)"),
+    ("data/validation/landcover_sensitivity/tile_summary_bare_strict.csv",
+     "python -m pipeline.sites --bare-col bare_strict --out-dir data/validation/landcover_sensitivity (job J33)",
+     "as ranking_bare_strict.csv", "VARIANT: per-tile counts under the strict mask (as data/earth/tiles/tile_summary.csv)"),
     ("data/validation/aw3d30_comparison.json", "python validation/nasadem_vs_copdem.py --aw3d30-comparison (job J29)",
      "jaxa_aw3d30, data/earth/cells_nasadem/*.parquet, data/earth/cells/*.parquet",
      "terrain feature agreement across Copernicus, NASADEM and optical AW3D30 on ten reference tiles"),

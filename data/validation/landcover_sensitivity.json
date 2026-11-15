@@ -310,5 +310,535 @@
  "files": {
   "sites": "data/validation/landcover_sensitivity/sites_top100.csv",
   "cells": "data/validation/landcover_sensitivity/cells_top100.parquet"
+ },
+ "full_run": {
+  "what": "full run: bare_strict (WorldCover class 60 only) for every scanned cell, the sites stage rerun with --bare-col bare_strict, compared with the default ranking",
+  "match_km": 3.0,
+  "candidate_cells": {
+   "default": 63618,
+   "bare_strict": 35875
+  },
+  "bare_cells": {
+   "default": 1213569,
+   "bare_strict": 902926,
+   "rule": "valid, bare >= 0.8, ice < 0.05, water < 0.05 (tile_summary n_bare)"
+  },
+  "sites": {
+   "default": 3175,
+   "bare_strict": 1561
+  },
+  "sites_artefact_flagged": {
+   "default": 521,
+   "bare_strict": 347
+  },
+  "ranking_rows": {
+   "default": 200,
+   "bare_strict": 200
+  },
+  "overlap": {
+   "top10": {
+    "default_in_strict": 1,
+    "strict_in_default": 1,
+    "n": 10
+   },
+   "top30": {
+    "default_in_strict": 3,
+    "strict_in_default": 3,
+    "n": 30
+   },
+   "top100": {
+    "default_in_strict": 16,
+    "strict_in_default": 16,
+    "n": 100
+   }
+  },
+  "regions_top30": {
+   "default": {
+    "Putorana Plateau": 16,
+    "southern Peary Land": 5,
+    "northern Ungava": 2,
+    "northern Baffin Island": 2,
+    "Atacama / Puna": 1,
+    "Chukotka": 1,
+    "Hazen Plateau / northern Ellesmere": 1,
+    "Mauna Loa": 1,
+    "Polar Urals": 1
+   },
+   "bare_strict": {
+    "Atacama / Puna": 13,
+    "western Tibetan Plateau (incl. Ladakh)": 8,
+    "southern Peru / Arica coastal desert": 4,
+    "Hazen Plateau / northern Ellesmere": 3,
+    "Mauna Loa": 1,
+    "others": 1
+   }
+  },
+  "regions_top100": {
+   "default": {
+    "Putorana Plateau": 37,
+    "others": 23,
+    "Hazen Plateau / northern Ellesmere": 10,
+    "southern Peary Land": 7,
+    "Atacama / Puna": 7,
+    "northern Baffin Island": 4,
+    "western Tibetan Plateau (incl. Ladakh)": 4,
+    "Chukotka": 3,
+    "northern Ungava": 3,
+    "Mauna Loa": 1,
+    "Polar Urals": 1
+   },
+   "bare_strict": {
+    "Atacama / Puna": 46,
+    "western Tibetan Plateau (incl. Ladakh)": 24,
+    "southern Peru / Arica coastal desert": 11,
+    "others": 9,
+    "Hazen Plateau / northern Ellesmere": 7,
+    "Mauna Loa": 1,
+    "northern Baffin Island": 1,
+    "southern Peary Land": 1
+   }
+  },
+  "regions_all_sites": {
+   "default": {
+    "others": 1734,
+    "Atacama / Puna": 419,
+    "western Tibetan Plateau (incl. Ladakh)": 401,
+    "Putorana Plateau": 228,
+    "northern Baffin Island": 103,
+    "Chukotka": 87,
+    "Hazen Plateau / northern Ellesmere": 67,
+    "northern Ungava": 52,
+    "southern Peru / Arica coastal desert": 46,
+    "southern Peary Land": 28,
+    "Mauna Loa": 5,
+    "Polar Urals": 5
+   },
+   "bare_strict": {
+    "others": 643,
+    "Atacama / Puna": 419,
+    "western Tibetan Plateau (incl. Ladakh)": 392,
+    "southern Peru / Arica coastal desert": 46,
+    "Hazen Plateau / northern Ellesmere": 23,
+    "northern Baffin Island": 16,
+    "southern Peary Land": 11,
+    "Mauna Loa": 5,
+    "northern Ungava": 5,
+    "Putorana Plateau": 1
+   }
+  },
+  "countries_top30": {
+   "default": {
+    "Russia": 18,
+    "Greenland": 5,
+    "Canada": 5,
+    "Chile": 1,
+    "United States of America": 1
+   },
+   "bare_strict": {
+    "Argentina": 9,
+    "China": 7,
+    "Chile": 4,
+    "Canada": 4,
+    "Peru": 4,
+    "United States of America": 1,
+    "India": 1
+   }
+  },
+  "countries_top100": {
+   "default": {
+    "Russia": 48,
+    "Canada": 32,
+    "Greenland": 7,
+    "Argentina": 5,
+    "Chile": 2,
+    "India": 2,
+    "China": 2,
+    "United States of America": 1,
+    "Mongolia": 1
+   },
+   "bare_strict": {
+    "Argentina": 27,
+    "China": 22,
+    "Chile": 19,
+    "Canada": 12,
+    "Peru": 10,
+    "India": 4,
+    "Bolivia": 2,
+    "United States of America": 1,
+    "Yemen": 1,
+    "Mongolia": 1,
+    "Greenland": 1
+   }
+  },
+  "strict_top10": [
+   {
+    "rank": 1,
+    "site_id": "S21W070-01",
+    "country": "Chile",
+    "region": "Atacama / Puna",
+    "lat": -20.5168,
+    "lon": -69.2344,
+    "best_window_km2": 57.35,
+    "is_known": true,
+    "nearest_known": "Atacama Desert region 2 of 5 (Tarapaca - Loa)",
+    "nearest_known_km": 102.0
+   },
+   {
+    "rank": 2,
+    "site_id": "N19W156-01",
+    "country": "United States of America",
+    "region": "Mauna Loa",
+    "lat": 19.4806,
+    "lon": -155.5683,
+    "best_window_km2": 40.79,
+    "is_known": true,
+    "nearest_known": "Island of Hawaii (whole island; region named in the challenge)",
+    "nearest_known_km": 15.1
+   },
+   {
+    "rank": 3,
+    "site_id": "S26W069-01",
+    "country": "Argentina",
+    "region": "Atacama / Puna",
+    "lat": -25.6808,
+    "lon": -68.4742,
+    "best_window_km2": 36.33,
+    "is_known": false,
+    "nearest_known": "Atacama Desert hyper-arid core",
+    "nearest_known_km": 152.8
+   },
+   {
+    "rank": 4,
+    "site_id": "N81W072-01",
+    "country": "Canada",
+    "region": "Hazen Plateau / northern Ellesmere",
+    "lat": 81.4027,
+    "lon": -71.5926,
+    "best_window_km2": 35.38,
+    "is_known": false,
+    "nearest_known": "McGill Arctic Research Station Expedition Fiord Axel Heiberg Island",
+    "nearest_known_km": 414.1
+   },
+   {
+    "rank": 5,
+    "site_id": "N32E078-01",
+    "country": "India",
+    "region": "western Tibetan Plateau (incl. Ladakh)",
+    "lat": 32.9073,
+    "lon": 78.6966,
+    "best_window_km2": 32.9,
+    "is_known": false,
+    "nearest_known": "Dalangtan (DLT) area Qaidam Basin",
+    "nearest_known_km": 1316.8
+   },
+   {
+    "rank": 6,
+    "site_id": "S27W069-01",
+    "country": "Argentina",
+    "region": "Atacama / Puna",
+    "lat": -26.5776,
+    "lon": -68.214,
+    "best_window_km2": 25.8,
+    "is_known": false,
+    "nearest_known": "Atacama Desert region 4 of 5 (Taltal - Chanaral)",
+    "nearest_known_km": 208.9
+   },
+   {
+    "rank": 7,
+    "site_id": "S26W069-02",
+    "country": "Chile",
+    "region": "Atacama / Puna",
+    "lat": -25.3647,
+    "lon": -68.8529,
+    "best_window_km2": 25.79,
+    "is_known": true,
+    "nearest_known": "Atacama Desert hyper-arid core",
+    "nearest_known_km": 104.2
+   },
+   {
+    "rank": 8,
+    "site_id": "S27W068-01",
+    "country": "Argentina",
+    "region": "Atacama / Puna",
+    "lat": -26.6545,
+    "lon": -67.2751,
+    "best_window_km2": 24.68,
+    "is_known": false,
+    "nearest_known": "Atacama Desert region 4 of 5 (Taltal - Chanaral)",
+    "nearest_known_km": 296.2
+   },
+   {
+    "rank": 9,
+    "site_id": "N34E084-01",
+    "country": "China",
+    "region": "western Tibetan Plateau (incl. Ladakh)",
+    "lat": 34.4735,
+    "lon": 84.8932,
+    "best_window_km2": 23.82,
+    "is_known": false,
+    "nearest_known": "Dalangtan (DLT) area Qaidam Basin",
+    "nearest_known_km": 742.4
+   },
+   {
+    "rank": 10,
+    "site_id": "N35E080-01",
+    "country": "China",
+    "region": "western Tibetan Plateau (incl. Ladakh)",
+    "lat": 35.3218,
+    "lon": 80.071,
+    "best_window_km2": 23.78,
+    "is_known": false,
+    "nearest_known": "Dalangtan (DLT) area Qaidam Basin",
+    "nearest_known_km": 1084.1
+   }
+  ],
+  "default_top30_strict_rank": [
+   {
+    "default_rank": 1,
+    "site_id": "N82W026-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 43.88
+   },
+   {
+    "default_rank": 2,
+    "site_id": "N69E093-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 92.66
+   },
+   {
+    "default_rank": 3,
+    "site_id": "N82W028-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 14.47
+   },
+   {
+    "default_rank": 4,
+    "site_id": "N82W027-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 27.02
+   },
+   {
+    "default_rank": 5,
+    "site_id": "N68E093-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 130.78
+   },
+   {
+    "default_rank": 6,
+    "site_id": "N68E095-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 216.2
+   },
+   {
+    "default_rank": 7,
+    "site_id": "N69E093-02",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 60.78
+   },
+   {
+    "default_rank": 8,
+    "site_id": "S21W070-01",
+    "region": "Atacama / Puna",
+    "strict_rank": 1,
+    "strict_site_id": "S21W070-01",
+    "km": 0.0
+   },
+   {
+    "default_rank": 9,
+    "site_id": "N68E094-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 197.13
+   },
+   {
+    "default_rank": 10,
+    "site_id": "N68E093-02",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 119.76
+   },
+   {
+    "default_rank": 11,
+    "site_id": "N82W031-01",
+    "region": "southern Peary Land",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 5.39
+   },
+   {
+    "default_rank": 12,
+    "site_id": "N65W172-01",
+    "region": "Chukotka",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 2218.32
+   },
+   {
+    "default_rank": 13,
+    "site_id": "N68E094-02",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 195.93
+   },
+   {
+    "default_rank": 14,
+    "site_id": "N62W074-01",
+    "region": "northern Ungava",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 22.73
+   },
+   {
+    "default_rank": 15,
+    "site_id": "N68E094-03",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 146.19
+   },
+   {
+    "default_rank": 16,
+    "site_id": "N69E092-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 43.78
+   },
+   {
+    "default_rank": 17,
+    "site_id": "N82W029-01",
+    "region": "southern Peary Land",
+    "strict_rank": 554,
+    "strict_site_id": "N82W029-02",
+    "km": 2.56
+   },
+   {
+    "default_rank": 18,
+    "site_id": "N81W072-01",
+    "region": "Hazen Plateau / northern Ellesmere",
+    "strict_rank": 4,
+    "strict_site_id": "N81W072-01",
+    "km": 0.88
+   },
+   {
+    "default_rank": 19,
+    "site_id": "N69E092-02",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 78.21
+   },
+   {
+    "default_rank": 20,
+    "site_id": "N68E093-03",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 185.07
+   },
+   {
+    "default_rank": 21,
+    "site_id": "N69E094-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 105.51
+   },
+   {
+    "default_rank": 22,
+    "site_id": "N71W078-01",
+    "region": "northern Baffin Island",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 4.88
+   },
+   {
+    "default_rank": 23,
+    "site_id": "N69E096-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 191.06
+   },
+   {
+    "default_rank": 24,
+    "site_id": "N19W156-01",
+    "region": "Mauna Loa",
+    "strict_rank": 2,
+    "strict_site_id": "N19W156-01",
+    "km": 0.0
+   },
+   {
+    "default_rank": 25,
+    "site_id": "N69E093-03",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 85.73
+   },
+   {
+    "default_rank": 26,
+    "site_id": "N68E093-04",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 152.49
+   },
+   {
+    "default_rank": 27,
+    "site_id": "N67E066-01",
+    "region": "Polar Urals",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 978.16
+   },
+   {
+    "default_rank": 28,
+    "site_id": "N67E093-01",
+    "region": "Putorana Plateau",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 272.21
+   },
+   {
+    "default_rank": 29,
+    "site_id": "N71W077-01",
+    "region": "northern Baffin Island",
+    "strict_rank": null,
+    "strict_site_id": null,
+    "km": 9.79
+   },
+   {
+    "default_rank": 30,
+    "site_id": "N61W074-01",
+    "region": "northern Ungava",
+    "strict_rank": 930,
+    "strict_site_id": "N61W074-02",
+    "km": 1.37
+   }
+  ],
+  "default_top30_with_strict_site_within_3km": 5,
+  "files": {
+   "ranking": "data/validation/landcover_sensitivity/ranking_bare_strict.csv",
+   "geojson": "data/validation/landcover_sensitivity/sites_bare_strict.geojson",
+   "tiles": "data/validation/landcover_sensitivity/tile_summary_bare_strict.csv"
+  }
  }
 }
