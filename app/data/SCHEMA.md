@@ -195,7 +195,7 @@ Values that apply to every site record.
 |---|---|---|---|---|---|
 | `novelty_values` | object |  | app/build_data.py NOVELTY_VALUES; counts from data/sites/ranking.csv · novelty | `{unchecked, unreported, mentioned, established}` |  |
 | `novelty_values.mentioned.meaning` | string |  | docs/NOVELTY.md section 3 | `"An opened page names the region (not the site) as an analog; today..."` |  |
-| `novelty_values.mentioned.ranked_sites` | integer | sites of the 200 ranked | data/sites/ranking.csv · novelty | `4` |  |
+| `novelty_values.mentioned.ranked_sites` | integer | sites of the 200 ranked | data/sites/ranking.csv · novelty | `11` |  |
 | `analog_for` | object |  | app/build_data.py ANALOG_FOR | `{moon, mars, both}` | tag -> words |
 | `feature_info` | object | [label, unit] | app/build_data.py FEATURE_INFO | `{s240, s570, r200, r1600, dep_frac}` |  |
 | `share_info` | object |  | app/build_data.py SHARE_INFO | `{f_le5, f_le8, f_le15}` |  |
@@ -458,7 +458,7 @@ All 44 rows of `data/sites/novelty_check.csv`. Judged by an SI model; a person h
 | Key | Type | Unit | Source (file · column or key) | Example | Note |
 |---|---|---|---|---|---|
 | `verdict_counts` | object | rows | novelty_check.csv · verdict | `{"mentioned": 11, "unreported": 28, "established": 5}` |  |
-| `ranking_counts` | object | sites of 200 | ranking.csv · novelty | `{"unreported": 26, "established": 2, "mentioned": 4, "unchecked": 168}` |  |
+| `ranking_counts` | object | sites of 200 | ranking.csv · novelty | `{"unreported": 19, "established": 2, "mentioned": 11, "unchecked": 168}` |  |
 | `values` | object |  | app/build_data.py NOVELTY_VALUES | `{unchecked, unreported, mentioned, established}` |  |
 | `wording` | string |  | docs/NOVELTY.md section 6 | `"Judged by an SI model; a person has not confirmed it. Nothing is a..."` |  |
 | `rows.[].site_id` | string |  | novelty_check.csv · site_id | `"N25E039-01"` |  |
