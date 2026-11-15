@@ -7,7 +7,7 @@ import { go, href, replaceParams } from "../lib/router";
 import { num } from "../lib/format";
 import { Arrow, Failed, Loading, Segmented } from "../components/kit";
 import { CritRow } from "../components/explore/Filters";
-import { MoonGlobe } from "../components/three/MoonGlobe";
+import { MissionMoon } from "../components/discover/MissionMoon";
 import { PixelWaves } from "../components/PixelWaves";
 import { MissionIcon } from "../components/discover/MissionIcon";
 import "../styles/explore.css";
@@ -43,6 +43,10 @@ function Journey({ atlas, params }: { atlas: Atlas; params: URLSearchParams }) {
   const ids = useMemo(() => crits.map((c) => c.id), [crits]);
   const [prefs, setPrefs] = useState<Prefs>(() => params.has("c") ? readPrefs(params, ids) : missionPrefs(mission, dataset));
   const [strict, setStrict] = useState(() => ["10", "25", "50"].includes(params.get("k") ?? "") ? Number(params.get("k")) : 25);
+  // every pick in the panel or on the globe flies the Moon to that region (the pooled target to the pole)
+  const [fly, setFly] = useState(0);
+  const pick = (id: string) => { setTarget(id); setFly((n) => n + 1); };
+  const marks = useMemo(() => regions.filter((r) => r.kind !== "pooled" && r.lat != null && r.lon != null).map((r) => ({ id: r.id, lat: r.lat!, lon: r.lon!, label: r.display_name.replace(/ \(.+\)/, "") })), [atlas.moon.regions]); // eslint-disable-line react-hooks/exhaustive-deps
   const scroll = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const region = atlas.moon.regions[target];
@@ -58,7 +62,7 @@ function Journey({ atlas, params }: { atlas: Atlas; params: URLSearchParams }) {
   return <div className="journey">
     <div className="journey-scene">
       <PixelWaves />
-      <div className="journey-orbit"><MoonGlobe rpm={0} tilt={-1.35} light={[.7, .4, 1]} fill={.88} stars selectedMarker={target} onMarkerSelect={setTarget} markers={regions.filter((r) => r.lat != null && r.lon != null).map((r) => ({ lat: r.lat!, lon: r.lon!, id: r.id }))} /></div>
+      <div className="journey-orbit"><MissionMoon markers={marks} selected={target} lit={region.kind === "pooled" ? region.members ?? [] : []} focus={region.kind === "pooled" ? "pole" : target} focusNonce={fly} onSelect={pick} /></div>
       <div className="journey-coordinate"><span>Moon / South pole</span><span>{region.lat != null ? `${Math.abs(region.lat).toFixed(2)}° S · ${region.lon?.toFixed(2)}° E` : "Seven candidate base regions"}</span></div>
       <div className="journey-caption" key={target + mission + step}>
         <span className="journey-kicker">{step === 0 ? "Your destination" : "Your field story"}</span>
@@ -79,7 +83,7 @@ function Journey({ atlas, params }: { atlas: Atlas; params: URLSearchParams }) {
             <figcaption><b>{region.display_name}</b><p>{STORIES[target]}</p><div className="destination-stats"><span><small>Slope at 240 m</small><b>{num(region.features.s240.median, 1)}°</b></span><span><small>Terrain at ≤ 8°</small><b>{num(region.shares.f_le8 * 100, 0)}%</b></span></div><small>LRO LOLA elevation · shaded relief, not a photograph</small></figcaption>
           </figure>
           <div className="destination-choices" aria-label="Lunar destination">
-            {regions.map((r) => <button key={r.id} aria-pressed={r.id === target} onClick={() => setTarget(r.id)} className={r.id === target ? "on" : ""}><img src={img(r.hillshade ?? atlas.moon.regions.polar_160km.hillshade!)} alt="" /><span><b>{r.display_name.replace(/ \(.+\)/, "")}</b><small>{r.kind === "pooled" ? "All seven regions together" : "Lunar south-pole region"}</small></span><i>{r.id === target ? "✓" : "+"}</i></button>)}
+            {regions.map((r) => <button key={r.id} aria-pressed={r.id === target} onClick={() => pick(r.id)} className={r.id === target ? "on" : ""}><img src={img(r.hillshade ?? atlas.moon.regions.polar_160km.hillshade!)} alt="" /><span><b>{r.display_name.replace(/ \(.+\)/, "")}</b><small>{r.kind === "pooled" ? "All seven regions together" : "Lunar south-pole region"}</small></span><i>{r.id === target ? "✓" : "+"}</i></button>)}
           </div>
         </>}
         {step === 1 && <>

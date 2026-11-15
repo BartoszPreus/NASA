@@ -207,6 +207,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
           outline={selected?.polygon ?? null}
           offsetX={wide && panelOpen ? 210 : 0}
           heat={heatOn ? `./heat/${target}.png` : null}
+          flatMap
+          insets={{ left: wide ? (panelOpen ? 472 : 56) : 0, right: wide && selected ? 490 : 0, bottom: wide ? 64 : 48 }}
         />
         <div className="globe-legend">
           <label className="heat-tg">

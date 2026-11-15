@@ -1,4 +1,11 @@
-.pixel-waves { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-.l-hero > .pixel-waves { z-index: -1; }
-.l-end { position: relative; isolation: isolate; overflow: hidden; }
+/* Dithered pixel backgrounds (Dither.tsx). Always behind content, never interactive. */
+.dither { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.l-hero > .pixel-waves { z-index: -3; -webkit-mask-image: linear-gradient(to bottom, transparent 4%, #000 22%, #000 70%, transparent 92%); mask-image: linear-gradient(to bottom, transparent 4%, #000 22%, #000 70%, transparent 92%); }
+.l-end { position: relative; isolation: isolate; }
+.l-end > .dither { z-index: -1; top: -18vh; left: 50%; right: auto; width: 100vw; height: calc(100% + 18vh); margin-left: -50vw; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 80%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 35%, #000 80%, transparent); }
 .l-end > .reveal { position: relative; z-index: 1; }
+
+/* Page backdrop from Shell.tsx: fixed, below every element of the page (negative z-index in the root
+   stacking context), so opaque panels and 3D canvases cover it and it shows only in margins and gaps. */
+.page-dither { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, transparent 40px, #000 220px); mask-image: linear-gradient(to bottom, transparent 40px, #000 220px); }
+.page-dither .dither { position: absolute; }

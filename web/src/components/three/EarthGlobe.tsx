@@ -1,26 +1,23 @@
 // Textured 3D Earth with the candidate patches: HTML markers projected from the globe each frame,
-// screen-space clustering, numbered pins for the top results, fly-to on selection, outline of the
-// selected patch. Earth shader (day/night from NASA mosaics, thin limb) adapted from ShadowAstra
-// Atlas (MIT), src/components/three/Planet.tsx.
-import { useEffect, useMemo, useRef, useState } from "react";
+// screen-space merging of close points into plain dots (lib/cluster.ts) with a list of their places,
+// numbered pins for single top results, fly-to on selection, outline of the selected patch, and (flatMap)
+// a cross-fade to a high-resolution 2D map when zoomed in close. Earth shader (day/night from NASA
+// mosaics, thin limb) adapted from ShadowAstra Atlas (MIT), src/components/three/Planet.tsx.
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Stars } from "./Stars";
 import { bestLod, hasWebGL, latLonToVec3, useInView, useProgressiveTexture, useReducedMotion } from "./textures";
+import { mergeScreen, type GlobePoint, type ScreenPoint } from "../../lib/cluster";
+import { ClusterMenu, Marker, type MarkerItem } from "../explore/Markers";
+import type { FlatView } from "../explore/FlatMap";
 import "../../styles/globe.css";
 
-export interface GlobePoint {
-  id: string;
-  lat: number;
-  lon: number;
-  kind: "match" | "listed"; // match = passes the active criteria (lit), listed = shown faint
-  rank: number;
-  label: string; // tooltip text, e.g. "Southern Peary Land upland"
-  sub?: string; // second tooltip line, e.g. country
-  top?: boolean; // emphasised (e.g. one of the first 10 results): numbered pin
-  order?: number; // number drawn on the pin when top
-}
+export type { GlobePoint } from "../../lib/cluster";
+
+const loadFlat = () => import("../explore/FlatMap");
+const FlatMap = lazy(loadFlat);
 
 export interface EarthGlobeProps {
   points: GlobePoint[];
@@ -38,21 +35,16 @@ export interface EarthGlobeProps {
   heat?: string | null;
   /** slow spin while idle and nothing is selected (default true; off with reduced motion) */
   autoRotate?: boolean;
+  /** zooming in close cross-fades to a high-resolution 2D map (Explore only) */
+  flatMap?: boolean;
+  /** CSS px on the left and right covered by other panels: menus and map controls keep clear of them */
+  insets?: { left: number; right: number; bottom?: number };
   className?: string;
 }
 
 /* ------------------------------------------------------------------ model */
 
-interface Item {
-  key: string;
-  ids: string[];
-  dir: THREE.Vector3; // unit vector; centroid for plain clusters, the pin itself for pin clusters
-  cluster: boolean;
-  match: boolean;
-  top: number | null; // lowest pin number inside
-  point: GlobePoint | null; // the point of a single (or the pin of a pin cluster)
-  sel: boolean;
-}
+type Item = MarkerItem & { dir: THREE.Vector3 }; // unit vector; centroid for merged dots
 
 interface Store {
   els: Map<string, HTMLElement>;
@@ -65,16 +57,40 @@ interface Store {
   lastInteract: number;
   fit: number;
   hotDot: string | null;
+  menuAt: { dir: THREE.Vector3; x: number; y: number } | null; // the merged dot whose list is open, and where it was on screen
+  prevD: number;
+  flat: boolean;
 }
 
-// larger than the biggest cluster disc (38 px), so two clusters never overlap
-const CLUSTER_PX = 42;
-const TOP_PX = 22;
 const MIN_D = 1.12;
 const HOME = latLonToVec3(42, 62, 1); // first view: Eurasia and the Arctic, where most patches are
 const UP = new THREE.Vector3(0, 1, 0);
+// the 2D map takes over when the projected globe radius reaches ENTER x the smaller free viewport side,
+// and gives back below EXIT (hysteresis); PRELOAD starts downloading its code a little earlier
+const ENTER = 0.9;
+const EXIT = 0.72;
+const PRELOAD = 0.6;
+const MAX_LAT = 84; // Web Mercator stops at 85.05 degrees
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const rad = Math.PI / 180;
+
+/** Projected radius (CSS px) of the unit globe seen from distance d. */
+const radiusPx = (d: number, fov: number, h: number) => ((h / 2) * Math.tan(Math.asin(Math.min(1, 1 / d)))) / Math.tan((fov * rad) / 2);
+/** Camera distance at which the projected radius is R px. */
+const distFor = (R: number, fov: number, h: number) => 1 / Math.sin(Math.atan((R * Math.tan((fov * rad) / 2)) / (h / 2)));
+/** Ground scale (px per degree of latitude) at the centre of the view from distance d. */
+const pxPerDeg = (d: number, fov: number, h: number) => (rad * (h / 2)) / ((d - 1) * Math.tan((fov * rad) / 2));
+/** Web Mercator zoom with the same ground scale at latitude lat. */
+const zoomFor = (k: number, lat: number) => Math.log2((k * 360 * Math.cos(Math.min(MAX_LAT, Math.abs(lat)) * rad)) / 256);
+const kFor = (z: number, lat: number) => (256 * 2 ** z) / (360 * Math.cos(Math.min(MAX_LAT, Math.abs(lat)) * rad));
+function vecToLatLon(v: THREE.Vector3): { lat: number; lon: number } {
+  const n = v.clone().normalize();
+  const lat = 90 - Math.acos(Math.max(-1, Math.min(1, n.y))) / rad;
+  let lon = Math.atan2(n.z, -n.x) / rad - 180;
+  if (lon < -180) lon += 360;
+  return { lat, lon };
+}
 
 /* ------------------------------------------------------------------ shaders */
 
@@ -287,66 +303,37 @@ function Outline({ outline }: { outline: [number, number][][][] }) {
   );
 }
 
-/** Cluster the visible points in screen space. The selected point stays single; top pins absorb nearby points. */
+/** Merge the visible points in screen space. Faint single points go to the GPU layer, the rest become HTML markers. */
 function cluster(points: GlobePoint[], dirs: Map<string, THREE.Vector3>, cam: THREE.PerspectiveCamera, w: number, h: number, selectedId: string | null): { items: Item[]; dots: string[] } {
   const c = cam.position;
   const tmp = new THREE.Vector3();
-  type V = { p: GlobePoint; x: number; y: number; dir: THREE.Vector3 };
-  const vis: V[] = [];
+  const vis: ScreenPoint[] = [];
   for (const p of points) {
     const d = dirs.get(p.id);
     if (!d || d.dot(c) < 1.0) continue; // behind the limb
     tmp.copy(d).project(cam);
-    vis.push({ p, dir: d, x: ((tmp.x + 1) / 2) * w, y: ((1 - tmp.y) / 2) * h });
+    vis.push({ p, x: ((tmp.x + 1) / 2) * w, y: ((1 - tmp.y) / 2) * h });
   }
-  const prio = (v: V) => (v.p.id === selectedId ? -1e9 : v.p.top ? -1e6 + (v.p.order ?? 0) : (v.p.kind === "match" ? 0 : 1e5) + v.p.rank);
-  vis.sort((a, b) => prio(a) - prio(b));
-  const grid = new Map<string, V[]>();
-  for (const v of vis) {
-    const k = `${Math.floor(v.x / CLUSTER_PX)}:${Math.floor(v.y / CLUSTER_PX)}`;
-    const g = grid.get(k);
-    if (g) g.push(v);
-    else grid.set(k, [v]);
-  }
-  const used = new Set<string>();
   const items: Item[] = [];
   const dots: string[] = [];
-  for (const seed of vis) {
-    if (used.has(seed.p.id)) continue;
-    used.add(seed.p.id);
-    const members: V[] = [seed];
-    const isSel = seed.p.id === selectedId;
-    if (!isSel) {
-      const gx = Math.floor(seed.x / CLUSTER_PX);
-      const gy = Math.floor(seed.y / CLUSTER_PX);
-      for (let i = -1; i <= 1; i++)
-        for (let j = -1; j <= 1; j++)
-          for (const v of grid.get(`${gx + i}:${gy + j}`) ?? []) {
-            if (used.has(v.p.id) || v.p.id === selectedId) continue;
-            // pins only merge with very close pins; a plain point never swallows a pin
-            const r = seed.p.top && v.p.top ? TOP_PX : v.p.top ? -1 : CLUSTER_PX;
-            if (Math.hypot(v.x - seed.x, v.y - seed.y) <= r) {
-              used.add(v.p.id);
-              members.push(v);
-            }
-          }
-    }
-    const single = members.length === 1;
-    if (single && !isSel && !seed.p.top && seed.p.kind === "listed") {
-      dots.push(seed.p.id); // plain faint point: GPU layer, no HTML element
+  for (const g of mergeScreen(vis, selectedId)) {
+    const seed = g.members[0].p;
+    const single = g.members.length === 1;
+    if (single && !g.sel && !seed.top && seed.kind === "listed") {
+      dots.push(seed.id); // plain faint point: GPU layer, no HTML element
       continue;
     }
-    const tops = members.filter((m) => m.p.top).map((m) => m.p.order ?? 0);
-    const dir = single || seed.p.top ? seed.dir : members.reduce((s, m) => s.add(m.dir), new THREE.Vector3()).normalize();
+    const dir = single ? dirs.get(seed.id)!.clone() : g.members.reduce((s, m) => s.add(dirs.get(m.p.id)!), new THREE.Vector3()).normalize();
     items.push({
-      key: single ? `p:${seed.p.id}` : `c:${seed.p.id}`,
-      ids: members.map((m) => m.p.id),
+      key: single ? `p:${seed.id}` : `c:${seed.id}`,
+      ids: g.members.map((m) => m.p.id),
       dir,
       cluster: !single,
-      match: members.some((m) => m.p.kind === "match"),
-      top: tops.length ? Math.min(...tops) : null,
-      point: single || seed.p.top ? seed.p : null,
-      sel: isSel,
+      match: g.members.some((m) => m.p.kind === "match"),
+      top: g.members.some((m) => m.p.top),
+      pin: single && seed.top ? (seed.order ?? null) : null,
+      point: seed,
+      sel: g.sel,
     });
   }
   return { items, dots };
@@ -365,7 +352,12 @@ function flyTo(store: Store, cam: THREE.Camera, dir: THREE.Vector3, dist: number
   store.fly = { a, q, d0: cam.position.length(), d1: dist, t0: performance.now(), dur: 700 + Math.min(700, a.angleTo(b) * 420) };
 }
 
-function Scene({ p, store, setItems, setHotDot, reduced }: { p: EarthGlobeProps; store: Store; setItems: (i: Item[]) => void; setHotDot: (id: string | null) => void; reduced: boolean }) {
+interface SceneHooks {
+  closeMenu: () => void;
+  enterFlat: (v: FlatView) => void;
+}
+
+function Scene({ p, store, setItems, setHotDot, reduced, hooks }: { p: EarthGlobeProps; store: Store; setItems: (i: Item[]) => void; setHotDot: (id: string | null) => void; reduced: boolean; hooks: SceneHooks }) {
   const { camera, gl, size } = useThree();
   const cam = camera as THREE.PerspectiveCamera;
   const ctl = useRef<OrbitControls | null>(null);
@@ -481,6 +473,7 @@ function Scene({ p, store, setItems, setHotDot, reduced }: { p: EarthGlobeProps;
     const now = performance.now();
     const c = ctl.current;
     const f = store.fly;
+    const flying = !!f; // also true on the frame a fly-to ends
     if (f) {
       const t = Math.min(1, (now - f.t0) / f.dur);
       const e = ease(t);
@@ -490,9 +483,33 @@ function Scene({ p, store, setItems, setHotDot, reduced }: { p: EarthGlobeProps;
       if (t >= 1) store.fly = null;
     }
     if (c) {
-      c.autoRotate = p.autoRotate !== false && !reduced && !p.selectedId && !store.fly && now - store.lastInteract > 9000;
+      c.autoRotate = p.autoRotate !== false && !reduced && !p.selectedId && !store.fly && !store.menuAt && now - store.lastInteract > 9000;
       c.update();
     }
+    // the list of a merged dot closes when the camera moves
+    if (store.menuAt) {
+      tmp.copy(store.menuAt.dir).project(cam);
+      const mx = ((tmp.x + 1) / 2) * size.width;
+      const my = ((1 - tmp.y) / 2) * size.height;
+      if (Math.hypot(mx - store.menuAt.x, my - store.menuAt.y) > 6) {
+        store.menuAt = null;
+        hooks.closeMenu();
+      }
+    }
+    // zooming in past ENTER hands over to the 2D map (only a zoom by the user, not a fly-to)
+    const dist = cam.position.length();
+    if (p.flatMap && !store.flat && !flying && size.width && size.height) {
+      const m = Math.min(Math.max(220, size.width - 2 * offsetX), size.height);
+      const R = radiusPx(dist, cam.fov, size.height);
+      if (R >= PRELOAD * m) loadFlat();
+      if (dist < store.prevD - 1e-6 && R >= ENTER * m) {
+        const { lat, lon } = vecToLatLon(cam.position);
+        const zoom = zoomFor(pxPerDeg(dist, cam.fov, size.height), lat);
+        store.flat = true;
+        hooks.enterFlat({ lat: Math.max(-MAX_LAT, Math.min(MAX_LAT, lat)), lon, zoom });
+      }
+    }
+    store.prevD = dist;
     // light from the upper left of the viewer: the visible side is lit, with a soft terminator on the right
     tmp.copy(cam.position).normalize();
     right.crossVectors(UP, tmp).normalize();
@@ -520,6 +537,7 @@ function Scene({ p, store, setItems, setHotDot, reduced }: { p: EarthGlobeProps;
       dotGeo.computeBoundingSphere();
       setItems(items);
     }
+    if (store.flat) return;
 
     // place the markers; fade them out towards the limb
     const cp = cam.position;
@@ -583,18 +601,109 @@ export function EarthGlobe(p: EarthGlobeProps) {
   const reduced = useReducedMotion();
   const [items, setItems] = useState<Item[]>([]);
   const camRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const store = useMemo<Store>(() => ({ els: new Map(), items: [], dotIds: [], dotSet: new Set(), extra: null, byId: new Map(), fly: null, lastInteract: 0, fit: 0, hotDot: null }), []);
+  const store = useMemo<Store>(
+    () => ({ els: new Map(), items: [], dotIds: [], dotSet: new Set(), extra: null, byId: new Map(), fly: null, lastInteract: 0, fit: 0, hotDot: null, menuAt: null, prevD: Infinity, flat: false }),
+    [],
+  );
   const [hotDot, setHotDot] = useState<string | null>(null);
   const [hot, setHot] = useState<string | null>(null);
+  const [menu, setMenu] = useState<{ key: string; ids: string[]; x: number; y: number; dir: THREE.Vector3 } | null>(null);
+  // 2D map: `flat` is the view handed over while the map is mounted, `flatOn` whether it is the visible one
+  const [flat, setFlat] = useState<FlatView | null>(null);
+  const [flatOn, setFlatOn] = useState(false);
+  const [box, setBox] = useState({ w: 0, h: 0 });
   const byId = useMemo(() => new Map(p.points.map((x) => [x.id, x])), [p.points]);
   const hoverKey = p.hoverId ? (store.byId.get(p.hoverId) ?? null) : null;
+  const offsetX = p.offsetX ?? 0;
+  const insets = p.insets ?? { left: 0, right: 0 };
   // a GPU dot under the pointer or hovered in the list gets a temporary HTML marker with its tooltip
   const dotHover = hotDot ?? (p.hoverId && store.dotSet.has(p.hoverId) ? p.hoverId : null);
   const dotPt = dotHover ? byId.get(dotHover) : undefined;
   const extra: Item | null = dotPt
-    ? { key: `h:${dotPt.id}`, ids: [dotPt.id], dir: latLonToVec3(dotPt.lat, dotPt.lon, 1), cluster: false, match: false, top: null, point: dotPt, sel: false }
+    ? { key: `h:${dotPt.id}`, ids: [dotPt.id], dir: latLonToVec3(dotPt.lat, dotPt.lon, 1), cluster: false, match: false, top: false, pin: null, point: dotPt, sel: false, ghost: true }
     : null;
   store.extra = extra;
+
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setBox({ w: el.clientWidth, h: el.clientHeight }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // a wheel over a marker zooms the globe too (the markers sit above the canvas)
+  const wheelZoom = p.wheelZoom !== false;
+  useEffect(() => {
+    const el = wrap.current;
+    const layer = el?.querySelector<HTMLElement>(":scope > .eg-layer");
+    if (!el || !layer || !wheelZoom) return;
+    const f = (e: WheelEvent) => {
+      const c = el.querySelector("canvas");
+      if (!c) return;
+      e.preventDefault();
+      c.dispatchEvent(new WheelEvent("wheel", e));
+    };
+    layer.addEventListener("wheel", f, { passive: false });
+    return () => layer.removeEventListener("wheel", f);
+  }, [wheelZoom]);
+
+  const closeMenu = useCallback(() => {
+    store.menuAt = null;
+    setMenu(null);
+  }, [store]);
+
+  const hooks = useMemo<SceneHooks>(
+    () => ({
+      closeMenu,
+      enterFlat: (v) => {
+        store.menuAt = null;
+        setMenu(null);
+        setFlat(v);
+        setFlatOn(true);
+      },
+    }),
+    [closeMenu, store],
+  );
+
+  // back from the map: the globe looks at the same point, from no closer than the EXIT threshold
+  const exitFlat = useCallback(
+    (v: FlatView) => {
+      const cam = camRef.current;
+      const el = wrap.current;
+      if (cam && el) {
+        const h = el.clientHeight;
+        const m = Math.min(Math.max(220, el.clientWidth - 2 * offsetX), h);
+        const dScale = 1 + (rad * (h / 2)) / (kFor(v.zoom, v.lat) * Math.tan((cam.fov * rad) / 2));
+        const d = Math.min(store.fit || 4, Math.max(dScale, distFor(EXIT * m, cam.fov, h)));
+        cam.position.copy(latLonToVec3(Math.max(-80, Math.min(80, v.lat)), v.lon, 1)).multiplyScalar(d);
+        cam.lookAt(0, 0, 0);
+        store.fly = null;
+        store.prevD = d;
+        store.lastInteract = performance.now();
+      }
+      store.flat = false;
+      setFlatOn(false);
+      if (reduced) setFlat(null);
+    },
+    [offsetX, reduced, store],
+  );
+
+  // unmount the map once it has faded out
+  useEffect(() => {
+    if (flatOn || !flat) return;
+    const t = setTimeout(() => setFlat(null), 500);
+    return () => clearTimeout(t);
+  }, [flatOn, flat]);
+
+  // the map is only for pages that ask for it
+  useEffect(() => {
+    if (!p.flatMap && store.flat) {
+      store.flat = false;
+      setFlatOn(false);
+      setFlat(null);
+    }
+  }, [p.flatMap, store]);
 
   if (!hasWebGL()) {
     return (
@@ -604,22 +713,39 @@ export function EarthGlobe(p: EarthGlobeProps) {
     );
   }
 
-  const clickItem = (it: Item) => {
+  const clickItem = (it: MarkerItem, el: HTMLElement) => {
     if (!it.cluster || it.sel) {
       p.onSelect(it.ids[0]);
       return;
     }
+    if (menu?.key === it.key) return closeMenu();
     const cam = camRef.current;
-    if (!cam) return;
+    const w = wrap.current;
+    if (!cam || !w) return;
+    const r = el.getBoundingClientRect();
+    const b = w.getBoundingClientRect();
+    const x = r.left + r.width / 2 - b.left;
+    const y = r.top + r.height / 2 - b.top;
+    const dir = (it as Item).dir.clone();
+    store.menuAt = { dir, x, y };
     store.lastInteract = performance.now();
-    flyTo(store, cam, it.dir, Math.max(MIN_D, cam.position.length() * 0.55), reduced);
+    setMenu({ key: it.key, ids: it.ids, x, y, dir });
+  };
+
+  const zoomToMenu = () => {
+    const cam = camRef.current;
+    if (!cam || !menu) return;
+    const dir = menu.dir;
+    closeMenu();
+    store.lastInteract = performance.now();
+    flyTo(store, cam, dir, Math.max(MIN_D, cam.position.length() * 0.55), reduced);
   };
 
   return (
-    <div ref={wrap} className={`eg ${p.className ?? ""}`}>
+    <div ref={wrap} className={`eg ${flatOn ? "flat" : ""} ${p.className ?? ""}`}>
       <Canvas
         dpr={[1, 2]}
-        frameloop={inView ? "always" : "never"}
+        frameloop={inView && !flatOn ? "always" : "never"}
         camera={{ position: [0.9, 0.95, 3.6], fov: 35, near: 0.05, far: 300 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         raycaster={{ params: { Points: { threshold: 0.012 }, Mesh: {}, Line: { threshold: 0 }, LOD: {}, Sprite: {} } }}
@@ -628,56 +754,74 @@ export function EarthGlobe(p: EarthGlobeProps) {
         }}
       >
         <color attach="background" args={["#050608"]} />
-        <Scene p={p} store={store} setItems={setItems} setHotDot={setHotDot} reduced={reduced} />
+        <Scene p={p} store={store} setItems={setItems} setHotDot={setHotDot} reduced={reduced} hooks={hooks} />
       </Canvas>
       <div className="eg-layer">
-        {(extra ? [...items, extra] : items).map((it) => {
-          const pt = it.point;
-          const n = it.ids.length;
-          const isHot = hot === it.key || hoverKey === it.key || it === extra;
-          const plainCluster = it.cluster && it.top == null;
-          const cls = ["eg-m", it === extra ? "ghost" : "", it.cluster ? "cl" : "pt", it.top != null ? "pin" : "", it.match ? "lit" : "", it.sel ? "sel" : "", isHot ? "hot" : ""].join(" ");
-          const size = plainCluster ? Math.round(20 + Math.min(18, Math.log2(n) * 4.5)) : undefined;
-          const first = byId.get(it.ids[0]);
-          const tipA = plainCluster ? `${n} patches` : (pt?.label ?? first?.label ?? "");
-          const tipB = it.cluster ? (it.top != null ? `${n - 1} more nearby, click to zoom in` : "Click to zoom in") : (pt?.sub ?? "");
-          return (
-            <div
-              key={it.key}
-              className={cls}
-              ref={(el) => {
-                if (el) store.els.set(it.key, el);
-                else store.els.delete(it.key);
-              }}
-              style={{ opacity: 0 }}
-            >
-              <button
-                type="button"
-                className="eg-hit"
-                style={size ? { width: size, height: size } : undefined}
-                aria-label={plainCluster ? `${n} patches, zoom in` : `${tipA}${pt?.sub ? `, ${pt.sub}` : ""}`}
-                onClick={() => clickItem(it)}
-                onPointerEnter={() => {
-                  setHot(it.key);
-                  if (!it.cluster && pt) p.onHover?.(pt.id);
-                }}
-                onPointerLeave={() => {
-                  setHot(null);
-                  p.onHover?.(null);
-                }}
-              >
-                {it.top != null ? <span className="eg-num mono">{it.top}</span> : plainCluster ? <span className="eg-count mono">{n}</span> : null}
-                {it.top != null && it.cluster && <span className="eg-badge mono">+{n - 1}</span>}
-              </button>
-              {it.sel && <span className="eg-pulse" />}
-              <span className="eg-tip">
-                <b>{tipA}</b>
-                {tipB && <span>{tipB}</span>}
-              </span>
-            </div>
-          );
-        })}
+        {(extra ? [...items, extra] : items).map((it) => (
+          <Marker
+            key={it.key}
+            it={it}
+            hot={hot === it.key || hoverKey === it.key || it === extra}
+            open={menu?.key === it.key}
+            setRef={(k, el) => {
+              if (el) store.els.set(k, el);
+              else store.els.delete(k);
+            }}
+            onClick={clickItem}
+            onEnter={(x) => {
+              setHot(x.key);
+              if (!x.cluster && x.point) p.onHover?.(x.point.id);
+            }}
+            onLeave={() => {
+              setHot(null);
+              p.onHover?.(null);
+            }}
+          />
+        ))}
       </div>
+      {menu && !flatOn && (
+        <ClusterMenu
+          x={menu.x}
+          y={menu.y}
+          ids={menu.ids}
+          byId={byId}
+          bounds={{ w: box.w, h: box.h, left: insets.left, right: insets.right, bottom: insets.bottom ?? 0 }}
+          onPick={(id) => {
+            closeMenu();
+            p.onSelect(id);
+          }}
+          onHover={p.onHover}
+          onClose={closeMenu}
+          onZoom={zoomToMenu}
+        />
+      )}
+      {p.flatMap && flat && (
+        <Suspense fallback={<div className="fm-wait">Loading the map</div>}>
+          <FlatMap
+            points={p.points}
+            selectedId={p.selectedId}
+            hoverId={p.hoverId}
+            onSelect={p.onSelect}
+            onHover={p.onHover}
+            outline={p.outline}
+            heat={p.heat}
+            view={flat}
+            offsetX={offsetX}
+            insets={insets}
+            exitZoom={(lat) => {
+              const el = wrap.current;
+              const cam = camRef.current;
+              if (!el || !cam) return 0;
+              const h = el.clientHeight;
+              const m = Math.min(Math.max(220, el.clientWidth - 2 * offsetX), h);
+              return zoomFor(pxPerDeg(distFor(EXIT * m, cam.fov, h), cam.fov, h), lat);
+            }}
+            onExit={exitFlat}
+            shown={flatOn}
+            reduced={reduced}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

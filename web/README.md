@@ -44,14 +44,16 @@ The custom hash routes need no server rewrites. Live satellite imagery and terra
 
 - Data: see `data/sources.csv` and the Sources page.
 - React and React DOM (MIT), Vite (MIT), TypeScript (Apache-2.0), three.js (MIT), React Three Fiber (MIT).
+- Leaflet 1.9.4 (BSD-2-Clause, (c) 2010-2023 Vladimir Agafonkin, (c) 2010-2011 CloudMade), https://leafletjs.com: the 2D map of Explore when zoomed in, loaded lazily.
 - Fonts: Geist and Geist Mono (SIL Open Font License 1.1, Vercel), served from npm packages by Fontsource (MIT).
 - Land outlines: Natural Earth (public domain).
 - ShadowAstra Atlas (MIT, (c) 2026 Team ShadowAstra, https://github.com/ABRUBAB/ShadowAstra_Atlas): the interface design is inspired by it; the globe textures in `public/textures/` are its files (built from NASA products, provenance in `public/textures/README.md`); the Earth shader, star field, texture loading, terrain slabs and shadow code are adapted from it (marked in each file).
 - Elevation grids of the Compare page: Copernicus DEM GLO-30 (ESA, via the AWS open data bucket) and LOLA LDEM_80S_20MPP_ADJ (NASA PGDA product 90, Barker et al. 2023).
 - Globe textures: NASA Blue Marble and Black Marble (NASA GIBS), LRO LROC WAC global mosaic (NASA Solar System Treks).
-- Live imagery (list thumbnails, Compare): Sentinel-2 cloudless 2016 by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016), CC BY 4.0, WMS layer `s2cloudless` (https://s2maps.eu), loaded by the browser; live elevation for patches without a prebuilt grid: AWS Terrain Tiles (terrarium; SRTM, GMTED2010, ETOPO1, ArcticDEM and others), open data (https://registry.opendata.aws/terrain-tiles/).
+- Live imagery (list thumbnails, Compare): Sentinel-2 cloudless 2016 by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2016), CC BY 4.0, WMS layer `s2cloudless` (https://s2maps.eu), loaded by the browser; the zoomed-in 2D map of Explore uses Sentinel-2 cloudless 2020 by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2020), CC BY 4.0, WMTS layer `s2cloudless-2020_3857` (https://tiles.maps.eox.at), loaded by the browser; live elevation for patches without a prebuilt grid: AWS Terrain Tiles (terrarium; SRTM, GMTED2010, ETOPO1, ArcticDEM and others), open data (https://registry.opendata.aws/terrain-tiles/).
 
-- Pixel-wave art direction: user reference https://put-hack-17j38oqmm-put-hack.vercel.app/ (Vercel sign-in prevented viewing this deployment). `PixelWaves.tsx` is original procedural code based on the user's description; no PUT HACK source/assets are copied. Grayscale waves stop for reduced-motion preferences, hidden tabs and offscreen sections.
+- Dithered pixel backgrounds: visual inspiration from the PUT HACK site, https://put-hack-ten.vercel.app/ (viewed 15 Nov 2026). `Dither.tsx` and `PixelWaves.tsx` are original code (ordered 4 x 4 Bayer dithering of procedural wave, orb and horizon fields on a low-resolution canvas); no PUT HACK code or assets are copied. The effect is static for reduced-motion preferences and pauses in hidden tabs and offscreen sections.
+- Plan a mission Moon (`discover/MissionMoon.tsx`): LRO LROC WAC mosaic, with the LRO LOLA polar hillshade `public/textures/moon_south_pole_lola.webp` mapped onto the cap from 80 deg S to the pole; the same texture under the south polar map of the Moon page.
 - Mission journey reference: https://shadowastra-atlas.vercel.app/discover (viewed); original wizard code over Zodiak's existing data and criteria. Mars is not offered because the project's ranking reference is lunar.
 
 Written with SI assistance (Claude Code, OpenAI Codex).

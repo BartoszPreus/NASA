@@ -21,6 +21,7 @@ import {
   type TerrainManifest,
 } from "../lib/terrain";
 import { Twins, type Block, type Overlay } from "../components/compare/Twins";
+import { SiteProfile } from "../components/compare/SiteProfile";
 import { CrossSection, Picture, SameScale, SlopeBars } from "../components/compare/Views";
 import { LIVE_IMAGE_CREDIT, liveImageUrl } from "../lib/imagery";
 import "../styles/compare.css";
@@ -30,7 +31,7 @@ const FEATURES: FeatureKey[] = ["s240", "s570", "r200", "r1600", "dep_frac"];
 const SECTIONS = [
   { id: "c-compare", n: "00", label: "Compare" },
   { id: "c-ground", n: "01", label: "Ground" },
-  { id: "c-surface", n: "02", label: "Surface" },
+  { id: "c-site", n: "02", label: "Site" },
   { id: "c-limits", n: "03", label: "Limits" },
 ];
 // in-page scrolling without touching the hash (the hash holds the route)
@@ -294,6 +295,9 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
               {reg.lat != null && reg.lon != null ? lunarCoord(reg.lat, reg.lon) : "south pole"} · {kmM} km
             </span>
           </div>
+          <p className="cmp-credit mono dim">
+            Earth: {eImageCredit}. Moon: {lroc && reg.quicklook ? "NASA LRO LROC WAC, brightness DN, not a physical value" : "NASA LRO LOLA hillshade"}.
+          </p>
         </div>
         <aside className="cmp-score">
           <div className="sc-top">
@@ -525,45 +529,14 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
         </p>
       </section>
 
-      <section id="c-surface" className="cmp-sec">
+      <section id="c-site" className="cmp-sec">
         <div className="sec-head">
-          <h2>Surfaces at the same scale</h2>
-          <p className="chrome">The same ground as above. The Earth image shows colour and cover; the lunar images show relief and brightness. Only terrain shape enters the score.</p>
+          <h2>This site among all patches</h2>
+          <p className="chrome">
+            Where {siteName(site)} stands on each explorer criterion, against every patch of the {set === "strict" ? "bare-ground" : "default"} run. Pick a criterion to see its distribution, move the threshold to see which criteria the site passes, and pick a lunar region to change the target. Only terrain shape enters the similarity score; climate, vegetation and geology are context.
+          </p>
         </div>
-        <div className="surf">
-          <figure>
-            <div className="sframe">
-              <Picture canvas={eCrop ?? eShade} share={kmE / span} alt={`Earth surface, ${siteName(site)}`} />
-              <span className="ftag">
-                <i className="dot earth" />
-                Earth
-              </span>
-              <span className="sbar" style={{ width: `${(10 / span) * 100}%` }}>
-                <i className="mono">10 km</i>
-              </span>
-            </div>
-            <figcaption>
-              <b>{siteName(site)}</b>
-              <span className="mono dim">{eImageCredit}</span>
-            </figcaption>
-          </figure>
-          <figure>
-            <div className="sframe">
-              <Picture canvas={mPic} share={kmM / span} alt={`Lunar surface, ${reg.display_name}`} />
-              <span className="ftag">
-                <i className="dot moon" />
-                Moon
-              </span>
-              <span className="sbar" style={{ width: `${(10 / span) * 100}%` }}>
-                <i className="mono">10 km</i>
-              </span>
-            </div>
-            <figcaption>
-              <b>{reg.display_name}</b>
-              <span className="mono dim">{lroc && reg.quicklook ? "NASA LRO LROC WAC · brightness DN, not a physical value" : "NASA LRO LOLA hillshade"}</span>
-            </figcaption>
-          </figure>
-        </div>
+        <SiteProfile atlas={atlas} set={set} site={site} region={region} onRegion={setRegion} canTarget={(id) => !!man.moon[id]} />
       </section>
 
       <section id="c-limits" className="cmp-sec">
