@@ -19,7 +19,9 @@ export interface MoonGlobeProps {
   /** share of the canvas the disc fills (1 = touches the shorter side) */
   fill?: number;
   /** small lit markers on the surface, e.g. the south-pole candidate regions */
-  markers?: { lat: number; lon: number }[];
+  markers?: { lat: number; lon: number; id?: string }[];
+  selectedMarker?: string;
+  onMarkerSelect?: (id: string) => void;
   /** stars behind the Moon (off when the page draws its own) */
   stars?: boolean;
   /** called once the texture is on screen */
@@ -39,7 +41,9 @@ function Fit({ fill }: { fill: number }) {
   return null;
 }
 
-function Body({ rpm, tilt, markers, reduced, onReady }: { rpm: number; tilt: number; markers?: { lat: number; lon: number }[]; reduced: boolean; onReady?: () => void }) {
+function Body({ rpm, tilt, markers, reduced, onReady, selectedMarker, onMarkerSelect }: { rpm: number; tilt: number; markers?: { lat: number; lon: number; id?: string }[];
+  selectedMarker?: string;
+  onMarkerSelect?: (id: string) => void; reduced: boolean; onReady?: () => void }) {
   const spin = useRef<THREE.Group>(null);
   const tex = useProgressiveTexture("moon_lroc");
   const done = useRef(false);
@@ -47,7 +51,7 @@ function Body({ rpm, tilt, markers, reduced, onReady }: { rpm: number; tilt: num
     () =>
       (markers ?? []).map((m) => {
         const v = latLonToVec3(m.lat, m.lon, 1.004);
-        return { v, q: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), v.clone().normalize()) };
+        return { id: m.id, v, q: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), v.clone().normalize()) };
       }),
     [markers],
   );
@@ -72,10 +76,10 @@ function Body({ rpm, tilt, markers, reduced, onReady }: { rpm: number; tilt: num
         <mesh material={mat}>
           <sphereGeometry args={[1, 128, 96]} />
         </mesh>
-        {dots.map(({ v, q }, i) => (
-          <mesh key={i} position={v} quaternion={q}>
-            <circleGeometry args={[0.012, 20]} />
-            <meshBasicMaterial color="#f2c879" toneMapped={false} />
+        {dots.map(({ id, v, q }, i) => (
+          <mesh key={i} position={v} quaternion={q} onClick={(e) => { if (id && onMarkerSelect) { e.stopPropagation(); onMarkerSelect(id); } }} onPointerOver={(e) => { if (onMarkerSelect) { e.stopPropagation(); document.body.style.cursor = "pointer"; } }} onPointerOut={() => { document.body.style.cursor = ""; }}>
+            <circleGeometry args={[id === selectedMarker ? .022 : .012, 24]} />
+            <meshBasicMaterial color={id === selectedMarker ? "#ffffff" : "#c9c5bc"} toneMapped={false} />
           </mesh>
         ))}
       </group>
@@ -83,7 +87,7 @@ function Body({ rpm, tilt, markers, reduced, onReady }: { rpm: number; tilt: num
   );
 }
 
-export function MoonGlobe({ className = "", rpm = 0.6, light = [1, 0.35, 0.25], tilt = 0.35, fill = 0.98, markers, stars = false, onReady }: MoonGlobeProps) {
+export function MoonGlobe({ className = "", rpm = 0.6, light = [1, 0.35, 0.25], tilt = 0.35, fill = 0.98, markers, stars = false, onReady, selectedMarker, onMarkerSelect }: MoonGlobeProps) {
   const wrap = useRef<HTMLDivElement>(null);
   const inView = useInView(wrap);
   const reduced = useReducedMotion();
@@ -101,7 +105,7 @@ export function MoonGlobe({ className = "", rpm = 0.6, light = [1, 0.35, 0.25], 
         <ambientLight intensity={0.035} />
         <directionalLight position={[light[0] * 10, light[1] * 10, light[2] * 10]} intensity={3.8} color="#fff6e8" />
         {stars && <Stars count={1600} drift={reduced ? 0 : 0.002} />}
-        <Body rpm={rpm} tilt={tilt} markers={markers} reduced={reduced} onReady={onReady} />
+        <Body rpm={rpm} tilt={tilt} markers={markers} reduced={reduced} onReady={onReady} selectedMarker={selectedMarker} onMarkerSelect={onMarkerSelect} />
       </Canvas>
     </div>
   );

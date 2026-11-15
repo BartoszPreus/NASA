@@ -1,8 +1,9 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { loadContext, loadPolygons, type Load, type SiteContext } from "../lib/data";
 import type { Atlas, Site } from "../lib/types";
-import { replaceParams } from "../lib/router";
-import { criteriaFor, evaluate, thresholdsFor, type Dataset, type Pref, type Prefs } from "../lib/criteria";
+import { readPrefs, writePrefs, missionFor } from "../lib/discovery";
+import { href, replaceParams } from "../lib/router";
+import { criteriaFor, evaluate, thresholdsFor, type Dataset, type Prefs } from "../lib/criteria";
 import { Failed, Loading, Switch } from "../components/kit";
 import { Filters, type Extra } from "../components/explore/Filters";
 import { SiteList, type Sort } from "../components/explore/SiteList";
@@ -10,26 +11,7 @@ import { SiteCard } from "../components/explore/SiteCard";
 import { EarthGlobe, type GlobePoint } from "../components/three/EarthGlobe";
 import { siteName } from "../lib/format";
 import "../styles/explore.css";
-
-// URL: #/explore?set=strict&target=haworth&c=score,cold:m&k=25&site=N82W026-01
-// No `c` = every criterion counts (the default view); `c=none` = none; `:m` = must.
-function readPrefs(p: URLSearchParams, all: string[]): Prefs {
-  const raw = p.get("c");
-  if (raw == null) return Object.fromEntries(all.map((id) => [id, "count" as Pref]));
-  const out: Prefs = {};
-  if (raw === "none") return out;
-  for (const part of raw.split(",")) {
-    const [id, m] = part.split(":");
-    if (id) out[id] = m === "m" ? "must" : "count";
-  }
-  return out;
-}
-function writePrefs(a: Prefs, all: string[]): string | null {
-  const ids = Object.keys(a);
-  if (!ids.length) return "none";
-  if (ids.length === all.length && ids.every((k) => a[k] === "count")) return null;
-  return ids.map((k) => (a[k] === "must" ? `${k}:m` : k)).join(",");
-}
+import "../styles/discover.css";
 
 export function Explore({ atlas, params }: { atlas: Load<Atlas>; params: URLSearchParams }) {
   if (atlas.error) return <Failed error={atlas.error} retry={atlas.retry} />;
@@ -261,7 +243,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
           </svg>
         </button>
         <div className="ex-panel-scroll">
-          <Filters
+          <div className="ex-mission"><div><span>Your mission</span><b>{params.get("mission") ? missionFor(params.get("mission")).title : "Explore on your terms"}</b></div><a className="btn sm" href={href("discover", { ...Object.fromEntries(params), step: "criteria", set: dataset, target, c: writePrefs(prefs, allIds) })}>Edit mission</a></div>
+          <details className="ex-adjust"><summary><span>Adjust criteria <small>{activeCrits.length} included{mustCrits.length ? ` · ${mustCrits.length} required` : ""}</small></span><span aria-hidden>＋</span></summary><Filters
             atlas={atlas}
             dataset={dataset}
             setDataset={switchDataset}
@@ -277,7 +260,8 @@ function ExploreInner({ atlas, params }: { atlas: Atlas; params: URLSearchParams
             setExtra={setExtra}
             q={q}
             setQ={setQ}
-          />
+          /></details>
+          <div className="ex-result-context">{atlas.moon.regions[target].display_name} · {dataset === "strict" ? "Bare ground only" : "Tundra included"}</div>
           <SiteList
             sites={matched}
             nListed={listed.length}

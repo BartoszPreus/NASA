@@ -1,6 +1,15 @@
 # Changelog of the React front end (web/)
 
-Issue #29, branch `t-web-react`. Newest first. Written with SI assistance (Claude Code).
+Issues #29 and #32. Newest first. Written with SI assistance (Claude Code, OpenAI Codex).
+
+## 2026-11-15, visual mission journey and linked terrain views (#32)
+
+- Added **Plan a mission**: lunar destination cards and clickable globe markers, four field-story presets, then criterion choices before opening results. Forward/back navigation and links retain the target, mission, dataset, criterion preferences and threshold. The landing CTA enters the wizard; the map remains directly accessible.
+- Renamed criterion pills to **Ignore / Include / Require**, with their score/filter effects explained. Results lead the explorer; **Adjust criteria** opens the controls and **Edit mission** returns with the current choices.
+- Fixed missing satellite thumbnails: the previously unused live-image component now supplies list and detail imagery, including sites with no stored photograph. Visible images load lazily; errors/timeouts try the stored image, then relief/outline or an explicit unavailable state. Changing a site resets a failed request.
+- Split Compare into two independent WebGL viewports with a bidirectionally synchronized camera. Both terrains remain centered in their own scene at common physical units. Added camera readouts; reduced rendering to demand frames. Preserved existing live DEM and imagery work for patches outside the prebuilt set. Expanded view also works when the embedded browser disallows native fullscreen.
+- Added original gray pixel-wave animation to the landing hero, closing section and mission scene. Respects reduced motion and pauses offscreen/in hidden tabs. No additional dependencies.
+- Kept lunar-only ranking scope, existing pipeline exports and legacy URL preference encodings. No synthetic terrain photos or new scientific claims.
 
 ## 2026-11-15, simpler filtering, score badge, strengths
 

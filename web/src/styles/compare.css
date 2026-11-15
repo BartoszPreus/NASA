@@ -187,3 +187,22 @@
   .cmp .pills { bottom: 12px; max-width: calc(100% - 24px); overflow-x: auto; }
   .cmp .pills button { padding: 7px 10px; font-size: 12px; }
 }
+
+/* Each slab has its own renderer, camera and centered coordinate space. */
+.cmp .terrain-twins { height: 100%; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); position: relative; }
+.cmp .terrain-viewport { position: relative; min-width: 0; height: 100%; overflow: hidden; }
+.cmp .terrain-viewport + .terrain-viewport { border-left: 1px solid #35373b; }
+.cmp .terrain-sync { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); border: 1px solid #44464b; border-radius: 30px; background: #131416; color: #b9bdc3; padding: 6px 10px; font-size: 10px; pointer-events: none; }
+.cmp .terrain-loading { position: absolute; top: 50%; left: 20%; font-size: 12px; color: var(--dim); }
+.cmp .stage-tags > div { max-width: 46%; }
+@media (max-width: 650px) {
+ .cmp .stage .canvas { height: 330px; }
+ .cmp .stage-tags { top: 12px; left: 12px; right: 12px; gap: 24px; }
+ .cmp .stage-tags > div { font-size: 11px; }
+ .cmp .stage-tags .mono { font-size: 8px; }
+ .cmp .terrain-sync { top: auto; bottom: 12px; transform: translateX(-50%); }
+}
+
+.cmp .stage.full:not(:fullscreen) { position: fixed; inset: 0; z-index: 1500; }
+.cmp .terrain-orientation { position: absolute; bottom: 14px; left: 16px; color: #a3a6ac; font-size: 10px; pointer-events: none; }
+@media (max-width: 650px) { .cmp .terrain-orientation { bottom: 44px; left: 8px; font-size: 8px; } }

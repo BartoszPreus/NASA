@@ -6,6 +6,7 @@ import { useAtlas } from "./lib/data";
 import { Landing } from "./pages/Landing";
 
 // Pages other than the landing page load on demand, so three.js and the page code arrive when needed.
+const Discover = lazy(() => import("./pages/Discover").then((m) => ({ default: m.Discover })));
 const Explore = lazy(() => import("./pages/Explore").then((m) => ({ default: m.Explore })));
 const ComparePage = lazy(() => import("./pages/Compare").then((m) => ({ default: m.ComparePage })));
 const MoonPage = lazy(() => import("./pages/Moon").then((m) => ({ default: m.MoonPage })));
@@ -18,13 +19,14 @@ export function App() {
   useEffect(() => {
     if (route.page !== "explore") scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [route.page]);
-  const full = route.page === "explore";
+  const full = route.page === "explore" || route.page === "discover";
   return (
     <>
       <Nav page={route.page} />
       <main id="main">
         <Suspense fallback={<Loading text="Loading" />}>
           {route.page === "home" && <Landing atlas={atlas} />}
+          {route.page === "discover" && <Discover atlas={atlas} params={route.params} />}
           {route.page === "explore" && <Explore atlas={atlas} params={route.params} />}
           {route.page === "compare" && <ComparePage atlas={atlas} params={route.params} />}
           {route.page === "moon" && <MoonPage atlas={atlas} />}

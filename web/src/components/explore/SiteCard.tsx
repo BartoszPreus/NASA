@@ -1,3 +1,4 @@
+import { SiteImage } from "../SiteImage";
 import { useEffect, useState, type ReactNode } from "react";
 import type { Atlas, ContextField, FeatureKey, MoonRegion, Site } from "../../lib/types";
 import { LOW_SUN_DEG, lunarMaxSun, sunStats } from "../../lib/sunEarth";
@@ -276,7 +277,7 @@ export function SiteCard(p: {
   const region = moon.regions[p.target];
   // pooled target has no single window: the side-by-side view uses the site's best region
   const viewRegion = region?.hillshade ? region : moon.regions[s.best_region];
-  const [view, setView] = useState<"image" | "compare">(s.image ? "image" : "compare");
+  const [view, setView] = useState<"image" | "compare">("image");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -351,16 +352,9 @@ export function SiteCard(p: {
             ]}
           />
           {view === "image" ? (
-            s.image ? (
-              <figure className="sat">
-                <img src={img(s.image)} alt={`Satellite image of ${siteName(s)}`} />
-                <figcaption className="mono">
-                  NASA Worldview / GIBS · {s.image_date ?? "date unknown"} · {s.image_layer ?? ""}
-                </figcaption>
-              </figure>
-            ) : (
-              <div className="sat none dim">No image stored</div>
-            )
+            <figure className="sat" style={{ aspectRatio: "1", minHeight: 260 }}>
+              <SiteImage lat={s.lat} lon={s.lon} px={512} alt={`Satellite image of ${siteName(s)}`} stored={s.image ? img(s.image) : null} credit />
+            </figure>
           ) : (
             <SideBySide s={s} region={viewRegion} />
           )}

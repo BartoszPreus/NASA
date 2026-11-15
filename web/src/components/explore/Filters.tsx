@@ -37,10 +37,10 @@ const NOVELTY_OPTS: Option<Novelty | "all">[] = [
   { value: "unchecked", label: "Not checked" },
 ];
 
-const PREF_OPTS: { value: Pref | "off"; label: string }[] = [
-  { value: "off", label: "Off" },
-  { value: "count", label: "Count" },
-  { value: "must", label: "Must" },
+export const PREF_OPTS: { value: Pref | "off"; label: string }[] = [
+  { value: "off", label: "Ignore" },
+  { value: "count", label: "Include" },
+  { value: "must", label: "Require" },
 ];
 
 function Accordion({ title, count, open, onToggle, children, all }: { title: string; count: string; open: boolean; onToggle: () => void; children: ReactNode; all?: { on: boolean; set: (v: boolean) => void } }) {
@@ -61,7 +61,7 @@ function Accordion({ title, count, open, onToggle, children, all }: { title: str
   );
 }
 
-function CritRow({ c, pref, setPref, nPass, strict }: { c: Criterion; pref: Pref | "off"; setPref: (p: Pref | "off") => void; nPass: number | null; strict: number }) {
+export function CritRow({ c, pref, setPref, nPass, strict }: { c: Criterion; pref: Pref | "off"; setPref: (p: Pref | "off") => void; nPass: number | null; strict: number }) {
   return (
     <li className={`crit2 ${pref}`}>
       <div className="crit2-text">
@@ -132,12 +132,12 @@ export function Filters(p: Props) {
         </div>
         <div className="crits-explain">
           <p>
-            <b>Count</b> adds the criterion to the score. <b>Must</b> also hides every patch outside the best part of that criterion.
+            <b>Include</b> adds the criterion to the score. <b>Require</b> also hides every patch outside the best part of that criterion.
           </p>
           <div className="crits-strict">
-            <span>Must means the best</span>
+            <span>Require keeps the best</span>
             <Segmented
-              label="Share kept by a Must criterion"
+              label="Share kept by a required criterion"
               value={String(p.strict)}
               onChange={(v) => p.setStrict(Number(v))}
               options={[
@@ -148,7 +148,7 @@ export function Filters(p: Props) {
             />
           </div>
           <p className="mono crits-sum">
-            {nCount + nMust} of {p.crits.length} in the score{nMust ? ` · ${nMust} must` : ""}
+            {nCount + nMust} of {p.crits.length} in the score{nMust ? ` · ${nMust} required` : ""}
           </p>
         </div>
         {groups.map((g) => {

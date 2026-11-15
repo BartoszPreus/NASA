@@ -256,3 +256,103 @@ export function defaultImageBbox(lat: number, lon: number): [number, number, num
   const span = Math.min(3, 0.6 / Math.max(Math.cos(lat * D2R), 1e-3));
   return [lat - 0.3, lon - span / 2, lat + 0.3, lon + span / 2];
 }
+
+/* ------------------------------------------------------------------ live Earth grid */
+
+// For a patch without a prebuilt grid: a km x km square (north up, local equirectangular) around lat, lon,
+// resampled to n x n from AWS Terrain Tiles (Mapzen terrarium PNG: h = R * 256 + G + B / 256 - 32768 m;
+// SRTM, GMTED, ETOPO1, NED, ArcticDEM and others; open data, registry.opendata.aws/terrain-tiles).
+export const LIVE_DEM_CREDIT = "AWS Terrain Tiles (terrarium; SRTM, GMTED2010, ETOPO1, ArcticDEM and others), open data";
+const TERRARIUM = (z: number, x: number, y: number) => `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${z}/${x}/${y}.png`;
+const liveGrids = new Map<string, Promise<Grid>>();
+
+function tilePixels(z: number, x: number, y: number): Promise<ImageData | null> {
+  return new Promise((resolve) => {
+    const im = new Image();
+    im.crossOrigin = "anonymous";
+    im.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = c.height = 256;
+      const ctx = c.getContext("2d", { willReadFrequently: true })!;
+      ctx.drawImage(im, 0, 0);
+      resolve(ctx.getImageData(0, 0, 256, 256));
+    };
+    im.onerror = () => resolve(null);
+    im.src = TERRARIUM(z, x, y);
+  });
+}
+
+export function loadLiveGrid(lat: number, lon: number, km = 30, n = 128): Promise<Grid> {
+  const key = `live:${lat.toFixed(4)},${lon.toFixed(4)},${km},${n}`;
+  let p = liveGrids.get(key);
+  if (p) return p;
+  p = (async () => {
+    const sideM = km * 1000;
+    const cell = sideM / n;
+    // zoom so a tile pixel is about cell / 1.5 on the ground (web mercator: 156543 m * cos(lat) / 2^z)
+    const cosLat = Math.max(0.05, Math.cos((lat * Math.PI) / 180));
+    const z = Math.max(1, Math.min(13, Math.round(Math.log2((156543.03 * cosLat) / (cell / 1.5)))));
+    const N = 2 ** z;
+    const tx = (lo: number) => ((lo + 180) / 360) * N;
+    const ty = (la: number) => {
+      const r = (Math.max(-85.05, Math.min(85.05, la)) * Math.PI) / 180;
+      return ((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * N;
+    };
+    const dLat = km / 2 / 111.32;
+    const dLon = dLat / cosLat;
+    const x0 = Math.floor(tx(lon - dLon));
+    const x1 = Math.floor(tx(lon + dLon));
+    const y0 = Math.floor(ty(lat + dLat));
+    const y1 = Math.floor(ty(lat - dLat));
+    const tiles = new Map<string, ImageData | null>();
+    const jobs: Promise<void>[] = [];
+    for (let x = x0; x <= x1; x++)
+      for (let y = y0; y <= y1; y++) {
+        const xx = ((x % N) + N) % N;
+        jobs.push(tilePixels(z, xx, y).then((d) => void tiles.set(`${x}:${y}`, d)));
+      }
+    await Promise.all(jobs);
+    if ([...tiles.values()].every((t) => !t)) throw new Error("terrain tiles unavailable");
+    const sample = (fx: number, fy: number): number => {
+      const x = Math.floor(fx);
+      const y = Math.floor(fy);
+      const t = tiles.get(`${x}:${y}`);
+      if (!t) return NaN;
+      const px = Math.min(255, Math.max(0, Math.floor((fx - x) * 256)));
+      const py = Math.min(255, Math.max(0, Math.floor((fy - y) * 256)));
+      const k = (py * 256 + px) * 4;
+      return t.data[k] * 256 + t.data[k + 1] + t.data[k + 2] / 256 - 32768;
+    };
+    const h = new Float32Array(n * n);
+    let min = Infinity;
+    let max = -Infinity;
+    for (let j = 0; j < n; j++) {
+      const la = lat + dLat - ((j + 0.5) / n) * 2 * dLat; // row 0 = north
+      const fy = ty(la);
+      for (let i = 0; i < n; i++) {
+        const lo = lon - dLon + ((i + 0.5) / n) * 2 * dLon;
+        // bilinear in tile-pixel space
+        const gx = tx(lo) * 256 - 0.5;
+        const gy = fy * 256 - 0.5;
+        const ix = Math.floor(gx);
+        const iy = Math.floor(gy);
+        const ax = gx - ix;
+        const ay = gy - iy;
+        const v = (dx: number, dy: number) => sample((ix + dx + 0.5) / 256, (iy + dy + 0.5) / 256);
+        const a = v(0, 0);
+        const b = v(1, 0);
+        const c = v(0, 1);
+        const d = v(1, 1);
+        let val = (a * (1 - ax) + b * ax) * (1 - ay) + (c * (1 - ax) + d * ax) * ay;
+        if (!Number.isFinite(val)) val = [a, b, c, d].find(Number.isFinite) ?? 0;
+        h[j * n + i] = val;
+        if (val < min) min = val;
+        if (val > max) max = val;
+      }
+    }
+    return { key, n, sideM, cell, min, max, h };
+  })();
+  p.catch(() => liveGrids.delete(key));
+  liveGrids.set(key, p);
+  return p;
+}

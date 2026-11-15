@@ -4,6 +4,7 @@ import type { Criterion, Eval } from "../../lib/criteria";
 import { Dropdown, type Option } from "../kit";
 import { ScoreBadge } from "./ScoreBadge";
 import { siteName } from "../../lib/format";
+import { SiteImage } from "../SiteImage";
 import { img } from "../../lib/data";
 import { hillshadeCanvas, loadGrid, loadManifest } from "../../lib/terrain";
 
@@ -72,11 +73,7 @@ function ThumbRelief({ s, run, poly }: { s: Site; run: string; poly: [number, nu
 function Thumb({ s, poly, n, pin, run }: { s: Site; poly: [number, number][][][] | null; n: number; pin: boolean; run: string }) {
   return (
     <span className="sthumb">
-      {s.image ? (
-        <img src={img(s.image)} alt="" loading="lazy" decoding="async" />
-      ) : (
-        <ThumbRelief s={s} run={run} poly={poly} />
-      )}
+      <SiteImage lat={s.lat} lon={s.lon} px={128} alt={`Satellite view of ${siteName(s)}`} stored={s.image ? img(s.image) : null} fallback={<ThumbRelief s={s} run={run} poly={poly} />} />
       <span className={`sthumb-n mono ${pin ? "pin" : ""}`} title={`Position ${n} in this list; rank ${s.rank} in the terrain ranking`}>
         {n}
       </span>
@@ -148,7 +145,7 @@ export function SiteList(p: {
       <div className="lst-head">
         <div className="lst-count">
           <span className="big tab">{p.sites.length}</span>
-          <span className="dim">{p.sites.length === p.nListed ? "patches" : `of ${p.nListed} patches pass the Must criteria`}</span>
+          <span className="dim">{p.sites.length === p.nListed ? "patches" : `of ${p.nListed} patches pass the required criteria`}</span>
         </div>
         <div className="lst-sortbox">
           <Dropdown label="Sort by" value={sortOpts.some((o) => o.value === p.sort) ? p.sort : "target"} options={sortOpts} onChange={p.setSort} className="lst-sort" />

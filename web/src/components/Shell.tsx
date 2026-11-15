@@ -11,6 +11,7 @@ export const Mark = () => (
 
 const LINKS: { page: Page; label: string }[] = [
   { page: "home", label: "Overview" },
+  { page: "discover", label: "Plan a mission" },
   { page: "explore", label: "Explore" },
   { page: "compare", label: "Compare" },
   { page: "moon", label: "Moon" },

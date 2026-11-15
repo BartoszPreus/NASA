@@ -1,8 +1,8 @@
-// Two terrain blocks side by side in one scene, Earth left and Moon right, at one ground and height scale.
+// Independent Earth/Moon scenes with one shared camera pose and physical terrain scale.
 // Slab, walls and the shadow veil are adapted from the team's pl2moon viewer (pl2moon/web/src/components/Twins3D.tsx),
 // itself adapted from ShadowAstra Atlas (MIT, (c) 2026 Team ShadowAstra), src/components/three/TerrainTwins.tsx.
-import { useEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { Grid, Sun } from "../../lib/terrain";
@@ -19,7 +19,6 @@ export interface Block {
 
 const UNITS_PER_KM = 10 / 30; // a 30 km block is 10 units wide
 const BASE = 0.7;
-const GAP = 1.6;
 const SLICE = "#f2c879";
 const RAMP: Record<Block["body"], string[]> = {
   earth: ["#1d2a3a", "#4b6178", "#8fb4ea", "#dbe6f5"],
@@ -140,74 +139,101 @@ function Slab({ b, x, overlay, exag }: { b: Block; x: number; overlay: Overlay; 
   );
 }
 
-function Rig({ span, fullscreen }: { span: number; fullscreen: boolean }) {
-  const { camera, gl } = useThree();
-  const ctl = useRef<OrbitControls | null>(null);
-  const intro = useRef(0);
-  const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const home = useMemo(() => new THREE.Vector3(0, span * 0.62, span * 0.98), [span]);
-  const start = useMemo(() => new THREE.Vector3(span * 0.55, span * 1.25, span * 1.7), [span]);
-
+// Only the actively manipulated viewport publishes a pose; the other applies it without feedback.
+// Damping is disabled so switching the active side never replays residual motion from its old controls.
+interface CameraSync { position: THREE.Vector3; target: THREE.Vector3; active: string | null; version: number }
+function Rig({ span, fullscreen, side, sync }: { span: number; fullscreen: boolean; side: string; sync: RefObject<CameraSync> }) {
+  const { camera, gl, invalidate, size } = useThree();
+  useEffect(() => {
+    const perspective = camera as THREE.PerspectiveCamera;
+    perspective.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(17)) / Math.min(1, size.width / Math.max(1, size.height))));
+    perspective.updateProjectionMatrix();
+    invalidate();
+  }, [camera, size.width, size.height, invalidate]);
   useEffect(() => {
     const c = new OrbitControls(camera, gl.domElement);
-    c.enableDamping = true;
-    c.dampingFactor = 0.08;
+    c.enableDamping = false;
     c.enablePan = false;
-    c.minDistance = span * 0.35;
-    c.maxDistance = span * 2.6;
-    c.maxPolarAngle = Math.PI * 0.47;
-    c.target.set(0, 0.6, 0);
+    c.minDistance = span * .65;
+    c.maxDistance = span * 4;
+    c.maxPolarAngle = Math.PI * .47;
     c.enableZoom = fullscreen;
-    ctl.current = c;
-    camera.position.copy(reduce ? home : start);
-    intro.current = reduce ? 1 : 0;
-    // ctrl + wheel zooms; the plain wheel keeps scrolling the page
+    let applying = false;
+    const annotate = () => {
+      const delta = camera.position.clone().sub(c.target);
+      const orbit = THREE.MathUtils.radToDeg(Math.atan2(delta.x, delta.z));
+      const tilt = THREE.MathUtils.radToDeg(Math.atan2(delta.y, Math.hypot(delta.x, delta.z)));
+      const output = gl.domElement.closest(".terrain-viewport")?.querySelector("output");
+      if (output) output.textContent = `Orbit ${orbit.toFixed(1)}° · tilt ${tilt.toFixed(1)}° · zoom ${(span / delta.length()).toFixed(2)}`;
+    };
+    const apply = () => {
+      applying = true;
+      camera.position.copy(sync.current.position);
+      c.target.copy(sync.current.target);
+      camera.lookAt(c.target);
+      c.update();
+      applying = false;
+      annotate();
+      invalidate();
+    };
+    const publish = () => {
+      if (applying || sync.current.active !== side) return;
+      sync.current.position.copy(camera.position);
+      sync.current.target.copy(c.target);
+      sync.current.version++;
+      annotate();
+      // Emit to the sibling without involving React or creating another render loop.
+      gl.domElement.parentElement?.closest(".terrain-twins")?.dispatchEvent(new Event("terrain-camera"));
+      invalidate();
+    };
+    const activate = () => { sync.current.active = side; };
     const wheel = (e: WheelEvent) => {
       if (fullscreen || !e.ctrlKey) return;
       e.preventDefault();
-      const d = camera.position.clone().sub(c.target);
-      const len = THREE.MathUtils.clamp(d.length() * (e.deltaY > 0 ? 1.08 : 0.92), c.minDistance, c.maxDistance);
-      camera.position.copy(c.target).add(d.setLength(len));
+      activate();
+      const delta = camera.position.clone().sub(c.target);
+      const len = THREE.MathUtils.clamp(delta.length() * (e.deltaY > 0 ? 1.08 : .92), c.minDistance, c.maxDistance);
+      camera.position.copy(c.target).add(delta.setLength(len));
+      c.update();
+      publish();
     };
+    const receive = () => { if (sync.current.active !== side) apply(); };
+    const wrapper = gl.domElement.closest(".terrain-twins");
+    // Capture runs before OrbitControls consumes wheel / pointer input.
+    gl.domElement.addEventListener("pointerdown", activate, true);
+    gl.domElement.addEventListener("wheel", activate, true);
     gl.domElement.addEventListener("wheel", wheel, { passive: false });
+    wrapper?.addEventListener("terrain-camera", receive);
+    c.addEventListener("change", publish);
+    apply();
     return () => {
+      gl.domElement.removeEventListener("pointerdown", activate, true);
+      gl.domElement.removeEventListener("wheel", activate, true);
       gl.domElement.removeEventListener("wheel", wheel);
+      wrapper?.removeEventListener("terrain-camera", receive);
+      c.removeEventListener("change", publish);
       c.dispose();
     };
-  }, [camera, gl, span, fullscreen, home, start, reduce]);
-
-  useFrame((_, dt) => {
-    if (intro.current < 1) {
-      intro.current = Math.min(1, intro.current + dt / 1.8);
-      const t = 1 - Math.pow(1 - intro.current, 3);
-      camera.position.lerpVectors(start, home, t);
-    }
-    ctl.current?.update();
-  });
-  return null;
-}
-
-// Free the GPU when the page closes the canvas.
-function Release() {
-  const { gl } = useThree();
-  useEffect(() => () => gl.dispose(), [gl]);
+  }, [camera, gl, span, fullscreen, side, sync, invalidate]);
   return null;
 }
 
 export function Twins({ earth, moon, overlay, exag, fullscreen }: { earth: Block | null; moon: Block | null; overlay: Overlay; exag: number; fullscreen: boolean }) {
-  const we = earth ? (earth.grid.sideM / 1000) * UNITS_PER_KM : 10;
-  const wm = moon ? (moon.grid.sideM / 1000) * UNITS_PER_KM : 10;
-  const xe = -(wm + GAP) / 2;
-  const xm = (we + GAP) / 2;
-  const span = we + wm + GAP;
-  return (
-    <Canvas camera={{ fov: 34, near: 0.1, far: 500, position: [0, 12, 20] }} dpr={[1, 2]} gl={{ antialias: true, preserveDrawingBuffer: true }}>
-      <color attach="background" args={["#07080a"]} />
-      <fog attach="fog" args={["#07080a", span * 2.2, span * 4]} />
-      <Rig span={span} fullscreen={fullscreen} />
-      <Release />
-      {earth && <Slab key={earth.grid.key} b={earth} x={xe} overlay={overlay} exag={exag} />}
-      {moon && <Slab key={moon.grid.key} b={moon} x={xm} overlay={overlay} exag={exag} />}
-    </Canvas>
-  );
+  const span = Math.max(earth ? earth.grid.sideM / 1000 * UNITS_PER_KM : 10, moon ? moon.grid.sideM / 1000 * UNITS_PER_KM : 10);
+  const sync = useRef<CameraSync>({ position: new THREE.Vector3(span * .8, span * 1.2, span * 1.8), target: new THREE.Vector3(0, .6, 0), active: null, version: 0 });
+  return <div className="terrain-twins">
+    {(["earth", "moon"] as const).map((side) => {
+      const block = side === "earth" ? earth : moon;
+      return <div className={`terrain-viewport ${side}`} key={side} aria-label={`${side === "earth" ? "Earth" : "Moon"} terrain, synchronized 3D view`}>
+        <Canvas frameloop="demand" camera={{ fov: 34, near: .1, far: 500, position: [0, 12, 20] }} dpr={[1, 2]} gl={{ antialias: true, preserveDrawingBuffer: true }}>
+          <color attach="background" args={["#07080a"]} />
+          <Rig span={span} fullscreen={fullscreen} side={side} sync={sync} />
+          {block && <Slab key={block.grid.key} b={block} x={0} overlay={overlay} exag={exag} />}
+        </Canvas>
+        <output className="terrain-orientation" aria-label={`${side} camera orientation`} />
+        {!block && <span className="terrain-loading">Loading {side} terrain…</span>}
+      </div>;
+    })}
+    <span className="terrain-sync">Linked views</span>
+  </div>;
 }

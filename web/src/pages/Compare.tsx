@@ -9,7 +9,9 @@ import {
   cropImage,
   defaultImageBbox,
   hillshadeCanvas,
+  LIVE_DEM_CREDIT,
   loadGrid,
+  loadLiveGrid,
   loadManifest,
   medianDaylightElev,
   shadowMask,
@@ -20,6 +22,7 @@ import {
 } from "../lib/terrain";
 import { Twins, type Block, type Overlay } from "../components/compare/Twins";
 import { CrossSection, Picture, SameScale, SlopeBars } from "../components/compare/Views";
+import { LIVE_IMAGE_CREDIT, liveImageUrl } from "../lib/imagery";
 import "../styles/compare.css";
 
 type SetId = "default" | "strict";
@@ -44,6 +47,7 @@ export function ComparePage({ atlas, params }: { atlas: Load<Atlas>; params: URL
 function loadCanvas(url: string): Promise<HTMLCanvasElement | null> {
   return new Promise((resolve) => {
     const im = new Image();
+    im.crossOrigin = "anonymous";
     im.onload = () => {
       const c = document.createElement("canvas");
       c.width = im.naturalWidth;
@@ -73,12 +77,17 @@ function usePromise<T>(fn: () => Promise<T> | null, deps: unknown[]): T | null {
 
 function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManifest; params: URLSearchParams }) {
   const moon = atlas.moon;
-  const lists: Record<SetId, Site[]> = { default: atlas.sites, strict: atlas.strict };
+  // every patch of both runs (ranks above 300 / 100 are compact records), so any explorer link resolves
+  const lists: Record<SetId, Site[]> = useMemo(
+    () => ({ default: [...atlas.sites, ...atlas.flagged], strict: [...atlas.strict, ...atlas.strictFlagged] }),
+    [atlas],
+  );
   const [set, setSet] = useState<SetId>(params.get("set") === "strict" ? "strict" : "default");
   const [siteId, setSiteId] = useState(() => {
     const s = params.get("site");
     const k: SetId = params.get("set") === "strict" ? "strict" : "default";
-    return s && man.earth[k][s] ? s : lists[k][0].site_id;
+    const all = k === "strict" ? [...atlas.strict, ...atlas.strictFlagged] : [...atlas.sites, ...atlas.flagged];
+    return s && all.some((x) => x.site_id === s) ? s : all[0].site_id;
   });
   const site = lists[set].find((s) => s.site_id === siteId) ?? lists[set][0];
   const regions = Object.values(moon.regions).filter((r) => man.moon[r.id]);
@@ -110,16 +119,23 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
   };
 
   const eRec = man.earth[set][site.site_id];
+  // centre of the Earth square: the prebuilt grid's centre, else the best 15 km window, else the centroid
+  const eLat = eRec?.lat ?? site.window?.[0] ?? site.lat;
+  const eLon = eRec?.lon ?? site.window?.[1] ?? site.lon;
+  const live = !eRec;
   const mRec = man.moon[region];
-  const eGrid = usePromise<Grid>(() => (eRec ? loadGrid(eRec, man.grid) : null), [eRec?.file]);
+  const eGrid = usePromise<Grid>(() => (eRec ? loadGrid(eRec, man.grid) : loadLiveGrid(eLat, eLon, 30, man.grid)), [eRec?.file, eLat, eLon]);
   const mGrid = usePromise<Grid>(() => (mRec ? loadGrid(mRec, man.grid) : null), [mRec?.file]);
 
   // Earth picture: the satellite image cropped to the same square, else a hillshade of the grid
   const bbox = eRec?.image_bbox ?? site.image_bbox ?? (site.image ? defaultImageBbox(site.lat, site.lon) : null);
-  const eCrop = usePromise<HTMLCanvasElement | null>(
-    () => (site.image && bbox && eRec?.lat != null ? cropImage(img(site.image), bbox as [number, number, number, number], eRec.lat, eRec.lon!, eRec.km) : null),
-    [site.image, eRec?.file],
+  // live Sentinel-2 cloudless view of the same square (10 m); the stored MODIS crop and the hillshade are fallbacks
+  const eLive = usePromise<HTMLCanvasElement | null>(() => loadCanvas(liveImageUrl(eLat, eLon, eRec?.km ?? 30, 1024)), [eLat, eLon, eRec?.km]);
+  const eStored = usePromise<HTMLCanvasElement | null>(
+    () => (!eLive && site.image && bbox && eRec?.lat != null ? cropImage(img(site.image), bbox as [number, number, number, number], eRec.lat, eRec.lon!, eRec.km) : null),
+    [site.image, eRec?.file, !!eLive],
   );
+  const eCrop = eLive ?? eStored;
   const eShade = useMemo(() => (eGrid ? hillshadeCanvas(eGrid, [214, 222, 232]) : null), [eGrid]);
   const mFile = lroc && reg.quicklook ? reg.quicklook : reg.hillshade;
   const mPic = usePromise<HTMLCanvasElement | null>(() => (mFile ? loadCanvas(img(mFile)) : null), [mFile]);
@@ -130,7 +146,7 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
   const span = Math.max(kmE, kmM);
 
   // the Sun: one azimuth, each body at its own median daylight height for its latitude
-  const elevE = useMemo(() => medianDaylightElev("earth", eRec?.lat ?? site.lat), [eRec?.lat, site.lat]);
+  const elevE = useMemo(() => medianDaylightElev("earth", eLat), [eLat]);
   const elevM = useMemo(() => Math.max(0.5, medianDaylightElev("moon", reg.lat ?? -89.5)), [reg.lat]);
   const azQ = Math.round(az / 3) * 3;
   const shE = useMemo(() => (eGrid && overlay === "light" ? shadowMask(eGrid, { elev: elevE, az: azQ }) : null), [eGrid, overlay, elevE, azQ]);
@@ -177,9 +193,18 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
     return () => document.removeEventListener("fullscreenchange", f);
   }, []);
 
+  useEffect(() => {
+    if (!full) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const escape = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(false); };
+    addEventListener("keydown", escape);
+    return () => { document.body.style.overflow = previous; removeEventListener("keydown", escape); };
+  }, [full]);
+
   const siteOpts: Option<string>[] = (["default", "strict"] as SetId[]).flatMap((k) =>
     lists[k]
-      .filter((s) => man.earth[k][s.site_id])
+      .filter((s) => man.earth[k][s.site_id] || (k === set && s.site_id === site.site_id))
       .map((s) => ({
         value: `${k}:${s.site_id}`,
         label: `${String(s.rank).padStart(2, "0")}  ${siteName(s)}`,
@@ -204,7 +229,12 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
       Moon · {reg.display_name}
     </>
   );
-  const eImageCredit = eCrop ? `NASA Worldview / GIBS · ${site.image_date ?? "date unknown"} · ${site.image_layer ?? ""}` : "Hillshade of the Copernicus DEM GLO-30 grid; no satellite image stored for this square";
+  const demCredit = live ? `Elevation: ${LIVE_DEM_CREDIT}, loaded live` : "Elevation: Copernicus DEM GLO-30 (prebuilt)";
+  const eImageCredit = eLive
+    ? LIVE_IMAGE_CREDIT
+    : eStored
+      ? `NASA Worldview / GIBS · ${site.image_date ?? "date unknown"} · ${site.image_layer ?? ""}`
+      : `Hillshade of the elevation grid; no satellite image for this square. ${demCredit}`;
 
   return (
     <div className="cmp">
@@ -247,7 +277,7 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
           />
           <div className="cmp-view-foot">
             <span className="mono dim">
-              {coord(eRec?.lat ?? site.lat, eRec?.lon ?? site.lon)} · {kmE} km
+              {coord(eLat, eLon)} · {kmE} km
             </span>
             {reg.quicklook && (
               <Segmented
@@ -337,7 +367,7 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
         <div className="sec-head">
           <h2>Terrain at one scale</h2>
           <p className="chrome">
-            {kmE === kmM ? `Both blocks show ${kmE} x ${kmE} km of ground` : `The blocks show ${kmE} km of Earth and ${kmM} km of the Moon`} at one horizontal and vertical scale. The gold line marks the west to east slice drawn below.
+            {kmE === kmM ? `Both blocks show ${kmE} x ${kmE} km of ground` : `The blocks show ${kmE} km of Earth and ${kmM} km of the Moon`} at one horizontal and vertical scale. Rotate either view to compare both landscapes from the same angle. The gold line marks the west to east slice drawn below.
           </p>
         </div>
         <div className={`stage ${full ? "full" : ""}`} ref={stage}>
@@ -347,7 +377,9 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
                 <i className="dot earth" />
                 {siteName(site)}
               </b>
-              <span className="mono dim">Copernicus DEM GLO-30 · {num((kmE * 1000) / man.grid, 0)} m per pixel</span>
+              <span className="mono dim">
+                {live ? "AWS Terrain Tiles, live" : "Copernicus DEM GLO-30, prebuilt"} · {num((kmE * 1000) / man.grid, 0)} m per pixel
+              </span>
             </div>
             <div className="r">
               <b>
@@ -398,12 +430,17 @@ function CompareInner({ atlas, man, params }: { atlas: Atlas; man: TerrainManife
                 { value: "6", label: "6x" },
               ]}
             />
-            <span className="mono dim hint">drag to orbit · ctrl + wheel to zoom</span>
+            <span className="mono dim hint">linked views · drag either side · ctrl + wheel to zoom</span>
             <button
               className="btn sm"
               onClick={() => {
-                if (document.fullscreenElement) document.exitFullscreen();
-                else stage.current?.requestFullscreen?.();
+                if (full) {
+                  setFull(false);
+                  if (document.fullscreenElement) void document.exitFullscreen();
+                } else {
+                  setFull(true);
+                  void stage.current?.requestFullscreen?.().catch(() => { /* Embedded browsers use the expanded CSS view. */ });
+                }
               }}
             >
               {full ? "Exit full screen" : "Full screen"}

@@ -4,6 +4,7 @@ import { int, num } from "../lib/format";
 import { go, href } from "../lib/router";
 import type { Atlas } from "../lib/types";
 import { Arrow, Failed, Reveal } from "../components/kit";
+import { PixelWaves } from "../components/PixelWaves";
 import { Starfield } from "../components/landing/Starfield";
 import { MoonSphere } from "../components/landing/MoonSphere";
 import { CountryBars, Funnel, ScaleRuler } from "../components/landing/Graphics";
@@ -81,6 +82,7 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
     <div className="landing">
       <section className="l-hero">
         <Starfield />
+        <PixelWaves />
         <MoonSphere texture={texture ? img(texture) : null} ready={moonReady}>
           <Suspense fallback={null}>
             <MoonGlobe className="l-moon-3d" rpm={0.5} light={[1, 0.45, 0.2]} tilt={0.42} onReady={() => setMoonReady(true)} />
@@ -91,8 +93,8 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
             The shape of the lunar south pole, measured on Earth.
           </h1>
           <div className="l-cta">
-            <a className="btn primary" href={href("explore")}>
-              Explore the atlas <Arrow />
+            <a className="btn primary" href={href("discover")}>
+              Find your Earth analog <Arrow />
             </a>
             <a
               className="btn"
@@ -235,12 +237,13 @@ export function Landing({ atlas }: { atlas: Load<Atlas> }) {
       </section>
 
       <section className="l-end">
+        <PixelWaves quiet />
         <Reveal>
           <h2 className="l-h2">
             Terrain that fits at least one criterion.
           </h2>
-          <a className="btn primary" href={href("explore")}>
-            Open the explorer <Arrow />
+          <a className="btn primary" href={href("discover")}>
+            Plan a mission <Arrow />
           </a>
         </Reveal>
       </section>
