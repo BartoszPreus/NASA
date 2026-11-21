@@ -18,6 +18,7 @@ const LINKS: { page: Page; label: string }[] = [
   { page: "moon", label: "Moon" },
   { page: "method", label: "Method" },
   { page: "sources", label: "Sources" },
+  { page: "irrigation", label: "Nawadnianie" },
 ];
 
 // Subtle dithered page background per route. It sits behind every element of the page and never takes

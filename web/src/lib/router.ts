@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
 // Hash routes so the build works from any static folder: #/explore?site=N82W026-01&target=haworth
-export type Page = "home" | "discover" | "explore" | "compare" | "moon" | "method" | "sources";
+export type Page = "home" | "discover" | "explore" | "compare" | "moon" | "method" | "sources" | "irrigation";
 export interface Route {
   page: Page;
   params: URLSearchParams;
 }
 
-const PAGES: Page[] = ["home", "discover", "explore", "compare", "moon", "method", "sources"];
+const PAGES: Page[] = ["home", "discover", "explore", "compare", "moon", "method", "sources", "irrigation"];
 
 export function parse(hash = location.hash): Route {
   const h = hash.replace(/^#\/?/, "");

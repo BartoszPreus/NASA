@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { useRoute } from "./lib/router";
+import { useRoute, type Route } from "./lib/router";
 import { Footer, Nav } from "./components/Shell";
 import { Loading } from "./components/kit";
 import { useAtlas } from "./lib/data";
@@ -13,8 +13,18 @@ const MoonPage = lazy(() => import("./pages/Moon").then((m) => ({ default: m.Moo
 const MethodPage = lazy(() => import("./pages/Method").then((m) => ({ default: m.MethodPage })));
 const SourcesPage = lazy(() => import("./pages/Sources").then((m) => ({ default: m.SourcesPage })));
 
+const Irrigation = lazy(() => import("./irrigation/Planner"));
+
 export function App() {
   const route = useRoute();
+  if (route.page === "irrigation") return <>
+    <Nav page="irrigation" />
+    <main id="main" lang="pl"><Suspense fallback={<Loading text="Ładowanie planera" />}><Irrigation /></Suspense></main>
+  </>;
+  return <AtlasPage route={route} />;
+}
+
+function AtlasPage({ route }: { route: Route }) {
   const atlas = useAtlas();
   useEffect(() => {
     if (route.page !== "explore") scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });

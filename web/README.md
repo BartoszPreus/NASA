@@ -20,7 +20,7 @@ The build uses relative paths and hash routes (`#/explore?site=N82W026-01&target
 
 Live app: https://zodiak-atlas.vercel.app/ (Vercel project `zodiak-atlas`, workspace `put-hack`).
 
-The production deployment builds the committed source from the **repository root**, so the public symlinks can resolve the tracked `app/data` export and land outlines. Root `vercel.json` installs the locked frontend dependencies, runs tests, type-checks and builds, then checks every packaged public asset and terrain grid. `.vercelignore` limits CLI uploads to the frontend and its tracked inputs. Only `web/dist` is published.
+The production deployment builds the committed source from the **repository root**, so the public symlinks can resolve the tracked `app/data` export and land outlines. Root `vercel.json` installs the locked frontend dependencies, runs tests, type-checks and builds, then checks every packaged public asset and terrain grid. `.vercelignore` limits CLI uploads to the frontend and its tracked inputs. Vercel publishes the frontend from `web/dist` and the three irrigation data endpoints from the root `api/` directory.
 
 ```console
 npm ci --prefix web
@@ -37,6 +37,10 @@ The custom hash routes need no server rewrites. Live satellite imagery and terra
 Publishing currently uses the authenticated Vercel CLI. Native Git deployment is **not connected**: on 15 Nov 2026 Vercel rejected the connection to `BartoszPreus/NASA` because repository access could not be established. A Vercel/GitHub owner must grant that integration access before automatic deployments can be enabled. CI itself needs no Vercel token or repository secrets.
 
 ## Pages
+
+The Polish irrigation route `#/irrigation` loads separately from the lunar catalogue. Start with the labelled example or draw/import a field. Users choose a source, pin the intake, confirm the pump operating point and set a working wind limit. The planner evaluates two layout directions, handles excluded areas and compares dry and forecast-rain scenarios. Its coverage display is a geometric reach estimate. Lift uses sampled boundary elevations or a manual measurement. Source pins, field records and metered runs live on the current device. The WFS, terrain and satellite lookups have fixed upstream services. The Vite dev and preview servers expose the same handlers as Vercel.
+
+To refresh the public pilot layers, run `python web/scripts/extract-irrigation.py` with the repository's geospatial dependencies. This downloads the 2026 ARiMR crop features and the national BDOT10k surface-water class. The extractor accepts local original downloads with an explicit snapshot date. The application works from the committed public layers.
 
 - **Overview**: what was compared, how, where the patches are and what the result does not claim.
 - **Plan a mission** (`#/discover`): a visual three-step journey: lunar destination, field story, criteria. Click a region card or lunar marker; choose a rover traverse, base camp, geology or long-shadow exercise. Presets select actual explorer criteria. The current step, target, mission, mask, criteria and threshold are shareable in the URL.
